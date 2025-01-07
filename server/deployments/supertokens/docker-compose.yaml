@@ -1,0 +1,24 @@
+services:
+  supertokens:
+    image: registry.supertokens.io/supertokens/supertokens-mysql
+    container_name: supertokens
+    ports:
+      - "3567:3567"
+    environment:
+      MYSQL_CONNECTION_URI: "mysql://user:password@mysqldb/auth"
+    depends_on:
+      - mysqldb
+
+  mysqldb:
+    image: mysql:9.0
+    container_name: mysqldb
+    environment:
+      MYSQL_ROOT_PASSWORD: adminpass
+      MYSQL_DATABASE: auth
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
