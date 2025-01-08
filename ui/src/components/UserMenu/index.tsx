@@ -1,9 +1,6 @@
 import { Avatar, Group, Menu, UnstyledButton, Text } from '@mantine/core';
 import { IconUser, IconLogout, IconChevronDown, IconSun } from '@tabler/icons-react';
-import { signOut } from "supertokens-auth-react/recipe/session";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios';
-import { getApiDomain } from '../../config';
 import { useEffect, useState } from 'react';
 import ThemeSwitcher from '../ThemeSwitcher';
 
@@ -17,12 +14,13 @@ const UserButton = () => {
     const [user, setUser] = useState<User>({} as User);
 
     const handleSignOut = async () => {
-        await signOut();
-        navigate("/auth");
+        sessionStorage.removeItem("usermetadata");
     }
     const getUserInfo = async () => {
-        let response = await axios.get(getApiDomain() + "/auth/userinfo");
-        return response.data;
+        return {
+            email: "john.doe@example.com",
+            image: "https://avatar.iran.liara.run/public/33"
+        }
     }
 
     const handleProfileClick = () => {
@@ -36,7 +34,6 @@ const UserButton = () => {
                     email: data.email,
                     image: data.image
                 }
-                sessionStorage.setItem("usermetadata", JSON.stringify(u))
                 setUser(u)
             })
             .catch(e => console.log(e));

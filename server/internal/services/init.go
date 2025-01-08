@@ -19,12 +19,6 @@ func InitServices() {
 		panic(err)
 	}
 
-	// Initialize Supertokens.
-	err = initSuperTokens(cfg)
-	if err != nil {
-		panic(err)
-	}
-
 	// Initialize the web server.
 	err = initWebServer(cfg)
 	if err != nil {

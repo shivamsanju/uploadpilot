@@ -1,8 +1,12 @@
-import CodeBasePage from "./app/codebases";
-import CodeMapPage from "./app/codebases/details";
-import HomeLayout from "./app/layouts"
+import WorkflowsPage from "./pages/workflows";
+import NewWorkflowPage from "./pages/workflows/newWorkflow";
+import WorkflowDetailsPage from "./pages/workflowDetails";
+import ProfilePage from "./pages/profile";
+import HomeLayout from "./components/Layout"
 import { NotFoundImage } from "./components/NotFound";
-import ProfilePage from "./components/Profile";
+import DashboardPage from "./pages/dashboard";
+import NewConnectorsPage from "./pages/storage/newConnector";
+import ConnectorsPage from "./pages/storage/connectors";
 
 type Route = {
     path: string
@@ -14,12 +18,37 @@ const routes: Route[] = [
     {
         path: "/",
         layout: HomeLayout,
-        element: <CodeBasePage />
+        element: <DashboardPage />
     },
     {
-        path: "/codebases/:codebaseId",
+        path: "/workflows",
         layout: HomeLayout,
-        element: <CodeMapPage />
+        element: <WorkflowsPage />
+    },
+    {
+        path: "/workflows/new",
+        layout: HomeLayout,
+        element: <NewWorkflowPage />
+    },
+    {
+        path: "/storage/units",
+        layout: HomeLayout,
+        element: <WorkflowsPage />
+    },
+    {
+        path: "/storage/connectors",
+        layout: HomeLayout,
+        element: <ConnectorsPage />
+    },
+    {
+        path: "/storage/connectors/new",
+        layout: HomeLayout,
+        element: <NewConnectorsPage />
+    },
+    {
+        path: "/workflows/:workflowId",
+        layout: HomeLayout,
+        element: <WorkflowDetailsPage />
     },
     {
         path: "/profile",

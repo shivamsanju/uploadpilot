@@ -6,8 +6,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/shivamsanju/uploader/internal/db"
 	"github.com/shivamsanju/uploader/internal/db/models"
+	"github.com/shivamsanju/uploader/internal/db/repo"
 	g "github.com/shivamsanju/uploader/pkg/globals"
 	"github.com/shivamsanju/uploader/web/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -27,7 +27,7 @@ func NewWorkflowHandler() WorkflowHandler {
 }
 
 func (h *workflowHandler) ListWorkflows(w http.ResponseWriter, r *http.Request) {
-	cbs, err := db.GetWorkflows(r.Context())
+	cbs, err := repo.GetWorkflows(r.Context())
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -45,11 +45,16 @@ func (h *workflowHandler) GetWorkflow(w http.ResponseWriter, r *http.Request) {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	cb := db.GetWorkflow(r.Context(), WorkflowId)
+	cb, err := repo.GetWorkflow(r.Context(), WorkflowId)
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
 	render.JSON(w, r, cb)
 }
 
 func (h *workflowHandler) CreateWorkflow(w http.ResponseWriter, r *http.Request) {
+	g.Log.Info("creating workflow")
 	body := &models.Workflow{}
 	if err := render.DecodeJSON(r.Body, body); err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
@@ -62,7 +67,7 @@ func (h *workflowHandler) CreateWorkflow(w http.ResponseWriter, r *http.Request)
 	cb := body
 
 	g.Log.Infof("adding Workflow: %+v", cb)
-	id := db.AddWorkflow(r.Context(), cb)
+	id := repo.AddWorkflow(r.Context(), cb)
 
 	render.JSON(w, r, id)
 }

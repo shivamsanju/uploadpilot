@@ -42,7 +42,7 @@ const ThemeSwitcher = () => {
             trigger='hover'
         >
             <Menu.Target>
-                <Text>Theme</Text>
+                <Text size='sm'>Theme</Text>
             </Menu.Target>
 
             <Menu.Dropdown>

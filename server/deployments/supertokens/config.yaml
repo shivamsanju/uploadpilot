@@ -1,5 +1,0 @@
-# config.yaml
-host: "0.0.0.0"
-access_token_validity: 3600 # In seconds (1 hour)
-refresh_token_validity: 144000 # In seconds (40 hours)
-api_keys: ["password123"]

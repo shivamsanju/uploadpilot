@@ -2,14 +2,11 @@ package web
 
 import (
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
 	g "github.com/shivamsanju/uploader/pkg/globals"
 	"github.com/shivamsanju/uploader/web/utils"
-	"github.com/supertokens/supertokens-golang/recipe/session"
-	"github.com/supertokens/supertokens-golang/supertokens"
 )
 
 func CorsMiddleware(frontendUri string) func(http.Handler) http.Handler {
@@ -18,8 +15,8 @@ func CorsMiddleware(frontendUri string) func(http.Handler) http.Handler {
 			response.Header().Set("Access-Control-Allow-Origin", frontendUri)
 			response.Header().Set("Access-Control-Allow-Credentials", "true")
 			if r.Method == "OPTIONS" {
-				response.Header().Set("Access-Control-Allow-Headers", strings.Join(append([]string{"Content-Type"}, supertokens.GetAllCORSHeaders()...), ","))
 				response.Header().Set("Access-Control-Allow-Methods", "*")
+				response.Header().Set("Access-Control-Allow-Headers", "*")
 				response.Write([]byte(""))
 			} else {
 				next.ServeHTTP(response, r)
@@ -45,11 +42,5 @@ func LoggerMiddleware(next http.Handler) http.Handler {
 			)
 		}()
 		next.ServeHTTP(ww, r)
-	})
-}
-
-func AuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		session.VerifySession(nil, next.ServeHTTP).ServeHTTP(w, r)
 	})
 }

@@ -14,7 +14,7 @@ export function AdminHeader({ burger }: Props) {
 
   return (
     <header className={classes.header}>
-      {burger && burger}
+      {burger}
       <Logo />
       <Box style={{ flex: 1 }} />
       <TextInput

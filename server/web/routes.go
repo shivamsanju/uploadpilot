@@ -7,12 +7,12 @@ import (
 
 func Routes() *chi.Mux {
 	r := chi.NewRouter()
-	r.Mount("/auth", getAuthRoutes())
-	r.Mount("/workflows", getCodebaseRoutes())
+	r.Mount("/workflows", GetWorkflowRoutes())
+	r.Mount("/storage/connectors", GetStorageConnectorRoutes())
 	return r
 }
 
-func getCodebaseRoutes() *chi.Mux {
+func GetWorkflowRoutes() *chi.Mux {
 	r := chi.NewRouter()
 	h := handlers.NewWorkflowHandler()
 	r.Post("/", h.CreateWorkflow)
@@ -21,9 +21,10 @@ func getCodebaseRoutes() *chi.Mux {
 	return r
 }
 
-func getAuthRoutes() *chi.Mux {
+func GetStorageConnectorRoutes() *chi.Mux {
 	r := chi.NewRouter()
-	h := handlers.NewAuthHandler()
-	r.Get("/userinfo", h.GetUserInfo)
+	h := handlers.NewStorageConnectorHandler()
+	r.Post("/", h.CreateStorageConnector)
+	r.Get("/", h.GetStorageConnectors)
 	return r
 }
