@@ -1,6 +1,8 @@
 package models
 
-import "go.mongodb.org/mongo-driver/v2/bson"
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type S3Config struct {
 	Region    string `json:"region"`
@@ -34,14 +36,16 @@ const (
 )
 
 type StorageConnector struct {
-	Id          bson.ObjectID `bson:"_id,omitempty" json:"id"`
-	Name        string        `json:"name"`
-	Type        StorageType   `json:"type"`
-	Tags        []string      `json:"tags,omitempty" `
-	S3Config    *S3Config     `json:"s3Config,omitempty" `
-	AzureConfig *AzureConfig  `json:"azureConfig,omitempty" `
-	GCSConfig   *GCSConfig    `json:"gcsConfig,omitempty" `
-	LocalConfig *LocalConfig  `json:"localConfig,omitempty" `
-	CreatedAt   int64         `json:"createdAt"`
-	CreatedBy   string        `json:"createdBy"`
+	ID          primitive.ObjectID `bson:"_id,omitempty" json:"id" validate:"required"`
+	Name        string             `json:"name" validate:"required"`
+	Type        StorageType        `json:"type" validate:"required"`
+	Tags        []string           `json:"tags,omitempty"`
+	S3Config    *S3Config          `json:"s3Config,omitempty" `
+	AzureConfig *AzureConfig       `json:"azureConfig,omitempty" `
+	GCSConfig   *GCSConfig         `json:"gcsConfig,omitempty" `
+	LocalConfig *LocalConfig       `json:"localConfig,omitempty" `
+	CreatedAt   primitive.DateTime `json:"createdAt"`
+	CreatedBy   string             `json:"createdBy"`
+	UpdatedAt   primitive.DateTime `json:"updatedAt"`
+	UpdatedBy   string             `json:"updatedBy"`
 }

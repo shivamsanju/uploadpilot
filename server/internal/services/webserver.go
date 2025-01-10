@@ -8,8 +8,8 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/shivamsanju/uploader/internal/config"
+	"github.com/shivamsanju/uploader/internal/web"
 	g "github.com/shivamsanju/uploader/pkg/globals"
-	"github.com/shivamsanju/uploader/web"
 )
 
 func initWebServer(config *config.Config) error {

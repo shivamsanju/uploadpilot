@@ -5,12 +5,14 @@ import classes from "./Logo.module.css";
 interface Props {
   width?: string;
   height?: string;
+  enableOnClick?: boolean;
 }
 
-export const Logo: React.FC<Props> = () => {
+export const Logo: React.FC<Props> = ({ height, width, enableOnClick }) => {
   return (
     <Flex direction="row" align="center" gap={4}>
       <Link
+        onClick={(e) => !enableOnClick && e.preventDefault()}
         to="/"
         style={{ textDecoration: "none" }}
         className={classes.heading}

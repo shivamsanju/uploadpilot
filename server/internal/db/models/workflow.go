@@ -1,17 +1,17 @@
 package models
 
-import "go.mongodb.org/mongo-driver/v2/bson"
+import "go.mongodb.org/mongo-driver/bson/primitive"
 
 type Workflow struct {
-	ID              bson.ObjectID          `bson:"_id,omitempty" json:"id"`
-	Name            string                 `json:"name"`
-	Description     string                 `json:"description"`
-	Tags            []string               `json:"tags"`
-	Metadata        map[string]interface{} `json:"metadata"`
-	ImportPolicyId  bson.ObjectID          `json:"importPolicyId"`
-	DestStorageUnit *StorageUnit           `json:"destStorageUnit"`
-	UpdatedAt       int64                  `json:"updatedAt"`
-	UpdatedBy       string                 `json:"updatedBy"`
-	CreatedAt       int64                  `json:"createdAt"`
-	CreatedBy       string                 `json:"createdBy"`
+	ID             primitive.ObjectID     `bson:"_id" json:"id" validate:"required"`
+	Name           string                 `json:"name" validate:"required,min=2,max=100"`
+	Description    string                 `json:"description" validate:"max=500"`
+	Tags           []string               `json:"tags"`
+	Metadata       map[string]interface{} `json:"metadata"`
+	ImportPolicyID primitive.ObjectID     `json:"importPolicyId" validate:"required"`
+	DataStoreID    primitive.ObjectID     `json:"dataStoreId" validate:"required"`
+	CreatedAt      primitive.DateTime     `json:"createdAt"`
+	CreatedBy      string                 `json:"createdBy"`
+	UpdatedAt      primitive.DateTime     `json:"updatedAt"`
+	UpdatedBy      string                 `json:"updatedBy"`
 }

@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Container, Card, Text, Group, Button, TextInput, Grid, FileButton, Avatar, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import axiosInstance from '../../utils/axios';
+import { notifications } from '@mantine/notifications';
 
-function ProfilePage() {
+const ProfilePage = () => {
     const [isEditing, setIsEditing] = useState(false);
     const form = useForm({
         initialValues: {
@@ -18,11 +20,32 @@ function ProfilePage() {
         },
     });
 
-    useEffect(() => {
-        const usermetadata = sessionStorage.getItem('usermetadata');
-        if (usermetadata) {
-            form.setValues(JSON.parse(usermetadata));
+    const getUserInfo = async () => {
+        try {
+            const response = await axiosInstance.get("/users/me")
+            if (response.status === 200) {
+                return response.data;
+            }
+            notifications.show({
+                title: 'Error',
+                message: response.data.message,
+                color: 'red',
+            })
+        } catch (error: any) {
+            console.log(error);
+            notifications.show({
+                title: 'Error',
+                message: error.toString(),
+                color: 'red',
+            })
         }
+    }
+
+    useEffect(() => {
+        getUserInfo().then((data) => form.setValues({
+            ...data,
+            image: "https://avatar.iran.liara.run/public/33"
+        }));
     }, [form])
 
     const handleEditToggle = () => {

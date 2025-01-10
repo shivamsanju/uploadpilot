@@ -1,12 +1,18 @@
-import WorkflowsPage from "./pages/workflows";
-import NewWorkflowPage from "./pages/workflows/newWorkflow";
-import WorkflowDetailsPage from "./pages/workflowDetails";
-import ProfilePage from "./pages/profile";
-import HomeLayout from "./components/Layout"
+import AuthPage from "./pages/Auth";
+import AppLayout from "./components/Layout/AppLayout"
 import { NotFoundImage } from "./components/NotFound";
-import DashboardPage from "./pages/dashboard";
-import NewConnectorsPage from "./pages/storage/newConnector";
-import ConnectorsPage from "./pages/storage/connectors";
+import WorkflowsPage from "./pages/Workflow";
+import NewWorkflowPage from "./pages/Workflow/New";
+import WorkflowDetailsPage from "./pages/Workflow/Details";
+import ProfilePage from "./pages/Profile";
+import DashboardPage from "./pages/Dashboard";
+import NewConnectorsPage from "./pages/Storage/Connectors/New";
+import ConnectorsPage from "./pages/Storage/Connectors";
+import EmptyLayout from "./components/Layout/EmptyLayout";
+import ImportPoliciesPage from "./pages/ImportPolicy";
+import NewImportPolicyPage from "./pages/ImportPolicy/New";
+import ImportPolicyDetailsPage from "./pages/ImportPolicy/Details";
+import DataStoresPage from "./pages/Storage/DataStores";
 
 type Route = {
     path: string
@@ -16,49 +22,69 @@ type Route = {
 
 const routes: Route[] = [
     {
+        path: "/auth",
+        layout: EmptyLayout,
+        element: <AuthPage />
+    },
+    {
         path: "/",
-        layout: HomeLayout,
+        layout: AppLayout,
         element: <DashboardPage />
     },
     {
         path: "/workflows",
-        layout: HomeLayout,
+        layout: AppLayout,
         element: <WorkflowsPage />
     },
     {
         path: "/workflows/new",
-        layout: HomeLayout,
+        layout: AppLayout,
         element: <NewWorkflowPage />
     },
     {
-        path: "/storage/units",
-        layout: HomeLayout,
-        element: <WorkflowsPage />
+        path: "/workflows/:workflowId",
+        layout: AppLayout,
+        element: <WorkflowDetailsPage />
+    },
+    {
+        path: "/importPolicies",
+        layout: AppLayout,
+        element: <ImportPoliciesPage />
+    },
+    {
+        path: "/importPolicies/new",
+        layout: AppLayout,
+        element: <NewImportPolicyPage />
+    },
+    {
+        path: "/importPolicies/:importPolicyId",
+        layout: AppLayout,
+        element: <ImportPolicyDetailsPage />
+    },
+    {
+        path: "/storage/datastores",
+        layout: AppLayout,
+        element: <DataStoresPage />
     },
     {
         path: "/storage/connectors",
-        layout: HomeLayout,
+        layout: AppLayout,
         element: <ConnectorsPage />
     },
     {
         path: "/storage/connectors/new",
-        layout: HomeLayout,
+        layout: AppLayout,
         element: <NewConnectorsPage />
     },
     {
-        path: "/workflows/:workflowId",
-        layout: HomeLayout,
-        element: <WorkflowDetailsPage />
-    },
-    {
         path: "/profile",
-        layout: HomeLayout,
+        layout: AppLayout,
         element: <ProfilePage />
     },
     {
         path: "*",
         element: <NotFoundImage />,
-        layout: HomeLayout
+        layout: AppLayout
     },
 ]
 

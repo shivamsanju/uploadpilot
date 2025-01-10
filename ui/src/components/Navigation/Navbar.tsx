@@ -3,8 +3,7 @@ import {
     IconCircles,
     IconDatabase,
     IconGauge,
-    IconPresentationAnalytics,
-    IconTopologyStar,
+    IconPackageImport,
     IconWebhook,
 } from '@tabler/icons-react';
 import { Code, ScrollArea } from '@mantine/core';
@@ -18,16 +17,23 @@ const mockdata = [
         icon: IconCircles,
         link: "/workflows",
     },
-    { label: 'Import Policies', icon: IconTopologyStar, link: "/import-policies" },
+    {
+        label: 'Import',
+        icon: IconPackageImport,
+        links: [
+            { label: 'Policies', link: '/importPolicies' },
+            { label: 'Validations', link: '/validations' },
+        ],
+    },
     {
         label: 'Storage',
         icon: IconDatabase,
         links: [
+            { label: 'Datastores', link: '/storage/datastores' },
             { label: 'Connectors', link: '/storage/connectors' },
         ],
     },
     { label: 'Hooks', icon: IconWebhook, link: "/hooks" },
-    { label: 'Analytics', icon: IconPresentationAnalytics, link: "/analytics" },
     { label: 'Settings', icon: IconAdjustments, link: "/settings" },
 ];
 
@@ -41,7 +47,7 @@ const NavBar = () => {
             </ScrollArea>
 
             <div className={classes.footer}>
-                <Code fw={700}>Version : v3.1.2</Code>
+                <Code fw={700} p="xs">Version : v0.0.1</Code>
             </div>
         </nav>
     );

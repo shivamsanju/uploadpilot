@@ -7,17 +7,16 @@ import (
 	"github.com/shivamsanju/uploader/internal/config"
 	"github.com/shivamsanju/uploader/internal/db/models"
 	g "github.com/shivamsanju/uploader/pkg/globals"
-	"go.mongodb.org/mongo-driver/v2/bson"
-	"go.mongodb.org/mongo-driver/v2/mongo"
-	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func initMongoDB(config *config.Config) error {
-
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(config.MongoURI).SetServerAPIOptions(serverAPI)
 
-	client, err := mongo.Connect(opts)
+	client, err := mongo.Connect(context.TODO(), opts)
 	if err != nil {
 		g.Log.Error("failed to connect to mongodb!")
 		return err
@@ -31,6 +30,7 @@ func initMongoDB(config *config.Config) error {
 		return err
 	}
 	g.Db = client
+	g.DbName = config.DatabaseName
 	g.Log.Info("successfully connected to mongodb!")
 
 	err = seedDatabase(ctx)
@@ -41,7 +41,7 @@ func initMongoDB(config *config.Config) error {
 }
 
 func seedDatabase(ctx context.Context) error {
-	collection := g.Db.Database("uploader").Collection("storage")
+	collection := g.Db.Database(g.DbName).Collection("storageconnectors")
 	// check if exists
 	item := collection.FindOne(ctx, bson.M{"name": "local"})
 	if item.Err() == nil {

@@ -1,7 +1,6 @@
 "use client";
 
-import { Box, TextInput } from "@mantine/core";
-import { IconSearch } from "@tabler/icons-react";
+import { Box } from "@mantine/core";
 import classes from "./Header.module.css";
 import { Logo } from "../Logo/Logo";
 import UserMenu from "../UserMenu";
@@ -17,12 +16,7 @@ export function AdminHeader({ burger }: Props) {
       {burger}
       <Logo />
       <Box style={{ flex: 1 }} />
-      <TextInput
-        placeholder="Search"
-        variant="filled"
-        leftSection={<IconSearch size="0.8rem" />}
-        style={{}}
-      />
+
       <UserMenu />
     </header>
   );

@@ -1,112 +1,120 @@
-import { useEffect, useMemo, useState } from 'react';
-import { TextInput, Stack, Button, Group, Title, Table, ActionIcon } from '@mantine/core';
-import { IconBrandAws, IconBrandAzure, IconBrandGoogle, IconEye, IconFolder, IconSearch, IconSquarePlus, IconTrash } from '@tabler/icons-react';
+import { useMemo, } from 'react';
+import { Button, Group, Title, Menu, Box } from '@mantine/core';
+import { IconBrandAws, IconBrandAzure, IconBrandGoogle, IconCirclePlus2, IconDots, IconFolder, IconTrash } from '@tabler/icons-react';
 import axios from 'axios';
 import { notifications } from '@mantine/notifications';
-import { getApiDomain } from '../../../config';
+import { getApiDomain } from '../../../utils/config';
 import { useNavigate } from 'react-router-dom';
+import { useGetStorageConnectors } from '../../../apis/storage';
+import TimeAgo from 'javascript-time-ago'
+import en from 'javascript-time-ago/locale/en'
+import { ThemedAgGridReact } from '../../../components/AgGrid/AgGrid';
 
-const headers = ["Name", "Type", "Tags", "Created By", "Created At", "Actions"];
+
+TimeAgo.addDefaultLocale(en)
+const timeAgo = new TimeAgo('en-US');
+
 const ConnectorsPage = () => {
-    const [search, setSearch] = useState('');
-    const [connectors, setConnectors] = useState<any[]>([]);
     const navigate = useNavigate();
+
+    const { isPending, error, connectors } = useGetStorageConnectors();
 
     const handleNewConnector = () => {
         navigate('/storage/connectors/new');
     }
 
-    const getConnectors = async () => {
-        try {
-            const resp = await axios.get(getApiDomain() + "/storage/connectors");
-            return resp.data;
-        } catch {
-            notifications.show({
-                title: 'Error',
-                message: 'Failed to fetch connectors',
-                color: 'red',
-            })
-        }
-    }
-
     const handleDeleteConnector = async (id: string) => {
-        if (!window.confirm("Are you sure you want to delete this connector?")) {
-            return
-        }
-        try {
-            const resp = await axios.delete(getApiDomain() + "/connectors/" + id);
-            if (resp.status === 200) {
-                notifications.show({
-                    title: 'Success',
-                    message: 'Connector deleted successfully',
-                    color: 'green',
-                })
-                getConnectors().then((data) => {
-                    setConnectors(data)
-                });
-            }
-        } catch {
-            notifications.show({
-                title: 'Error',
-                message: 'Failed to delete connector',
-                color: 'red',
-            })
-        }
+        notifications.show({
+            title: 'Comming Soon',
+            message: 'This feature is comming soon',
+            color: 'yellow',
+        })
+
     }
 
-    const filteredConnectors: any = useMemo(() => {
-        if (!connectors || connectors.length === 0) {
-            return {
-                head: headers,
-                body: [],
-            };
-        }
-        const fc = connectors.filter((connector) =>
-            connector.name.toLowerCase().includes(search.toLowerCase())
-        )
-        return {
-            head: headers,
-            body: fc.map((connector) => ([
-                connector.name,
-                <>
-                    {connector.type === "s3" && <Group align='center'><IconBrandAws size={16} /> S3</Group>}
-                    {connector.type === "gcs" && <Group align='center'><IconBrandGoogle size={16} /> GCS</Group>}
-                    {connector.type === "azure" && <Group align='center'><IconBrandAzure size={16} /> Azure</Group>}
-                    {connector.type === "local" && <Group align='center'><IconFolder size={16} /> Local</Group>}
-                </>,
-                connector.tags?.join(', '),
-                connector.createdBy,
-                new Date(connector.createdAt).toLocaleString('en-CA'),
-                <ActionIcon variant='filled' onClick={() => handleDeleteConnector(connector.id)}>
-                    <IconTrash size={16} />
-                </ActionIcon>
-            ])),
-        }
-    }, [search, connectors]);
 
-    useEffect(() => {
-        getConnectors().then((data) => {
-            setConnectors(data)
-        });
-    }, [])
+    const colDefs = useMemo(() => {
+        return [
+
+            {
+                headerName: '',
+                field: 'type',
+                flex: 0.5,
+                cellRenderer: (params: any) => {
+                    switch (params.value) {
+                        case 's3':
+                            return <IconBrandAws size={15} />;
+                        case 'gcs':
+                            return <IconBrandGoogle size={15} />;
+                        case 'azure':
+                            return <IconBrandAzure size={15} />;
+                        default:
+                            return <IconFolder size={15} />;
+                    }
+                },
+                sortable: false,
+                filter: false,
+                cellStyle: { textAlign: 'center' }
+            },
+            {
+                headerName: 'Name',
+                field: 'name',
+                flex: 1.5
+            },
+            {
+                headerName: 'Type',
+                field: 'type',
+            },
+            { headerName: 'Created By', field: 'createdBy' },
+            { headerName: 'Created At', field: 'createdAt', valueFormatter: (params: any) => params.value && timeAgo.format(new Date(params.value)) },
+            { headerName: 'Updated At', field: 'updatedAt', valueFormatter: (params: any) => params.value && timeAgo.format(new Date(params.value)) },
+            {
+                headerName: 'Actions',
+                field: 'actions',
+                flex: 0.5,
+                cellRenderer: (params: any) => (
+                    <Menu>
+                        <Menu.Target>
+                            <IconDots size={15} style={{ cursor: 'pointer' }} />
+                        </Menu.Target>
+                        <Menu.Dropdown>
+                            <Menu.Item
+                                onClick={() => handleDeleteConnector(params.data.id)}
+                                leftSection={<IconTrash size={13} />}
+                            >
+                                Delete
+                            </Menu.Item>
+
+                        </Menu.Dropdown>
+                    </Menu>
+                )
+            },
+        ]
+    }, []);
+
 
     return (
         <>
-            <Title order={3} mb="lg" opacity={0.8}>Connectors</Title>
-            <Group justify='space-between' align='flex-start'>
-                <TextInput
-                    placeholder="Search connectors..."
-                    leftSection={<IconSearch size={16} />}
-                    value={search}
-                    onChange={(event) => setSearch(event.currentTarget.value)}
-                    mb="md"
-                    w="90%"
-                />
-                <Button size="xs" leftSection={<IconSquarePlus size={16} />} onClick={handleNewConnector}>Create</Button>
+            <Group justify='space-between' align='flex-start' gap="lg">
+                <Title order={3} mb="lg" opacity={0.8}>Storage Connectors</Title>
+                <Button size="xs" leftSection={<IconCirclePlus2 size={16} />} onClick={handleNewConnector}>Create</Button>
             </Group>
-            <Stack gap="md">
-                <Table data={filteredConnectors} withTableBorder stickyHeader p="md" />
-            </Stack>
+            <Box h="83vh">
+                <ThemedAgGridReact
+                    overlayNoRowsTemplate='No storage connectors found'
+                    loading={isPending && !error}
+                    rowData={connectors}
+                    columnDefs={colDefs}
+                    defaultColDef={{
+                        sortable: true,
+                        filter: true,
+                        flex: 1,
+                    }}
+                    pagination={true}
+                    paginationAutoPageSize={true}
+                    paginationPageSizeSelector={false}
+                />
+            </Box>
         </>
     );
 }
