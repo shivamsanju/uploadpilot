@@ -1587,13 +1587,6 @@
     react-textarea-autosize "8.5.6"
     type-fest "^4.27.0"
 
-"@mantine/dropzone@^7.15.3":
-  version "7.15.3"
-  resolved "https://registry.yarnpkg.com/@mantine/dropzone/-/dropzone-7.15.3.tgz#4384caac7680142c5bc6e8fcefd619584a8bdf32"
-  integrity sha512-3BZNKqfWyE6/DXOUoYbT72kVDiAu4jRLxUM7KsWojlSy1ucgd8X5oC6yvMlCa2nSDbrVlCNzsDADrezh2MxaNA==
-  dependencies:
-    react-dropzone-esm "15.2.0"
-
 "@mantine/form@^7.15.0":
   version "7.15.3"
   resolved "https://registry.npmjs.org/@mantine/form/-/form-7.15.3.tgz"
@@ -8479,13 +8472,6 @@ react-dom@^18.2.0:
   dependencies:
     loose-envify "^1.1.0"
     scheduler "^0.23.2"
-
-react-dropzone-esm@15.2.0:
-  version "15.2.0"
-  resolved "https://registry.yarnpkg.com/react-dropzone-esm/-/react-dropzone-esm-15.2.0.tgz#a2bf703796f083282fe98429ae01a2cdd761aa2a"
-  integrity sha512-pPwR8xWVL+tFLnbAb8KVH5f6Vtl397tck8dINkZ1cPMxHWH+l9dFmIgRWgbh7V7jbjIcuKXCsVrXbhQz68+dVA==
-  dependencies:
-    prop-types "^15.8.1"
 
 react-error-overlay@^6.0.11:
   version "6.0.11"

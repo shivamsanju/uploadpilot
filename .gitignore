@@ -1,0 +1,45 @@
+# Code specific
+server/tmp
+server/.env
+
+# Binaries for programs and plugins
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Build artifacts
+*.out
+
+# Testing
+*.test
+
+# Go vendor directory (if using Go modules, this may not be needed)
+vendor/
+
+# Dependency directories (deprecated in favor of Go modules)
+Godeps/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+
+# MacOS files
+.DS_Store
+
+# Temporary files
+*.tmp
+*.log
+
+# Coverage output
+*.cov
+*.coverprofile
+*.coverage
+coverage/
+
+# Go environment files
+.env
+.envrc

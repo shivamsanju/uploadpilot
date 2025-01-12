@@ -42,20 +42,15 @@ func (h *importHandler) GetTusHandler() http.Handler {
 		},
 		PreFinishResponseCallback: func(hook tusd.HookEvent) (tusd.HTTPResponse, error) {
 			globals.Log.Infof("pre finish response -> %s", hook.Upload.ID)
+			defer hooks.RemoveTusUploadHook(hook)
 
 			err := hooks.UploadToDatastoreHook(hook)
 			if err != nil {
-				globals.Log.Errorf("Unable to upload to datastore: %s", err)
+				globals.Log.Errorf("unable to upload to datastore: %s", err)
 				return tusd.HTTPResponse{
 					StatusCode: http.StatusBadRequest,
-				}, err
+				}, nil
 			}
-
-			err = hooks.RemoveTusUploadHook(hook)
-			if err != nil {
-				globals.Log.Errorf("unable to remove tus upload: %s", err)
-			}
-
 			return tusd.HTTPResponse{
 				StatusCode: http.StatusOK,
 			}, nil

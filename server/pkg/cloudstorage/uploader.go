@@ -15,7 +15,14 @@ type Uploader struct {
 
 func NewUploader(connector *models.StorageConnector, bucket string) (*Uploader, error) {
 	if connector.Type == models.StorageTypeS3 {
-		backend := storage.NewAmazonS3BackendWithCredentials(bucket, "", connector.S3Config.Region, "", "", credentials.NewStaticCredentials(connector.S3Config.AccessKey, connector.S3Config.SecretKey+"ss", ""))
+		backend := storage.NewAmazonS3BackendWithCredentials(
+			bucket,
+			"",
+			connector.S3Config.Region,
+			"",
+			"",
+			credentials.NewStaticCredentials(connector.S3Config.AccessKey, connector.S3Config.SecretKey, ""),
+		)
 		uploader := Uploader{Backend: backend}
 		return &uploader, nil
 	}

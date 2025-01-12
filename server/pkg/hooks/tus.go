@@ -9,16 +9,14 @@ import (
 	tusd "github.com/tus/tusd/v2/pkg/handler"
 )
 
-func RemoveTusUploadHook(hook tusd.HookEvent) error {
-	globals.Log.Infof("upload metadata -> %+v", hook.Upload.MetaData)
+func RemoveTusUploadHook(hook tusd.HookEvent) {
 	uploadID := hook.Upload.ID
 	err := os.Remove(path.Join(globals.TusUploadDir, fmt.Sprintf("%s.info", uploadID)))
 	if err != nil {
-		return err
+		globals.Log.Infof("failed to remove tus upload -> %+v", hook.Upload.ID)
 	}
 	err = os.Remove(path.Join(globals.TusUploadDir, uploadID))
 	if err != nil {
-		return err
+		globals.Log.Infof("failed to remove tus upload -> %+v", hook.Upload.ID)
 	}
-	return nil
 }

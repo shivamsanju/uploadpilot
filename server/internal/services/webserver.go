@@ -13,7 +13,7 @@ import (
 )
 
 func initWebServer(config *config.Config) error {
-	g.TusUploadDir = "/tmp"
+	g.TusUploadDir = "./tmp"
 
 	// Create a new router with support for CORS and logging.
 	router := chi.NewRouter()
