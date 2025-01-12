@@ -45,7 +45,7 @@ func UploadToDatastoreHook(hook tusd.HookEvent) error {
 		return err
 	}
 	uploadPath := path.Join(globals.TusUploadDir, hook.Upload.ID)
-	err = cloudUploader.Upload(uploadPath, hook.Upload.MetaData["filename"])
+	err = cloudUploader.Upload(uploadPath, hook.Upload.ID+"_"+hook.Upload.MetaData["filename"])
 	if err != nil {
 		return err
 	}

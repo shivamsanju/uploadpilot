@@ -9,8 +9,6 @@ type SettingsProps = {
     setHeight: React.Dispatch<React.SetStateAction<number>>
     width: number
     setWidth: React.Dispatch<React.SetStateAction<number>>
-    backendEndpoint: string
-    setBackendEndpoint: React.Dispatch<React.SetStateAction<string>>
     uploaderDetails: any
 }
 
@@ -21,8 +19,6 @@ const Settings: React.FC<SettingsProps> = ({
     setHeight,
     width,
     setWidth,
-    backendEndpoint,
-    setBackendEndpoint,
     uploaderDetails
 }) => {
     const form = useForm<CreateUploaderForm>({
@@ -60,20 +56,6 @@ const Settings: React.FC<SettingsProps> = ({
                         placeholder="Enter width in px"
                         value={width}
                         onChange={(e) => setWidth(Number(e))}
-                    />
-                </Group>
-                <Group justify="space-between" pb="xl" className={classes.settingsItem} wrap="nowrap" gap="xl">
-                    <div>
-                        <Text size="sm">Backend Endpoint</Text>
-                        <Text size="xs" c="dimmed">
-                            Set the backend endpoint for upload pilot
-                        </Text>
-                    </div>
-                    <TextInput
-                        w={w}
-                        placeholder="https://example.com/upload"
-                        value={backendEndpoint}
-                        onChange={(e) => setBackendEndpoint(e.target.value)}
                     />
                 </Group>
             </Stack>

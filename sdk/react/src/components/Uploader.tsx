@@ -80,7 +80,7 @@ const Uploader: React.FC<UploaderProps> = ({ uploaderId, backendEndpoint, h, w }
             })
     }, [uploaderId, backendEndpoint]);
 
-    return <Dashboard
+    return uppy && <Dashboard
         uppy={uppy}
         height={h}
         width={w}

@@ -22,10 +22,14 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "outDir": "dist",
+    "declaration": true,
+    "declarationDir": "dist"
   },
   "include": [
     "src",
-    "globals.d.ts"
+    "globals.d.ts",
+    "vite.config.ts"
   ]
 }

@@ -1,5 +1,5 @@
 import { Card, Group, Paper, SegmentedControl, SimpleGrid, Text, useMantineColorScheme } from "@mantine/core"
-import { Uploader } from "uploadpilotreact"
+import { Uploader } from "@uploadpilot/react"
 import { useState } from "react";
 import { IconCode, IconEye } from "@tabler/icons-react";
 import { CodeHighlightTabs } from "@mantine/code-highlight";
@@ -7,9 +7,10 @@ import '@mantine/code-highlight/styles.css';
 import { useParams } from "react-router-dom";
 import AppLoader from "../../../../components/Loader/AppLoader";
 import Settings from "./Settings/Settings";
+import { getApiDomain } from "../../../../utils/config";
 
 const getCode = (uploaderId: string, backendEndpoint: string, h: number, w: number) => `
-import Uploader from "upload-pilot"
+import { Uploader } from "@uploadpilot/react"
 
 const Component = () => {
     return (
@@ -25,12 +26,12 @@ const Component = () => {
 export default Component
 `
 
+const backendEndpoint = getApiDomain();
 
 const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
     const [viewMode, setViewMode] = useState<string>('settings');
     const [height, setHeight] = useState<number>(600);
     const [width, setWidth] = useState<number>(500);
-    const [backendEndpoint, setBackendEndpoint] = useState<string>('');
 
     const { uploaderId } = useParams();
     const { colorScheme } = useMantineColorScheme();
@@ -81,8 +82,6 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
                             setHeight={setHeight}
                             width={width}
                             setWidth={setWidth}
-                            backendEndpoint={backendEndpoint}
-                            setBackendEndpoint={setBackendEndpoint}
                             uploaderDetails={uploaderDetails}
                         />
                     ) :
@@ -108,7 +107,7 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
                 }}>
                 <Group justify="center" align="center" style={{ overflow: 'auto' }} h="70vh">
                     <Uploader
-                        backendEndpoint="http://localhost:8080"
+                        backendEndpoint={backendEndpoint}
                         uploaderId={uploaderId}
                         h={height}
                         w={width}
