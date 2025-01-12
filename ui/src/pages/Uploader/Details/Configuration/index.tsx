@@ -1,5 +1,5 @@
 import { Card, Group, Paper, SegmentedControl, SimpleGrid, Text, useMantineColorScheme } from "@mantine/core"
-import Uploader from "../../../../components/Uploader/Uploader"
+import { Uploader } from "uploadpilotreact"
 import { useState } from "react";
 import { IconCode, IconEye } from "@tabler/icons-react";
 import { CodeHighlightTabs } from "@mantine/code-highlight";

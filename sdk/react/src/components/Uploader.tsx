@@ -26,7 +26,7 @@ type UploaderProps = {
     w: number
 };
 const Uploader: React.FC<UploaderProps> = ({ uploaderId, backendEndpoint, h, w }) => {
-    const [uppy, setUppy] = useState(() => new Uppy({ debug: true }));
+    const [uppy, setUppy] = useState<any>();
     const [theme, setTheme] = useState<"dark" | "light" | "auto">('auto');
 
 

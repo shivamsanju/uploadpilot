@@ -1,6 +1,8 @@
 # Code specific
 server/tmp
 server/.env
+react-uploader/node_modules
+react-uploader/dist
 
 # Binaries for programs and plugins
 *.exe
