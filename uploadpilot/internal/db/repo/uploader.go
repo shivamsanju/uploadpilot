@@ -16,8 +16,8 @@ type UploaderRepo interface {
 	GetUploader(ctx context.Context, id string) (*bson.M, error)
 	CreateUploader(ctx context.Context, cb *models.Uploader) (primitive.ObjectID, error)
 	DeleteUploader(ctx context.Context, id string) error
-	UpdateUploader(ctx context.Context, id string, metadata map[string]interface{}) error
 	GetUploaderDataStoreCreds(ctx context.Context, id string) (map[string]interface{}, error)
+	UpdateUploaderConfig(ctx context.Context, id string, cb *models.UploaderConfig, updatedBy string) error
 }
 
 type uploaderRepo struct {
@@ -26,7 +26,7 @@ type uploaderRepo struct {
 
 func NewUploaderRepo() UploaderRepo {
 	return &uploaderRepo{
-		collectionName: "Uploaders",
+		collectionName: "uploaders",
 	}
 }
 
@@ -115,23 +115,49 @@ func (ur *uploaderRepo) DeleteUploader(ctx context.Context, id string) error {
 	return err
 }
 
-func (ur *uploaderRepo) UpdateUploader(ctx context.Context, id string, metadata map[string]interface{}) error {
-	metadata["updatedAt"] = primitive.NewDateTimeFromTime(time.Now())
-
+func (ur *uploaderRepo) UpdateUploaderConfig(ctx context.Context, id string, updatedData *models.UploaderConfig, updatedBy string) error {
+	updatedAt := primitive.NewDateTimeFromTime(time.Now())
+	uploaderID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
 	collection := g.Db.Database(g.DbName).Collection(ur.collectionName)
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": id}, bson.M{"$set": metadata})
+	g.Log.Infof("\n\n\ns -----------> %+v\n\n\n", updatedData)
+	update := bson.M{
+		"$set": bson.M{
+			"config.maxFileSize":            updatedData.MaxFileSize,
+			"config.minFileSize":            updatedData.MinFileSize,
+			"config.maxNumberOfFiles":       updatedData.MaxNumberOfFiles,
+			"config.minNumberOfFiles":       updatedData.MinNumberOfFiles,
+			"config.maxTotalFileSize":       updatedData.MaxTotalFileSize,
+			"config.allowedFileTypes":       updatedData.AllowedFileTypes,
+			"config.allowedSources":         updatedData.AllowedSources,
+			"config.requiredMetadataFields": updatedData.RequiredMetadataFields,
+			"config.theme":                  updatedData.Theme,
+			"config.showStatusBar":          updatedData.ShowStatusBar,
+			"config.showProgress":           updatedData.ShowProgress,
+			"config.allowPauseAndResume":    updatedData.AllowPauseAndResume,
+			"config.enableImageEditing":     updatedData.EnableImageEditing,
+			"config.useCompression":         updatedData.UseCompression,
+			"config.useFaultTolerantMode":   updatedData.UseFaultTolerantMode,
+			"updatedBy":                     updatedBy,
+			"updatedAt":                     updatedAt,
+		},
+	}
+	g.Log.Infof("ddd %+v", update)
+	_, err = collection.UpdateOne(ctx, bson.M{"_id": uploaderID}, update)
 	return err
 }
 
 func (ur *uploaderRepo) GetUploaderDataStoreCreds(ctx context.Context, id string) (map[string]interface{}, error) {
 	collection := g.Db.Database(g.DbName).Collection(ur.collectionName)
-	UploaderID, err := primitive.ObjectIDFromHex(id)
+	uploaderID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return nil, err
 	}
 	pipeline := []bson.M{
 		{"$match": bson.M{
-			"_id": UploaderID,
+			"_id": uploaderID,
 		}},
 		{"$lookup": bson.M{
 			"from":         "datastores",

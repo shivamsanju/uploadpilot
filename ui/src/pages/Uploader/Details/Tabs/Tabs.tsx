@@ -2,6 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Tabs } from '@mantine/core';
 import Configuration from '../Configuration';
 import Imports from '../Imports/Imports';
+import classes from "./Tabs.module.css"
 
 type UploaderTabsProps = {
     uploaderDetails: any
@@ -27,8 +28,9 @@ const UploaderTabs: React.FC<UploaderTabsProps> = ({ uploaderDetails }) => {
             defaultValue="."
             value={tabValue || "."}
             onChange={handleTabChange}
+            classNames={classes}
         >
-            <Tabs.List mb="sm">
+            <Tabs.List mb="sm" grow>
                 <Tabs.Tab value=".">Configuration</Tabs.Tab>
                 <Tabs.Tab value="imports">Imports</Tabs.Tab>
             </Tabs.List>

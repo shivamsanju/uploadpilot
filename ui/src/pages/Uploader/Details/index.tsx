@@ -14,7 +14,7 @@ const CodeMapPage = () => {
     return isPending ? <AppLoader h="70vh" /> : error ? <ErrorCard title={error.name} message={error.message} h="70vh" /> : (
         <Paper shadow="xs" p="sm" radius="xs" withBorder h={"90vh"}>
             <Group justify='space-between'>
-                <Title order={3} mb="xs" opacity={0.8}>{uploader.name}</Title>
+                <Title order={3} opacity={0.8}>{uploader.name}</Title>
                 <Group align='center' >
                     {uploader.tags && uploader.tags.length > 0 && uploader.tags.map((tag: string) => (<Badge size="sm" variant="light" ta="center" >{tag}</Badge>))}
                 </Group>
@@ -23,8 +23,8 @@ const CodeMapPage = () => {
                 <Text size="xs">Created By: {uploader.createdBy}</Text>
                 <Text size="xs">Updated: {timeAgo.format(new Date(uploader.updatedAt))}</Text>
             </Group>
-            <Group align='center' mb="sm">
-                <Text lineClamp={2} size="xs" opacity={0.8} >{uploader.description}</Text>
+            <Group align='center' mb="xs">
+                <Text lineClamp={1} size="xs" opacity={0.8} >{uploader.description}</Text>
             </Group>
             <UploaderTabs uploaderDetails={uploader} />
         </Paper>

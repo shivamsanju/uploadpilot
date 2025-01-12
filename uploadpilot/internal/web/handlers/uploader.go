@@ -87,3 +87,19 @@ func (h *uploaderHandler) GetAllAllowedSources(w http.ResponseWriter, r *http.Re
 		models.Zoom,
 	})
 }
+
+func (h *uploaderHandler) UpdateUploaderConfig(w http.ResponseWriter, r *http.Request) {
+	uploaderID := chi.URLParam(r, "id")
+	uploaderConfig := &models.UploaderConfig{}
+	if err := render.DecodeJSON(r.Body, uploaderConfig); err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	updatedBy := r.Header.Get("email")
+	err := h.wfRepo.UpdateUploaderConfig(r.Context(), uploaderID, uploaderConfig, updatedBy)
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	render.JSON(w, r, uploaderID)
+}

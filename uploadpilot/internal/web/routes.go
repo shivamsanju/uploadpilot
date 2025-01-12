@@ -45,6 +45,7 @@ func GetUploaderRoutes() *chi.Mux {
 	r.Post("/", h.CreateUploader)
 	r.Get("/", h.GetAllUploaders)
 	r.Get("/{id}", h.GetUploaderByID)
+	r.Put("/{id}/config", h.UpdateUploaderConfig)
 	r.Delete("/{id}", h.DeleteUploader)
 	r.Get("/allowedSources", h.GetAllAllowedSources)
 	return r

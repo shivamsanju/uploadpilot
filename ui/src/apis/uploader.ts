@@ -40,6 +40,7 @@ export const useCreateUploaderMutation = () => {
 };
 
 
+
 export const useGetUploaderDetailsById = (uploaderId: string) => {
     const { isPending, error, data: uploader } = useQuery({
         queryKey: ['uploaderDetails', uploaderId],
@@ -56,6 +57,30 @@ export const useGetUploaderDetailsById = (uploaderId: string) => {
 
     return { isPending, error, uploader }
 }
+
+export const useUpdateUploaderConfigMutation = (uploaderId: string) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: ['uploaderDetails', uploaderId],
+        mutationFn: (wf: Uploader) => axiosInstance.put(`/uploaders/${uploaderId}/config`, wf).then((res) => res.data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['uploaderDetails', uploaderId] });
+            notifications.show({
+                title: "Success",
+                message: "Uploader updated successfully",
+                color: "green",
+            });
+        },
+        onError: () => {
+            notifications.show({
+                title: "Error",
+                message: "Failed to update uploader",
+                color: "red",
+            });
+        },
+    })
+};
 
 export const useGetAllAllowedSources = () => {
     const { isPending, error, data: allowedSources } = useQuery({

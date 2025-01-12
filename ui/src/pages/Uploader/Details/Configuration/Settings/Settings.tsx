@@ -1,7 +1,7 @@
-import { Box, Group, NumberInput, Stack, Text, TextInput } from '@mantine/core';
+import { Box, Group, NumberInput, Stack, Text } from '@mantine/core';
 import UploaderConfigForm from '../../../New/Form/ConfigurationForm';
 import { CreateUploaderForm } from '../../../../../types/uploader';
-import { useForm } from '@mantine/form';
+import { UseFormReturnType } from '@mantine/form';
 import classes from "./Settings.module.css";
 
 type SettingsProps = {
@@ -9,7 +9,8 @@ type SettingsProps = {
     setHeight: React.Dispatch<React.SetStateAction<number>>
     width: number
     setWidth: React.Dispatch<React.SetStateAction<number>>
-    uploaderDetails: any
+    form: UseFormReturnType<CreateUploaderForm, (values: CreateUploaderForm) => CreateUploaderForm>;
+    editMode: boolean
 }
 
 const w = "15vw";
@@ -19,12 +20,9 @@ const Settings: React.FC<SettingsProps> = ({
     setHeight,
     width,
     setWidth,
-    uploaderDetails
+    form,
+    editMode
 }) => {
-    const form = useForm<CreateUploaderForm>({
-        initialValues: { ...uploaderDetails.config, requiredMetadataFields: uploaderDetails.requiredMetadataFields || [] },
-    });
-
     return (
         <Box style={{ overflow: "auto", height: '62vh' }}>
             <Stack p="md" pt="xs">
@@ -59,7 +57,7 @@ const Settings: React.FC<SettingsProps> = ({
                     />
                 </Group>
             </Stack>
-            <UploaderConfigForm form={form} type="view" />
+            <UploaderConfigForm form={form} type={editMode ? "edit" : "view"} />
         </Box>
     );
 }
