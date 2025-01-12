@@ -1,17 +1,14 @@
 import AuthPage from "./pages/Auth";
 import AppLayout from "./components/Layout/AppLayout"
 import { NotFoundImage } from "./components/NotFound";
-import WorkflowsPage from "./pages/Workflow";
-import NewWorkflowPage from "./pages/Workflow/New";
-import WorkflowDetailsPage from "./pages/Workflow/Details";
+import UploaderPage from "./pages/Uploader";
+import CreateNewUploaderPage from "./pages/Uploader/New";
+import UploaderDetailsPage from "./pages/Uploader/Details";
 import ProfilePage from "./pages/Profile";
 import DashboardPage from "./pages/Dashboard";
 import NewConnectorsPage from "./pages/Storage/Connectors/New";
 import ConnectorsPage from "./pages/Storage/Connectors";
 import EmptyLayout from "./components/Layout/EmptyLayout";
-import ImportPoliciesPage from "./pages/ImportPolicy";
-import NewImportPolicyPage from "./pages/ImportPolicy/New";
-import ImportPolicyDetailsPage from "./pages/ImportPolicy/Details";
 import DataStoresPage from "./pages/Storage/DataStores";
 
 type Route = {
@@ -32,34 +29,24 @@ const routes: Route[] = [
         element: <DashboardPage />
     },
     {
-        path: "/workflows",
+        path: "/uploaders",
         layout: AppLayout,
-        element: <WorkflowsPage />
+        element: <UploaderPage />
     },
     {
-        path: "/workflows/new",
+        path: "/uploaders/new",
         layout: AppLayout,
-        element: <NewWorkflowPage />
+        element: <CreateNewUploaderPage />
     },
     {
-        path: "/workflows/:workflowId",
+        path: "/uploaders/:uploaderId",
         layout: AppLayout,
-        element: <WorkflowDetailsPage />
+        element: <UploaderDetailsPage />
     },
     {
-        path: "/importPolicies",
+        path: "/uploaders/:uploaderId/:tabValue",
         layout: AppLayout,
-        element: <ImportPoliciesPage />
-    },
-    {
-        path: "/importPolicies/new",
-        layout: AppLayout,
-        element: <NewImportPolicyPage />
-    },
-    {
-        path: "/importPolicies/:importPolicyId",
-        layout: AppLayout,
-        element: <ImportPolicyDetailsPage />
+        element: <UploaderDetailsPage />
     },
     {
         path: "/storage/datastores",

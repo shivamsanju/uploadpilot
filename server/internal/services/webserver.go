@@ -13,9 +13,10 @@ import (
 )
 
 func initWebServer(config *config.Config) error {
+	g.TusUploadDir = "/tmp"
+
 	// Create a new router with support for CORS and logging.
 	router := chi.NewRouter()
-	g.Log.Info(config)
 	router.Use(web.CorsMiddleware(config.FrontendURI))
 	router.Use(middleware.RequestID)
 	router.Use(web.LoggerMiddleware)
@@ -26,11 +27,14 @@ func initWebServer(config *config.Config) error {
 	r := web.Routes()
 	router.Mount("/", r)
 
+	g.RootPassword = config.RootPassword
+
 	// Start the web server.
 	g.Log.Infof("starting webserver on port %d", config.WebServerPort)
 	err := http.ListenAndServe(fmt.Sprintf(":%d", config.WebServerPort), router)
 	if err != nil {
 		g.Log.Errorf("failed to start webserver: %+v", err)
 	}
+
 	return err
 }

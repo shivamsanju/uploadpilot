@@ -1,18 +1,11 @@
 import { useMemo, } from 'react';
 import { Button, Group, Title, Menu, Box, Anchor } from '@mantine/core';
-import { IconBrandAws, IconBrandAzure, IconBrandGoogle, IconCirclePlus2, IconDots, IconFolder, IconTrash } from '@tabler/icons-react';
-import axios from 'axios';
+import { IconCirclePlus2, IconDots, IconTrash } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
-import { getApiDomain } from '../../../utils/config';
 import { useNavigate } from 'react-router-dom';
 import { useGetDataStores } from '../../../apis/storage';
-import TimeAgo from 'javascript-time-ago'
-import en from 'javascript-time-ago/locale/en'
 import { ThemedAgGridReact } from '../../../components/AgGrid/AgGrid';
-
-
-TimeAgo.addDefaultLocale(en)
-const timeAgo = new TimeAgo('en-US');
+import { timeAgo } from '../../../utils/datetime';
 
 const DataStoresPage = () => {
     const navigate = useNavigate();
@@ -27,8 +20,8 @@ const DataStoresPage = () => {
 
     const handleDeleteDataStore = async (id: string) => {
         notifications.show({
-            title: 'Comming Soon',
-            message: 'This feature is comming soon',
+            title: 'Coming Soon',
+            message: 'This feature is coming soon',
             color: 'yellow',
         })
 
@@ -44,8 +37,8 @@ const DataStoresPage = () => {
             },
             {
                 headerName: 'Connector',
-                field: 'connectorId',
-                cellRenderer: (params: any) => <Anchor size='xs' href={`/storage/connectors/${params.data.id}`}>{params.value}</Anchor>,
+                field: 'connectorName',
+                cellRenderer: (params: any) => <Anchor size='xs' href={`/storage/connectors/${params.data.connectorId}`}>{params.value}</Anchor>,
             },
             {
                 headerName: 'Bucket',

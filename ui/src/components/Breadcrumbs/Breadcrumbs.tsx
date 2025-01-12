@@ -12,14 +12,14 @@ function Breadcrumb() {
         const title = part.charAt(0).toUpperCase() + part.slice(1);
 
         return (
-            <Anchor key={index} component={Link} to={href}>
+            <Anchor size="xs" key={index} component={Link} to={href}>
                 {title}
             </Anchor>
         );
     });
 
     const items = [
-        <Anchor key="home" component={Link} to="/">
+        <Anchor size="xs" key="home" component={Link} to="/">
             Home
         </Anchor>,
         ...breadcrumbItems,

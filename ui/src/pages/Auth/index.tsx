@@ -2,6 +2,7 @@ import {
     Anchor,
     Button,
     Checkbox,
+    Divider,
     Group,
     Paper,
     PaperProps,
@@ -11,7 +12,7 @@ import {
     TextInput,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { upperFirst, useToggle } from '@mantine/hooks';
+import { useToggle } from '@mantine/hooks';
 import axiosInstance from '../../utils/axios';
 import { notifications } from '@mantine/notifications';
 import { Logo } from '../../components/Logo/Logo';
@@ -23,6 +24,7 @@ type FormValues = {
     email: string;
     password: string;
     confirmPassword?: string;
+    rootPassword?: string;
     terms?: boolean;
 }
 const AuthPage = (props: PaperProps) => {
@@ -34,6 +36,7 @@ const AuthPage = (props: PaperProps) => {
             email: '',
             password: '',
             confirmPassword: '',
+            rootPassword: '',
             terms: true,
         },
 
@@ -43,6 +46,7 @@ const AuthPage = (props: PaperProps) => {
             email: (val) => (/^\S+@\S+$/.test(val) ? null : 'Invalid email'),
             password: (val) => (val.length <= 6 ? 'Password should include at least 6 characters' : null),
             confirmPassword: (val, values) => (type === 'register' && val !== values.password ? 'Passwords did not match' : null),
+            rootPassword: (val) => (type === 'register' && !val ? 'Please enter the root password' : null),
         },
     });
 
@@ -90,16 +94,34 @@ const AuthPage = (props: PaperProps) => {
                 <Stack align="center" gap="xs">
                     <Logo enableOnClick={false} />
                     <Text size="sm" fw={500}>
-                        Welcome to UploadPilot, {type} with
+                        Welcome to UploadPilot, {type === 'register' ? 'Create  User' : 'Login'}
                     </Text>
                 </Stack>
 
                 <form onSubmit={form.onSubmit(onSubmit)}>
                     <Stack>
+                        {
+                            type === 'register' && (
+                                <>
+                                    <PasswordInput
+                                        size='xs'
+                                        required
+                                        label="Root password"
+                                        placeholder="Root passwor for creating user"
+                                        value={form.values.rootPassword}
+                                        onChange={(event) => form.setFieldValue('rootPassword', event.currentTarget.value)}
+                                        error={form.errors.rootPassword && 'Passwords did not match'}
+                                        radius="md"
+                                    />
+                                    <Divider label="New User Details" labelPosition="center" />
+                                </>
+                            )
+                        }
                         {type === 'register' && (
                             <TextInput
+                                withAsterisk
                                 label="First Name"
-                                placeholder="Your first name"
+                                placeholder="First name"
                                 value={form.values.firstName}
                                 onChange={(event) => form.setFieldValue('firstName', event.currentTarget.value)}
                                 error={form.errors.firstName && 'First name should include at least 2 letters'}
@@ -110,8 +132,9 @@ const AuthPage = (props: PaperProps) => {
 
                         {type === 'register' && (
                             <TextInput
+                                withAsterisk
                                 label="Last Name"
-                                placeholder="Your first name"
+                                placeholder="Last name"
                                 value={form.values.lastName}
                                 onChange={(event) => form.setFieldValue('lastName', event.currentTarget.value)}
                                 error={form.errors.lastName && 'Last name should include at least 2 letters'}
@@ -131,6 +154,7 @@ const AuthPage = (props: PaperProps) => {
                         />
 
                         <PasswordInput
+                            size='xs'
                             required
                             label="Password"
                             placeholder="Your password"
@@ -143,6 +167,7 @@ const AuthPage = (props: PaperProps) => {
                         {
                             type === 'register' && (
                                 <PasswordInput
+                                    size='xs'
                                     required
                                     label="Confirm password"
                                     placeholder="Your password"
@@ -154,6 +179,7 @@ const AuthPage = (props: PaperProps) => {
                             )
                         }
 
+
                         {type === 'register' && (
                             <Checkbox
                                 label="I accept terms and conditions"
@@ -164,13 +190,13 @@ const AuthPage = (props: PaperProps) => {
                     </Stack>
 
                     <Group justify="space-between" mt="xl">
-                        <Anchor component="button" type="button" c="dimmed" onClick={() => toggle()} size="xs">
+                        <Anchor size="xs" component="button" type="button" c="dimmed" onClick={() => toggle()}>
                             {type === 'register'
                                 ? 'Already have an account? Login'
-                                : "Don't have an account? Register"}
+                                : "Create User (Needs root permission)"}
                         </Anchor>
                         <Button type="submit" radius="xl">
-                            {upperFirst(type)}
+                            {type === 'register' ? 'Create' : 'Login'}
                         </Button>
                     </Group>
                 </form>

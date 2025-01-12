@@ -31,7 +31,7 @@ func NewStorageConnectorRepo() StorageConnectorRepo {
 func (sr *storageConnectorRepo) GetStorageConnectors(ctx context.Context) ([]models.StorageConnector, error) {
 	collection := g.Db.Database(g.DbName).Collection(sr.collectionName)
 	var cb []models.StorageConnector
-	opts := options.Find().SetSort(bson.D{{Key: "updatedat", Value: -1}})
+	opts := options.Find().SetSort(bson.D{{Key: "updatedAt", Value: -1}})
 	cursor, err := collection.Find(ctx, bson.M{}, opts)
 	if err != nil {
 		g.Log.Errorf("no storages found: %s", err.Error())

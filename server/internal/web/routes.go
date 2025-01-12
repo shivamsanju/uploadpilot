@@ -1,6 +1,8 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/shivamsanju/uploader/internal/web/handlers"
 )
@@ -8,13 +10,15 @@ import (
 func Routes() *chi.Mux {
 	r := chi.NewRouter()
 	r.Mount("/", GetAuthRoutes())
+	ih := handlers.NewImportHandler()
+	r.Mount("/imports", http.StripPrefix(("/imports"), ih.GetTusHandler()))
+	// r.Mount("/imports/{*path}", http.StripPrefix(("/imports/"), ih.GetTusHandler()))
 	r.Group(func(r chi.Router) {
 		r.Use(AuthMiddleware)
 		r.Mount("/users", GetUserRoutes())
-		r.Mount("/workflows", GetWorkflowRoutes())
+		r.Mount("/uploaders", GetUploaderRoutes())
 		r.Mount("/storage/connectors", GetStorageConnectorRoutes())
 		r.Mount("/storage/datastores", GetDatastoreRoutes())
-		r.Mount("/importPolicies", GetImportPoliciesRoutes())
 	})
 
 	return r
@@ -35,13 +39,14 @@ func GetUserRoutes() *chi.Mux {
 	return r
 }
 
-func GetWorkflowRoutes() *chi.Mux {
+func GetUploaderRoutes() *chi.Mux {
 	r := chi.NewRouter()
-	h := handlers.NewWorkflowHandler()
-	r.Post("/", h.CreateWorkflow)
-	r.Get("/", h.GetAllWorkflows)
-	r.Get("/{id}", h.GetWorkflowByID)
-	r.Delete("/{id}", h.DeleteWorkflow)
+	h := handlers.NewuploaderHandler()
+	r.Post("/", h.CreateUploader)
+	r.Get("/", h.GetAllUploaders)
+	r.Get("/{id}", h.GetUploaderByID)
+	r.Delete("/{id}", h.DeleteUploader)
+	r.Get("/allowedSources", h.GetAllAllowedSources)
 	return r
 }
 
@@ -62,15 +67,5 @@ func GetDatastoreRoutes() *chi.Mux {
 	r.Get("/", h.GetAllDatastores)
 	r.Get("/{id}", h.GetDatastoreByID)
 	r.Delete("/{id}", h.DeleteDatastore)
-	return r
-}
-
-func GetImportPoliciesRoutes() *chi.Mux {
-	r := chi.NewRouter()
-	h := handlers.NewImportPolicyHandler()
-	r.Post("/", h.CreateImportPolicy)
-	r.Get("/", h.GetImportPolicies)
-	r.Get("/{id}", h.GetImportPolicy)
-	r.Delete("/{id}", h.DeleteImportPolicy)
 	return r
 }

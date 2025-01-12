@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	"github.com/go-playground/validator/v10"
 	"github.com/shivamsanju/uploader/internal/db/models"
 	"github.com/shivamsanju/uploader/internal/db/repo"
 	"github.com/shivamsanju/uploader/internal/web/utils"
@@ -45,6 +47,14 @@ func (h *storageConnectorHandler) CreateStorageConnector(w http.ResponseWriter, 
 	connector := &models.StorageConnector{}
 	if err := render.DecodeJSON(r.Body, connector); err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	if err := validate.Struct(connector); err != nil {
+		errors := make(map[string]string)
+		for _, err := range err.(validator.ValidationErrors) {
+			errors[err.Field()] = err.Tag()
+		}
+		utils.HandleHttpError(w, r, http.StatusBadRequest, fmt.Errorf("validation error: %v", errors))
 		return
 	}
 	g.Log.Infof("adding storage connector: %+v", connector)

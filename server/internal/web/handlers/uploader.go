@@ -1,0 +1,89 @@
+package handlers
+
+import (
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/render"
+	"github.com/shivamsanju/uploader/internal/db/models"
+	"github.com/shivamsanju/uploader/internal/db/repo"
+	"github.com/shivamsanju/uploader/internal/web/utils"
+	g "github.com/shivamsanju/uploader/pkg/globals"
+)
+
+type uploaderHandler struct {
+	wfRepo repo.UploaderRepo
+	dsRepo repo.DataStoreRepo
+}
+
+func NewuploaderHandler() *uploaderHandler {
+	return &uploaderHandler{
+		wfRepo: repo.NewUploaderRepo(),
+		dsRepo: repo.NewDataStoreRepo(),
+	}
+}
+
+func (h *uploaderHandler) GetAllUploaders(w http.ResponseWriter, r *http.Request) {
+	cbs, err := h.wfRepo.GetUploaders(r.Context())
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	if cbs == nil {
+		cbs = make([]models.Uploader, 0)
+	}
+	render.JSON(w, r, cbs)
+}
+
+func (h *uploaderHandler) GetUploaderByID(w http.ResponseWriter, r *http.Request) {
+	uploaderID := chi.URLParam(r, "id")
+	cb, err := h.wfRepo.GetUploader(r.Context(), uploaderID)
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	render.JSON(w, r, cb)
+}
+
+func (h *uploaderHandler) CreateUploader(w http.ResponseWriter, r *http.Request) {
+	g.Log.Info("creating uploader")
+	uploader := &models.Uploader{}
+	if err := render.DecodeJSON(r.Body, uploader); err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	uploader.CreatedBy = r.Header.Get("email")
+	uploader.UpdatedBy = r.Header.Get("email")
+
+	g.Log.Infof("adding uploader: %+v", uploader)
+	id, err := h.wfRepo.CreateUploader(r.Context(), uploader)
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	render.JSON(w, r, id)
+}
+
+func (h *uploaderHandler) DeleteUploader(w http.ResponseWriter, r *http.Request) {
+	uploaderID := chi.URLParam(r, "id")
+	h.wfRepo.DeleteUploader(r.Context(), uploaderID)
+}
+
+func (h *uploaderHandler) GetAllAllowedSources(w http.ResponseWriter, r *http.Request) {
+	render.JSON(w, r, []models.AllowedSources{
+		models.FileUpload,
+		models.Webcamera,
+		models.Audio,
+		models.ScreenCapture,
+		models.Box,
+		models.Dropbox,
+		models.Facebook,
+		models.GoogleDrive,
+		models.GooglePhotos,
+		models.Instagram,
+		models.OneDrive,
+		models.Unsplash,
+		models.Url,
+		models.Zoom,
+	})
+}

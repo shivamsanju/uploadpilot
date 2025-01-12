@@ -1,0 +1,23 @@
+export const MIME_TYPES = [
+    { value: "image/png", label: "PNG Image" },
+    { value: "image/gif", label: "GIF Image" },
+    { value: "image/jpeg", label: "JPEG Image" },
+    { value: "image/svg+xml", label: "SVG Image" },
+    { value: "image/webp", label: "WebP Image" },
+    { value: "image/avif", label: "AVIF Image" },
+    { value: "image/heic", label: "HEIC Image" },
+    { value: "image/heif", label: "HEIF Image" },
+    { value: "video/mp4", label: "MP4 Video" },
+    { value: "application/zip", label: "ZIP Archive" },
+    { value: "application/x-rar", label: "RAR Archive" },
+    { value: "application/x-7z-compressed", label: "7z Archive" },
+    { value: "text/csv", label: "CSV File" },
+    { value: "application/pdf", label: "PDF Document" },
+    { value: "application/msword", label: "Microsoft Word Document (DOC)" },
+    { value: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", label: "Microsoft Word Document (DOCX)" },
+    { value: "application/vnd.ms-excel", label: "Microsoft Excel Spreadsheet (XLS)" },
+    { value: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", label: "Microsoft Excel Spreadsheet (XLSX)" },
+    { value: "application/vnd.ms-powerpoint", label: "Microsoft PowerPoint Presentation (PPT)" },
+    { value: "application/vnd.openxmlformats-officedocument.presentationml.presentation", label: "Microsoft PowerPoint Presentation (PPTX)" },
+    { value: "application/vnd.microsoft.portable-executable", label: "Executable File (EXE)" }
+];

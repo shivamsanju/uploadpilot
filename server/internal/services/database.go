@@ -8,6 +8,7 @@ import (
 	"github.com/shivamsanju/uploader/internal/db/models"
 	g "github.com/shivamsanju/uploader/pkg/globals"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -22,7 +23,7 @@ func initMongoDB(config *config.Config) error {
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	err = client.Ping(ctx, nil)
 	if err != nil {
@@ -49,6 +50,7 @@ func seedDatabase(ctx context.Context) error {
 	}
 
 	cb := models.StorageConnector{
+		ID:   primitive.NewObjectID(),
 		Name: "local",
 		Type: "local",
 		LocalConfig: &models.LocalConfig{

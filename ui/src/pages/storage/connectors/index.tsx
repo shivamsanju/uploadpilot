@@ -1,18 +1,12 @@
 import { useMemo, } from 'react';
 import { Button, Group, Title, Menu, Box } from '@mantine/core';
 import { IconBrandAws, IconBrandAzure, IconBrandGoogle, IconCirclePlus2, IconDots, IconFolder, IconTrash } from '@tabler/icons-react';
-import axios from 'axios';
 import { notifications } from '@mantine/notifications';
-import { getApiDomain } from '../../../utils/config';
 import { useNavigate } from 'react-router-dom';
 import { useGetStorageConnectors } from '../../../apis/storage';
-import TimeAgo from 'javascript-time-ago'
-import en from 'javascript-time-ago/locale/en'
 import { ThemedAgGridReact } from '../../../components/AgGrid/AgGrid';
+import { timeAgo } from '../../../utils/datetime';
 
-
-TimeAgo.addDefaultLocale(en)
-const timeAgo = new TimeAgo('en-US');
 
 const ConnectorsPage = () => {
     const navigate = useNavigate();
@@ -25,8 +19,8 @@ const ConnectorsPage = () => {
 
     const handleDeleteConnector = async (id: string) => {
         notifications.show({
-            title: 'Comming Soon',
-            message: 'This feature is comming soon',
+            title: 'Coming Soon',
+            message: 'This feature is coming soon',
             color: 'yellow',
         })
 

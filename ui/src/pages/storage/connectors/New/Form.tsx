@@ -133,7 +133,7 @@ const NewConnectorForm = ({ onSubmit, showSubmitButton, showCancelButton, onCanc
 
             <Group justify="flex-end" mt="md" gap="sm">
                 {showCancelButton && <Button onClick={onCancel}>Cancel</Button>}
-                {showSubmitButton && <Button type="submit">Submit</Button>}
+                {showSubmitButton && <Button type="submit">Create</Button>}
             </Group>
         </form >
     );

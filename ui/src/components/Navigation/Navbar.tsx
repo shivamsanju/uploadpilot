@@ -3,7 +3,6 @@ import {
     IconCircles,
     IconDatabase,
     IconGauge,
-    IconPackageImport,
     IconWebhook,
 } from '@tabler/icons-react';
 import { Code, ScrollArea } from '@mantine/core';
@@ -13,17 +12,9 @@ import classes from './Navbar.module.css';
 const mockdata = [
     { label: 'Dashboard', icon: IconGauge, link: "/" },
     {
-        label: 'Workflows',
+        label: 'Uploaders',
         icon: IconCircles,
-        link: "/workflows",
-    },
-    {
-        label: 'Import',
-        icon: IconPackageImport,
-        links: [
-            { label: 'Policies', link: '/importPolicies' },
-            { label: 'Validations', link: '/validations' },
-        ],
+        link: "/uploaders",
     },
     {
         label: 'Storage',

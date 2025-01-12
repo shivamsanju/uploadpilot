@@ -10,6 +10,7 @@ import (
 	"github.com/shivamsanju/uploader/internal/db/repo"
 	webmodels "github.com/shivamsanju/uploader/internal/web/models"
 	"github.com/shivamsanju/uploader/internal/web/utils"
+	"github.com/shivamsanju/uploader/pkg/globals"
 )
 
 type userHandler struct {
@@ -36,6 +37,10 @@ func (h *userHandler) Signup(w http.ResponseWriter, r *http.Request) {
 			errors[err.Field()] = err.Tag()
 		}
 		utils.HandleHttpError(w, r, http.StatusBadRequest, fmt.Errorf("validation error: %v", errors))
+		return
+	}
+	if signupReq.RootPassword != globals.RootPassword {
+		utils.HandleHttpError(w, r, http.StatusUnauthorized, fmt.Errorf("invalid root password"))
 		return
 	}
 	if signupReq.Password != signupReq.ConfirmPassword {

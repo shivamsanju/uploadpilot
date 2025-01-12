@@ -1,5 +1,4 @@
 import "@mantine/core/styles.css";
-import 'mantine-datatable/styles.layer.css';
 import '@mantine/notifications/styles.css';
 import { Routes, BrowserRouter as Router, Route } from "react-router-dom";
 import { MantineProvider } from '@mantine/core';

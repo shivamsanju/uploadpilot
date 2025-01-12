@@ -1,0 +1,172 @@
+package repo
+
+import (
+	"context"
+	"time"
+
+	"github.com/shivamsanju/uploader/internal/db/models"
+	g "github.com/shivamsanju/uploader/pkg/globals"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
+)
+
+type UploaderRepo interface {
+	GetUploaders(ctx context.Context) ([]models.Uploader, error)
+	GetUploader(ctx context.Context, id string) (*bson.M, error)
+	CreateUploader(ctx context.Context, cb *models.Uploader) (primitive.ObjectID, error)
+	DeleteUploader(ctx context.Context, id string) error
+	UpdateUploader(ctx context.Context, id string, metadata map[string]interface{}) error
+	GetUploaderDataStoreCreds(ctx context.Context, id string) (map[string]interface{}, error)
+}
+
+type uploaderRepo struct {
+	collectionName string
+}
+
+func NewUploaderRepo() UploaderRepo {
+	return &uploaderRepo{
+		collectionName: "Uploaders",
+	}
+}
+
+func (ur *uploaderRepo) GetUploaders(ctx context.Context) ([]models.Uploader, error) {
+	collection := g.Db.Database(g.DbName).Collection(ur.collectionName)
+	var cb []models.Uploader
+	opts := options.Find().SetSort(bson.D{{Key: "updatedAt", Value: -1}})
+	cursor, err := collection.Find(ctx, bson.M{}, opts)
+	if err != nil {
+		g.Log.Errorf("no Uploaders found: %s", err.Error())
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	cursor.All(ctx, &cb)
+	g.Log.Infof("found %d Uploaders", len(cb))
+	return cb, nil
+}
+
+func (ur *uploaderRepo) GetUploader(ctx context.Context, id string) (*bson.M, error) {
+	collection := g.Db.Database(g.DbName).Collection(ur.collectionName)
+	UploaderID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	pipeline := []bson.M{
+		{"$match": bson.M{
+			"_id": UploaderID,
+		}},
+		{"$lookup": bson.M{
+			"from":         "datastores",
+			"localField":   "dataStoreId",
+			"foreignField": "_id",
+			"as":           "dataStoreDetails",
+		}},
+		{"$unwind": bson.M{"path": "$dataStoreDetails"}},
+		{"$lookup": bson.M{
+			"from":         "storageconnectors",
+			"localField":   "dataStoreDetails.connectorId",
+			"foreignField": "_id",
+			"as":           "dataStoreDetails.connectorDetails",
+		}},
+		{"$unwind": bson.M{"path": "$dataStoreDetails.connectorDetails"}},
+		{"$addFields": bson.M{
+			"dataStoreDetails.connectorName": "$dataStoreDetails.connectorDetails.name",
+			"dataStoreDetails.connectorType": "$dataStoreDetails.connectorDetails.type",
+			"dataStoreDetails.connectorId":   "$dataStoreDetails.connectorDetails._id",
+		}},
+		{"$unset": "dataStoreDetails.connectorDetails"},
+	}
+	cb := []bson.M{}
+	cursor, err := collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		g.Log.Errorf("failed to find Uploader: %s", err.Error())
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	err = cursor.All(ctx, &cb)
+	if err != nil {
+		g.Log.Errorf("failed to find Uploader: %s", err.Error())
+		return nil, err
+	}
+	g.Log.Infof("found Uploader: %+v", cb)
+	if len(cb) == 0 {
+		return nil, nil
+	}
+	return &cb[0], nil
+}
+
+func (ur *uploaderRepo) CreateUploader(ctx context.Context, cb *models.Uploader) (primitive.ObjectID, error) {
+	cb.ID = primitive.NewObjectID()
+	cb.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
+	cb.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
+
+	collection := g.Db.Database(g.DbName).Collection(ur.collectionName)
+	r, err := collection.InsertOne(ctx, &cb)
+	if err != nil {
+		g.Log.Errorf("failed to add Uploader: %v", err.Error())
+		return primitive.ObjectID{}, err
+	}
+	return (r.InsertedID).(primitive.ObjectID), nil
+}
+
+func (ur *uploaderRepo) DeleteUploader(ctx context.Context, id string) error {
+	collection := g.Db.Database(g.DbName).Collection(ur.collectionName)
+	_, err := collection.DeleteOne(ctx, bson.M{"_id": id})
+	return err
+}
+
+func (ur *uploaderRepo) UpdateUploader(ctx context.Context, id string, metadata map[string]interface{}) error {
+	metadata["updatedAt"] = primitive.NewDateTimeFromTime(time.Now())
+
+	collection := g.Db.Database(g.DbName).Collection(ur.collectionName)
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": id}, bson.M{"$set": metadata})
+	return err
+}
+
+func (ur *uploaderRepo) GetUploaderDataStoreCreds(ctx context.Context, id string) (map[string]interface{}, error) {
+	collection := g.Db.Database(g.DbName).Collection(ur.collectionName)
+	UploaderID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+	pipeline := []bson.M{
+		{"$match": bson.M{
+			"_id": UploaderID,
+		}},
+		{"$lookup": bson.M{
+			"from":         "datastores",
+			"localField":   "dataStoreId",
+			"foreignField": "_id",
+			"as":           "dataStoreDetails",
+		}},
+		{"$unwind": bson.M{"path": "$dataStoreDetails"}},
+		{"$lookup": bson.M{
+			"from":         "storageconnectors",
+			"localField":   "dataStoreDetails.connectorId",
+			"foreignField": "_id",
+			"as":           "connectorDetails",
+		}},
+		{"$unwind": bson.M{"path": "$connectorDetails"}},
+		{"$addFields": bson.M{
+			"bucket": "$dataStoreDetails.bucket",
+		}},
+		{"$unset": "dataStoreDetails"},
+	}
+	cb := []map[string]interface{}{}
+	cursor, err := collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		g.Log.Errorf("failed to find Uploader: %s", err.Error())
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	err = cursor.All(ctx, &cb)
+	if err != nil {
+		g.Log.Errorf("failed to find Uploader: %s", err.Error())
+		return nil, err
+	}
+	g.Log.Infof("found Uploader: %+v", cb)
+	if len(cb) == 0 {
+		return nil, nil
+	}
+	return cb[0], nil
+}

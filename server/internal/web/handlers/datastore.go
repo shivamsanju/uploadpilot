@@ -1,13 +1,14 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	"github.com/go-playground/validator/v10"
 	"github.com/shivamsanju/uploader/internal/db/models"
 	"github.com/shivamsanju/uploader/internal/db/repo"
-	webmodels "github.com/shivamsanju/uploader/internal/web/models"
 	"github.com/shivamsanju/uploader/internal/web/utils"
 	g "github.com/shivamsanju/uploader/pkg/globals"
 )
@@ -35,22 +36,14 @@ func (h *datastoreHandler) GetAllDatastores(w http.ResponseWriter, r *http.Reque
 
 func (h *datastoreHandler) GetDatastoreByID(w http.ResponseWriter, r *http.Request) {
 	datastoreID := chi.URLParam(r, "id")
-	cb, err := h.dsRepo.GetDataStore(r.Context(), datastoreID)
+	dataStore, err := h.dsRepo.GetDataStore(r.Context(), datastoreID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	connector, err := h.scRepo.GetStorageConnector(r.Context(), cb.ConnectorID.Hex())
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-	g.Log.Infof("found datastore: %+v", &connector)
-	dsResp := webmodels.DataStoreResponse{
-		DataStore: cb,
-		Connector: connector,
-	}
-	render.JSON(w, r, dsResp)
+
+	g.Log.Infof("found datastore: %+v", &dataStore)
+	render.JSON(w, r, dataStore)
 }
 
 func (h *datastoreHandler) CreateDatastore(w http.ResponseWriter, r *http.Request) {
@@ -58,6 +51,14 @@ func (h *datastoreHandler) CreateDatastore(w http.ResponseWriter, r *http.Reques
 	datastore := &models.DataStore{}
 	if err := render.DecodeJSON(r.Body, datastore); err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	if err := validate.Struct(datastore); err != nil {
+		errors := make(map[string]string)
+		for _, err := range err.(validator.ValidationErrors) {
+			errors[err.Field()] = err.Tag()
+		}
+		utils.HandleHttpError(w, r, http.StatusBadRequest, fmt.Errorf("validation error: %v", errors))
 		return
 	}
 	g.Log.Infof("creating datastore: %+v", datastore)
