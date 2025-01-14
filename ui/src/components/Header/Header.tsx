@@ -14,9 +14,8 @@ export function AdminHeader({ burger }: Props) {
   return (
     <header className={classes.header}>
       {burger}
-      <Logo />
+      <Logo height="40" width="129.64" />
       <Box style={{ flex: 1 }} />
-
       <UserMenu />
     </header>
   );

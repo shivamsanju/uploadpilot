@@ -1,0 +1,28 @@
+package models
+
+import "go.mongodb.org/mongo-driver/bson/primitive"
+
+type Log struct {
+	TimeStamp primitive.DateTime `bson:"timestamp" json:"timestamp"`
+	Message   string             `bson:"message" json:"message"`
+}
+
+type ImportStatus string
+
+const (
+	ImportStatusInProgress ImportStatus = "In Progress"
+	ImportStatusFailed     ImportStatus = "Failed"
+	ImportStatusSuccess    ImportStatus = "Success"
+)
+
+type Import struct {
+	ID             primitive.ObjectID     `bson:"_id" json:"id"`
+	UploaderID     primitive.ObjectID     `bson:"uploaderId" json:"uploaderId" validate:"required"`
+	Status         ImportStatus           `bson:"status" json:"status" validate:"required"`
+	Metadata       map[string]interface{} `bson:"metadata" json:"metadata"`
+	StoredFileName string                 `bson:"storedFileName" json:"storedFileName" validate:"required"`
+	Size           int64                  `bson:"size" json:"size" validate:"required"`
+	StartedAt      primitive.DateTime     `bson:"startedAt" json:"startedAt"`
+	FinishedAt     primitive.DateTime     `bson:"finishedAt" json:"finishedAt"`
+	Logs           []Log                  `bson:"logs" json:"logs"`
+}

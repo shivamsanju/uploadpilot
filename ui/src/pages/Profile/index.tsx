@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Container, Card, Text, Group, Button, TextInput, Grid, FileButton, Avatar, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import axiosInstance from '../../utils/axios';
-import { notifications } from '@mantine/notifications';
+import { useGetCurrentUserDetails } from '../../apis/user';
+import AppLoader from '../../components/Loader/AppLoader';
+import ErrorCard from '../../components/ErrorCard/ErrorCard';
 
 const ProfilePage = () => {
     const [isEditing, setIsEditing] = useState(false);
+    const { isPending, error, me } = useGetCurrentUserDetails();
     const form = useForm({
         initialValues: {
             firstName: "John",
@@ -20,33 +22,10 @@ const ProfilePage = () => {
         },
     });
 
-    const getUserInfo = async () => {
-        try {
-            const response = await axiosInstance.get("/users/me")
-            if (response.status === 200) {
-                return response.data;
-            }
-            notifications.show({
-                title: 'Error',
-                message: response.data.message,
-                color: 'red',
-            })
-        } catch (error: any) {
-            console.log(error);
-            notifications.show({
-                title: 'Error',
-                message: error.toString(),
-                color: 'red',
-            })
-        }
-    }
 
     useEffect(() => {
-        getUserInfo().then((data) => form.setValues({
-            ...data,
-            image: "https://avatar.iran.liara.run/public/33"
-        }));
-    }, [form])
+        form.setValues(me)
+    }, [me])
 
     const handleEditToggle = () => {
         setIsEditing((prev) => !prev);
@@ -57,7 +36,11 @@ const ProfilePage = () => {
         setIsEditing(false);
     };
 
-    return form.values.email ? (
+    if (error) {
+        return <ErrorCard title={error.name} message={error.message} h="70vh" />
+    }
+
+    return isPending ? <AppLoader h="70vh" /> : form.values.email ? (
         <Container size="md" mt="xl">
             <Card shadow="sm" padding="lg" radius="md" withBorder>
                 <Group>

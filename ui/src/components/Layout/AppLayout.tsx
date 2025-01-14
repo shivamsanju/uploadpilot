@@ -47,7 +47,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                             opened={false}
                             onClick={toggle}
                             size="sm"
-                            mr="xl"
+                            mr="sm"
                         />
                     }
                 />

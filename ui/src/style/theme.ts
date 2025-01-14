@@ -1,6 +1,7 @@
 import { createTheme, TextInput, Button, Select, Textarea, TagsInput, Badge } from "@mantine/core";
 
 export const theme = createTheme({
+    primaryColor: 'yellow',
     fontFamily: "Poppins",
     headings: {
         fontFamily: "Poppins",

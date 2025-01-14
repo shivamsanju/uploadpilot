@@ -1,7 +1,7 @@
 import { Box, Button, Card, Group, Paper, SegmentedControl, SimpleGrid, Text, useMantineColorScheme } from "@mantine/core"
 import { Uploader } from "@uploadpilot/react"
 import { useState } from "react";
-import { IconCode, IconDeviceFloppy, IconEdit, IconEye } from "@tabler/icons-react";
+import { IconCancel, IconCode, IconDeviceFloppy, IconEdit, IconEye } from "@tabler/icons-react";
 import { CodeHighlightTabs } from "@mantine/code-highlight";
 import '@mantine/code-highlight/styles.css';
 import { useParams } from "react-router-dom";
@@ -11,6 +11,7 @@ import { getApiDomain } from "../../../../utils/config";
 import { CreateUploaderForm } from "../../../../types/uploader";
 import { useForm } from "@mantine/form";
 import { useUpdateUploaderConfigMutation } from "../../../../apis/uploader";
+import { useGetCurrentUserDetails } from "../../../../apis/user";
 
 const getCode = (uploaderId: string, backendEndpoint: string, h: number, w: number) => `
 import { Uploader } from "@uploadpilot/react"
@@ -40,6 +41,7 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
 
     const { uploaderId } = useParams();
     const { mutateAsync } = useUpdateUploaderConfigMutation(uploaderId as string)
+    const { isPending: isUserPending, me } = useGetCurrentUserDetails();
     const { colorScheme } = useMantineColorScheme();
     const code = getCode(uploaderId as string, backendEndpoint, height, width);
     const form = useForm<CreateUploaderForm>({
@@ -47,7 +49,7 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
     });
 
 
-    const handleEditButton = async () => {
+    const handleEditAndSaveButton = async () => {
         if (editMode) {
             mutateAsync(form.values)
                 .then(() => refreshKey(prev => prev === "0" ? "1" : "0"))
@@ -55,14 +57,28 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
         setEditMode(prev => !prev)
     }
 
-    return !uploaderId ? <AppLoader h="67vh" /> : (
+    const handleCancelButton = () => {
+        setEditMode(false)
+    }
+
+    console.log(me)
+
+    return (!uploaderId || isUserPending) ? <AppLoader h="67vh" /> : (
         <Box>
-            <Group justify="flex-end" mb="xs">
-                <Button
+            <Group justify="flex-end" mb="xs" gap="md">
+                {editMode && <Button
                     size="xs"
                     variant="default"
-                    onClick={handleEditButton}
-                    leftSection={editMode ? <IconDeviceFloppy size={20} /> : <IconEdit size={20} />}
+                    onClick={handleCancelButton}
+                    leftSection={<IconCancel size={18} />}
+                >
+                    Cancel
+                </Button>}
+                <Button
+                    size="xs"
+                    variant={editMode ? undefined : "default"}
+                    onClick={handleEditAndSaveButton}
+                    leftSection={editMode ? <IconDeviceFloppy size={18} /> : <IconEdit size={18} />}
                 >
                     {editMode ? "Save" : "Edit"}
                 </Button>
@@ -140,6 +156,10 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
                             uploaderId={uploaderId}
                             h={height}
                             w={width}
+                            metadata={{
+                                "uploaderEmail": me.email,
+                                "uploaderName": me.firstName + " " + me.lastName
+                            }}
                         />
                     </Group>
                 </Paper>

@@ -24,7 +24,7 @@ func NewuploaderHandler() *uploaderHandler {
 }
 
 func (h *uploaderHandler) GetAllUploaders(w http.ResponseWriter, r *http.Request) {
-	cbs, err := h.wfRepo.GetUploaders(r.Context())
+	cbs, err := h.wfRepo.GetAll(r.Context())
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -36,8 +36,8 @@ func (h *uploaderHandler) GetAllUploaders(w http.ResponseWriter, r *http.Request
 }
 
 func (h *uploaderHandler) GetUploaderByID(w http.ResponseWriter, r *http.Request) {
-	uploaderID := chi.URLParam(r, "id")
-	cb, err := h.wfRepo.GetUploader(r.Context(), uploaderID)
+	uploaderID := chi.URLParam(r, "uploaderId")
+	cb, err := h.wfRepo.Get(r.Context(), uploaderID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -56,7 +56,7 @@ func (h *uploaderHandler) CreateUploader(w http.ResponseWriter, r *http.Request)
 	uploader.UpdatedBy = r.Header.Get("email")
 
 	g.Log.Infof("adding uploader: %+v", uploader)
-	id, err := h.wfRepo.CreateUploader(r.Context(), uploader)
+	id, err := h.wfRepo.Create(r.Context(), uploader)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -65,8 +65,8 @@ func (h *uploaderHandler) CreateUploader(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *uploaderHandler) DeleteUploader(w http.ResponseWriter, r *http.Request) {
-	uploaderID := chi.URLParam(r, "id")
-	h.wfRepo.DeleteUploader(r.Context(), uploaderID)
+	uploaderID := chi.URLParam(r, "uploaderId")
+	h.wfRepo.Delete(r.Context(), uploaderID)
 }
 
 func (h *uploaderHandler) GetAllAllowedSources(w http.ResponseWriter, r *http.Request) {
@@ -89,14 +89,14 @@ func (h *uploaderHandler) GetAllAllowedSources(w http.ResponseWriter, r *http.Re
 }
 
 func (h *uploaderHandler) UpdateUploaderConfig(w http.ResponseWriter, r *http.Request) {
-	uploaderID := chi.URLParam(r, "id")
+	uploaderID := chi.URLParam(r, "uploaderId")
 	uploaderConfig := &models.UploaderConfig{}
 	if err := render.DecodeJSON(r.Body, uploaderConfig); err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
 	updatedBy := r.Header.Get("email")
-	err := h.wfRepo.UpdateUploaderConfig(r.Context(), uploaderID, uploaderConfig, updatedBy)
+	err := h.wfRepo.UpdateConfig(r.Context(), uploaderID, uploaderConfig, updatedBy)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return

@@ -10,16 +10,22 @@ import (
 	"github.com/shivamsanju/uploader/pkg/cloudstorage"
 	"github.com/shivamsanju/uploader/pkg/globals"
 	tusd "github.com/tus/tusd/v2/pkg/handler"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func UploadToDatastoreHook(hook tusd.HookEvent) error {
+func UploadToDatastoreHook(hook tusd.HookEvent, imp *models.Import) error {
 	headers := hook.HTTPRequest.Header
 	uploaderId := headers.Get("uploaderId")
 	if len(uploaderId) == 0 {
 		return fmt.Errorf("missing uploaderId in header")
 	}
-	repo := repo.NewUploaderRepo()
-	uploader, err := repo.GetUploaderDataStoreCreds(hook.Context, uploaderId)
+	uploaderIDObjID, err := primitive.ObjectIDFromHex(uploaderId)
+	if err != nil {
+		return fmt.Errorf("invalid uploaderId: %w", err)
+	}
+	imp.UploaderID = uploaderIDObjID
+	uploaderRepo := repo.NewUploaderRepo()
+	uploader, err := uploaderRepo.GetDataStoreCreds(hook.Context, uploaderId)
 	if err != nil {
 		return err
 	}
@@ -45,7 +51,9 @@ func UploadToDatastoreHook(hook tusd.HookEvent) error {
 		return err
 	}
 	uploadPath := path.Join(globals.TusUploadDir, hook.Upload.ID)
-	err = cloudUploader.Upload(uploadPath, hook.Upload.ID+"_"+hook.Upload.MetaData["filename"])
+	objectFileName := hook.Upload.ID + "_" + hook.Upload.MetaData["filename"]
+	imp.StoredFileName = objectFileName
+	err = cloudUploader.Upload(uploadPath, objectFileName)
 	if err != nil {
 		return err
 	}

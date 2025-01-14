@@ -15,6 +15,7 @@ type Config struct {
 	DatabaseName  string
 	FrontendURI   string
 	RootPassword  string
+	CompanionURI  string
 }
 
 func NewConfig() (*Config, error) {
@@ -37,5 +38,6 @@ func NewConfig() (*Config, error) {
 		FrontendURI:   os.Getenv("FRONTEND_URI"),
 		DatabaseName:  os.Getenv("APP_NAME") + "DB",
 		RootPassword:  os.Getenv("ROOT_PASSWORD"),
+		CompanionURI:  os.Getenv("COMPANION_URI"),
 	}, nil
 }

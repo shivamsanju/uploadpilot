@@ -2,7 +2,7 @@ import axios from "axios";
 import { getApiDomain } from "./config";
 
 const axiosInstance = axios.create({
-    baseURL: getApiDomain(),
+    baseURL: getApiDomain() + "/api",
     headers: {
         "Content-Type": "application/json",
     },

@@ -13,10 +13,11 @@ import (
 )
 
 type StorageConnectorRepo interface {
-	GetStorageConnectors(ctx context.Context) ([]models.StorageConnector, error)
-	GetStorageConnector(ctx context.Context, id string) (*models.StorageConnector, error)
-	CreateStorageConnector(ctx context.Context, cb *models.StorageConnector) (primitive.ObjectID, error)
-	DeleteStorageConnector(ctx context.Context, id string) error
+	GetAll(ctx context.Context) ([]models.StorageConnector, error)
+	Get(ctx context.Context, id string) (*models.StorageConnector, error)
+	Create(ctx context.Context, cb *models.StorageConnector) (primitive.ObjectID, error)
+	Delete(ctx context.Context, id string) error
+	Update(ctx context.Context, id string, updateMap map[string]interface{}) error
 }
 
 type storageConnectorRepo struct {
@@ -28,7 +29,7 @@ func NewStorageConnectorRepo() StorageConnectorRepo {
 		collectionName: "storageconnectors",
 	}
 }
-func (sr *storageConnectorRepo) GetStorageConnectors(ctx context.Context) ([]models.StorageConnector, error) {
+func (sr *storageConnectorRepo) GetAll(ctx context.Context) ([]models.StorageConnector, error) {
 	collection := g.Db.Database(g.DbName).Collection(sr.collectionName)
 	var cb []models.StorageConnector
 	opts := options.Find().SetSort(bson.D{{Key: "updatedAt", Value: -1}})
@@ -43,7 +44,7 @@ func (sr *storageConnectorRepo) GetStorageConnectors(ctx context.Context) ([]mod
 	return cb, nil
 }
 
-func (sr *storageConnectorRepo) GetStorageConnector(ctx context.Context, id string) (*models.StorageConnector, error) {
+func (sr *storageConnectorRepo) Get(ctx context.Context, id string) (*models.StorageConnector, error) {
 	collection := g.Db.Database(g.DbName).Collection(sr.collectionName)
 	var cb models.StorageConnector
 	err := collection.FindOne(ctx, bson.M{"_id": id}).Decode(&cb)
@@ -54,7 +55,7 @@ func (sr *storageConnectorRepo) GetStorageConnector(ctx context.Context, id stri
 	return &cb, nil
 }
 
-func (sr *storageConnectorRepo) CreateStorageConnector(ctx context.Context, cb *models.StorageConnector) (primitive.ObjectID, error) {
+func (sr *storageConnectorRepo) Create(ctx context.Context, cb *models.StorageConnector) (primitive.ObjectID, error) {
 	cb.ID = primitive.NewObjectID()
 	cb.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
 	cb.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
@@ -68,13 +69,13 @@ func (sr *storageConnectorRepo) CreateStorageConnector(ctx context.Context, cb *
 	return (r.InsertedID).(primitive.ObjectID), nil
 }
 
-func (sr *storageConnectorRepo) DeleteStorageConnector(ctx context.Context, id string) error {
+func (sr *storageConnectorRepo) Delete(ctx context.Context, id string) error {
 	collection := g.Db.Database(g.DbName).Collection(sr.collectionName)
 	_, err := collection.DeleteOne(ctx, bson.M{"_id": id})
 	return err
 }
 
-func (sr *storageConnectorRepo) UpdateStorageConnector(ctx context.Context, id string, updateMap map[string]interface{}) error {
+func (sr *storageConnectorRepo) Update(ctx context.Context, id string, updateMap map[string]interface{}) error {
 	updateMap["updatedAt"] = primitive.NewDateTimeFromTime(time.Now())
 
 	// TODO: Fix this method

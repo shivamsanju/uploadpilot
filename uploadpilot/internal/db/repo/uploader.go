@@ -12,12 +12,12 @@ import (
 )
 
 type UploaderRepo interface {
-	GetUploaders(ctx context.Context) ([]models.Uploader, error)
-	GetUploader(ctx context.Context, id string) (*bson.M, error)
-	CreateUploader(ctx context.Context, cb *models.Uploader) (primitive.ObjectID, error)
-	DeleteUploader(ctx context.Context, id string) error
-	GetUploaderDataStoreCreds(ctx context.Context, id string) (map[string]interface{}, error)
-	UpdateUploaderConfig(ctx context.Context, id string, cb *models.UploaderConfig, updatedBy string) error
+	GetAll(ctx context.Context) ([]models.Uploader, error)
+	Get(ctx context.Context, id string) (*bson.M, error)
+	Create(ctx context.Context, cb *models.Uploader) (primitive.ObjectID, error)
+	Delete(ctx context.Context, id string) error
+	GetDataStoreCreds(ctx context.Context, id string) (map[string]interface{}, error)
+	UpdateConfig(ctx context.Context, id string, cb *models.UploaderConfig, updatedBy string) error
 }
 
 type uploaderRepo struct {
@@ -30,7 +30,7 @@ func NewUploaderRepo() UploaderRepo {
 	}
 }
 
-func (ur *uploaderRepo) GetUploaders(ctx context.Context) ([]models.Uploader, error) {
+func (ur *uploaderRepo) GetAll(ctx context.Context) ([]models.Uploader, error) {
 	collection := g.Db.Database(g.DbName).Collection(ur.collectionName)
 	var cb []models.Uploader
 	opts := options.Find().SetSort(bson.D{{Key: "updatedAt", Value: -1}})
@@ -45,7 +45,7 @@ func (ur *uploaderRepo) GetUploaders(ctx context.Context) ([]models.Uploader, er
 	return cb, nil
 }
 
-func (ur *uploaderRepo) GetUploader(ctx context.Context, id string) (*bson.M, error) {
+func (ur *uploaderRepo) Get(ctx context.Context, id string) (*bson.M, error) {
 	collection := g.Db.Database(g.DbName).Collection(ur.collectionName)
 	UploaderID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -95,7 +95,7 @@ func (ur *uploaderRepo) GetUploader(ctx context.Context, id string) (*bson.M, er
 	return &cb[0], nil
 }
 
-func (ur *uploaderRepo) CreateUploader(ctx context.Context, cb *models.Uploader) (primitive.ObjectID, error) {
+func (ur *uploaderRepo) Create(ctx context.Context, cb *models.Uploader) (primitive.ObjectID, error) {
 	cb.ID = primitive.NewObjectID()
 	cb.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
 	cb.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
@@ -109,13 +109,13 @@ func (ur *uploaderRepo) CreateUploader(ctx context.Context, cb *models.Uploader)
 	return (r.InsertedID).(primitive.ObjectID), nil
 }
 
-func (ur *uploaderRepo) DeleteUploader(ctx context.Context, id string) error {
+func (ur *uploaderRepo) Delete(ctx context.Context, id string) error {
 	collection := g.Db.Database(g.DbName).Collection(ur.collectionName)
 	_, err := collection.DeleteOne(ctx, bson.M{"_id": id})
 	return err
 }
 
-func (ur *uploaderRepo) UpdateUploaderConfig(ctx context.Context, id string, updatedData *models.UploaderConfig, updatedBy string) error {
+func (ur *uploaderRepo) UpdateConfig(ctx context.Context, id string, updatedData *models.UploaderConfig, updatedBy string) error {
 	updatedAt := primitive.NewDateTimeFromTime(time.Now())
 	uploaderID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -149,7 +149,7 @@ func (ur *uploaderRepo) UpdateUploaderConfig(ctx context.Context, id string, upd
 	return err
 }
 
-func (ur *uploaderRepo) GetUploaderDataStoreCreds(ctx context.Context, id string) (map[string]interface{}, error) {
+func (ur *uploaderRepo) GetDataStoreCreds(ctx context.Context, id string) (map[string]interface{}, error) {
 	collection := g.Db.Database(g.DbName).Collection(ur.collectionName)
 	uploaderID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {

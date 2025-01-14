@@ -33,12 +33,16 @@ const UploaderTabs: React.FC<UploaderTabsProps> = ({ uploaderDetails }) => {
             <Tabs.List mb="sm" grow>
                 <Tabs.Tab value=".">Configuration</Tabs.Tab>
                 <Tabs.Tab value="imports">Imports</Tabs.Tab>
+                <Tabs.Tab value="hooks">Hooks</Tabs.Tab>
             </Tabs.List>
             <Tabs.Panel value=".">
                 <Configuration uploaderDetails={uploaderDetails} />
             </Tabs.Panel>
             <Tabs.Panel value="imports">
                 <Imports uploaderDetails={uploaderDetails} />
+            </Tabs.Panel>
+            <Tabs.Panel value="hooks">
+                Coming soon
             </Tabs.Panel>
         </Tabs>
     );

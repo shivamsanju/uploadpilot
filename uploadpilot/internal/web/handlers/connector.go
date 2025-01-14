@@ -24,7 +24,7 @@ func NewStorageConnectorHandler() *storageConnectorHandler {
 }
 
 func (h *storageConnectorHandler) GetAllStorageConnectors(w http.ResponseWriter, r *http.Request) {
-	storages, err := h.scRepo.GetStorageConnectors(r.Context())
+	storages, err := h.scRepo.GetAll(r.Context())
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -34,7 +34,7 @@ func (h *storageConnectorHandler) GetAllStorageConnectors(w http.ResponseWriter,
 
 func (h *storageConnectorHandler) GetStorageConnectorByID(w http.ResponseWriter, r *http.Request) {
 	storageID := chi.URLParam(r, "id")
-	cb, err := h.scRepo.GetStorageConnector(r.Context(), storageID)
+	cb, err := h.scRepo.Get(r.Context(), storageID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -60,7 +60,7 @@ func (h *storageConnectorHandler) CreateStorageConnector(w http.ResponseWriter, 
 	g.Log.Infof("adding storage connector: %+v", connector)
 	connector.CreatedBy = r.Header.Get("email")
 	connector.UpdatedBy = r.Header.Get("email")
-	id, err := h.scRepo.CreateStorageConnector(r.Context(), connector)
+	id, err := h.scRepo.Create(r.Context(), connector)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -70,5 +70,5 @@ func (h *storageConnectorHandler) CreateStorageConnector(w http.ResponseWriter, 
 
 func (h *storageConnectorHandler) DeleteStorageConnector(w http.ResponseWriter, r *http.Request) {
 	storageID := chi.URLParam(r, "id")
-	h.scRepo.DeleteStorageConnector(r.Context(), storageID)
+	h.scRepo.Delete(r.Context(), storageID)
 }

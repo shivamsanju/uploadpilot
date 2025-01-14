@@ -11,10 +11,10 @@ import (
 )
 
 type DataStoreRepo interface {
-	CreateDataStore(ctx context.Context, dataStore *models.DataStore) (primitive.ObjectID, error)
-	GetDataStore(ctx context.Context, id string) (*bson.M, error)
-	GetDataStores(ctx context.Context) ([]bson.M, error)
-	DeleteDataStore(ctx context.Context, id string) error
+	GetAll(ctx context.Context) ([]bson.M, error)
+	Get(ctx context.Context, id string) (*bson.M, error)
+	Create(ctx context.Context, dataStore *models.DataStore) (primitive.ObjectID, error)
+	Delete(ctx context.Context, id string) error
 }
 
 type dataStoreRepo struct {
@@ -27,7 +27,7 @@ func NewDataStoreRepo() DataStoreRepo {
 	}
 }
 
-func (ds *dataStoreRepo) GetDataStores(ctx context.Context) ([]bson.M, error) {
+func (ds *dataStoreRepo) GetAll(ctx context.Context) ([]bson.M, error) {
 	collection := g.Db.Database(g.DbName).Collection(ds.collectionName)
 	var cb []bson.M
 	pipeline := []bson.M{
@@ -57,7 +57,7 @@ func (ds *dataStoreRepo) GetDataStores(ctx context.Context) ([]bson.M, error) {
 	return cb, nil
 }
 
-func (ds *dataStoreRepo) GetDataStore(ctx context.Context, id string) (*bson.M, error) {
+func (ds *dataStoreRepo) Get(ctx context.Context, id string) (*bson.M, error) {
 	collection := g.Db.Database(g.DbName).Collection(ds.collectionName)
 	connectorId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
@@ -94,7 +94,7 @@ func (ds *dataStoreRepo) GetDataStore(ctx context.Context, id string) (*bson.M, 
 	return &cb[0], nil
 }
 
-func (ds *dataStoreRepo) CreateDataStore(ctx context.Context, dataStore *models.DataStore) (primitive.ObjectID, error) {
+func (ds *dataStoreRepo) Create(ctx context.Context, dataStore *models.DataStore) (primitive.ObjectID, error) {
 	g.Log.Infof("adding datatore: %+v", dataStore)
 	dataStore.ID = primitive.NewObjectID()
 	dataStore.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
@@ -109,7 +109,7 @@ func (ds *dataStoreRepo) CreateDataStore(ctx context.Context, dataStore *models.
 	return (r.InsertedID).(primitive.ObjectID), nil
 }
 
-func (ds *dataStoreRepo) DeleteDataStore(ctx context.Context, id string) error {
+func (ds *dataStoreRepo) Delete(ctx context.Context, id string) error {
 	collection := g.Db.Database(g.DbName).Collection(ds.collectionName)
 	_, err := collection.DeleteOne(ctx, bson.M{"_id": id})
 	return err

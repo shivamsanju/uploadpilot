@@ -59,9 +59,9 @@ const AuthPage = (props: PaperProps) => {
         let response;
         try {
             if (type === 'register') {
-                response = await axiosInstance.post('/signup', values)
+                response = await axiosInstance.post('/auth/signup', values)
             } else {
-                response = await axiosInstance.post('/login', values)
+                response = await axiosInstance.post('/auth/login', values)
             }
 
             if (response.status === 200) {
@@ -90,7 +90,7 @@ const AuthPage = (props: PaperProps) => {
 
     return (
         <Group justify="center" align="center" style={{ minHeight: '100vh' }}>
-            <Paper radius="md" p="xl" withBorder {...props} w="30vw" h={type === 'register' ? '70vh' : '40vh'}>
+            <Paper radius="md" p="xl" withBorder {...props} w="30vw" h={type === 'register' ? '82vh' : '45vh'}>
                 <Stack align="center" gap="xs">
                     <Logo enableOnClick={false} />
                     <Text size="sm" fw={500}>

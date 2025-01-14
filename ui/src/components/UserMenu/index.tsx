@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import ThemeSwitcher from '../ThemeSwitcher';
 import axiosInstance from '../../utils/axios';
 import { notifications } from '@mantine/notifications';
+import { useGetCurrentUserDetails } from '../../apis/user';
+import ErrorCard from '../ErrorCard/ErrorCard';
 
 type User = {
     email: string;
@@ -15,7 +17,7 @@ type User = {
 
 const UserButton = () => {
     const navigate = useNavigate();
-    const [user, setUser] = useState<User>({} as User);
+    const { isPending, error, me } = useGetCurrentUserDetails();
 
     const handleSignOut = async () => {
         localStorage.removeItem("token");
@@ -23,46 +25,22 @@ const UserButton = () => {
         navigate("/auth");
     }
 
-    const getUserInfo = async () => {
-        try {
-            const response = await axiosInstance.get("/users/me")
-            if (response.status === 200) {
-                return response.data;
-            }
-            notifications.show({
-                title: 'Error',
-                message: response.data.message,
-                color: 'red',
-            })
-        } catch (error: any) {
-            console.log(error);
-            notifications.show({
-                title: 'Error',
-                message: error.toString(),
-                color: 'red',
-            })
-        }
-    }
 
     const handleProfileClick = () => {
         navigate("/profile");
     }
 
-    useEffect(() => {
-        getUserInfo()
-            .then((data: any) => {
-                const u = {
-                    email: data.email,
-                    firstName: data.firstName,
-                    lastName: data.lastName,
-                    image: "https://avatar.iran.liara.run/public/33"
-                }
-                setUser(u)
-            })
-            .catch(e => console.log(e));
-    }, [])
+    if (error) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        navigate("/auth");
+    }
 
-    return user.email ? (
+    if (isPending) {
+        return <></>;
+    }
+
+    return me.email ? (
         <Menu
             width={200}
             position="bottom"
@@ -71,9 +49,9 @@ const UserButton = () => {
             <Menu.Target>
                 <UnstyledButton>
                     <Group gap={7}>
-                        <Avatar src={user.image} alt={user.email} radius="xl" size={25} />
+                        <Avatar src={me.image} alt={me.email} radius="xl" size={25} />
                         <Text fw={500} size="sm" lh={1} mr={3}>
-                            {user.firstName + " " + user.lastName}
+                            {me.firstName + " " + me.lastName}
                         </Text>
                         <IconChevronDown size={12} stroke={1.5} />
                     </Group>

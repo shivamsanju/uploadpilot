@@ -24,20 +24,18 @@ type UploaderProps = {
     backendEndpoint: string
     h: number
     w: number
+    metadata?: Record<string, string>
+    headers?: Record<string, string>
 };
-const Uploader: React.FC<UploaderProps> = ({ uploaderId, backendEndpoint, h, w }) => {
+const Uploader: React.FC<UploaderProps> = ({ uploaderId, backendEndpoint, h, w, headers, metadata }) => {
     const [uppy, setUppy] = useState<any>();
     const [theme, setTheme] = useState<"dark" | "light" | "auto">('auto');
 
 
+
     useEffect(() => {
         if (!uploaderId) return;
-        const token = localStorage.getItem("token");
-        fetch(`${backendEndpoint}/uploaders/${uploaderId}`, {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
+        fetch(`${backendEndpoint}/api/uploaders/${uploaderId}`)
             .then(response => response.json())
             .then(data => {
                 const config = data.config;
@@ -56,17 +54,20 @@ const Uploader: React.FC<UploaderProps> = ({ uploaderId, backendEndpoint, h, w }
                 });
                 uppy.use(Informer);
                 uppy.use(RemoteSources, {
-                    companionUrl: "COMPANION_URL",
+                    companionUrl: backendEndpoint,
                     sources: config.allowedSources.filter((e: string) => !['FileUpload', 'Audio', 'Webcamera', 'ScreenCapture'].includes(e)),
-                    companionAllowedHosts: []
+                    companionAllowedHosts: [
+                        backendEndpoint
+                    ],
                 });
                 uppy.use(Tus, {
-                    endpoint: `${backendEndpoint}/imports`,
+                    endpoint: `${backendEndpoint}/api/upload`,
                     headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'uploaderId': uploaderId
-                    }
+                        'uploaderId': uploaderId,
+                        ...headers
+                    },
                 });
+                if (metadata) uppy.setMeta(metadata);
                 if (config.enableImageEditing) uppy.use(ImageEditor);
                 if (config.useCompression) uppy.use(Compressor);
                 if (config.useFaultTolerantMode) uppy.use(GoldenRetriever);
@@ -85,6 +86,7 @@ const Uploader: React.FC<UploaderProps> = ({ uploaderId, backendEndpoint, h, w }
         height={h}
         width={w}
         theme={theme}
+        proudlyDisplayPoweredByUppy={false}
     />;
 }
 

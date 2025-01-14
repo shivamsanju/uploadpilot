@@ -26,7 +26,7 @@ func NewDatastoreHandler() *datastoreHandler {
 }
 
 func (h *datastoreHandler) GetAllDatastores(w http.ResponseWriter, r *http.Request) {
-	datastores, err := h.dsRepo.GetDataStores(r.Context())
+	datastores, err := h.dsRepo.GetAll(r.Context())
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -36,7 +36,7 @@ func (h *datastoreHandler) GetAllDatastores(w http.ResponseWriter, r *http.Reque
 
 func (h *datastoreHandler) GetDatastoreByID(w http.ResponseWriter, r *http.Request) {
 	datastoreID := chi.URLParam(r, "id")
-	dataStore, err := h.dsRepo.GetDataStore(r.Context(), datastoreID)
+	dataStore, err := h.dsRepo.Get(r.Context(), datastoreID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -64,7 +64,7 @@ func (h *datastoreHandler) CreateDatastore(w http.ResponseWriter, r *http.Reques
 	g.Log.Infof("creating datastore: %+v", datastore)
 	datastore.CreatedBy = r.Header.Get("email")
 	datastore.UpdatedBy = r.Header.Get("email")
-	id, err := h.dsRepo.CreateDataStore(r.Context(), datastore)
+	id, err := h.dsRepo.Create(r.Context(), datastore)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -74,5 +74,5 @@ func (h *datastoreHandler) CreateDatastore(w http.ResponseWriter, r *http.Reques
 
 func (h *datastoreHandler) DeleteDatastore(w http.ResponseWriter, r *http.Request) {
 	datastoreID := chi.URLParam(r, "id")
-	h.dsRepo.DeleteDataStore(r.Context(), datastoreID)
+	h.dsRepo.Delete(r.Context(), datastoreID)
 }
