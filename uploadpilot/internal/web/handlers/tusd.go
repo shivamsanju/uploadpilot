@@ -37,8 +37,9 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 	locker.UseIn(composer)
 
 	// Create a new tusd handler
+	globals.Log.Infof("initializing tusd handler with upload base path: %s", globals.TusUploadBasePath)
 	tusdHandler, err := tusd.NewHandler(tusd.Config{
-		BasePath:      "/upload",
+		BasePath:      globals.TusUploadBasePath,
 		StoreComposer: composer,
 		PreUploadCreateCallback: func(hook tusd.HookEvent) (tusd.HTTPResponse, tusd.FileInfoChanges, error) {
 			globals.Log.Infof("pre upload create -> %s", hook.HTTPRequest.URI)

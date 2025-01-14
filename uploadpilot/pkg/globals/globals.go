@@ -10,3 +10,4 @@ var DbName string
 var Log *zap.SugaredLogger
 var RootPassword string
 var TusUploadDir string
+var TusUploadBasePath string

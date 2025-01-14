@@ -61,8 +61,6 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
         setEditMode(false)
     }
 
-    console.log(me)
-
     return (!uploaderId || isUserPending) ? <AppLoader h="67vh" /> : (
         <Box>
             <Group justify="flex-end" mb="xs" gap="md">

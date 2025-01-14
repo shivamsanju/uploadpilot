@@ -12,7 +12,8 @@ const app = express()
 //
 // If you are using something else in your app, you can add these
 // middlewares in the same subpath as Companion instead.
-app.use("/api", proxy("http://localhost:8080"))
+console.log(config.mandatory.uploadPilotUrl)
+app.use("/api", proxy(config.mandatory.uploadPilotUrl))
 
 app.use(bodyParser.json())
 app.use(session({ secret: config.mandatory.companionSecret }))

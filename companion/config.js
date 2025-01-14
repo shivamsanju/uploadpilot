@@ -8,6 +8,7 @@ const config = {
         companionSecret: process.env.COMPANION_SECRET,
         companionDomain: process.env.COMPANION_DOMAIN,
         companionDataDir: process.env.COMPANION_DATADIR,
+        uploadPilotUrl: process.env.UPLOADPILOT_URL || 'http://localhost:8081',
     },
     optional: {
         companionProtocol: process.env.COMPANION_PROTOCOL || 'http',

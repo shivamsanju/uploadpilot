@@ -15,6 +15,7 @@ import (
 func initWebServer(config *config.Config) error {
 	g.RootPassword = config.RootPassword
 	g.TusUploadDir = "./tmp"
+	g.TusUploadBasePath = config.CompanionURI + "/api/upload"
 
 	// Create a new router with support for CORS and logging.
 	router := chi.NewRouter()
