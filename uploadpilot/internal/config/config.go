@@ -15,18 +15,21 @@ type Config struct {
 	DatabaseName  string
 	FrontendURI   string
 	RootPassword  string
-	CompanionURI  string
 }
 
 func NewConfig() (*Config, error) {
 	// Load the .env file
-	err := godotenv.Load("./internal/config/.env")
+	err := godotenv.Load("./.env")
 	if err != nil {
 		fmt.Println("No .env file found, reading from environment variables instead")
 	}
 
 	// Parse individual environment variables
-	port, err := strconv.Atoi(os.Getenv("WEB_SERVER_PORT"))
+	portStr := os.Getenv("WEB_SERVER_PORT")
+	if portStr == "" {
+		portStr = "8081"
+	}
+	port, err := strconv.Atoi(portStr)
 	if err != nil {
 		return nil, fmt.Errorf("invalid WEB_SERVER_PORT: %w", err)
 	}
@@ -38,6 +41,5 @@ func NewConfig() (*Config, error) {
 		FrontendURI:   os.Getenv("FRONTEND_URI"),
 		DatabaseName:  os.Getenv("APP_NAME") + "DB",
 		RootPassword:  os.Getenv("ROOT_PASSWORD"),
-		CompanionURI:  os.Getenv("COMPANION_URI"),
 	}, nil
 }

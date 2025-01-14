@@ -1,5 +1,5 @@
 export function getApiDomain() {
-    const apiUrl = process.env.REACT_APP_BACKEND_URL || `http://localhost:8090`;
+    const apiUrl = process.env.REACT_APP_BACKEND_URL || `http://localhost:8080`;
     return apiUrl;
 }
 

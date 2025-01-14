@@ -11,7 +11,7 @@ const config = {
     },
     optional: {
         companionProtocol: process.env.COMPANION_PROTOCOL || 'http',
-        companionPort: process.env.COMPANION_PORT || 8090,
+        companionPort: process.env.COMPANION_PORT || 8080,
         companionPath: process.env.COMPANION_PATH || '',
         companionHideWelcome: process.env.COMPANION_HIDE_WELCOME === 'false',
         companionHideMetrics: process.env.COMPANION_HIDE_METRICS === 'false',

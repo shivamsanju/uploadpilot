@@ -2,21 +2,27 @@ version: '3.8'
 
 services:
   companion:
-    image: companion
+    build:
+      context: ./companion
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     networks:
       - app-network
 
   ui:
-    image: ui
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
     ports:
       - "3000:80"
     networks:
       - app-network
 
   uploadpilot:
-    image: uploadpilot
+    build:
+      context: ./uploadpilot
+      dockerfile: Dockerfile
     networks:
       - app-network
 
