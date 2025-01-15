@@ -24,9 +24,9 @@ const Settings: React.FC<SettingsProps> = ({
     editMode
 }) => {
     return (
-        <Box style={{ overflow: "auto" }}>
-            <Stack p="md" py="xs">
-                <Group justify="space-between" mb="md" pb="xl" className={classes.settingsItem} wrap="nowrap" gap="xl">
+        <Box style={{ overflow: "auto" }} pr="xl">
+            <Stack px="md" pt="sm">
+                <Group justify="space-between" pb="sm" className={classes.settingsItem} wrap="nowrap" gap="xl">
                     <div>
                         <Text size="sm">Height</Text>
                         <Text size="xs" c="dimmed">
@@ -41,7 +41,7 @@ const Settings: React.FC<SettingsProps> = ({
                         onChange={(e) => setHeight(Number(e))}
                     />
                 </Group>
-                <Group justify="space-between" mb="md" pb="xl" className={classes.settingsItem} wrap="nowrap" gap="xl">
+                <Group justify="space-between" pb="sm" className={classes.settingsItem} wrap="nowrap" gap="xl">
                     <div>
                         <Text size="sm">Width</Text>
                         <Text size="xs" c="dimmed">

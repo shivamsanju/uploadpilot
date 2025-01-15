@@ -142,14 +142,14 @@ const CreateNewUploaderPage = () => {
                         Completed, click back button to get to previous step
                     </Stepper.Completed>
                 </Stepper>
-                <Paper shadow='xs' p="lg" radius="md" withBorder>
-                    <Stack h="57vh" style={{ overflowY: 'auto' }}>
+                <Paper p="lg" radius="md" withBorder>
+                    <Stack h="57vh" style={{ overflowY: 'auto' }} pr="lg">
                         {page === 1 && <MetadataPage form={form} />}
                         {page === 2 && <ConfigurationForm form={form} />}
                         {page === 3 && <DataStorePage form={form} />}
                     </Stack>
                     <Group justify="space-between" mt="xl">
-                        {page > 1 ? <Button onClick={handlePrevPage}>Prev</Button> : <div />}
+                        {page > 1 ? <Button variant="light" onClick={handlePrevPage}>Prev</Button> : <div />}
                         {page < 3 ? (
                             <Button onClick={handleNextPage}>Next</Button>
                         ) : (

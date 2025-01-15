@@ -1,4 +1,4 @@
-import { Box, Button, Card, Group, Paper, SegmentedControl, SimpleGrid, Text, useMantineColorScheme } from "@mantine/core"
+import { Button, Card, Group, SegmentedControl, SimpleGrid, useMantineColorScheme } from "@mantine/core"
 import { Uploader } from "@uploadpilot/react"
 import { useState } from "react";
 import { IconCancel, IconCode, IconDeviceFloppy, IconEdit, IconEye } from "@tabler/icons-react";
@@ -65,26 +65,24 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
         <Card withBorder >
             <Card.Section withBorder inheritPadding py="xs">
                 <Group justify="space-between">
-                    <Text fw="700" size="lg">Preview</Text>
+                    <Group justify="flex-end" gap="md">
+                        {editMode && <Button
+                            variant="light"
+                            onClick={handleCancelButton}
+                            leftSection={<IconCancel size={18} />}
+                        >
+                            Cancel
+                        </Button>}
+                        <Button
+                            variant={editMode ? undefined : "subtle"}
+                            onClick={handleEditAndSaveButton}
+                            leftSection={editMode ? <IconDeviceFloppy size={18} /> : <IconEdit size={18} />}
+                        >
+                            {editMode ? "Save" : "Edit"}
+                        </Button>
+                    </Group>
                     <Group align="center" gap="md">
-                        {/* <Group justify="flex-end" gap="md">
-                            {editMode && <Button
-                                size="sm"
-                                variant="default"
-                                onClick={handleCancelButton}
-                                leftSection={<IconCancel size={18} />}
-                            >
-                                Cancel
-                            </Button>}
-                            <Button
-                                size="sm"
-                                variant={editMode ? undefined : "default"}
-                                onClick={handleEditAndSaveButton}
-                                leftSection={editMode ? <IconDeviceFloppy size={18} /> : <IconEdit size={18} />}
-                            >
-                                {editMode ? "Save" : "Edit"}
-                            </Button>
-                        </Group> */}
+
                         <SegmentedControl
                             w="250"
                             value={viewMode}

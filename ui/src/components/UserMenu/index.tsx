@@ -1,23 +1,14 @@
 import { Avatar, Group, Menu, UnstyledButton, Text } from '@mantine/core';
 import { IconUser, IconLogout, IconChevronDown, IconSun } from '@tabler/icons-react';
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from 'react';
 import ThemeSwitcher from '../ThemeSwitcher';
-import axiosInstance from '../../utils/axios';
-import { notifications } from '@mantine/notifications';
 import { useGetCurrentUserDetails } from '../../apis/user';
-import ErrorCard from '../ErrorCard/ErrorCard';
 
-type User = {
-    email: string;
-    firstName: string;
-    lastName: string;
-    image: string;
-}
 
 const UserButton = () => {
     const navigate = useNavigate();
     const { isPending, error, me } = useGetCurrentUserDetails();
+
 
     const handleSignOut = async () => {
         localStorage.removeItem("token");

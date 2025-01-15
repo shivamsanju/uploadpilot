@@ -4,8 +4,7 @@
 
 .item {
     &+& {
-        padding-top: var(--mantine-spacing-lg);
-        margin-top: var(--mantine-spacing-lg);
+        padding-top: var(--mantine-spacing-sm);
         border-top: 1px solid light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-5));
     }
 }

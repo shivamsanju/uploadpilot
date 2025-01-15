@@ -23,9 +23,6 @@ const CodeMapPage = () => {
                 <Text size="xs" opacity={0.6}>Created By: {uploader.createdBy}</Text>
                 <Text size="xs" opacity={0.6}>Updated: {timeAgo.format(new Date(uploader.updatedAt))}</Text>
             </Group>
-            <Group align='center' mb="xs">
-                <Text lineClamp={1} size="xs" opacity={0.6} >{uploader.description}</Text>
-            </Group>
             <UploaderTabs uploaderDetails={uploader} />
         </Box>
     );

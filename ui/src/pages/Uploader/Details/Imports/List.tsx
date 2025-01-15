@@ -128,9 +128,9 @@ const UploadersListPage = () => {
             <Group justify='space-between' align='flex-start' gap="lg">
                 {/* <Title order={3} opacity={0.8}>Imports</Title> */}
                 <Box />
-                <Button variant="default" onClick={handleRefresh} leftSection={<IconRefresh size={18} />}>Refresh</Button>
+                <Button size="xs" variant="subtle" onClick={handleRefresh} leftSection={<IconRefresh size={18} />}>Refresh</Button>
             </Group>
-            <Box h="71.5vh">
+            <Box h="74vh">
                 <ThemedAgGridReact
                     overlayNoRowsTemplate='No imports found'
                     loading={isPending && !error}
