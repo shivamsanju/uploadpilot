@@ -126,10 +126,11 @@ const UploadersListPage = () => {
                 metadata={metadata}
             />
             <Group justify='space-between' align='flex-start' gap="lg">
-                <Title order={3} opacity={0.8}>Imports</Title>
+                {/* <Title order={3} opacity={0.8}>Imports</Title> */}
+                <Box />
                 <Button variant="default" onClick={handleRefresh} leftSection={<IconRefresh size={18} />}>Refresh</Button>
             </Group>
-            <Box h="55vh">
+            <Box h="71.5vh">
                 <ThemedAgGridReact
                     overlayNoRowsTemplate='No imports found'
                     loading={isPending && !error}

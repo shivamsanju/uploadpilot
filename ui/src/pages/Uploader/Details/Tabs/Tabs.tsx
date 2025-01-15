@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { Tabs } from '@mantine/core';
+import { Divider, Tabs } from '@mantine/core';
 import Configuration from '../Configuration';
 import Imports from '../Imports/Imports';
 import classes from "./Tabs.module.css"
@@ -30,10 +30,10 @@ const UploaderTabs: React.FC<UploaderTabsProps> = ({ uploaderDetails }) => {
             onChange={handleTabChange}
             classNames={classes}
         >
-            <Tabs.List mb="sm" grow>
-                <Tabs.Tab value=".">Configuration</Tabs.Tab>
-                <Tabs.Tab value="imports">Imports</Tabs.Tab>
-                <Tabs.Tab value="hooks">Hooks</Tabs.Tab>
+            <Tabs.List mb="sm" grow={false} style={{ gap: "0.5rem" }}>
+                <Tabs.Tab w={150} value=".">Configuration</Tabs.Tab>
+                <Tabs.Tab w={150} value="imports">Imports</Tabs.Tab>
+                <Tabs.Tab w={150} value="hooks">Hooks</Tabs.Tab>
             </Tabs.List>
             <Tabs.Panel value=".">
                 <Configuration uploaderDetails={uploaderDetails} />

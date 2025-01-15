@@ -1,5 +1,5 @@
 .header {
-	padding: var(--mantine-spacing-sm) var(--mantine-spacing-md);
+	padding: 0 var(--mantine-spacing-md);
 	color: lightdark(var(--mantine-color-white), var(--mantine-color-dark));
 	gap: var(--mantine-spacing-md);
 	display: flex;
@@ -7,4 +7,5 @@
 	align-items: center;
 	justify-content: space-between;
 	width: 100vw;
+	height: 5vh;
 }

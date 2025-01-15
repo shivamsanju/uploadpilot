@@ -61,93 +61,85 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
         setEditMode(false)
     }
 
-    return (!uploaderId || isUserPending) ? <AppLoader h="67vh" /> : (
-        <Box>
-            <Group justify="flex-end" mb="xs" gap="md">
-                {editMode && <Button
-                    size="xs"
-                    variant="default"
-                    onClick={handleCancelButton}
-                    leftSection={<IconCancel size={18} />}
-                >
-                    Cancel
-                </Button>}
-                <Button
-                    size="xs"
-                    variant={editMode ? undefined : "default"}
-                    onClick={handleEditAndSaveButton}
-                    leftSection={editMode ? <IconDeviceFloppy size={18} /> : <IconEdit size={18} />}
-                >
-                    {editMode ? "Save" : "Edit"}
-                </Button>
-            </Group>
-
-            <SimpleGrid cols={2}>
-                <Card withBorder shadow="xs" radius="sm" h="67vh">
-                    <Card.Section withBorder inheritPadding py="xs">
-                        <Group justify="space-between">
-                            <Text fw={500}>Configuration</Text>
-                            <SegmentedControl
-                                w="250"
-                                value={viewMode}
-                                onChange={(e) => setViewMode(e)}
-                                data={[
-                                    {
-                                        value: 'settings',
-                                        label: (
-                                            <Group align="center" justify="center" gap="sm">
-                                                <IconEye size={16} stroke={1.5} />
-                                                <div>Settings</div>
-                                            </Group>
-                                        ),
-                                    },
-                                    {
-                                        value: 'code',
-                                        label: (
-                                            <Group align="center" justify="center" gap="sm">
-                                                <IconCode size={16} stroke={1.5} />
-                                                <div>Code</div>
-                                            </Group>
-                                        ),
-                                    },
-                                ]}
-                            />
-                        </Group>
-
-                    </Card.Section>
-                    <Card.Section py="xs">
-
-                        {viewMode === 'settings' ? (
-                            <Settings
-                                height={height}
-                                setHeight={setHeight}
-                                width={width}
-                                setWidth={setWidth}
-                                editMode={editMode}
-                                form={form}
-                            />
-                        ) :
-                            <CodeHighlightTabs
-                                m="sm"
-                                code={[
-                                    { fileName: 'React', code: code, language: 'tsx' },
-                                    { fileName: 'Angular', code: code, language: 'tsx' },
-                                    { fileName: 'Vue', code: code, language: 'tsx' },
-                                    { fileName: 'Svelte', code: code, language: 'tsx' },
-                                ]}
-                            />
-                        }
-                    </Card.Section>
-                </Card>
-                <Paper
-                    withBorder
-                    shadow="xs"
-                    radius="sm"
-                    style={{
+    return (!uploaderId || isUserPending) ? <AppLoader h="50vh" /> : (
+        <Card withBorder >
+            <Card.Section withBorder inheritPadding py="xs">
+                <Group justify="space-between">
+                    <Text fw="700" size="lg">Preview</Text>
+                    <Group align="center" gap="md">
+                        {/* <Group justify="flex-end" gap="md">
+                            {editMode && <Button
+                                size="sm"
+                                variant="default"
+                                onClick={handleCancelButton}
+                                leftSection={<IconCancel size={18} />}
+                            >
+                                Cancel
+                            </Button>}
+                            <Button
+                                size="sm"
+                                variant={editMode ? undefined : "default"}
+                                onClick={handleEditAndSaveButton}
+                                leftSection={editMode ? <IconDeviceFloppy size={18} /> : <IconEdit size={18} />}
+                            >
+                                {editMode ? "Save" : "Edit"}
+                            </Button>
+                        </Group> */}
+                        <SegmentedControl
+                            w="250"
+                            value={viewMode}
+                            onChange={(e) => setViewMode(e)}
+                            data={[
+                                {
+                                    value: 'settings',
+                                    label: (
+                                        <Group align="center" justify="center" gap="sm">
+                                            <IconEye size={16} stroke={1.5} />
+                                            <div>Settings</div>
+                                        </Group>
+                                    ),
+                                },
+                                {
+                                    value: 'code',
+                                    label: (
+                                        <Group align="center" justify="center" gap="sm">
+                                            <IconCode size={16} stroke={1.5} />
+                                            <div>Code</div>
+                                        </Group>
+                                    ),
+                                },
+                            ]}
+                        />
+                    </Group>
+                </Group>
+            </Card.Section>
+            <Card.Section>
+                <SimpleGrid cols={2} h="70vh">
+                    {viewMode === 'settings' ? (
+                        <Settings
+                            height={height}
+                            setHeight={setHeight}
+                            width={width}
+                            setWidth={setWidth}
+                            editMode={editMode}
+                            form={form}
+                        />
+                    ) :
+                        <CodeHighlightTabs
+                            m="sm"
+                            code={[
+                                { fileName: 'React', code: code, language: 'tsx' },
+                                { fileName: 'Angular', code: code, language: 'tsx' },
+                                { fileName: 'Vue', code: code, language: 'tsx' },
+                                { fileName: 'Svelte', code: code, language: 'tsx' },
+                            ]}
+                        />
+                    }
+                    <Group justify="center" align="center" style={{
+                        overflow: 'auto',
                         backgroundImage: colorScheme === 'light' ? 'radial-gradient(circle,rgb(219, 219, 219) 1px, transparent 1px)' : 'radial-gradient(circle, #3e3e3e 1px, transparent 1px)',
                         backgroundSize: '10px 10px',
                     }}>
-                    <Group justify="center" align="center" style={{ overflow: 'auto' }} h="67vh">
                         <Uploader
                             key={key}
                             backendEndpoint={backendEndpoint}
@@ -160,9 +152,9 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
                             }}
                         />
                     </Group>
-                </Paper>
-            </SimpleGrid>
-        </Box>
+                </SimpleGrid>
+            </Card.Section>
+        </Card>
     )
 }
 

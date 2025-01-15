@@ -30,9 +30,9 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
     return (
         <AppShell
-            header={{ height: "7vh" }}
+            header={{ height: "5vh" }}
             navbar={{
-                width: 250,
+                width: 220,
                 breakpoint: 'sm',
                 collapsed: { mobile: !opened, desktop: !opened },
             }}
@@ -46,13 +46,12 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                         <Burger
                             opened={false}
                             onClick={toggle}
-                            size="sm"
-                            mr="sm"
+                            size="xs"
                         />
                     }
                 />
             </AppShell.Header>
-            <AppShell.Navbar bg={navbarHeaderBg}>
+            <AppShell.Navbar bg={navbarHeaderBg} withBorder={false}>
                 <NavBar />
             </AppShell.Navbar>
             <AppShell.Main bg={bg}>

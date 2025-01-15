@@ -93,7 +93,7 @@ const ConnectorsPage = () => {
                 <Title order={3} mb="lg" opacity={0.8}>Storage Connectors</Title>
                 <Button size="xs" leftSection={<IconCirclePlus2 size={16} />} onClick={handleNewConnector}>Create</Button>
             </Group>
-            <Box h="83vh">
+            <Box h="85vh">
                 <ThemedAgGridReact
                     overlayNoRowsTemplate='No storage connectors found'
                     loading={isPending && !error}

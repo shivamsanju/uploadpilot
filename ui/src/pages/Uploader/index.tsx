@@ -21,10 +21,18 @@ const UploadersListPage = () => {
             {
                 headerName: 'Name',
                 field: 'name',
-                cellRenderer: (params: any) => <Anchor size="xs" href={`/uploaders/${params.data.id}`}>{params.value}</Anchor>,
+                cellRenderer: (params: any) => <Anchor size="sm" href={`/uploaders/${params.data.id}`}>{params.value}</Anchor>,
                 flex: 1.7
             },
-            { headerName: 'Created By', field: 'createdBy' },
+            {
+                headerName: 'Created By', field: 'createdBy',
+                filter: 'agSetColumnFilter',
+                filterParams: {
+                    suppressCloseOnClickOutside: true, // Keeps the filter open
+                },
+                editable: true,
+
+            },
             { headerName: 'Created At', field: 'createdAt', valueFormatter: (params: any) => params.value && timeAgo.format(new Date(params.value)) },
             { headerName: 'Updated At', field: 'updatedAt', valueFormatter: (params: any) => params.value && timeAgo.format(new Date(params.value)) },
             {
@@ -57,7 +65,7 @@ const UploadersListPage = () => {
                 <Title order={3} mb="lg" opacity={0.8}>Uploaders</Title>
                 <Button size="xs" leftSection={<IconCirclePlus2 size={16} />} onClick={handleCreateNewUploader}>Create</Button>
             </Group>
-            <Box h="83vh">
+            <Box h="85vh">
                 <ThemedAgGridReact
                     overlayNoRowsTemplate='No uploaders found'
                     loading={isPending && !error}

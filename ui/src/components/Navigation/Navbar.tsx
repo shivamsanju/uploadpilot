@@ -36,10 +36,6 @@ const NavBar = () => {
             <ScrollArea className={classes.links}>
                 <div className={classes.linksInner}>{links}</div>
             </ScrollArea>
-
-            <div className={classes.footer}>
-                <Code fw={700} p="xs">Version : v0.0.1</Code>
-            </div>
         </nav>
     );
 }

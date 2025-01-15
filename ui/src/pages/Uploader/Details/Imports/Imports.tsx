@@ -17,7 +17,7 @@ const Imports: React.FC<ImportsProps> = ({ uploaderDetails }) => {
     }
     return (
         <Stack gap="md" >
-            <Card shadow="xs" p="sm" radius="xs" withBorder>
+            {/* <Card shadow="xs" p="sm" radius="xs" withBorder>
                 <Group justify="space-between" mb="sm">
                     <Text size="lg" fw="bold" mb="sm">DataStore</Text>
                     <Button size="xs" onClick={handleEdit} leftSection={<IconEdit size={18} />}>Edit</Button>
@@ -27,7 +27,7 @@ const Imports: React.FC<ImportsProps> = ({ uploaderDetails }) => {
                     disabled
                     data={[uploaderDetails.dataStoreDetails.name]}
                 />
-            </Card>
+            </Card> */}
             <ImportsListPage />
         </Stack>
     )

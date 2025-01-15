@@ -1,10 +1,10 @@
-import { createTheme, TextInput, Button, Select, Textarea, TagsInput, Badge } from "@mantine/core";
+import { createTheme, TextInput, Button, Select, Textarea, TagsInput, Badge, Text } from "@mantine/core";
 
 export const theme = createTheme({
-    primaryColor: 'yellow',
-    fontFamily: "Poppins",
+    primaryColor: 'teal',
+    fontFamily: "Roboto",
     headings: {
-        fontFamily: "Poppins",
+        fontFamily: "Roboto",
     },
     defaultRadius: "md",
     components: {
@@ -38,6 +38,6 @@ export const theme = createTheme({
                 size: "xs",
                 variant: "light"
             }
-        })
+        }),
     }
 });

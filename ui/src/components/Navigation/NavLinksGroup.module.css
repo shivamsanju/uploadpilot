@@ -2,7 +2,7 @@
     font-weight: 500;
     display: block;
     width: 100%;
-    padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+    padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
     color: var(--mantine-color-text);
     font-size: var(--mantine-font-size-sm);
 
@@ -16,8 +16,8 @@
     font-weight: 500;
     display: block;
     text-decoration: none;
-    padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
-    padding-left: var(--mantine-spacing-md);
+    padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+    padding-left: var(--mantine-spacing-sm);
     margin-left: var(--mantine-spacing-xl);
     font-size: var(--mantine-font-size-sm);
     color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));

@@ -24,8 +24,8 @@ const Settings: React.FC<SettingsProps> = ({
     editMode
 }) => {
     return (
-        <Box style={{ overflow: "auto", height: '62vh' }}>
-            <Stack p="md" pt="xs">
+        <Box style={{ overflow: "auto" }}>
+            <Stack p="md" py="xs">
                 <Group justify="space-between" mb="md" pb="xl" className={classes.settingsItem} wrap="nowrap" gap="xl">
                     <div>
                         <Text size="sm">Height</Text>

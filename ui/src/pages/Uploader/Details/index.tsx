@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useGetUploaderDetailsById } from '../../../apis/uploader';
-import { Badge, Group, Paper, Text, Title } from '@mantine/core';
+import { Badge, Group, Box, Text, Title } from '@mantine/core';
 import AppLoader from '../../../components/Loader/AppLoader';
 import ErrorCard from '../../../components/ErrorCard/ErrorCard';
 import { timeAgo } from '../../../utils/datetime';
@@ -12,7 +12,7 @@ const CodeMapPage = () => {
     const { isPending, error, uploader } = useGetUploaderDetailsById(uploaderId as string);
 
     return isPending ? <AppLoader h="70vh" /> : error ? <ErrorCard title={error.name} message={error.message} h="70vh" /> : (
-        <Paper shadow="xs" p="sm" radius="xs" withBorder h={"90vh"}>
+        <Box h={"90vh"}>
             <Group justify='space-between'>
                 <Title order={3} opacity={0.8}>{uploader.name}</Title>
                 <Group align='center' >
@@ -20,14 +20,14 @@ const CodeMapPage = () => {
                 </Group>
             </Group>
             <Group align='center' mb="sm">
-                <Text size="xs">Created By: {uploader.createdBy}</Text>
-                <Text size="xs">Updated: {timeAgo.format(new Date(uploader.updatedAt))}</Text>
+                <Text size="xs" opacity={0.6}>Created By: {uploader.createdBy}</Text>
+                <Text size="xs" opacity={0.6}>Updated: {timeAgo.format(new Date(uploader.updatedAt))}</Text>
             </Group>
             <Group align='center' mb="xs">
-                <Text lineClamp={1} size="xs" opacity={0.8} >{uploader.description}</Text>
+                <Text lineClamp={1} size="xs" opacity={0.6} >{uploader.description}</Text>
             </Group>
             <UploaderTabs uploaderDetails={uploader} />
-        </Paper>
+        </Box>
     );
 }
 
