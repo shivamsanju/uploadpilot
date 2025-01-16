@@ -8,22 +8,22 @@ import (
 	"github.com/tus/tusd/v2/pkg/filelocker"
 	"github.com/tus/tusd/v2/pkg/filestore"
 	tusd "github.com/tus/tusd/v2/pkg/handler"
+	"github.com/uploadpilot/uploadpilot/pkg/db"
 	"github.com/uploadpilot/uploadpilot/pkg/db/models"
-	"github.com/uploadpilot/uploadpilot/pkg/db/repo"
 	"github.com/uploadpilot/uploadpilot/pkg/globals"
 	"github.com/uploadpilot/uploadpilot/pkg/hooks"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type tusdHandler struct {
-	upRepo  repo.UploaderRepo
-	impRepo repo.ImportRepo
+	upRepo  db.UploaderRepo
+	impRepo db.ImportRepo
 }
 
 func NewTusdHandler() *tusdHandler {
 	return &tusdHandler{
-		upRepo:  repo.NewUploaderRepo(),
-		impRepo: repo.NewImportRepo(),
+		upRepo:  db.NewUploaderRepo(),
+		impRepo: db.NewImportRepo(),
 	}
 }
 

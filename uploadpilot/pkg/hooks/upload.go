@@ -6,8 +6,8 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 	tusd "github.com/tus/tusd/v2/pkg/handler"
+	"github.com/uploadpilot/uploadpilot/pkg/db"
 	"github.com/uploadpilot/uploadpilot/pkg/db/models"
-	"github.com/uploadpilot/uploadpilot/pkg/db/repo"
 	"github.com/uploadpilot/uploadpilot/pkg/globals"
 	"github.com/uploadpilot/uploadpilot/pkg/storage"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,7 +24,7 @@ func UploadToDatastoreHook(hook tusd.HookEvent, imp *models.Import) error {
 		return fmt.Errorf("invalid uploaderId: %w", err)
 	}
 	imp.UploaderID = uploaderIDObjID
-	uploaderRepo := repo.NewUploaderRepo()
+	uploaderRepo := db.NewUploaderRepo()
 	uploader, err := uploaderRepo.GetDataStoreCreds(hook.Context, uploaderId)
 	if err != nil {
 		return err

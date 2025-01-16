@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/uploadpilot/uploadpilot/pkg/db/repo"
+	"github.com/uploadpilot/uploadpilot/pkg/db"
 	"github.com/uploadpilot/uploadpilot/pkg/web/utils"
 )
 
@@ -16,12 +16,12 @@ type ImportHandler interface {
 }
 
 type importHandler struct {
-	impRepo repo.ImportRepo
+	impRepo db.ImportRepo
 }
 
 func NewImportHandler() ImportHandler {
 	return &importHandler{
-		impRepo: repo.NewImportRepo(),
+		impRepo: db.NewImportRepo(),
 	}
 }
 

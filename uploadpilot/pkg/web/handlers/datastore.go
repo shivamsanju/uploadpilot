@@ -7,21 +7,21 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
+	"github.com/uploadpilot/uploadpilot/pkg/db"
 	"github.com/uploadpilot/uploadpilot/pkg/db/models"
-	"github.com/uploadpilot/uploadpilot/pkg/db/repo"
 	g "github.com/uploadpilot/uploadpilot/pkg/globals"
 	"github.com/uploadpilot/uploadpilot/pkg/web/utils"
 )
 
 type datastoreHandler struct {
-	dsRepo repo.DataStoreRepo
-	scRepo repo.StorageConnectorRepo
+	dsRepo db.DataStoreRepo
+	scRepo db.StorageConnectorRepo
 }
 
 func NewDatastoreHandler() *datastoreHandler {
 	return &datastoreHandler{
-		dsRepo: repo.NewDataStoreRepo(),
-		scRepo: repo.NewStorageConnectorRepo(),
+		dsRepo: db.NewDataStoreRepo(),
+		scRepo: db.NewStorageConnectorRepo(),
 	}
 }
 

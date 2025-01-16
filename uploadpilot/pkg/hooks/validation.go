@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	tusd "github.com/tus/tusd/v2/pkg/handler"
-	"github.com/uploadpilot/uploadpilot/pkg/db/repo"
+	"github.com/uploadpilot/uploadpilot/pkg/db"
 )
 
 func ValidateUpload(hook tusd.HookEvent) error {
@@ -13,7 +13,7 @@ func ValidateUpload(hook tusd.HookEvent) error {
 	if len(uploaderId) == 0 {
 		return fmt.Errorf("missing uploaderId in header")
 	}
-	uploaderRepo := repo.NewUploaderRepo()
+	uploaderRepo := db.NewUploaderRepo()
 	uploader, err := uploaderRepo.GetDataStoreCreds(hook.Context, uploaderId)
 	if err != nil {
 		return err

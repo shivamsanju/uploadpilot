@@ -5,21 +5,21 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	"github.com/uploadpilot/uploadpilot/pkg/db"
 	"github.com/uploadpilot/uploadpilot/pkg/db/models"
-	"github.com/uploadpilot/uploadpilot/pkg/db/repo"
 	g "github.com/uploadpilot/uploadpilot/pkg/globals"
 	"github.com/uploadpilot/uploadpilot/pkg/web/utils"
 )
 
 type uploaderHandler struct {
-	wfRepo repo.UploaderRepo
-	dsRepo repo.DataStoreRepo
+	wfRepo db.UploaderRepo
+	dsRepo db.DataStoreRepo
 }
 
 func NewuploaderHandler() *uploaderHandler {
 	return &uploaderHandler{
-		wfRepo: repo.NewUploaderRepo(),
-		dsRepo: repo.NewDataStoreRepo(),
+		wfRepo: db.NewUploaderRepo(),
+		dsRepo: db.NewDataStoreRepo(),
 	}
 }
 
