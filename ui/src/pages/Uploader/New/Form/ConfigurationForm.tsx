@@ -172,37 +172,6 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                     />
                 </Group>
 
-                {/* Theme */}
-                <Group justify="space-between" className={classes.item} wrap="nowrap" gap="xl">
-                    <div>
-                        <Text size="sm">Choose Theme</Text>
-                        <Text size="xs" c="dimmed">
-                            Set the theme of the file uploader
-                        </Text>
-                    </div>
-                    <SegmentedControl
-                        w={w}
-                        size="xs"
-                        disabled={isPending || type === "view"}
-                        onChange={(value) => form.setFieldValue("theme", value as 'auto' | 'dark' | 'light')}
-                        value={form.values.theme}
-                        data={[
-                            {
-                                value: 'auto',
-                                label: 'Auto',
-                            },
-                            {
-                                value: 'dark',
-                                label: 'Dark',
-                            },
-                            {
-                                value: 'light',
-                                label: 'Light',
-                            },
-                        ]}
-                    />
-                </Group>
-
                 {/* Advanced options */}
                 <Group justify="space-between" className={classes.item} wrap="nowrap" gap="xl">
                     <div>
@@ -232,8 +201,8 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                         className={classes.switch}
                         size="lg"
                         onLabel="ON" offLabel="OFF"
-                        checked={form.values.showProgressBar}
-                        onChange={(e) => form.setFieldValue("showProgressBar", e.target.checked)}
+                        checked={form.values.showProgress}
+                        onChange={(e) => form.setFieldValue("showProgress", e.target.checked)}
                         disabled={isPending || type === "view"}
                     />
                 </Group>

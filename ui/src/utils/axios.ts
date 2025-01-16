@@ -2,7 +2,7 @@ import axios from "axios";
 import { getApiDomain } from "./config";
 
 const axiosInstance = axios.create({
-    baseURL: getApiDomain() + "/api",
+    baseURL: getApiDomain(),
     headers: {
         "Content-Type": "application/json",
     },
@@ -13,6 +13,9 @@ axiosInstance.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem("token");
         if (token) {
+            if (!config.headers) {
+                config.headers = {};
+            }
             config.headers.Authorization = `Bearer ${token}`;
         }
         return config;

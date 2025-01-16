@@ -13,7 +13,7 @@ import { useForm } from "@mantine/form";
 import { useUpdateUploaderConfigMutation } from "../../../../apis/uploader";
 import { useGetCurrentUserDetails } from "../../../../apis/user";
 
-const getCode = (uploaderId: string, backendEndpoint: string, h: number, w: number) => `
+const getCode = (uploaderId: string, backendEndpoint: string, h: number, w: number, theme: 'auto' | 'light' | 'dark' = 'auto') => `
 import { Uploader } from "@uploadpilot/react"
 
 const Component = () => {
@@ -21,8 +21,11 @@ const Component = () => {
         <Uploader 
             uploaderId="${uploaderId}"
             backendEndpoint="${backendEndpoint}"
-            h={${h}} 
-            w={${w}}
+            height={${h}} 
+            width={${w}}
+            theme={${theme}}
+            metadata={{"key": "value"}}
+            headers={{"key": "value"}}
         />
     )
 }
@@ -36,6 +39,7 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
     const [viewMode, setViewMode] = useState<string>('settings');
     const [height, setHeight] = useState<number>(600);
     const [width, setWidth] = useState<number>(500);
+    const [theme, setTheme] = useState<'auto' | 'light' | 'dark'>('auto');
     const [editMode, setEditMode] = useState<boolean>(false);
     const [key, refreshKey] = useState<string>("0");
 
@@ -43,7 +47,7 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
     const { mutateAsync } = useUpdateUploaderConfigMutation(uploaderId as string)
     const { isPending: isUserPending, me } = useGetCurrentUserDetails();
     const { colorScheme } = useMantineColorScheme();
-    const code = getCode(uploaderId as string, backendEndpoint, height, width);
+    const code = getCode(uploaderId as string, backendEndpoint, height, width, theme);
     const form = useForm<CreateUploaderForm>({
         initialValues: { ...uploaderDetails.config, requiredMetadataFields: uploaderDetails.requiredMetadataFields || [] },
     });
@@ -119,6 +123,8 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
                             setHeight={setHeight}
                             width={width}
                             setWidth={setWidth}
+                            theme={theme}
+                            setTheme={setTheme}
                             editMode={editMode}
                             form={form}
                         />
@@ -142,8 +148,9 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
                             key={key}
                             backendEndpoint={backendEndpoint}
                             uploaderId={uploaderId}
-                            h={height}
-                            w={width}
+                            height={height}
+                            width={width}
+                            theme={theme}
                             metadata={{
                                 "uploaderEmail": me.email,
                                 "uploaderName": me.firstName + " " + me.lastName

@@ -9,8 +9,8 @@ import (
 	"github.com/uploadpilot/uploadpilot/pkg/db"
 	"github.com/uploadpilot/uploadpilot/pkg/db/models"
 	"github.com/uploadpilot/uploadpilot/pkg/globals"
+	"github.com/uploadpilot/uploadpilot/pkg/utils"
 	webmodels "github.com/uploadpilot/uploadpilot/pkg/web/models"
-	"github.com/uploadpilot/uploadpilot/pkg/web/utils"
 )
 
 type userHandler struct {

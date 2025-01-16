@@ -9,7 +9,7 @@ export type UploaderConfig = {
     requiredMetadataFields?: string[];
     theme?: 'dark' | 'light' | 'auto';
     showStatusBar?: boolean;
-    showProgressBar?: boolean;
+    showProgress?: boolean;
     allowPauseAndResume?: boolean;
     enableImageEditing?: boolean;
     useCompression?: boolean;

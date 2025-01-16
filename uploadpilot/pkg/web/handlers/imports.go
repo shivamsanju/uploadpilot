@@ -6,7 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"github.com/uploadpilot/uploadpilot/pkg/db"
-	"github.com/uploadpilot/uploadpilot/pkg/web/utils"
+	"github.com/uploadpilot/uploadpilot/pkg/utils"
 )
 
 type ImportHandler interface {

@@ -2,7 +2,6 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import session from 'express-session'
 import companion from '@uppy/companion'
-import proxy from 'express-http-proxy'
 import { config } from "./config.js"
 
 const app = express()
@@ -12,8 +11,8 @@ const app = express()
 //
 // If you are using something else in your app, you can add these
 // middlewares in the same subpath as Companion instead.
-console.log(config.mandatory.uploadPilotUrl)
-app.use("/api", proxy(config.mandatory.uploadPilotUrl))
+// console.log(config.mandatory.uploadPilotUrl)
+// app.use("/api", proxy(config.mandatory.uploadPilotUrl))
 
 app.use(bodyParser.json())
 app.use(session({ secret: config.mandatory.companionSecret }))
@@ -55,7 +54,9 @@ const options = {
     server: {
         host: `${config.mandatory.companionDomain}:${config.optional.companionPort}`,
         protocol: config.optional.companionProtocol || 'http',
-        // path: '/companion',
+        path: '/remote',
+        oauthDomain: config.optional.oauthDomain,
+        validHosts: ["localhost:8081"] || [],
     },
     filePath: config.mandatory.companionDataDir || '/tmp',
     sendSelfEndpoint: config.optional.selfEndpoint || 'localhost:3020',
@@ -74,7 +75,7 @@ const options = {
 
 const { app: companionApp } = companion.app(options)
 
-app.use(companionApp)
+app.use("/remote", companionApp)
 
 const server = app.listen(config.optional.companionPort, () => {
     console.log(`Listening on port ${config.optional.companionPort}`)

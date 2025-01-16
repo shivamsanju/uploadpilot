@@ -22,23 +22,24 @@ import '@uppy/image-editor/dist/style.css';
 type UploaderProps = {
     uploaderId: string
     backendEndpoint: string
-    h: number
-    w: number
+    height: number
+    width: number
+    theme: 'auto' | 'light' | 'dark'
     metadata?: Record<string, string>
     headers?: Record<string, string>
 };
-const Uploader: React.FC<UploaderProps> = ({ uploaderId, backendEndpoint, h, w, headers, metadata }) => {
+const Uploader: React.FC<UploaderProps> = ({ uploaderId, backendEndpoint, height, width, theme, headers, metadata }) => {
     const [uppy, setUppy] = useState<any>();
-    const [theme, setTheme] = useState<"dark" | "light" | "auto">('auto');
 
 
 
     useEffect(() => {
         if (!uploaderId) return;
-        fetch(`${backendEndpoint}/api/uploaders/${uploaderId}`)
+        fetch(`${backendEndpoint}/uploaders/${uploaderId}`)
             .then(response => response.json())
             .then(data => {
                 const config = data.config;
+                console.log(config);
                 const uppy = new Uppy({
                     autoProceed: true,
                     debug: true,
@@ -54,14 +55,14 @@ const Uploader: React.FC<UploaderProps> = ({ uploaderId, backendEndpoint, h, w, 
                 });
                 uppy.use(Informer);
                 uppy.use(RemoteSources, {
-                    companionUrl: backendEndpoint,
+                    companionUrl: `${backendEndpoint}/remote`,
                     sources: config.allowedSources.filter((e: string) => !['FileUpload', 'Audio', 'Webcamera', 'ScreenCapture'].includes(e)),
                     companionAllowedHosts: [
                         backendEndpoint
                     ],
                 });
                 uppy.use(Tus, {
-                    endpoint: `${backendEndpoint}/api/upload`,
+                    endpoint: `${backendEndpoint}/upload`,
                     headers: {
                         'uploaderId': uploaderId,
                         ...headers
@@ -74,17 +75,16 @@ const Uploader: React.FC<UploaderProps> = ({ uploaderId, backendEndpoint, h, w, 
                 if (config.allowedSources.includes('Audio')) uppy.use(Audio);
                 if (config.allowedSources.includes('Webcamera')) uppy.use(Webcam);
                 if (config.allowedSources.includes('ScreenCapture')) uppy.use(ScreenCapture);
-                if (config.showProgressBar) uppy.use(Progress);
+                if (config.showProgress) uppy.use(Progress);
                 if (config.showStatusBar) uppy.use(StatusBar);
                 setUppy(uppy);
-                setTheme(config.theme);
             })
     }, [uploaderId, backendEndpoint]);
 
     return uppy && <Dashboard
         uppy={uppy}
-        height={h}
-        width={w}
+        height={height}
+        width={width}
         theme={theme}
         proudlyDisplayPoweredByUppy={false}
     />;

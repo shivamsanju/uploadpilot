@@ -9,13 +9,14 @@ import (
 )
 
 type Config struct {
-	AppName       string
-	WebServerPort int
-	MongoURI      string
-	DatabaseName  string
-	FrontendURI   string
-	RootPassword  string
-	CompanionURI  string
+	AppName           string
+	WebServerPort     int
+	MongoURI          string
+	DatabaseName      string
+	FrontendURI       string
+	RootPassword      string
+	CompanionEndpoint string
+	SelfEndpoint      string
 }
 
 func NewConfig() (*Config, error) {
@@ -36,12 +37,13 @@ func NewConfig() (*Config, error) {
 	}
 
 	return &Config{
-		AppName:       os.Getenv("APP_NAME"),
-		WebServerPort: port,
-		MongoURI:      os.Getenv("MONGO_URI"),
-		FrontendURI:   os.Getenv("FRONTEND_URI"),
-		DatabaseName:  os.Getenv("APP_NAME") + "DB",
-		RootPassword:  os.Getenv("ROOT_PASSWORD"),
-		CompanionURI:  os.Getenv("COMPANION_URI"),
+		AppName:           os.Getenv("APP_NAME"),
+		WebServerPort:     port,
+		MongoURI:          os.Getenv("MONGO_URI"),
+		FrontendURI:       os.Getenv("FRONTEND_URI"),
+		DatabaseName:      os.Getenv("APP_NAME") + "DB",
+		RootPassword:      os.Getenv("ROOT_PASSWORD"),
+		CompanionEndpoint: os.Getenv("COMPANION_ENDPOINT"),
+		SelfEndpoint:      os.Getenv("SELF_ENDPOINT"),
 	}, nil
 }

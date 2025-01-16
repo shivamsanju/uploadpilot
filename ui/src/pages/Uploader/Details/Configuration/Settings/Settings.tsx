@@ -1,4 +1,4 @@
-import { Box, Group, NumberInput, Stack, Text } from '@mantine/core';
+import { Box, Group, NumberInput, SegmentedControl, Stack, Text } from '@mantine/core';
 import UploaderConfigForm from '../../../New/Form/ConfigurationForm';
 import { CreateUploaderForm } from '../../../../../types/uploader';
 import { UseFormReturnType } from '@mantine/form';
@@ -9,6 +9,8 @@ type SettingsProps = {
     setHeight: React.Dispatch<React.SetStateAction<number>>
     width: number
     setWidth: React.Dispatch<React.SetStateAction<number>>
+    theme: 'light' | 'dark' | 'auto'
+    setTheme: React.Dispatch<React.SetStateAction<'light' | 'dark' | 'auto'>>
     form: UseFormReturnType<CreateUploaderForm, (values: CreateUploaderForm) => CreateUploaderForm>;
     editMode: boolean
 }
@@ -20,6 +22,8 @@ const Settings: React.FC<SettingsProps> = ({
     setHeight,
     width,
     setWidth,
+    theme,
+    setTheme,
     form,
     editMode
 }) => {
@@ -54,6 +58,35 @@ const Settings: React.FC<SettingsProps> = ({
                         placeholder="Enter width in px"
                         value={width}
                         onChange={(e) => setWidth(Number(e))}
+                    />
+                </Group>
+                {/* Theme */}
+                <Group justify="space-between" className={classes.item} wrap="nowrap" gap="xl">
+                    <div>
+                        <Text size="sm">Choose Theme</Text>
+                        <Text size="xs" c="dimmed">
+                            Set the theme of the file uploader
+                        </Text>
+                    </div>
+                    <SegmentedControl
+                        w={w}
+                        size="xs"
+                        onChange={(value) => setTheme(value as 'light' | 'dark' | 'auto')}
+                        value={theme}
+                        data={[
+                            {
+                                value: 'auto',
+                                label: 'Auto',
+                            },
+                            {
+                                value: 'dark',
+                                label: 'Dark',
+                            },
+                            {
+                                value: 'light',
+                                label: 'Light',
+                            },
+                        ]}
                     />
                 </Group>
             </Stack>

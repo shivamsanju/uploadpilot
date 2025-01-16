@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 	g "github.com/uploadpilot/uploadpilot/pkg/globals"
-	"github.com/uploadpilot/uploadpilot/pkg/web/utils"
+	"github.com/uploadpilot/uploadpilot/pkg/utils"
 )
 
 func CorsMiddleware(frontendUri string) func(http.Handler) http.Handler {

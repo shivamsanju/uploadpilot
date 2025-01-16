@@ -8,7 +8,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/pkg/db"
 	"github.com/uploadpilot/uploadpilot/pkg/db/models"
 	g "github.com/uploadpilot/uploadpilot/pkg/globals"
-	"github.com/uploadpilot/uploadpilot/pkg/web/utils"
+	"github.com/uploadpilot/uploadpilot/pkg/utils"
 )
 
 type uploaderHandler struct {
