@@ -5,11 +5,11 @@ import (
 	"path"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/shivamsanju/uploader/internal/db/models"
-	"github.com/shivamsanju/uploader/internal/db/repo"
-	"github.com/shivamsanju/uploader/pkg/cloudstorage"
-	"github.com/shivamsanju/uploader/pkg/globals"
 	tusd "github.com/tus/tusd/v2/pkg/handler"
+	"github.com/uploadpilot/uploadpilot/pkg/db/models"
+	"github.com/uploadpilot/uploadpilot/pkg/db/repo"
+	"github.com/uploadpilot/uploadpilot/pkg/globals"
+	"github.com/uploadpilot/uploadpilot/pkg/storage"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -46,7 +46,7 @@ func UploadToDatastoreHook(hook tusd.HookEvent, imp *models.Import) error {
 		return fmt.Errorf("failed to map connectorDetails to StorageConnector: %w", err)
 	}
 
-	cloudUploader, err := cloudstorage.NewUploader(&storageConnectorDetails, bucket)
+	cloudUploader, err := storage.NewUploader(&storageConnectorDetails, bucket)
 	if err != nil {
 		return err
 	}

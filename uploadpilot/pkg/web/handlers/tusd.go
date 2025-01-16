@@ -5,13 +5,13 @@ import (
 	"time"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/shivamsanju/uploader/internal/db/models"
-	"github.com/shivamsanju/uploader/internal/db/repo"
-	"github.com/shivamsanju/uploader/pkg/globals"
-	"github.com/shivamsanju/uploader/pkg/hooks"
 	"github.com/tus/tusd/v2/pkg/filelocker"
 	"github.com/tus/tusd/v2/pkg/filestore"
 	tusd "github.com/tus/tusd/v2/pkg/handler"
+	"github.com/uploadpilot/uploadpilot/pkg/db/models"
+	"github.com/uploadpilot/uploadpilot/pkg/db/repo"
+	"github.com/uploadpilot/uploadpilot/pkg/globals"
+	"github.com/uploadpilot/uploadpilot/pkg/hooks"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

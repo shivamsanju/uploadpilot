@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/shivamsanju/uploader/internal/db/models"
-	g "github.com/shivamsanju/uploader/pkg/globals"
+	"github.com/uploadpilot/uploadpilot/pkg/db/models"
+	g "github.com/uploadpilot/uploadpilot/pkg/globals"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"

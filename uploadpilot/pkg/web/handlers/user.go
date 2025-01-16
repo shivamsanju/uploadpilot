@@ -6,11 +6,11 @@ import (
 
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
-	"github.com/shivamsanju/uploader/internal/db/models"
-	"github.com/shivamsanju/uploader/internal/db/repo"
-	webmodels "github.com/shivamsanju/uploader/internal/web/models"
-	"github.com/shivamsanju/uploader/internal/web/utils"
-	"github.com/shivamsanju/uploader/pkg/globals"
+	"github.com/uploadpilot/uploadpilot/pkg/db/models"
+	"github.com/uploadpilot/uploadpilot/pkg/db/repo"
+	"github.com/uploadpilot/uploadpilot/pkg/globals"
+	webmodels "github.com/uploadpilot/uploadpilot/pkg/web/models"
+	"github.com/uploadpilot/uploadpilot/pkg/web/utils"
 )
 
 type userHandler struct {

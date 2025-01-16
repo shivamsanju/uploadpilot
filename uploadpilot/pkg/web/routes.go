@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/shivamsanju/uploader/internal/web/handlers"
+	"github.com/uploadpilot/uploadpilot/pkg/web/handlers"
 )
 
 func Routes() *chi.Mux {

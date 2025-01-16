@@ -1,4 +1,4 @@
-module github.com/shivamsanju/uploader
+module github.com/uploadpilot/uploadpilot
 
 go 1.23.2
 

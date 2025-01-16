@@ -1,7 +1,7 @@
-package services
+package init
 
 import (
-	g "github.com/shivamsanju/uploader/pkg/globals"
+	g "github.com/uploadpilot/uploadpilot/pkg/globals"
 	"go.uber.org/zap"
 )
 

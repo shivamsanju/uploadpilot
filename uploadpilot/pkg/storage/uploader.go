@@ -1,4 +1,4 @@
-package cloudstorage
+package storage
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/chartmuseum/storage"
-	"github.com/shivamsanju/uploader/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/pkg/db/models"
 )
 
 type Uploader struct {

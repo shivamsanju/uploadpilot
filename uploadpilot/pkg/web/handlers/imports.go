@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/shivamsanju/uploader/internal/db/repo"
-	"github.com/shivamsanju/uploader/internal/web/utils"
+	"github.com/uploadpilot/uploadpilot/pkg/db/repo"
+	"github.com/uploadpilot/uploadpilot/pkg/web/utils"
 )
 
 type ImportHandler interface {

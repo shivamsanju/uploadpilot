@@ -5,12 +5,12 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/shivamsanju/uploader/internal/services"
+	initializer "github.com/uploadpilot/uploadpilot/internal/init"
 )
 
 func main() {
 	// run InitServices() in a separate goroutine
-	go services.InitServices()
+	go initializer.InitServices()
 
 	// wait for Ctrl+C
 	sigChan := make(chan os.Signal, 1)

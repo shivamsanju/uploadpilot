@@ -5,8 +5,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/shivamsanju/uploader/pkg/globals"
 	tusd "github.com/tus/tusd/v2/pkg/handler"
+	"github.com/uploadpilot/uploadpilot/pkg/globals"
 )
 
 func RemoveTusUploadHook(hook tusd.HookEvent) {

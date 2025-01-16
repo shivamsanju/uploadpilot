@@ -6,7 +6,7 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/shivamsanju/uploader/pkg/globals"
+	"github.com/uploadpilot/uploadpilot/pkg/globals"
 	"golang.org/x/crypto/bcrypt"
 )
 

@@ -1,4 +1,4 @@
-package services
+package init
 
 import (
 	"fmt"
@@ -7,9 +7,9 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/shivamsanju/uploader/internal/config"
-	"github.com/shivamsanju/uploader/internal/web"
-	g "github.com/shivamsanju/uploader/pkg/globals"
+	"github.com/uploadpilot/uploadpilot/internal/config"
+	g "github.com/uploadpilot/uploadpilot/pkg/globals"
+	"github.com/uploadpilot/uploadpilot/pkg/web"
 )
 
 func initWebServer(config *config.Config) error {

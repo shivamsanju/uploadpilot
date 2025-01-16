@@ -1,7 +1,7 @@
-package services
+package init
 
 import (
-	"github.com/shivamsanju/uploader/internal/config"
+	"github.com/uploadpilot/uploadpilot/internal/config"
 )
 
 func InitServices() {

@@ -3,8 +3,8 @@ package hooks
 import (
 	"fmt"
 
-	"github.com/shivamsanju/uploader/internal/db/repo"
 	tusd "github.com/tus/tusd/v2/pkg/handler"
+	"github.com/uploadpilot/uploadpilot/pkg/db/repo"
 )
 
 func ValidateUpload(hook tusd.HookEvent) error {

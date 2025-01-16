@@ -7,10 +7,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
-	"github.com/shivamsanju/uploader/internal/db/models"
-	"github.com/shivamsanju/uploader/internal/db/repo"
-	"github.com/shivamsanju/uploader/internal/web/utils"
-	g "github.com/shivamsanju/uploader/pkg/globals"
+	"github.com/uploadpilot/uploadpilot/pkg/db/models"
+	"github.com/uploadpilot/uploadpilot/pkg/db/repo"
+	g "github.com/uploadpilot/uploadpilot/pkg/globals"
+	"github.com/uploadpilot/uploadpilot/pkg/web/utils"
 )
 
 type storageConnectorHandler struct {
