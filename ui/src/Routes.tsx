@@ -6,10 +6,9 @@ import CreateNewUploaderPage from "./pages/Uploader/New";
 import UploaderDetailsPage from "./pages/Uploader/Details";
 import ProfilePage from "./pages/Profile";
 import DashboardPage from "./pages/Dashboard";
-import NewConnectorsPage from "./pages/Storage/Connectors/New";
-import ConnectorsPage from "./pages/Storage/Connectors";
+import NewConnectorsPage from "./pages/Connectors/New";
+import ConnectorsPage from "./pages/Connectors";
 import EmptyLayout from "./components/Layout/EmptyLayout";
-import DataStoresPage from "./pages/Storage/DataStores";
 
 type Route = {
     path: string
@@ -49,17 +48,12 @@ const routes: Route[] = [
         element: <UploaderDetailsPage />
     },
     {
-        path: "/storage/datastores",
-        layout: AppLayout,
-        element: <DataStoresPage />
-    },
-    {
-        path: "/storage/connectors",
+        path: "/storageConnectors",
         layout: AppLayout,
         element: <ConnectorsPage />
     },
     {
-        path: "/storage/connectors/new",
+        path: "/storageConnectors/new",
         layout: AppLayout,
         element: <NewConnectorsPage />
     },

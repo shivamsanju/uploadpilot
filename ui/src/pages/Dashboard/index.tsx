@@ -56,7 +56,7 @@ const DashboardPage = () => {
 
                 <Group align="flex-end" gap="xs" mt={25}>
                     <Text className={classes.value}>{stat.value}</Text>
-                    <Text c={stat.diff > 0 ? 'teal' : 'red'} fz="sm" fw={500} className={classes.diff}>
+                    <Text c={stat.diff > 0 ? 'grape' : 'red'} fz="sm" fw={500} className={classes.diff}>
                         <span>{stat.diff}%</span>
                         <DiffIcon size={16} stroke={1.5} />
                     </Text>
@@ -86,7 +86,7 @@ const DashboardPage = () => {
                         { offset: 40, color: 'yellow.5' },
                         { offset: 70, color: 'lime.5' },
                         { offset: 80, color: 'cyan.5' },
-                        { offset: 100, color: 'blue.5' },
+                        { offset: 100, color: 'grape.5' },
                     ]}
                     strokeWidth={5}
                     curveType="natural"

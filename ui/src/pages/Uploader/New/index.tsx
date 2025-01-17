@@ -6,14 +6,13 @@ import ConfigurationForm from "./Form/ConfigurationForm";
 import DataStorePage from "./Form/DataStoreForm";
 import { CreateUploaderForm } from "../../../types/uploader";
 import { useNavigate } from "react-router-dom";
-import { useCreateDataStoreMutation } from "../../../apis/storage";
 import { useCreateUploaderMutation } from "../../../apis/uploader";
+import { notifications } from "@mantine/notifications";
 
 const CreateNewUploaderPage = () => {
     const [page, setPage] = useState(1);
 
     const navigate = useNavigate();
-    const { mutateAsync: mutateAsyncDataStore } = useCreateDataStoreMutation();
     const { mutateAsync } = useCreateUploaderMutation();
 
     const handleSubmit = async () => {
@@ -22,34 +21,34 @@ const CreateNewUploaderPage = () => {
             return;
         };
 
-        mutateAsyncDataStore({
-            name: form.values.dataStoreName,
-            connectorId: form.values.connectorId,
-            bucket: form.values.bucket
-        }).then((id) => {
-            mutateAsync({
-                name: form.values.name,
-                description: form.values.description,
-                tags: form.values.tags,
-                config: {
-                    minFileSize: form.values.minFileSize,
-                    maxFileSize: form.values.maxFileSize,
-                    minNumberOfFiles: form.values.minNumberOfFiles,
-                    maxNumberOfFiles: form.values.maxNumberOfFiles,
-                    maxTotalFileSize: form.values.maxTotalFileSize,
-                    allowedFileTypes: form.values.allowedFileTypes,
-                    allowedSources: form.values.allowedSources,
-                    requiredMetadataFields: form.values.requiredMetadataFields,
-                    showStatusBar: form.values.showStatusBar,
-                    showProgress: form.values.showProgress,
-                    enableImageEditing: form.values.enableImageEditing,
-                    useCompression: form.values.useCompression,
-                    useFaultTolerantMode: form.values.useFaultTolerantMode,
-                },
-                dataStoreId: id
-            }).then(() => {
-                navigate('/uploaders');
-            })
+        mutateAsync({
+            name: form.values.name,
+            description: form.values.description,
+            tags: form.values.tags,
+            config: {
+                minFileSize: form.values.minFileSize,
+                maxFileSize: form.values.maxFileSize,
+                minNumberOfFiles: form.values.minNumberOfFiles,
+                maxNumberOfFiles: form.values.maxNumberOfFiles,
+                maxTotalFileSize: form.values.maxTotalFileSize,
+                allowedFileTypes: form.values.allowedFileTypes,
+                allowedSources: form.values.allowedSources,
+                requiredMetadataFields: form.values.requiredMetadataFields,
+                showStatusBar: form.values.showStatusBar,
+                showProgress: form.values.showProgress,
+                enableImageEditing: form.values.enableImageEditing,
+                useCompression: form.values.useCompression,
+                useFaultTolerantMode: form.values.useFaultTolerantMode,
+            },
+            dataStore: {
+                name: form.values.dataStoreName,
+                connectorId: form.values.connectorId,
+                connectorName: form.values.connectorName,
+                connectorType: form.values.connectorType,
+                bucket: form.values.bucket,
+            }
+        }).then(() => {
+            navigate('/uploaders');
         })
     }
 
@@ -58,9 +57,10 @@ const CreateNewUploaderPage = () => {
             name: "",
             description: "",
             tags: [] as string[],
-            connectorId: "",
-            dataStoreId: "",
             dataStoreName: "",
+            connectorId: "",
+            connectorName: "",
+            connectorType: "",
             bucket: "",
             allowedFileTypes: [] as string[],
             allowedSources: [] as string[],
@@ -94,7 +94,6 @@ const CreateNewUploaderPage = () => {
             },
             allowedFileTypes: (value) => page === 2 && value.length === 0 ? "Please select at least one file type" : null,
             allowedSources: (value) => page === 2 && value.length === 0 ? "Please select at least one source" : null,
-            connectorId: (value) => page === 3 && !value ? "Please select a connector" : null,
             bucket: (value) => {
                 if (page === 3 && !value) {
                     return "Please enter a bucket name";
@@ -106,6 +105,7 @@ const CreateNewUploaderPage = () => {
                 return null;
             },
             dataStoreName: (value) => page === 3 && !value ? "Please enter a datastore name" : null,
+            connectorId: (value) => page === 3 && !value ? "Please select a connector" : null,
         },
     });
 
@@ -113,7 +113,11 @@ const CreateNewUploaderPage = () => {
         if (!form.validate().hasErrors) {
             setPage((prev) => prev + 1)
         } else {
-            console.log(form.errors);
+            notifications.show({
+                title: "Error",
+                message: "Form has errors. Please fix errors and try again",
+                color: "red",
+            })
         }
     };
 

@@ -25,7 +25,7 @@ const ProfilePage = () => {
 
     useEffect(() => {
         form.setValues(me)
-    }, [me])
+    }, [me, form])
 
     const handleEditToggle = () => {
         setIsEditing((prev) => !prev);

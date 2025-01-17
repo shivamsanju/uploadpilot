@@ -12,12 +12,12 @@ import (
 )
 
 type ImportRepo interface {
+	FindAll(ctx context.Context, skip int64, limit int64, search string) ([]models.Import, int64, error)
+	FindAllImportsByUploaderId(ctx context.Context, uploaderId string, skip int64, limit int64, search string) ([]models.Import, int64, error)
 	Get(ctx context.Context, id string) (*models.Import, error)
-	GetAll(ctx context.Context) ([]models.Import, error)
 	Create(ctx context.Context, imp *models.Import) (*models.Import, error)
 	Update(ctx context.Context, id *primitive.ObjectID, imp *models.Import) (*models.Import, error)
 	Delete(ctx context.Context, id string) error
-	FindImportsByUploaderId(ctx context.Context, uploaderId string) ([]models.Import, error)
 }
 
 type importRepo struct {
@@ -30,14 +30,108 @@ func NewImportRepo() ImportRepo {
 	}
 }
 
-func (i *importRepo) Get(ctx context.Context, id string) (*models.Import, error) {
+func (i *importRepo) FindAll(ctx context.Context, skip int64, limit int64, search string) ([]models.Import, int64, error) {
+	// Build filter with optional search
+	filter := bson.M{}
+	if search != "" {
+		filter["$or"] = []bson.M{
+			{"name": bson.M{"$regex": search, "$options": "i"}},
+			{"status": bson.M{"$regex": search, "$options": "i"}},
+			{"storedFileName": bson.M{"$regex": search, "$options": "i"}},
+		}
+	}
+
+	// Count total records matching the filter
 	collection := g.Db.Database(g.DbName).Collection(i.collectionName)
+	totalRecords, err := collection.CountDocuments(ctx, filter)
+	if err != nil {
+		g.Log.Errorf("failed to count imports: %s", err.Error())
+		return nil, 0, err
+	}
+
+	// Apply pagination and sorting
+	opts := options.Find().
+		SetSort(bson.D{{Key: "finishedAt", Value: -1}}).
+		SetSkip(skip).
+		SetLimit(limit)
+
+	// Fetch documents
+	cursor, err := collection.Find(ctx, filter, opts)
+	if err != nil {
+		g.Log.Errorf("failed to find imports: %s", err.Error())
+		return nil, 0, err
+	}
+	defer cursor.Close(ctx)
+
+	// Decode documents into the result slice
+	var cb []models.Import
+	if err := cursor.All(ctx, &cb); err != nil {
+		g.Log.Errorf("failed to decode imports: %s", err.Error())
+		return nil, 0, err
+	}
+
+	g.Log.Infof("found %d imports out of %d", len(cb), totalRecords)
+	return cb, totalRecords, nil
+}
+
+func (i *importRepo) FindAllImportsByUploaderId(ctx context.Context, id string, skip int64, limit int64, search string) ([]models.Import, int64, error) {
+	uploaderId, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		g.Log.Errorf("not a valid id: %v", err.Error())
+		return nil, 0, err
+	}
+
+	// Build filter with uploaderId and optional search
+	filter := bson.M{"uploaderId": uploaderId}
+	if search != "" {
+		filter["$or"] = []bson.M{
+			{"name": bson.M{"$regex": search, "$options": "i"}},
+			{"status": bson.M{"$regex": search, "$options": "i"}},
+			{"storedFileName": bson.M{"$regex": search, "$options": "i"}},
+		}
+	}
+
+	// Count total records matching the filter
+	collection := g.Db.Database(g.DbName).Collection(i.collectionName)
+	totalRecords, err := collection.CountDocuments(ctx, filter)
+	if err != nil {
+		g.Log.Errorf("failed to count imports: %s", err.Error())
+		return nil, 0, err
+	}
+
+	// Apply pagination and sorting
+	opts := options.Find().
+		SetSort(bson.D{{Key: "finishedAt", Value: -1}}).
+		SetSkip(skip).
+		SetLimit(limit)
+
+	// Fetch documents
+	cursor, err := collection.Find(ctx, filter, opts)
+	if err != nil {
+		g.Log.Errorf("failed to find imports: %s", err.Error())
+		return nil, 0, err
+	}
+	defer cursor.Close(ctx)
+
+	// Decode documents into the result slice
+	var cb []models.Import
+	if err := cursor.All(ctx, &cb); err != nil {
+		g.Log.Errorf("failed to decode imports: %s", err.Error())
+		return nil, 0, err
+	}
+
+	g.Log.Infof("found %d imports for uploaderId %s", len(cb), id)
+	return cb, totalRecords, nil
+}
+
+func (i *importRepo) Get(ctx context.Context, id string) (*models.Import, error) {
 	importId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		g.Log.Errorf("not a valid id: %v", err.Error())
 		return nil, err
 	}
 	var cb models.Import
+	collection := g.Db.Database(g.DbName).Collection(i.collectionName)
 	err = collection.FindOne(ctx, bson.M{"_id": importId}).Decode(&cb)
 	if err != nil {
 		g.Log.Errorf("failed to find import: %s", err.Error())
@@ -46,24 +140,9 @@ func (i *importRepo) Get(ctx context.Context, id string) (*models.Import, error)
 	return &cb, nil
 }
 
-func (i *importRepo) GetAll(ctx context.Context) ([]models.Import, error) {
-	collection := g.Db.Database(g.DbName).Collection(i.collectionName)
-	var cb []models.Import
-	opts := options.Find().SetSort(bson.D{{Key: "finishedAt", Value: -1}})
-	cursor, err := collection.Find(ctx, bson.M{}, opts)
-	if err != nil {
-		g.Log.Errorf("no imports found: %s", err.Error())
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-	cursor.All(ctx, &cb)
-	g.Log.Infof("found %d imports", len(cb))
-	return cb, nil
-}
-
 func (i *importRepo) Create(ctx context.Context, imp *models.Import) (*models.Import, error) {
-	collection := g.Db.Database(g.DbName).Collection(i.collectionName)
 	imp.FinishedAt = primitive.NewDateTimeFromTime(time.Now())
+	collection := g.Db.Database(g.DbName).Collection(i.collectionName)
 	_, err := collection.InsertOne(ctx, imp)
 	if err != nil {
 		g.Log.Errorf("failed to create import: %s", err.Error())
@@ -83,36 +162,16 @@ func (i *importRepo) Update(ctx context.Context, id *primitive.ObjectID, imp *mo
 }
 
 func (i *importRepo) Delete(ctx context.Context, id string) error {
-	collection := g.Db.Database(g.DbName).Collection(i.collectionName)
 	importId, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		g.Log.Errorf("not a valid id: %v", err.Error())
 		return err
 	}
+	collection := g.Db.Database(g.DbName).Collection(i.collectionName)
 	_, err = collection.DeleteOne(ctx, bson.M{"_id": importId})
 	if err != nil {
 		g.Log.Errorf("failed to delete import: %s", err.Error())
 		return err
 	}
 	return nil
-}
-
-func (i *importRepo) FindImportsByUploaderId(ctx context.Context, id string) ([]models.Import, error) {
-	collection := g.Db.Database(g.DbName).Collection(i.collectionName)
-	uploaderId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		g.Log.Errorf("not a valid id: %v", err.Error())
-		return nil, err
-	}
-	var cb []models.Import
-	opts := options.Find().SetSort(bson.D{{Key: "finishedAt", Value: -1}})
-	cursor, err := collection.Find(ctx, bson.M{"uploaderId": uploaderId}, opts)
-	if err != nil {
-		g.Log.Errorf("no imports found: %s", err.Error())
-		return nil, err
-	}
-	defer cursor.Close(ctx)
-	cursor.All(ctx, &cb)
-	g.Log.Infof("found %d imports", len(cb))
-	return cb, nil
 }

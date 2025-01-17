@@ -116,7 +116,7 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
                 </Group>
             </Card.Section>
             <Card.Section>
-                <SimpleGrid cols={2} h="70vh">
+                <SimpleGrid cols={2} h="72vh">
                     {viewMode === 'settings' ? (
                         <Settings
                             height={height}

@@ -2,7 +2,7 @@ import { Stack, Select, TextInput } from "@mantine/core";
 import { optionsFilter } from "../../../../utils/filter";
 import { useGetStorageConnectors } from "../../../../apis/storage";
 import { Connector } from "../../../../types/connector";
-import { useMemo } from "react";
+import { useState } from "react";
 import { UseFormReturnType } from "@mantine/form";
 import { CreateUploaderForm } from "../../../../types/uploader";
 import ErrorCard from "../../../../components/ErrorCard/ErrorCard";
@@ -12,10 +12,22 @@ type DataStorePageProps = {
     form: UseFormReturnType<CreateUploaderForm, (values: CreateUploaderForm) => CreateUploaderForm>;
 }
 const DataStorePage: React.FC<DataStorePageProps> = ({ form }) => {
+    const { isPending, error, connectors } = useGetStorageConnectors({
+        skip: 0,
+        limit: 10000,
+        search: ""
+    });
 
-    const { isPending, error, connectors } = useGetStorageConnectors();
+    const [selectedConnector, setSelectedConnector] = useState<Connector | null>(null);
 
-    const selectedConnector = useMemo(() => connectors?.find((connector: Connector) => connector.id === form.values.connectorId), [form.values.connectorId, connectors]);
+    const handleConnectorChange = (value: string | null) => {
+        form.setFieldValue("connectorId", value || "");
+        const selectedConnector = connectors?.find((connector: Connector) => connector.id === value);
+        form.setFieldValue("connectorName", selectedConnector?.name || "");
+        form.setFieldValue("connectorType", selectedConnector?.type || "");
+        setSelectedConnector(selectedConnector);
+    };
+
     return error ? <ErrorCard title={error.name} message={error.message} h="50vh" /> : (
         <Stack gap="md">
             <Select
@@ -24,7 +36,8 @@ const DataStorePage: React.FC<DataStorePageProps> = ({ form }) => {
                 label="Storage connector"
                 placeholder="Select a storage connector"
                 data={isPending ? [] : connectors.map((connector: Connector) => ({ ...connector, value: connector.id, label: connector.name }))}
-                {...form.getInputProps("connectorId")}
+                value={form.values.connectorId}
+                onChange={handleConnectorChange}
             />
 
             {selectedConnector?.id && (

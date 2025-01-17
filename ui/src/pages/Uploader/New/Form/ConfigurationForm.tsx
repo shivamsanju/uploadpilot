@@ -7,7 +7,6 @@ import {
     Text,
     Switch,
     TagsInput,
-    SegmentedControl,
 } from "@mantine/core";
 import { CreateUploaderForm } from "../../../../types/uploader";
 import { UseFormReturnType } from "@mantine/form";

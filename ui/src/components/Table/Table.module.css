@@ -1,0 +1,17 @@
+.search {
+    border-bottom: light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-5)) 1px solid;
+}
+
+.icon {
+    color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-2));
+    cursor: pointer;
+}
+
+.icon:hover {
+    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+}
+
+.rotate {
+    transform: rotate(180deg);
+    transition: transform 1s ease;
+}

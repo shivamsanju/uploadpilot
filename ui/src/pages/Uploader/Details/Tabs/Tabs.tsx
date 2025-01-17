@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from 'react-router-dom';
-import { Divider, Tabs } from '@mantine/core';
+import { Tabs } from '@mantine/core';
 import Configuration from '../Configuration';
 import Imports from '../Imports/Imports';
 import classes from "./Tabs.module.css"

@@ -41,7 +41,7 @@ func NewConfig() (*Config, error) {
 		WebServerPort:     port,
 		MongoURI:          os.Getenv("MONGO_URI"),
 		FrontendURI:       os.Getenv("FRONTEND_URI"),
-		DatabaseName:      os.Getenv("APP_NAME") + "DB",
+		DatabaseName:      os.Getenv("APP_NAME") + "db",
 		RootPassword:      os.Getenv("ROOT_PASSWORD"),
 		CompanionEndpoint: os.Getenv("COMPANION_ENDPOINT"),
 		SelfEndpoint:      os.Getenv("SELF_ENDPOINT"),

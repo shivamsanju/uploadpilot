@@ -6,10 +6,7 @@ import routes from "./Routes";
 import { theme } from "./style/theme";
 import { Notifications } from "@mantine/notifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 
-// Register all Community features
-ModuleRegistry.registerModules([AllCommunityModule]);
 
 const queryClient = new QueryClient()
 function App() {
@@ -17,7 +14,7 @@ function App() {
     return (
         <MantineProvider theme={theme}>
             <QueryClientProvider client={queryClient}>
-                <Notifications />
+                <Notifications position="bottom-center" />
                 <Router>
                     <Routes>
                         {routes.map((route) => (

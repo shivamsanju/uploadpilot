@@ -3,17 +3,25 @@ import axiosInstance from "../utils/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Uploader } from "../types/uploader";
 
-export const useGetUploaders = () => {
-    const { isPending, error, data: uploaders } = useQuery({
-        queryKey: ['uploaders'],
+export const useGetUploaders = ({ skip, limit, search }: {
+    skip: number,
+    limit: number,
+    search: string
+}) => {
+    const queryClient = useQueryClient();
+
+    const { isPending, error, data } = useQuery({
+        queryKey: ['uploaders', skip, limit, search],
         queryFn: () =>
             axiosInstance
-                .get("/uploaders")
+                .get(`/uploaders?skip=${skip}&limit=${limit}&search=${search}`)
                 .then((res) => res.data)
     })
 
-    return { isPending, error, uploaders }
+    const invalidate = () => queryClient.invalidateQueries({ queryKey: ['uploaders', skip, limit, search] });
+    return { isPending, error, uploaders: data?.records || [], totalRecords: data?.totalRecords || 0, invalidate }
 }
+
 
 export const useCreateUploaderMutation = () => {
     const queryClient = useQueryClient();

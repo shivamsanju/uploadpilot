@@ -9,30 +9,34 @@ import (
 	"github.com/uploadpilot/uploadpilot/pkg/db/models"
 	g "github.com/uploadpilot/uploadpilot/pkg/globals"
 	"github.com/uploadpilot/uploadpilot/pkg/utils"
+	webmodels "github.com/uploadpilot/uploadpilot/pkg/web/models"
 )
 
 type uploaderHandler struct {
 	wfRepo db.UploaderRepo
-	dsRepo db.DataStoreRepo
 }
 
 func NewuploaderHandler() *uploaderHandler {
 	return &uploaderHandler{
 		wfRepo: db.NewUploaderRepo(),
-		dsRepo: db.NewDataStoreRepo(),
 	}
 }
 
 func (h *uploaderHandler) GetAllUploaders(w http.ResponseWriter, r *http.Request) {
-	cbs, err := h.wfRepo.GetAll(r.Context())
+	skip, limit, search, err := utils.GetSkipLimitSearchParams(r)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	if cbs == nil {
-		cbs = make([]models.Uploader, 0)
+	uploaders, totalRecords, err := h.wfRepo.FindAll(r.Context(), skip, limit, search)
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
 	}
-	render.JSON(w, r, cbs)
+	render.JSON(w, r, &webmodels.PaginatedResponse[models.Uploader]{
+		Records:      uploaders,
+		TotalRecords: totalRecords,
+	})
 }
 
 func (h *uploaderHandler) GetUploaderByID(w http.ResponseWriter, r *http.Request) {

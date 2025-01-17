@@ -61,7 +61,7 @@ const Settings: React.FC<SettingsProps> = ({
                     />
                 </Group>
                 {/* Theme */}
-                <Group justify="space-between" className={classes.item} wrap="nowrap" gap="xl">
+                <Group justify="space-between" pb="sm" className={classes.settingsItem} wrap="nowrap" gap="xl">
                     <div>
                         <Text size="sm">Choose Theme</Text>
                         <Text size="xs" c="dimmed">

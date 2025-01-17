@@ -1,7 +1,7 @@
-import { Flex, Image, Text, Title, useMantineColorScheme } from "@mantine/core";
+import { Flex, Text, useMantineColorScheme } from "@mantine/core";
 import { Link } from "react-router-dom";
-import DarkLogo from "../../assets/images/full-logo-dark.png"
-import LightLogo from "../../assets/images/full-logo.png"
+// import DarkLogo from "../../assets/images/full-logo-dark.png"
+// import LightLogo from "../../assets/images/full-logo.png"
 
 interface Props {
   width?: string;

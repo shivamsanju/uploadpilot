@@ -11,6 +11,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/pkg/db/models"
 	g "github.com/uploadpilot/uploadpilot/pkg/globals"
 	"github.com/uploadpilot/uploadpilot/pkg/utils"
+	webmodels "github.com/uploadpilot/uploadpilot/pkg/web/models"
 )
 
 type storageConnectorHandler struct {
@@ -24,12 +25,20 @@ func NewStorageConnectorHandler() *storageConnectorHandler {
 }
 
 func (h *storageConnectorHandler) GetAllStorageConnectors(w http.ResponseWriter, r *http.Request) {
-	storages, err := h.scRepo.GetAll(r.Context())
+	skip, limit, search, err := utils.GetSkipLimitSearchParams(r)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	render.JSON(w, r, storages)
+	storages, totalRecords, err := h.scRepo.FindAll(r.Context(), skip, limit, search)
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	render.JSON(w, r, &webmodels.PaginatedResponse[models.StorageConnector]{
+		TotalRecords: totalRecords,
+		Records:      storages,
+	})
 }
 
 func (h *storageConnectorHandler) GetStorageConnectorByID(w http.ResponseWriter, r *http.Request) {

@@ -16,13 +16,21 @@ export type UploaderConfig = {
     useFaultTolerantMode?: boolean;
 };
 
+export type Datastore = {
+    name: string;
+    connectorId: string;
+    connectorName: string;
+    connectorType: string;
+    bucket: string;
+}
+
 export type Uploader = {
     id?: string;
     name: string;
     description: string;
     tags: string[];
     config?: UploaderConfig;
-    dataStoreId?: string;
+    dataStore?: Datastore;
     updatedAt?: number;
     createdAt?: number;
     createdBy?: string;
@@ -33,9 +41,5 @@ export type CreateUploaderForm = {
     name: string;
     description: string;
     tags: string[];
-    connectorId: string;
-    dataStoreId: string;
     dataStoreName: string;
-    bucket: string;
-
-} & UploaderConfig;
+} & UploaderConfig & Datastore;

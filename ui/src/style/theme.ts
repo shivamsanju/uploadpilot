@@ -1,7 +1,7 @@
-import { createTheme, TextInput, Button, Select, Textarea, TagsInput, Badge, Text } from "@mantine/core";
+import { createTheme, TextInput, Button, Select, Textarea, TagsInput, Badge } from "@mantine/core";
 
 export const theme = createTheme({
-    primaryColor: 'teal',
+    primaryColor: 'grape',
     fontFamily: "Roboto",
     headings: {
         fontFamily: "Roboto",

@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/render"
 	g "github.com/uploadpilot/uploadpilot/pkg/globals"
 	"github.com/uploadpilot/uploadpilot/pkg/web/models"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 func HandleHttpError(w http.ResponseWriter, r *http.Request, statusCode int, err error) {
@@ -30,4 +31,14 @@ func GetStatusLabel(status int) string {
 	default:
 		return fmt.Sprintf("%d Unknown", status)
 	}
+}
+
+func FilterNonEmptyBsonFields(data bson.M) bson.M {
+	filtered := bson.M{}
+	for key, value := range data {
+		if value != nil && value != "" {
+			filtered[key] = value
+		}
+	}
+	return filtered
 }

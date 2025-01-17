@@ -7,7 +7,7 @@ import {
     TagsInput,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
-import { Connector } from "../../../../types/connector";
+import { Connector } from "../../../types/connector";
 
 
 type NewConnectorFormProps = {
@@ -48,12 +48,17 @@ const NewConnectorForm = ({ onSubmit, showSubmitButton, showCancelButton, onCanc
         <form onSubmit={form.onSubmit((values) => {
             onSubmit(values)
         })}>
-            <Stack gap="md" h="50vh">
+            <Stack gap="lg" h="50vh">
 
-                <TextInput label="Name" placeholder="Enter Name" withAsterisk {...form.getInputProps("name")} />
+                <TextInput
+                    label="Name"
+                    placeholder="Enter a name for your connector"
+                    withAsterisk
+                    {...form.getInputProps("name")}
+                />
                 <TagsInput
-                    label="Press Enter to submit a tag"
-                    placeholder="Enter tags"
+                    label="Tags"
+                    placeholder="Enter tags (comma-separated)"
                     {...form.getInputProps("tags")}
                 />
                 <Select
@@ -131,8 +136,8 @@ const NewConnectorForm = ({ onSubmit, showSubmitButton, showCancelButton, onCanc
                 }
             </Stack>
 
-            <Group justify="flex-end" mt="md" gap="sm">
-                {showCancelButton && <Button onClick={onCancel}>Cancel</Button>}
+            <Group justify="flex-end" mt="md" gap="lg">
+                {showCancelButton && <Button variant="light" onClick={onCancel}>Cancel</Button>}
                 {showSubmitButton && <Button type="submit">Create</Button>}
             </Group>
         </form >

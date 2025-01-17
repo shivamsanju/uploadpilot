@@ -1,7 +1,7 @@
-import { Card, Title } from '@mantine/core';
+import { Group, Paper, Title } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import NewConnectorForm from './Form';
-import { useCreateStorageConnectorMutation } from '../../../../apis/storage';
+import { useCreateStorageConnectorMutation } from '../../../apis/storage';
 
 const NewConnectorsPage = () => {
     const navigate = useNavigate();
@@ -31,21 +31,23 @@ const NewConnectorsPage = () => {
         }
 
         mutateAsync(body).then(() => {
-            navigate('/storage/connectors');
+            navigate('/storageConnectors');
         })
 
     }
 
     const handleCancel = () => {
-        navigate('/storage/connectors');
+        navigate('/storageConnectors');
     }
 
     return (
         <>
-            <Title order={3} opacity={0.8} mt={8} mb={20}>New Connector</Title>
-            <Card w="100%" withBorder shadow="xs" radius="md" padding="xl">
-                <NewConnectorForm showSubmitButton onSubmit={handleSubmit} showCancelButton onCancel={handleCancel} />
-            </Card>
+            <Title order={3} opacity={0.8} mt={8} mb={20} ta="center">Create new connector</Title>
+            <Group justify="center" mt="xl">
+                <Paper withBorder radius="md" p="lg" w="50%">
+                    <NewConnectorForm showSubmitButton onSubmit={handleSubmit} showCancelButton onCancel={handleCancel} />
+                </Paper>
+            </Group>
         </>
     );
 }

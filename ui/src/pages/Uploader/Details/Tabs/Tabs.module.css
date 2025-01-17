@@ -10,13 +10,13 @@
     }
 
     &[data-active] {
-        background-color: var(--mantine-color-teal-filled);
-        border-color: var(--mantine-color-teal-filled);
-        color: var(--mantine-teal-white);
+        background-color: var(--mantine-color-grape-filled);
+        border-color: var(--mantine-color-grape-filled);
+        color: var(--mantine-grape-white);
 
 
         @mixin hover {
-            background-color: var(--mantine-color-teal-filled-hover);
+            background-color: var(--mantine-color-grape-filled-hover);
         }
     }
 } */
@@ -24,7 +24,7 @@
 .tab {
 
     &[data-active] {
-        color: var(--mantine-color-teal-filled);
+        color: var(--mantine-color-grape-filled);
     }
 
 }

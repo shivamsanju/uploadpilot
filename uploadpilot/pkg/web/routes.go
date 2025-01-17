@@ -21,8 +21,7 @@ func Routes() *chi.Mux {
 		r.Use(AuthMiddleware)
 		r.Mount("/users", GetUserRoutes())
 		r.Mount("/uploaders/{uploaderId}/imports", GetImportRoutes())
-		r.Mount("/storage/connectors", GetStorageConnectorRoutes())
-		r.Mount("/storage/datastores", GetDatastoreRoutes())
+		r.Mount("/storageConnectors", GetStorageConnectorRoutes())
 	})
 	return r
 }
@@ -73,15 +72,5 @@ func GetStorageConnectorRoutes() *chi.Mux {
 	r.Get("/", h.GetAllStorageConnectors)
 	r.Get("/{id}", h.GetStorageConnectorByID)
 	r.Delete("/{id}", h.DeleteStorageConnector)
-	return r
-}
-
-func GetDatastoreRoutes() *chi.Mux {
-	r := chi.NewRouter()
-	h := handlers.NewDatastoreHandler()
-	r.Post("/", h.CreateDatastore)
-	r.Get("/", h.GetAllDatastores)
-	r.Get("/{id}", h.GetDatastoreByID)
-	r.Delete("/{id}", h.DeleteDatastore)
 	return r
 }

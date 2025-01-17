@@ -16,9 +16,3 @@ export type Connector = {
     updatedBy?: string;
 }
 
-export type Datastore = {
-    id?: string;
-    name: string;
-    connectorId: string;
-    bucket: string;
-}

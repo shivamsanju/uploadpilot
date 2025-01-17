@@ -5,7 +5,7 @@ import {
     IconGauge,
     IconWebhook,
 } from '@tabler/icons-react';
-import { Code, ScrollArea } from '@mantine/core';
+import { ScrollArea } from '@mantine/core';
 import { LinksGroup } from './NavLinksGroup';
 import classes from './Navbar.module.css';
 
@@ -17,12 +17,9 @@ const mockdata = [
         link: "/uploaders",
     },
     {
-        label: 'Storage',
+        label: 'Storage Connectors',
         icon: IconDatabase,
-        links: [
-            { label: 'Datastores', link: '/storage/datastores' },
-            { label: 'Connectors', link: '/storage/connectors' },
-        ],
+        link: '/storageConnectors',
     },
     { label: 'Hooks', icon: IconWebhook, link: "/hooks" },
     { label: 'Settings', icon: IconAdjustments, link: "/settings" },
