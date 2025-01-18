@@ -10,15 +10,6 @@ services:
     networks:
       - app-network
 
-  # ui:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.ui
-  #   ports:
-  #     - "3000:80"
-  #   networks:
-  #     - app-network
-
   uploadpilot:
     build:
       context: ./uploadpilot

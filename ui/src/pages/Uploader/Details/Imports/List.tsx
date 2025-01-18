@@ -148,7 +148,7 @@ const ImportsList = () => {
                     onSearchFilterChange={onSearchFilterChange}
                     showRefresh
                     onRefresh={invalidate}
-                    height={"72vh"}
+                    height={"74vh"}
                     verticalSpacing={"sm"}
                     columns={colDefs}
                     records={imports}

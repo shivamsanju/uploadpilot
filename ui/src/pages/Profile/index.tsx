@@ -24,7 +24,8 @@ const ProfilePage = () => {
 
     useEffect(() => {
         form.setValues(session)
-    }, [session, form])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [session])
 
     const handleEditToggle = () => {
         setIsEditing((prev) => !prev);
@@ -51,7 +52,7 @@ const ProfilePage = () => {
                             <FileButton onChange={() => { }} accept="image/png,image/jpeg">
                                 {(props) => <Button {...props}>Upload New Photo</Button>}
                             </FileButton>
-                            <Button variant="outline" color="red">
+                            <Button variant="light">
                                 Reset
                             </Button>
                         </Group>
@@ -95,7 +96,7 @@ const ProfilePage = () => {
                         {isEditing ? (
                             <>
                                 <Button type="submit">Save Changes</Button>
-                                <Button onClick={handleEditToggle} variant="outline" color="gray">
+                                <Button onClick={handleEditToggle} variant="light">
                                     Reset
                                 </Button>
                             </>
