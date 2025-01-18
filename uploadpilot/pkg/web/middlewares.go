@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/uploadpilot/uploadpilot/pkg/auth"
 	g "github.com/uploadpilot/uploadpilot/pkg/globals"
 	"github.com/uploadpilot/uploadpilot/pkg/utils"
 )
@@ -54,15 +55,12 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			utils.HandleHttpError(w, r, http.StatusUnauthorized, fmt.Errorf("Unauthorized"))
 			return
 		}
-		claims, err := utils.ValidateToken(token)
+		claims, err := auth.ValidateToken(token)
 		if err != nil {
 			utils.HandleHttpError(w, r, http.StatusUnauthorized, err)
 			return
 		}
 		r.Header.Set("userId", claims.UserID)
-		r.Header.Set("email", claims.Email)
-		r.Header.Set("firstName", claims.FirstName)
-		r.Header.Set("lastName", claims.LastName)
 		next.ServeHTTP(w, r)
 	})
 }

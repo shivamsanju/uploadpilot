@@ -19,6 +19,7 @@ func initWebServer(config *config.Config) error {
 	g.RootPassword = config.RootPassword
 	g.TusUploadDir = "./tmp"
 	g.TusUploadBasePath = "/upload"
+	g.FrontendURI = config.FrontendURI
 
 	// Create the router and add the common middlewares.
 	router := chi.NewRouter()

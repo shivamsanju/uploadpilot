@@ -11,7 +11,7 @@ const axiosInstance = axios.create({
 // Request Interceptor
 axiosInstance.interceptors.request.use(
     (config) => {
-        const token = localStorage.getItem("token");
+        const token = localStorage.getItem("uploadpilottoken");
         if (token) {
             if (!config.headers) {
                 config.headers = {};
@@ -33,7 +33,7 @@ axiosInstance.interceptors.response.use(
     (error) => {
         if (error.response && error.response.status === 401) {
             console.error("Unauthorized! Redirecting to login...");
-            localStorage.removeItem("token");
+            localStorage.removeItem("uploadpilottoken");
             window.location.href = "/auth";
         }
         return Promise.reject(error);

@@ -14,6 +14,8 @@ import (
 	webmodels "github.com/uploadpilot/uploadpilot/pkg/web/models"
 )
 
+var validate = validator.New()
+
 type storageConnectorHandler struct {
 	scRepo db.StorageConnectorRepo
 }

@@ -9,68 +9,60 @@ import (
 
 func Routes() *chi.Mux {
 	r := chi.NewRouter()
-	ih := handlers.NewTusdHandler()
-	r.Mount("/upload", http.StripPrefix(("/upload"), ih.GetTusHandler()))
 
-	// Uploader details and signup login - no auth
-	r.Mount("/auth", GetAuthRoutes())
-	r.Mount("/uploaders", GetUploaderRoutes())
+	// Handlers for uploads
+	ih := handlers.NewTusdHandler()
+	authHandler := handlers.NewAuthHandler()
+	uploaderHandler := handlers.NewuploaderHandler()
+	importHandler := handlers.NewImportHandler()
+	storageHandler := handlers.NewStorageConnectorHandler()
+
+	// Public routes
+	r.Group(func(r chi.Router) {
+		r.Mount("/upload", http.StripPrefix("/upload", ih.GetTusHandler()))
+
+		// Auth routes
+		r.Route("/auth", func(r chi.Router) {
+			r.Get("/{provider}/authorize", authHandler.Login)
+			r.Get("/{provider}/callback", authHandler.HandleCallback)
+			r.Get("/logout", authHandler.Logout)
+			r.Get("/logout/{provider}", authHandler.LogoutProvider)
+		})
+
+		// Uploader details
+		r.Get("/uploaders/{uploaderId}", uploaderHandler.GetUploaderByID)
+	})
 
 	// Protected routes
 	r.Group(func(r chi.Router) {
 		r.Use(AuthMiddleware)
-		r.Mount("/users", GetUserRoutes())
-		r.Mount("/uploaders/{uploaderId}/imports", GetImportRoutes())
-		r.Mount("/storageConnectors", GetStorageConnectorRoutes())
+
+		// Session routes
+		r.Get("/session", authHandler.GetSession)
+
+		// Uploader routes
+		r.Route("/uploaders", func(r chi.Router) {
+			r.Post("/", uploaderHandler.CreateUploader)
+			r.Get("/", uploaderHandler.GetAllUploaders)
+			r.Get("/sources/allowed", uploaderHandler.GetAllAllowedSources)
+			r.Put("/{uploaderId}/config", uploaderHandler.UpdateUploaderConfig)
+			r.Delete("/{uploaderId}", uploaderHandler.DeleteUploader)
+		})
+
+		// Import routes
+		r.Route("/uploaders/{uploaderId}/imports", func(r chi.Router) {
+			r.Get("/", importHandler.GetAllImportsForUploader)
+			r.Get("/{importId}", importHandler.GetImportDetailsByID)
+		})
+
+		// Storage connector routes
+		r.Route("/storageConnectors", func(r chi.Router) {
+			r.Post("/", storageHandler.CreateStorageConnector)
+			r.Get("/", storageHandler.GetAllStorageConnectors)
+			r.Get("/{id}", storageHandler.GetStorageConnectorByID)
+			r.Delete("/{id}", storageHandler.DeleteStorageConnector)
+		})
 	})
-	return r
-}
 
-func GetAuthRoutes() *chi.Mux {
-	r := chi.NewRouter()
-	h := handlers.NewUserHandler()
-	r.Post("/signup", h.Signup)
-	r.Post("/login", h.Login)
-	return r
-}
-
-func GetUserRoutes() *chi.Mux {
-	r := chi.NewRouter()
-	h := handlers.NewUserHandler()
-	r.Get("/me", h.GetUserDetails)
-	return r
-}
-
-func GetUploaderRoutes() *chi.Mux {
-	r := chi.NewRouter()
-	h := handlers.NewuploaderHandler()
-	r.Get("/{uploaderId}", h.GetUploaderByID)
-
-	r.Group(func(r chi.Router) {
-		r.Use(AuthMiddleware)
-		r.Post("/", h.CreateUploader)
-		r.Get("/", h.GetAllUploaders)
-		r.Put("/{uploaderId}/config", h.UpdateUploaderConfig)
-		r.Delete("/{uploaderId}", h.DeleteUploader)
-		r.Get("/allowedSources", h.GetAllAllowedSources)
-	})
-	return r
-}
-
-func GetImportRoutes() *chi.Mux {
-	r := chi.NewRouter()
-	h := handlers.NewImportHandler()
-	r.Get("/", h.GetAllImportsForUploader)
-	r.Get("/{importId}", h.GetImportDetailsByID)
-	return r
-}
-
-func GetStorageConnectorRoutes() *chi.Mux {
-	r := chi.NewRouter()
-	h := handlers.NewStorageConnectorHandler()
-	r.Post("/", h.CreateStorageConnector)
-	r.Get("/", h.GetAllStorageConnectors)
-	r.Get("/{id}", h.GetStorageConnectorByID)
-	r.Delete("/{id}", h.DeleteStorageConnector)
 	return r
 }

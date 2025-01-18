@@ -11,7 +11,7 @@ import { getApiDomain } from "../../../../utils/config";
 import { CreateUploaderForm } from "../../../../types/uploader";
 import { useForm } from "@mantine/form";
 import { useUpdateUploaderConfigMutation } from "../../../../apis/uploader";
-import { useGetCurrentUserDetails } from "../../../../apis/user";
+import { useGetSession } from "../../../../apis/user";
 
 const getCode = (uploaderId: string, backendEndpoint: string, h: number, w: number, theme: 'auto' | 'light' | 'dark' = 'auto') => `
 import { Uploader } from "@uploadpilot/react"
@@ -45,7 +45,7 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
 
     const { uploaderId } = useParams();
     const { mutateAsync } = useUpdateUploaderConfigMutation(uploaderId as string)
-    const { isPending: isUserPending, me } = useGetCurrentUserDetails();
+    const { isPending: isUserPending, session } = useGetSession();
     const { colorScheme } = useMantineColorScheme();
     const code = getCode(uploaderId as string, backendEndpoint, height, width, theme);
     const form = useForm<CreateUploaderForm>({
@@ -152,8 +152,8 @@ const ConfigurationUI = ({ uploaderDetails }: { uploaderDetails: any }) => {
                             width={width}
                             theme={theme}
                             metadata={{
-                                "uploaderEmail": me.email,
-                                "uploaderName": me.firstName + " " + me.lastName
+                                "uploaderEmail": session.email,
+                                "uploaderName": session.Name
                             }}
                         />
                     </Group>

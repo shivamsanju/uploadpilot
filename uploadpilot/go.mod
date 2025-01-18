@@ -9,7 +9,9 @@ require (
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/go-chi/render v1.0.3
 	github.com/go-playground/validator/v10 v10.23.0
+	github.com/gorilla/sessions v1.4.0
 	github.com/joho/godotenv v1.5.1
+	github.com/markbates/goth v1.80.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/tus/tusd/v2 v2.6.0
 	go.mongodb.org/mongo-driver v1.17.2
@@ -51,6 +53,7 @@ require (
 	github.com/envoyproxy/protoc-gen-validate v1.1.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
+	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -67,12 +70,16 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.4 // indirect
 	github.com/googleapis/gax-go/v2 v2.13.0 // indirect
 	github.com/gophercloud/gophercloud v0.25.0 // indirect
+	github.com/gorilla/mux v1.8.1 // indirect
+	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/kidstuff/mongostore v0.0.0-20181113001930-e650cd85ee4b // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mozillazg/go-httpheader v0.3.1 // indirect
 	github.com/oracle/oci-go-sdk v24.3.0+incompatible // indirect
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
+	github.com/quasoft/memstore v0.0.0-20191010062613-2bce066d2b0b // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.35 // indirect
 	github.com/tus/lockfile v1.2.0 // indirect

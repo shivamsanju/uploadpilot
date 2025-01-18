@@ -2,18 +2,17 @@ package db
 
 import (
 	"context"
-	"time"
 
 	"github.com/uploadpilot/uploadpilot/pkg/db/models"
 	g "github.com/uploadpilot/uploadpilot/pkg/globals"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type UserRepo interface {
 	CreateUser(ctx context.Context, user *models.User) (*models.User, error)
-	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
+	GetUserByID(ctx context.Context, id string) (*models.User, error)
 	CheckUserExists(ctx context.Context, email string) (bool, error)
 }
 
@@ -36,41 +35,24 @@ func (u *userRepo) CreateUser(ctx context.Context, user *models.User) (*models.U
 	return user, nil
 }
 
-func (u *userRepo) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+func (u *userRepo) GetUserByID(ctx context.Context, userID string) (*models.User, error) {
 	collection := g.Db.Database(g.DbName).Collection(u.collectionName)
 	var user models.User
-	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
+	err := collection.FindOne(ctx, bson.M{"userId": userID}).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-func (u *userRepo) UpdateUserToken(ctx context.Context, userId string, signedToken string, signedRefreshToken string) error {
-	collection := g.Db.Database(g.DbName).Collection(u.collectionName)
-
-	updateObj := bson.D{
-		{"token", signedToken},
-		{"refreshToken", signedRefreshToken},
-		{"updatedAt", primitive.NewDateTimeFromTime(time.Now())},
-	}
-
-	upsert := true
-	opt := options.UpdateOptions{Upsert: &upsert}
-
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": userId}, bson.D{{"$set", updateObj}}, &opt)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (u *userRepo) CheckUserExists(ctx context.Context, email string) (bool, error) {
+func (u *userRepo) CheckUserExists(ctx context.Context, userID string) (bool, error) {
 	collection := g.Db.Database(g.DbName).Collection(u.collectionName)
 	var user models.User
-	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
+	err := collection.FindOne(ctx, bson.M{"userId": userID}).Decode(&user)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return false, nil
+		}
 		return false, err
 	}
 	return true, nil

@@ -19,6 +19,12 @@ func InitServices() {
 		panic(err)
 	}
 
+	// Initialize Auth Store
+	err = initAuth(cfg)
+	if err != nil {
+		panic(err)
+	}
+
 	// Initialize the web server.
 	err = initWebServer(cfg)
 	if err != nil {

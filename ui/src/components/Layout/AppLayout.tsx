@@ -7,7 +7,7 @@ import {
 import { useDisclosure } from "@mantine/hooks";
 import { AdminHeader } from "../Header/Header";
 import NavBar from "../Navigation/Navbar";
-import { useEffect } from "react";
+import AuthWrapper from "../AuthWrapper/AuthWrapper";
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [opened, { toggle }] = useDisclosure(true);
@@ -20,44 +20,38 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const navbarHeaderBg =
         colorScheme === "dark" ? theme.colors.dark[6] : "";
 
-    useEffect(() => {
-        const token = localStorage.getItem('token')
-        if (!token) {
-            window.location.href = '/auth'
-        }
-    }, [])
-
-
     return (
-        <AppShell
-            header={{ height: "5vh" }}
-            navbar={{
-                width: 220,
-                breakpoint: 'sm',
-                collapsed: { mobile: !opened, desktop: !opened },
-            }}
-            padding="md"
-            transitionDuration={500}
-            transitionTimingFunction="ease"
-        >
-            <AppShell.Header bg={navbarHeaderBg}>
-                <AdminHeader
-                    burger={
-                        <Burger
-                            opened={false}
-                            onClick={toggle}
-                            size="xs"
-                        />
-                    }
-                />
-            </AppShell.Header>
-            <AppShell.Navbar bg={navbarHeaderBg} withBorder={false}>
-                <NavBar />
-            </AppShell.Navbar>
-            <AppShell.Main bg={bg}>
-                {children}
-            </AppShell.Main>
-        </AppShell>
+        <AuthWrapper>
+            <AppShell
+                header={{ height: "5vh" }}
+                navbar={{
+                    width: 220,
+                    breakpoint: 'sm',
+                    collapsed: { mobile: !opened, desktop: !opened },
+                }}
+                padding="md"
+                transitionDuration={500}
+                transitionTimingFunction="ease"
+            >
+                <AppShell.Header bg={navbarHeaderBg}>
+                    <AdminHeader
+                        burger={
+                            <Burger
+                                opened={false}
+                                onClick={toggle}
+                                size="xs"
+                            />
+                        }
+                    />
+                </AppShell.Header>
+                <AppShell.Navbar bg={navbarHeaderBg} withBorder={false}>
+                    <NavBar />
+                </AppShell.Navbar>
+                <AppShell.Main bg={bg}>
+                    {children}
+                </AppShell.Main>
+            </AppShell>
+        </AuthWrapper>
     );
 }
 

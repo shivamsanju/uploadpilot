@@ -95,7 +95,7 @@ export const useGetAllAllowedSources = () => {
         queryKey: ['allowedSources'],
         queryFn: () =>
             axiosInstance
-                .get("/uploaders/allowedSources")
+                .get("/uploaders/sources/allowed")
                 .then((res) => res.data)
     })
 

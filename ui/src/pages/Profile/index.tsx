@@ -1,31 +1,30 @@
 import { useEffect, useState } from 'react';
 import { Container, Card, Text, Group, Button, TextInput, Grid, FileButton, Avatar, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { useGetCurrentUserDetails } from '../../apis/user';
+import { useGetSession } from '../../apis/user';
 import AppLoader from '../../components/Loader/AppLoader';
 import ErrorCard from '../../components/ErrorCard/ErrorCard';
 
 const ProfilePage = () => {
     const [isEditing, setIsEditing] = useState(false);
-    const { isPending, error, me } = useGetCurrentUserDetails();
+    const { isPending, error, session } = useGetSession();
     const form = useForm({
         initialValues: {
-            firstName: "John",
-            lastName: "Doe",
-            image: null,
+            name: "John",
+            avatarUrl: null,
             email: "",
-            organization: "CodeMonk"
+            organization: ""
         },
         validate: {
-            firstName: (value) => (value ? null : 'First name is required'),
-            lastName: (value) => (value ? null : 'Last name is required'),
+            name: (value) => (value ? null : 'First name is required'),
+            email: (value) => (value ? null : 'Email is required'),
         },
     });
 
 
     useEffect(() => {
-        form.setValues(me)
-    }, [me, form])
+        form.setValues(session)
+    }, [session, form])
 
     const handleEditToggle = () => {
         setIsEditing((prev) => !prev);
@@ -40,12 +39,12 @@ const ProfilePage = () => {
         return <ErrorCard title={error.name} message={error.message} h="70vh" />
     }
 
-    return isPending ? <AppLoader h="70vh" /> : form.values.email ? (
+    return isPending ? <AppLoader h="70vh" /> : session.userId ? (
         <Container size="md" mt="xl">
             <Card shadow="sm" padding="lg" radius="md" withBorder>
                 <Group>
                     <Group p="center">
-                        <Avatar size={100} src={form.values.image} alt="Profile Photo" />
+                        <Avatar size={100} src={form.values.avatarUrl} alt="Profile Photo" />
                     </Group>
                     <Stack>
                         <Group p="center">
@@ -69,16 +68,7 @@ const ProfilePage = () => {
                                 label="First Name"
                                 placeholder="Enter your first name"
                                 {...form.getInputProps('firstName')}
-                                value={form.values.firstName}
-                                disabled={!isEditing}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={6}>
-                            <TextInput
-                                label="Last Name"
-                                placeholder="Enter your last name"
-                                {...form.getInputProps('lastName')}
-                                value={form.values.lastName}
+                                value={form.values.name}
                                 disabled={!isEditing}
                             />
                         </Grid.Col>

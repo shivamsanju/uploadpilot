@@ -1,20 +1,19 @@
 import axiosInstance from "../utils/axios";
 import { useQuery } from "@tanstack/react-query";
 
-export const useGetCurrentUserDetails = () => {
-    const { isPending, error, data: me } = useQuery({
-        queryKey: ['me'],
+export const useGetSession = () => {
+
+    const { isPending, error, data: session } = useQuery({
+        queryKey: ['session'],
+        refetchInterval: 60000,
+        staleTime: 60000,
         queryFn: () => {
             return axiosInstance
-                .get(`/users/me`)
-                .then((res) => {
-                    return {
-                        ...res.data,
-                        image: "https://avatar.iran.liara.run/public/33"
-                    }
-                })
+                .get(`/session`)
+                .then((res) => res.data)
         }
     })
 
-    return { isPending, error, me }
+
+    return { isPending, error, session }
 }

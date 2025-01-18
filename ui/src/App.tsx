@@ -13,8 +13,8 @@ function App() {
 
     return (
         <MantineProvider theme={theme}>
+            <Notifications position="bottom-center" />
             <QueryClientProvider client={queryClient}>
-                <Notifications position="bottom-center" />
                 <Router>
                     <Routes>
                         {routes.map((route) => (
@@ -31,7 +31,7 @@ function App() {
                     </Routes>
                 </Router>
             </QueryClientProvider>
-        </MantineProvider>
+        </MantineProvider >
     );
 }
 

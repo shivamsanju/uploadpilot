@@ -2,18 +2,18 @@ import { Avatar, Group, Menu, UnstyledButton, Text } from '@mantine/core';
 import { IconUser, IconLogout, IconChevronDown, IconSun } from '@tabler/icons-react';
 import { useNavigate } from "react-router-dom";
 import ThemeSwitcher from '../ThemeSwitcher';
-import { useGetCurrentUserDetails } from '../../apis/user';
+import { useGetSession } from '../../apis/user';
+import { getApiDomain } from '../../utils/config';
 
 
 const UserButton = () => {
     const navigate = useNavigate();
-    const { isPending, error, me } = useGetCurrentUserDetails();
+    const { isPending, error, session } = useGetSession();
 
 
     const handleSignOut = async () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("refreshToken");
-        navigate("/auth");
+        localStorage.removeItem("uploadpilottoken");
+        window.location.href = getApiDomain() + `/auth/logout`
     }
 
 
@@ -22,8 +22,6 @@ const UserButton = () => {
     }
 
     if (error) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("refreshToken");
         navigate("/auth");
     }
 
@@ -31,7 +29,7 @@ const UserButton = () => {
         return <></>;
     }
 
-    return me.email ? (
+    return session.userId ? (
         <Menu
             width={200}
             position="bottom"
@@ -40,9 +38,9 @@ const UserButton = () => {
             <Menu.Target>
                 <UnstyledButton>
                     <Group gap={7}>
-                        <Avatar src={me.image} alt={me.email} radius="xl" size={25} />
+                        <Avatar src={session.avatarUrl} alt={session.name[0]} radius="xl" size={25} />
                         <Text fw={500} size="sm" lh={1} mr={3}>
-                            {me.firstName + " " + me.lastName}
+                            {session.name || session.firstName + " " + session.lastName}
                         </Text>
                         <IconChevronDown size={12} stroke={1.5} />
                     </Group>
