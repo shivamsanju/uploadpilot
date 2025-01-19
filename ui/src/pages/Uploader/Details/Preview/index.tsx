@@ -1,5 +1,5 @@
 import { Group, Paper, SegmentedControl, SimpleGrid, Stack, useMantineColorScheme } from "@mantine/core"
-import { Uploader } from "@uploadpilot/react"
+import { Uploader } from "uppy-react"
 import { useState } from "react";
 import { IconCode, IconEye } from "@tabler/icons-react";
 import { CodeHighlightTabs } from "@mantine/code-highlight";
@@ -35,7 +35,7 @@ const getCode = (uploaderId: string, backendEndpoint: string, settingsProps: any
         .join('\n            '); // Join with proper indentation
 
     const code = `
-import { Uploader } from "@uploadpilot/react"
+import { Uploader } from "uppy-react"
 
 const UploaderComponent = () => {
     return (
