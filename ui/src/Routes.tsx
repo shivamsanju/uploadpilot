@@ -9,6 +9,7 @@ import DashboardPage from "./pages/Dashboard";
 import NewConnectorsPage from "./pages/Connectors/New";
 import ConnectorsPage from "./pages/Connectors";
 import EmptyLayout from "./components/Layout/EmptyLayout";
+import ErrorQueryDisplay from "./pages/Error";
 
 type Route = {
     path: string
@@ -21,6 +22,11 @@ const routes: Route[] = [
         path: "/auth",
         layout: EmptyLayout,
         element: <AuthPage />
+    },
+    {
+        path: "/error",
+        layout: EmptyLayout,
+        element: <ErrorQueryDisplay />
     },
     {
         path: "/",

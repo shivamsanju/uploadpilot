@@ -7,12 +7,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type UserRepo interface {
 	CreateUser(ctx context.Context, user *models.User) (*models.User, error)
 	GetUserByID(ctx context.Context, id string) (*models.User, error)
 	CheckUserExists(ctx context.Context, email string) (bool, error)
+	CheckUserProvider(ctx context.Context, email string) (string, error)
 }
 
 type userRepo struct {
@@ -26,6 +28,7 @@ func NewUserRepo() UserRepo {
 func (u *userRepo) CreateUser(ctx context.Context, user *models.User) (*models.User, error) {
 	collection := db.Collection(u.collectionName)
 	user.ID = primitive.NewObjectID()
+	user.Workspaces = make([]models.UserWorkspace, 0)
 	result, err := collection.InsertOne(ctx, user)
 	if err != nil {
 		return nil, err
@@ -44,10 +47,10 @@ func (u *userRepo) GetUserByID(ctx context.Context, userID string) (*models.User
 	return &user, nil
 }
 
-func (u *userRepo) CheckUserExists(ctx context.Context, userID string) (bool, error) {
+func (u *userRepo) CheckUserExists(ctx context.Context, email string) (bool, error) {
 	collection := db.Collection(u.collectionName)
 	var user models.User
-	err := collection.FindOne(ctx, bson.M{"userId": userID}).Decode(&user)
+	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
 			return false, nil
@@ -55,4 +58,19 @@ func (u *userRepo) CheckUserExists(ctx context.Context, userID string) (bool, er
 		return false, err
 	}
 	return true, nil
+}
+
+func (u *userRepo) CheckUserProvider(ctx context.Context, email string) (string, error) {
+	collection := db.Collection(u.collectionName)
+	var user struct {
+		Provider string `bson:"provider"`
+	}
+	err := collection.FindOne(ctx, bson.M{"email": email}, options.FindOne().SetProjection(bson.M{"provider": 1})).Decode(&user)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return "", nil
+		}
+		return "", err
+	}
+	return user.Provider, nil
 }

@@ -49,6 +49,7 @@ type DataStore struct {
 
 type Uploader struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
+	WorkspaceID primitive.ObjectID `bson:"workspaceId" json:"workspaceId" validate:"required"`
 	Name        string             `bson:"name" json:"name" validate:"required,min=2,max=100"`
 	Description string             `bson:"description" json:"description" validate:"max=500"`
 	Tags        []string           `bson:"tags" json:"tags"`

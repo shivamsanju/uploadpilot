@@ -68,7 +68,6 @@ func (h *storageConnectorHandler) CreateStorageConnector(w http.ResponseWriter, 
 		utils.HandleHttpError(w, r, http.StatusBadRequest, fmt.Errorf("validation error: %v", errors))
 		return
 	}
-	infra.Log.Infof("adding storage connector: %+v", connector)
 	connector.CreatedBy = r.Header.Get("email")
 	connector.UpdatedBy = r.Header.Get("email")
 	id, err := h.scRepo.Create(r.Context(), connector)

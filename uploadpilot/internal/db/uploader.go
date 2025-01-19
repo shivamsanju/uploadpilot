@@ -64,7 +64,6 @@ func (ur *uploaderRepo) FindAll(ctx context.Context, skip int64, limit int64, se
 		return nil, 0, err
 	}
 
-	infra.Log.Infof("found %d uploaders (total records: %d)", len(cb), totalRecords)
 	return cb, totalRecords, nil
 }
 
@@ -132,7 +131,6 @@ func (ur *uploaderRepo) UpdateConfig(ctx context.Context, id string, updatedData
 
 	update := bson.M{"$set": updateFields}
 
-	infra.Log.Infof("Updating config: %+v", update)
 	collection := db.Collection(ur.collectionName)
 	_, err = collection.UpdateOne(ctx, bson.M{"_id": uploaderID}, update)
 	return err
@@ -173,6 +171,5 @@ func (ur *uploaderRepo) GetDataStoreCreds(ctx context.Context, id string) (map[s
 	if len(results) == 0 {
 		return nil, nil
 	}
-	infra.Log.Infof("found Uploader: %+v", results[0])
 	return results[0], nil
 }

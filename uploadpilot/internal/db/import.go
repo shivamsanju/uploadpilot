@@ -120,7 +120,6 @@ func (i *importRepo) FindAllImportsByUploaderId(ctx context.Context, id string, 
 		return nil, 0, err
 	}
 
-	infra.Log.Infof("found %d imports for uploaderId %s", len(cb), id)
 	return cb, totalRecords, nil
 }
 

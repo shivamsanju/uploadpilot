@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	"github.com/go-playground/validator/v10"
 	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
@@ -56,10 +58,19 @@ func (h *uploaderHandler) CreateUploader(w http.ResponseWriter, r *http.Request)
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
+
+	if err := validate.Struct(uploader); err != nil {
+		errors := make(map[string]string)
+		for _, err := range err.(validator.ValidationErrors) {
+			errors[err.Field()] = err.Tag()
+		}
+		utils.HandleHttpError(w, r, http.StatusBadRequest, fmt.Errorf("validation error: %v", errors))
+		return
+	}
+
 	uploader.CreatedBy = r.Header.Get("email")
 	uploader.UpdatedBy = r.Header.Get("email")
 
-	infra.Log.Infof("adding uploader: %+v", uploader)
 	id, err := h.wfRepo.Create(r.Context(), uploader)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)

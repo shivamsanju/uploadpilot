@@ -4,6 +4,19 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type UserRole string
+
+const (
+	UserRoleOwner       UserRole = "owner"
+	UserRoleContributor UserRole = "contributor"
+	UserRoleViewer      UserRole = "viewer"
+)
+
+type UserWorkspace struct {
+	WorkspaceID primitive.ObjectID `bson:"workspaceId" json:"workspaceId" validate:"required"`
+	Role        UserRole           `bson:"role" json:"role" validate:"required"`
+}
+
 // User is the model that governs all notes objects retrived or inserted into the DB
 type User struct {
 	ID            primitive.ObjectID  `bson:"_id" json:"id" validate:"required"`
@@ -20,6 +33,7 @@ type User struct {
 	AvatarURL     string              `bson:"avatarUrl" json:"avatarUrl"`
 	Location      string              `bson:"location" json:"location"`
 	IsUserBanned  bool                `bson:"isUserBanned" json:"isUserBanned"`
+	Workspaces    []UserWorkspace     `bson:"workspaces" json:"workspaces"`
 	BanReason     string              `bson:"banReason" json:"banReason"`
 	CreatedAt     primitive.Timestamp `bson:"createdAt" json:"createdAt"`
 	UpdatedAt     primitive.Timestamp `bson:"updatedAt" json:"updatedAt"`
