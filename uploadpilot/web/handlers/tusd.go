@@ -44,10 +44,10 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 		BasePath:                config.TusUploadBasePath,
 		StoreComposer:           composer,
 		RespectForwardedHeaders: true,
-		NotifyTerminatedUploads: true,
-		NotifyCompleteUploads:   true,
-		NotifyCreatedUploads:    true,
-		NotifyUploadProgress:    true,
+		// NotifyTerminatedUploads: true,
+		// NotifyCompleteUploads:   true,
+		// NotifyCreatedUploads:    true,
+		// NotifyUploadProgress:    true,
 		PreUploadCreateCallback: func(hook tusd.HookEvent) (tusd.HTTPResponse, tusd.FileInfoChanges, error) {
 			infra.Log.Infof("pre upload create -> %s", hook.HTTPRequest.URI)
 

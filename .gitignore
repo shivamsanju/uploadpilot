@@ -4,6 +4,7 @@ server/.env
 react-uploader/node_modules
 react-uploader/dist
 
+*/tmp/
 # Binaries for programs and plugins
 *.exe
 *.dll
