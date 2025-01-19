@@ -125,7 +125,7 @@ const PreviewTab = () => {
                     uploaderId={uploaderId}
                     metadata={{
                         "uploaderEmail": session.email,
-                        "uploaderName": session.Name
+                        "uploaderName": session.name || "sss"
                     }}
                     {...settingsProps}
                 />

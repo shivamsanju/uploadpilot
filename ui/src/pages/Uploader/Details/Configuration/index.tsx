@@ -4,7 +4,7 @@ import { CreateUploaderForm } from '../../../../types/uploader';
 import { useForm } from '@mantine/form';
 import { useUpdateUploaderConfigMutation } from '../../../../apis/uploader';
 import { useParams } from 'react-router-dom';
-import { IconCopy, IconDeviceFloppy, IconRestore } from '@tabler/icons-react';
+import { IconDeviceFloppy, IconRestore } from '@tabler/icons-react';
 
 
 const ConfigurationTab = ({ uploaderDetails }: { uploaderDetails: any }) => {
@@ -14,7 +14,6 @@ const ConfigurationTab = ({ uploaderDetails }: { uploaderDetails: any }) => {
     const form = useForm<CreateUploaderForm>({
         initialValues: { ...uploaderDetails.config, requiredMetadataFields: uploaderDetails.requiredMetadataFields || [] },
     });
-
 
     const handleEditAndSaveButton = async () => {
         if (form.isDirty()) {

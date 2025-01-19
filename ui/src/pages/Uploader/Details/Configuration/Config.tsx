@@ -174,7 +174,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
 
                 </Stack>
             </SimpleGrid>
-            <Divider label="Settings" labelPosition="center" mt="lg" />
+            <Divider label="Settings" labelPosition="center" mt="xl" />
             <SimpleGrid cols={2}>
                 <Stack p="md">
                     <Group justify="space-between" className={classes.item} wrap="nowrap" gap="xl">

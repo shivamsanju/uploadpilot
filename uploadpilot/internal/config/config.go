@@ -62,7 +62,7 @@ func Init() error {
 	GithubCallbackURL = os.Getenv("GITHUB_CALLBACK_URL")
 
 	TusUploadDir = "./tmp"
-	TusUploadBasePath = "/upload"
+	TusUploadBasePath = SelfEndpoint + "/upload"
 
 	return nil
 }
