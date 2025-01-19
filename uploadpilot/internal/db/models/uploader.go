@@ -30,8 +30,6 @@ type UploaderConfig struct {
 	AllowedFileTypes       []string         `bson:"allowedFileTypes" json:"allowedFileTypes" validate:"required"`
 	AllowedSources         []AllowedSources `bson:"allowedSources" json:"allowedSources" validate:"required"`
 	RequiredMetadataFields []string         `bson:"requiredMetadataFields" json:"requiredMetadataFields"`
-	ShowStatusBar          bool             `bson:"showStatusBar" json:"showStatusBar"`
-	ShowProgress           bool             `bson:"showProgress" json:"showProgress"`
 	AllowPauseAndResume    bool             `bson:"allowPauseAndResume" json:"allowPauseAndResume"`
 	EnableImageEditing     bool             `bson:"enableImageEditing" json:"enableImageEditing"`
 	UseCompression         bool             `bson:"useCompression" json:"useCompression"`

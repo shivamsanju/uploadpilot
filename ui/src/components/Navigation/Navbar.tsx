@@ -8,6 +8,7 @@ import {
 import { ScrollArea } from '@mantine/core';
 import { LinksGroup } from './NavLinksGroup';
 import classes from './Navbar.module.css';
+import { useLocation } from 'react-router-dom';
 
 const mockdata = [
     { label: 'Dashboard', icon: IconGauge, link: "/" },
@@ -26,7 +27,8 @@ const mockdata = [
 ];
 
 const NavBar = () => {
-    const links = mockdata.map((item) => <LinksGroup {...item} key={item.label} />);
+    const { pathname } = useLocation();
+    const links = mockdata.map((item) => <LinksGroup {...item} key={item.label} active={pathname === item.link} />);
 
     return (
         <nav className={classes.navbar}>

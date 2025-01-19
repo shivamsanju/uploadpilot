@@ -29,7 +29,7 @@ const UserButton = () => {
         return <></>;
     }
 
-    return session.userId ? (
+    return (session.email || session.name) ? (
         <Menu
             width={200}
             position="bottom"

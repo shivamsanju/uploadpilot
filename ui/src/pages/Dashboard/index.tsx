@@ -6,7 +6,7 @@ import {
     IconReceipt2,
     IconUserPlus,
 } from '@tabler/icons-react';
-import { Card, Group, Paper, SimpleGrid, Text, Title } from '@mantine/core';
+import { Box, Card, Group, Paper, SimpleGrid, Text, Title } from '@mantine/core';
 import classes from './dashboard.module.css';
 import { LineChart } from '@mantine/charts';
 
@@ -69,8 +69,8 @@ const DashboardPage = () => {
         );
     });
     return (
-        <>
-            <Title order={3} mb="lg" opacity={0.8}>Dashboard</Title>
+        <Box px="sm">
+            <Title order={3} mb="lg" opacity={0.7}>Dashboard</Title>
             <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }}>{stats}</SimpleGrid>
             <Card mt="xl">
                 <LineChart
@@ -94,7 +94,7 @@ const DashboardPage = () => {
                     valueFormatter={(value) => `${value}°C`}
                 />
             </Card>
-        </>
+        </Box>
     );
 }
 

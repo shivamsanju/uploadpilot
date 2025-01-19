@@ -7,6 +7,7 @@ import {
     Text,
     Switch,
     TagsInput,
+    Divider,
 } from "@mantine/core";
 import { CreateUploaderForm } from "../../../../types/uploader";
 import { UseFormReturnType } from "@mantine/form";
@@ -35,6 +36,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
     return (
         <form>
             <Stack p="md">
+                <Divider label="Validations" labelPosition="center" />
                 {/* Allowed file types */}
                 <Group justify="space-between" className={classes.item} wrap="nowrap" gap="xl">
                     <div>
@@ -171,41 +173,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                     />
                 </Group>
 
-                {/* Advanced options */}
-                <Group justify="space-between" className={classes.item} wrap="nowrap" gap="xl">
-                    <div>
-                        <Text size="sm">Show status bar</Text>
-                        <Text size="xs" c="dimmed">
-                            Toggle to show the status bar in the uploader
-                        </Text>
-                    </div>
-                    <Switch
-                        className={classes.switch}
-                        size="lg"
-                        onLabel="ON" offLabel="OFF"
-                        checked={form.values.showStatusBar}
-                        onChange={(e) => form.setFieldValue("showStatusBar", e.target.checked)}
-                        disabled={isPending || type === "view"}
-                    />
-                </Group>
-
-                <Group justify="space-between" className={classes.item} wrap="nowrap" gap="xl">
-                    <div>
-                        <Text size="sm">Show progress bar</Text>
-                        <Text size="xs" c="dimmed">
-                            Toggle to show the progress bar in the uploader
-                        </Text>
-                    </div>
-                    <Switch
-                        className={classes.switch}
-                        size="lg"
-                        onLabel="ON" offLabel="OFF"
-                        checked={form.values.showProgress}
-                        onChange={(e) => form.setFieldValue("showProgress", e.target.checked)}
-                        disabled={isPending || type === "view"}
-                    />
-                </Group>
-
+                <Divider label="Settings" labelPosition="center" />
                 <Group justify="space-between" className={classes.item} wrap="nowrap" gap="xl">
                     <div>
                         <Text size="sm">Allow pause and resume</Text>

@@ -1,14 +1,15 @@
-.search {
+/* .search {
     border-bottom: light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-5)) 1px solid;
-}
+} */
 
-.icon {
+.tableExtraBtn {
     color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-2));
     cursor: pointer;
 }
 
-.icon:hover {
+.tableExtraBtn:hover {
     color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+    background: transparent;
 }
 
 .rotate {

@@ -70,6 +70,8 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		r.Header.Set("userId", claims.UserID)
+		r.Header.Set("email", claims.Email)
+		r.Header.Set("name", claims.Name)
 		next.ServeHTTP(w, r)
 	})
 }

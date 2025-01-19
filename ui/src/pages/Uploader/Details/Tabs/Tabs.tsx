@@ -3,6 +3,7 @@ import { Tabs } from '@mantine/core';
 import Configuration from '../Configuration';
 import Imports from '../Imports/Imports';
 import classes from "./Tabs.module.css"
+import PreviewTab from '../Preview';
 
 type UploaderTabsProps = {
     uploaderDetails: any
@@ -31,15 +32,19 @@ const UploaderTabs: React.FC<UploaderTabsProps> = ({ uploaderDetails }) => {
             classNames={classes}
         >
             <Tabs.List mb="sm" grow={false} style={{ gap: "0.5rem" }}>
-                <Tabs.Tab w={150} value=".">Configuration</Tabs.Tab>
+                <Tabs.Tab w={150} value=".">Preview</Tabs.Tab>
                 <Tabs.Tab w={150} value="imports">Imports</Tabs.Tab>
+                <Tabs.Tab w={150} value="config">Configuration</Tabs.Tab>
                 <Tabs.Tab w={150} value="hooks">Hooks</Tabs.Tab>
             </Tabs.List>
             <Tabs.Panel value=".">
-                <Configuration uploaderDetails={uploaderDetails} />
+                <PreviewTab />
             </Tabs.Panel>
             <Tabs.Panel value="imports">
                 <Imports uploaderDetails={uploaderDetails} />
+            </Tabs.Panel>
+            <Tabs.Panel value="config">
+                <Configuration uploaderDetails={uploaderDetails} />
             </Tabs.Panel>
             <Tabs.Panel value="hooks">
                 Coming soon

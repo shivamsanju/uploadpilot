@@ -23,6 +23,8 @@ func GetSignedToken(w http.ResponseWriter, user *goth.User) (string, error) {
 	expiresAt := time.Now().Local().Add(time.Hour * 24 * 30)
 	claims := &SignedDetails{
 		UserID: user.UserID,
+		Email:  user.Email,
+		Name:   user.Name,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expiresAt.Unix(),
 		},

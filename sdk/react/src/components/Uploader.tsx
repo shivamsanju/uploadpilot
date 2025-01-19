@@ -25,10 +25,42 @@ type UploaderProps = {
     height: number
     width: number
     theme: 'auto' | 'light' | 'dark'
+    showStatusBar?: boolean
+    showProgress?: boolean
     metadata?: Record<string, string>
     headers?: Record<string, string>
+    hideUploadButton?: boolean,
+    hideCancelButton?: boolean,
+    hideRetryButton?: boolean,
+    hidePauseResumeButton?: boolean,
+    hideProgressAfterFinish?: boolean,
+    note?: string,
+    singleFileFullScreen?: boolean,
+    showSelectedFiles?: boolean,
+    showRemoveButtonAfterComplete?: boolean,
+    autoProceed?: boolean
 };
-const Uploader: React.FC<UploaderProps> = ({ uploaderId, backendEndpoint, height, width, theme, headers, metadata }) => {
+
+const Uploader: React.FC<UploaderProps> = ({
+    uploaderId,
+    backendEndpoint,
+    height,
+    width,
+    theme,
+    headers,
+    metadata,
+    showStatusBar = true,
+    showProgress = true,
+    hideUploadButton = false,
+    hideCancelButton = false,
+    hideRetryButton = false,
+    hidePauseResumeButton = false,
+    hideProgressAfterFinish = false,
+    note = null,
+    singleFileFullScreen = true,
+    showSelectedFiles = true,
+    autoProceed = false
+}) => {
     const [uppy, setUppy] = useState<any>();
 
 
@@ -39,10 +71,10 @@ const Uploader: React.FC<UploaderProps> = ({ uploaderId, backendEndpoint, height
             .then(response => response.json())
             .then(data => {
                 const config = data.config;
-                console.log(config);
                 const uppy = new Uppy({
-                    autoProceed: true,
-                    debug: true,
+                    id: uploaderId,
+                    autoProceed: autoProceed,
+                    debug: false,
                     restrictions: {
                         maxFileSize: config.maxFileSize,
                         minFileSize: config.minFileSize,
@@ -54,6 +86,8 @@ const Uploader: React.FC<UploaderProps> = ({ uploaderId, backendEndpoint, height
                     }
                 });
                 uppy.use(Informer);
+                uppy.use(Progress);
+                uppy.use(StatusBar);
                 uppy.use(RemoteSources, {
                     companionUrl: `${backendEndpoint}/remote`,
                     sources: config.allowedSources.filter((e: string) => !['FileUpload', 'Audio', 'Webcamera', 'ScreenCapture'].includes(e)),
@@ -68,15 +102,13 @@ const Uploader: React.FC<UploaderProps> = ({ uploaderId, backendEndpoint, height
                         ...headers
                     },
                 });
-                if (metadata) uppy.setMeta(metadata);
-                if (config.enableImageEditing) uppy.use(ImageEditor);
-                if (config.useCompression) uppy.use(Compressor);
-                if (config.useFaultTolerantMode) uppy.use(GoldenRetriever);
                 if (config.allowedSources.includes('Audio')) uppy.use(Audio);
                 if (config.allowedSources.includes('Webcamera')) uppy.use(Webcam);
                 if (config.allowedSources.includes('ScreenCapture')) uppy.use(ScreenCapture);
-                if (config.showProgress) uppy.use(Progress);
-                if (config.showStatusBar) uppy.use(StatusBar);
+                if (config.enableImageEditing) uppy.use(ImageEditor);
+                if (config.useCompression) uppy.use(Compressor);
+                if (config.useFaultTolerantMode) uppy.use(GoldenRetriever);
+                if (metadata) uppy.setMeta(metadata);
                 setUppy(uppy);
             })
     }, [uploaderId, backendEndpoint]);
@@ -86,6 +118,17 @@ const Uploader: React.FC<UploaderProps> = ({ uploaderId, backendEndpoint, height
         height={height}
         width={width}
         theme={theme}
+        hideUploadButton={hideUploadButton}
+        hideCancelButton={hideCancelButton}
+        hideRetryButton={hideRetryButton}
+        hidePauseResumeButton={hidePauseResumeButton}
+        hideProgressAfterFinish={hideProgressAfterFinish}
+        note={note}
+        singleFileFullScreen={singleFileFullScreen}
+        showSelectedFiles={showSelectedFiles}
+        showRemoveButtonAfterComplete={showSelectedFiles}
+        showProgressDetails={showProgress}
+        disableStatusBar={!showStatusBar}
         proudlyDisplayPoweredByUppy={false}
     />;
 }

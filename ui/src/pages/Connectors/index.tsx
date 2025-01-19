@@ -1,5 +1,5 @@
 import { useMemo, } from 'react';
-import { Button, Group, Title, Menu } from '@mantine/core';
+import { Button, Group, Title, Menu, Box } from '@mantine/core';
 import { IconBrandAws, IconBrandAzure, IconBrandGoogle, IconCirclePlus2, IconDots, IconEdit, IconFolder, IconTrash } from '@tabler/icons-react';
 import { notifications } from '@mantine/notifications';
 import { useNavigate } from 'react-router-dom';
@@ -110,9 +110,9 @@ const ConnectorsPage = () => {
 
 
     return (
-        <>
-            <Group justify='space-between' align='flex-start' gap="lg">
-                <Title order={3} mb="lg" opacity={0.8}>Storage Connectors</Title>
+        <Box px="sm">
+            <Group justify='space-between' align='center' mb="xl">
+                <Title order={3} opacity={0.7}>Storage Connectors</Title>
                 <Button size="xs" leftSection={<IconCirclePlus2 size={16} />} onClick={handleNewConnector}>Create</Button>
             </Group>
             {error ?
@@ -133,7 +133,7 @@ const ConnectorsPage = () => {
                     totalRecords={totalRecords}
                 />
             }
-        </>
+        </Box>
     );
 }
 

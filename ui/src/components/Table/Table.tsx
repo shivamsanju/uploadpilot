@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Group, Stack, TextInput } from '@mantine/core';
+import { Box, Button, Divider, Group, Stack, TextInput } from '@mantine/core';
 import { DataTable, DataTableProps } from 'mantine-datatable';
 import { IconDownload, IconRefresh, IconSearch } from '@tabler/icons-react';
 import classes from "./Table.module.css";
@@ -34,32 +34,54 @@ export const UploadPilotDataTable: React.FC<TableProps> = (props) => {
 
 
     return (
-        <Stack>
-            <Group justify='flex-end' gap="md">
-                {props.showExport && <IconDownload size={18} className={classes.icon} />}
-                {props.showRefresh &&
-                    <IconRefresh
-                        size={18}
-                        className={`${classes.icon} ${rotate ? classes.rotate : ''}`}
-                        onClick={handleRefresh}
-                    />}
-                {props.showSearch &&
-                    <TextInput
-                        leftSection={<IconSearch size={18} />}
-                        variant="subtle"
-                        placeholder="Search"
+        <Stack gap={2}>
+            <Group justify='space-between' p={0} m={0}>
+                <Box w="70%">
+                    {props.showSearch &&
+                        <TextInput
+                            leftSection={<IconSearch size={18} />}
+                            variant="subtle"
+                            placeholder="Search"
+                            size="xs"
+                            className={classes.search}
+                            onChange={(e) => handleSearchChange(e.target.value)}
+                        />
+                    }
+                </Box>
+                <Group gap="md" justify='flex-end'>
+                    {props.showExport && <Button
                         size="xs"
-                        className={classes.search}
-                        onChange={(e) => handleSearchChange(e.target.value)}
-                    />
-                }
+                        variant='subtle'
+                        className={classes.tableExtraBtn}
+                        leftSection={<IconDownload size={18} />}
+                    >
+                        Export
+                    </Button>}
+                    {props.showRefresh &&
+                        <Button
+                            size="xs"
+                            className={classes.tableExtraBtn}
+                            onClick={handleRefresh}
+                            variant="subtle"
+                            leftSection={
+                                <IconRefresh
+                                    size={15}
+                                    className={`${rotate ? classes.rotate : ''}`}
+                                />
+                            }
+                        >
+                            Refresh
+                        </Button>
+                    }
+                </Group>
             </Group>
+            <Divider p={0} m={0} />
             <DataTable
                 backgroundColor="transparent"
                 {...props}
             />
 
-        </Stack>
+        </Stack >
     );
 }
 

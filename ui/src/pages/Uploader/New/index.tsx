@@ -34,8 +34,6 @@ const CreateNewUploaderPage = () => {
                 allowedFileTypes: form.values.allowedFileTypes,
                 allowedSources: form.values.allowedSources,
                 requiredMetadataFields: form.values.requiredMetadataFields,
-                showStatusBar: form.values.showStatusBar,
-                showProgress: form.values.showProgress,
                 enableImageEditing: form.values.enableImageEditing,
                 useCompression: form.values.useCompression,
                 useFaultTolerantMode: form.values.useFaultTolerantMode,
@@ -65,8 +63,6 @@ const CreateNewUploaderPage = () => {
             allowedFileTypes: [] as string[],
             allowedSources: [] as string[],
             requiredMetadataFields: [] as string[],
-            showStatusBar: true,
-            showProgress: true,
             enableImageEditing: false,
             useCompression: false,
             useFaultTolerantMode: false
@@ -121,7 +117,12 @@ const CreateNewUploaderPage = () => {
         }
     };
 
-    const handlePrevPage = () => setPage((prev) => prev - 1);
+    const handlePrevPage = () => {
+        if (page === 1) {
+            navigate('/uploaders', { replace: true });
+        }
+        setPage((prev) => prev - 1);
+    }
 
 
     return (
@@ -151,7 +152,7 @@ const CreateNewUploaderPage = () => {
                         {page === 3 && <DataStorePage form={form} />}
                     </Stack>
                     <Group justify="space-between" mt="xl">
-                        {page > 1 ? <Button variant="light" onClick={handlePrevPage}>Prev</Button> : <div />}
+                        <Button variant="light" onClick={handlePrevPage}>{page > 1 ? "Prev" : "Cancel"}</Button>
                         {page < 3 ? (
                             <Button onClick={handleNextPage}>Next</Button>
                         ) : (

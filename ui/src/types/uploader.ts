@@ -7,9 +7,6 @@ export type UploaderConfig = {
     allowedFileTypes: string[];
     allowedSources: string[];
     requiredMetadataFields?: string[];
-    theme?: 'dark' | 'light' | 'auto';
-    showStatusBar?: boolean;
-    showProgress?: boolean;
     allowPauseAndResume?: boolean;
     enableImageEditing?: boolean;
     useCompression?: boolean;

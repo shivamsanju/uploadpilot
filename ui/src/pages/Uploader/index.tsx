@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Button, Title, Menu, Group, Anchor } from '@mantine/core';
+import { Button, Title, Menu, Group, Anchor, Box } from '@mantine/core';
 import { IconCirclePlus2, IconDots, IconEye } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { useGetUploaders } from '../../apis/uploader';
@@ -80,9 +80,9 @@ const UploadersListPage = () => {
 
 
     return (
-        <>
-            <Group justify='space-between' align='flex-start' gap="lg">
-                <Title order={3} mb="lg" opacity={0.8}>Uploaders</Title>
+        <Box px="sm" >
+            <Group justify='space-between' align='center' mb="xl">
+                <Title order={3} opacity={0.7}>Uploaders</Title>
                 <Button size="xs" leftSection={<IconCirclePlus2 size={16} />} onClick={handleCreateNewUploader}>Create</Button>
             </Group>
             {error ?
@@ -90,6 +90,7 @@ const UploadersListPage = () => {
                 <UploadPilotDataTable
                     fetching={isPending}
                     showSearch
+                    showExport
                     onSearchFilterChange={onSearchFilterChange}
                     showRefresh
                     onRefresh={invalidate}
@@ -103,7 +104,7 @@ const UploadersListPage = () => {
                     totalRecords={totalRecords}
                 />
             }
-        </>
+        </Box>
     );
 }
 

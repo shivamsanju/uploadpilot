@@ -10,9 +10,10 @@ interface LinksGroupProps {
     initiallyOpened?: boolean;
     links?: { label: string; link: string }[];
     link?: string;
+    active?: boolean;
 }
 
-export function LinksGroup({ icon: Icon, label, initiallyOpened, links, link }: LinksGroupProps) {
+export function LinksGroup({ icon: Icon, label, initiallyOpened, links, link, active }: LinksGroupProps) {
     const navigate = useNavigate();
 
     const hasLinks = Array.isArray(links);
@@ -41,7 +42,7 @@ export function LinksGroup({ icon: Icon, label, initiallyOpened, links, link }: 
                         <ThemeIcon variant="light" size={30}>
                             <Icon size={18} />
                         </ThemeIcon>
-                        <Box ml="md">{label}</Box>
+                        <Box ml="md" className={`${classes.label} ${active ? classes.active : ''}`}>{label}</Box>
                     </Box>
                     {hasLinks && (
                         <IconChevronRight

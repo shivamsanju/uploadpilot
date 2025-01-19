@@ -40,7 +40,7 @@ const ProfilePage = () => {
         return <ErrorCard title={error.name} message={error.message} h="70vh" />
     }
 
-    return isPending ? <AppLoader h="70vh" /> : session.userId ? (
+    return isPending ? <AppLoader h="70vh" /> : (session.email || session.name) ? (
         <Container size="md" mt="xl">
             <Card shadow="sm" padding="lg" radius="md" withBorder>
                 <Group>

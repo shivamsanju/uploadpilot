@@ -122,8 +122,6 @@ func (ur *uploaderRepo) UpdateConfig(ctx context.Context, id string, updatedData
 		"config.allowedFileTypes":       updatedData.AllowedFileTypes,
 		"config.allowedSources":         updatedData.AllowedSources,
 		"config.requiredMetadataFields": updatedData.RequiredMetadataFields,
-		"config.showStatusBar":          updatedData.ShowStatusBar,
-		"config.showProgress":           updatedData.ShowProgress,
 		"config.allowPauseAndResume":    updatedData.AllowPauseAndResume,
 		"config.enableImageEditing":     updatedData.EnableImageEditing,
 		"config.useCompression":         updatedData.UseCompression,
