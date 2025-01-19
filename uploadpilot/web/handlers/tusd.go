@@ -41,8 +41,13 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 	// Create a new tusd handler
 	infra.Log.Infof("initializing tusd handler with upload base path: %s", config.TusUploadBasePath)
 	tusdHandler, err := tusd.NewHandler(tusd.Config{
-		BasePath:      config.TusUploadBasePath,
-		StoreComposer: composer,
+		BasePath:                config.TusUploadBasePath,
+		StoreComposer:           composer,
+		RespectForwardedHeaders: true,
+		NotifyTerminatedUploads: true,
+		NotifyCompleteUploads:   true,
+		NotifyCreatedUploads:    true,
+		NotifyUploadProgress:    true,
 		PreUploadCreateCallback: func(hook tusd.HookEvent) (tusd.HTTPResponse, tusd.FileInfoChanges, error) {
 			infra.Log.Infof("pre upload create -> %s", hook.HTTPRequest.URI)
 
