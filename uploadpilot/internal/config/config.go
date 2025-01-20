@@ -28,6 +28,8 @@ var (
 	TusUploadDir       string
 	S3AccessKey        string
 	S3SecretKey        string
+	S3BucketName       string
+	S3Region           string
 )
 
 func Init() error {
@@ -64,6 +66,8 @@ func Init() error {
 	GithubCallbackURL = os.Getenv("GITHUB_CALLBACK_URL")
 	S3AccessKey = os.Getenv("S3_ACCESS_KEY")
 	S3SecretKey = os.Getenv("S3_SECRET_KEY")
+	S3BucketName = os.Getenv("S3_BUCKET_NAME")
+	S3Region = os.Getenv("S3_REGION")
 
 	TusUploadDir = "./tmp"
 	TusUploadBasePath = SelfEndpoint + "/upload"

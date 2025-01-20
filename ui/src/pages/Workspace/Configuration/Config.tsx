@@ -38,7 +38,12 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
 
 
     const form = useForm<UploaderConfig>({
-        initialValues: { ...config, requiredMetadataFields: config?.requiredMetadataFields || [] },
+        initialValues: {
+            ...config,
+            allowedFileTypes: config?.allowedFileTypes || [],
+            allowedSources: config?.allowedSources || [],
+            requiredMetadataFields: config?.requiredMetadataFields || []
+        },
         validate: {
             allowedSources: (value) => value.length === 0 ? "Please select at least one source" : null,
         }
@@ -63,10 +68,29 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                 <Paper p="sm">
                     <SimpleGrid cols={{ sm: 1, md: 2 }}>
                         <Stack p="md">
+
+                            {/* Allowed input sources */}
+                            <Group justify="space-between" className={classes.item} gap="xl">
+                                <div>
+                                    <Text size="sm">Allowed input sources *</Text>
+                                    <Text size="xs" c="dimmed">
+                                        Select allowed input sources for the file uploader
+                                    </Text>
+                                </div>
+                                <MultiSelect
+                                    w={w}
+                                    size="xs"
+                                    data={allowedSources || []}
+                                    {...form.getInputProps("allowedSources")}
+                                    disabled={isPending}
+                                // disabled={isPending || type === "view"}
+                                />
+                            </Group>
+
                             {/* Allowed file types */}
                             <Group justify="space-between" className={classes.item} gap="xl">
                                 <div>
-                                    <Text size="sm">Allowed file types *</Text>
+                                    <Text size="sm">Allowed file types</Text>
                                     <Text size="xs" c="dimmed">
                                         Select allowed file types for the file uploader
                                     </Text>
@@ -80,25 +104,8 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                                 />
                             </Group>
 
-                            {/* Allowed input sources */}
-                            <Group justify="space-between" className={classes.item} gap="xl">
-                                <div>
-                                    <Text size="sm">Allowed input sources *</Text>
-                                    <Text size="xs" c="dimmed">
-                                        Select allowed input sources for the file uploader
-                                    </Text>
-                                </div>
-                                <MultiSelect
-                                    w={w}
-                                    size="xs"
-                                    data={allowedSources}
-                                    {...form.getInputProps("allowedSources")}
-                                    disabled={isPending}
-                                // disabled={isPending || type === "view"}
-                                />
-                            </Group>
                             {/* Max total file size */}
-                            <Group justify="space-between" className={classes.item} gap="xl">
+                            {/* <Group justify="space-between" className={classes.item} gap="xl">
                                 <div>
                                     <Text size="sm">Max total file size (bytes)</Text>
                                     <Text size="xs" c="dimmed">
@@ -112,7 +119,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                                     // disabled={isPending || type === "view"}
                                     min={0}
                                 />
-                            </Group>
+                            </Group> */}
                             <Group justify="space-between" className={classes.item} gap="xl">
                                 <div>
                                     <Text size="sm">Required metadata fields</Text>

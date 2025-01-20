@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState, } from 'react';
 import { Menu, Badge, Loader, Tooltip, Stack, Box, Button, Group, ActionIcon, Text } from '@mantine/core';
-import { IconCircleCheck, IconDots, IconExclamationCircle, IconBraces, IconChevronsDown, IconLogs } from '@tabler/icons-react';
+import { IconCircleCheck, IconDots, IconExclamationCircle, IconBraces, IconChevronsDown, IconLogs, IconDownload, IconCopy } from '@tabler/icons-react';
 import { useParams } from 'react-router-dom';
 import { useGetImports } from '../../../apis/import';
 import { timeAgo } from '../../../utils/datetime';
@@ -9,9 +9,16 @@ import { formatBytes } from '../../../utils/utility';
 import { UploadPilotDataTable, useUploadPilotDataTable } from '../../../components/Table/Table';
 import { ErrorCard } from '../../../components/ErrorCard/ErrorCard';
 import { DataTableColumn } from 'mantine-datatable';
-import { AppLoader } from '../../../components/Loader/AppLoader';
 
 const batchSize = 20;
+
+const handleDownload = (url: string) => {
+    window.open(url, '_blank')
+}
+
+const handleCopyToClipboard = (url: string) => {
+    navigator.clipboard.writeText(url);
+}
 
 const ImportsList = () => {
     const scrollViewportRef = useRef<HTMLDivElement>(null);
@@ -49,6 +56,8 @@ const ImportsList = () => {
         }
     }, [imports])
 
+
+
     const handleRefresh = () => {
         invalidate();
         scrollViewportRef.current?.scrollTo(0, 0);
@@ -59,12 +68,12 @@ const ImportsList = () => {
         return [
             {
                 title: 'Name',
-                accessor: 'storedFileName',
+                accessor: 'metadata.filename',
                 elipsis: true,
                 width: 500,
                 render: (params: any) => (
                     <>
-                        <Text fz="sm">{params?.storedFileName}</Text>
+                        <Text fz="sm">{params?.metadata?.filename}</Text>
                         <Text fz="xs" c="dimmed">
                             Filename
                         </Text>
@@ -146,6 +155,18 @@ const ImportsList = () => {
                                 </ActionIcon>
                             </Menu.Target>
                             <Menu.Dropdown>
+                                {params?.url && <Menu.Item
+                                    onClick={() => handleDownload(params?.url)}
+                                    leftSection={<IconDownload size={18} />}
+                                >
+                                    Download
+                                </Menu.Item>}
+                                {params?.url && <Menu.Item
+                                    onClick={() => handleCopyToClipboard(params?.url)}
+                                    leftSection={<IconCopy size={18} />}
+                                >
+                                    Copy URL
+                                </Menu.Item>}
                                 <Menu.Item
                                     onClick={() => handleViewLogs(params?.id)}
                                     leftSection={<IconLogs size={18} />}
@@ -186,9 +207,11 @@ const ImportsList = () => {
             />
             <Box mr="md">
                 <UploadPilotDataTable
+                    minHeight={500}
                     verticalSpacing="lg"
                     horizontalSpacing="lg"
-                    fetching={isPending || isFetchingNextPage || isFetching}
+                    // fetching={isPending || isFetchingNextPage || isFetching}
+                    fetching={true}
                     noHeader={true}
                     showSearch={true}
                     showExport={true}
@@ -202,7 +225,6 @@ const ImportsList = () => {
                     selectionCheckboxProps={{ style: { cursor: 'pointer' } }}
                     onScrollToBottom={fetchNextPage}
                     scrollViewportRef={scrollViewportRef}
-                    customLoader={<AppLoader h="50vh" />}
                     noRecordsText="No imports yet"
                 />
 

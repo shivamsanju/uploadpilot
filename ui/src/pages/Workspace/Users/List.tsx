@@ -6,7 +6,6 @@ import { useMemo } from 'react';
 import { DataTableColumn } from 'mantine-datatable';
 import { UploadPilotDataTable } from '../../../components/Table/Table';
 import { ErrorCard } from '../../../components/ErrorCard/ErrorCard';
-import { AppLoader } from '../../../components/Loader/AppLoader';
 
 const getRandomAvatar = () => {
     const randomIndex = Math.floor(Math.random() * 5) + 1;
@@ -97,6 +96,7 @@ const WorkspaceUsersList = () => {
     return (
         <Box mr="md">
             <UploadPilotDataTable
+                minHeight={500}
                 fetching={isPending}
                 showSearch={false}
                 columns={columns}
@@ -104,7 +104,6 @@ const WorkspaceUsersList = () => {
                 verticalSpacing="md"
                 horizontalSpacing="md"
                 noHeader={true}
-                customLoader={<AppLoader h="50vh" />}
                 noRecordsText="No users found"
             />
         </Box>
