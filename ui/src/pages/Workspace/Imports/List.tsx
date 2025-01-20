@@ -9,6 +9,7 @@ import { formatBytes } from '../../../utils/utility';
 import { UploadPilotDataTable, useUploadPilotDataTable } from '../../../components/Table/Table';
 import { ErrorCard } from '../../../components/ErrorCard/ErrorCard';
 import { DataTableColumn } from 'mantine-datatable';
+import { AppLoader } from '../../../components/Loader/AppLoader';
 
 const batchSize = 20;
 
@@ -201,6 +202,8 @@ const ImportsList = () => {
                     selectionCheckboxProps={{ style: { cursor: 'pointer' } }}
                     onScrollToBottom={fetchNextPage}
                     scrollViewportRef={scrollViewportRef}
+                    customLoader={<AppLoader h="50vh" />}
+                    noRecordsText="No imports yet"
                 />
 
                 <Stack align='center' justify='center' p="md" key="selectedRecords">
@@ -210,6 +213,7 @@ const ImportsList = () => {
                         leftSection={<IconChevronsDown size={16} />}
                         variant="subtle"
                         disabled={isPending || isFetchingNextPage || isFetching || !hasNextPage}
+                        loading={isFetchingNextPage || isFetching}
                         onClick={() => fetchNextPage({})}
                     >
                         Load More
