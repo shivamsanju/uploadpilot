@@ -49,7 +49,7 @@ const UserButton = () => {
 
             <Menu.Dropdown>
                 <Menu.Item leftSection={<IconUser size={16} />} onClick={handleProfileClick}>Profile</Menu.Item>
-                <Menu.Item leftSection={<IconSun size={16} />}> <ThemeSwitcher /></Menu.Item>
+                <Menu.Item leftSection={<IconSun size={16} />} closeMenuOnClick={false}> <ThemeSwitcher /></Menu.Item>
                 <Menu.Divider />
                 <Menu.Item leftSection={<IconLogout size={16} />} onClick={handleSignOut}>Sign Out</Menu.Item>
             </Menu.Dropdown>

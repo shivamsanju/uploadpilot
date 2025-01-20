@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Container, Card, Text, Group, Button, TextInput, Grid, FileButton, Avatar, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useGetSession } from '../../apis/user';
-import AppLoader from '../../components/Loader/AppLoader';
-import ErrorCard from '../../components/ErrorCard/ErrorCard';
+import { AppLoader } from '../../components/Loader/AppLoader';
+import { ErrorCard } from '../../components/ErrorCard/ErrorCard';
 
 const ProfilePage = () => {
     const [isEditing, setIsEditing] = useState(false);

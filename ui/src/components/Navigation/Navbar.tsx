@@ -3,38 +3,71 @@ import {
     IconCircles,
     IconDatabase,
     IconGauge,
+    IconUsers,
     IconWebhook,
 } from '@tabler/icons-react';
 import { ScrollArea } from '@mantine/core';
 import { LinksGroup } from './NavLinksGroup';
 import classes from './Navbar.module.css';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
+import WorkspaceSwitcher from '../WorkspaceSwitcher';
+import { useMemo } from 'react';
 
-const mockdata = [
-    { label: 'Dashboard', icon: IconGauge, link: "/" },
-    {
-        label: 'Uploaders',
-        icon: IconCircles,
-        link: "/uploaders",
-    },
-    {
-        label: 'Storage Connectors',
-        icon: IconDatabase,
-        link: '/storageConnectors',
-    },
-    { label: 'Hooks', icon: IconWebhook, link: "/hooks" },
-    { label: 'Settings', icon: IconAdjustments, link: "/settings" },
-];
+
 
 const NavBar = () => {
     const { pathname } = useLocation();
-    const links = mockdata.map((item) => <LinksGroup {...item} key={item.label} active={pathname === item.link} />);
+    const { workspaceId } = useParams();
+
+    const links = useMemo(() => {
+        return [
+            {
+                label: 'Get Started',
+                icon: IconCircles,
+                link: `/workspaces/${workspaceId}`,
+            },
+            {
+                label: 'Imports',
+                icon: IconDatabase,
+                link: `/workspaces/${workspaceId}/imports`,
+            },
+            {
+                label: 'Configuration',
+                icon: IconAdjustments,
+                link: `/workspaces/${workspaceId}/configuration`,
+            },
+            {
+                label: 'Users',
+                icon: IconUsers,
+                link: `/workspaces/${workspaceId}/users`,
+            },
+            {
+                label: 'Hooks',
+                icon: IconWebhook,
+                link: `/workspaces/${workspaceId}/hooks`,
+            },
+            {
+                label: 'Webhooks',
+                icon: IconWebhook,
+                link: `/workspaces/${workspaceId}/webhooks`,
+            },
+            {
+                label: 'Analytics',
+                icon: IconGauge,
+                link: `/workspaces/${workspaceId}/analytics`,
+            },
+        ].map((item) => <LinksGroup {...item} key={item.label} active={pathname === item.link} />)
+    }, [workspaceId, pathname])
+
 
     return (
         <nav className={classes.navbar}>
             <ScrollArea className={classes.links}>
                 <div className={classes.linksInner}>{links}</div>
             </ScrollArea>
+            <div className={classes.footer}>
+                <WorkspaceSwitcher />
+            </div>
         </nav>
     );
 }

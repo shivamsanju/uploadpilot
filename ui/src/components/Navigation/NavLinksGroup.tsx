@@ -11,6 +11,7 @@ interface LinksGroupProps {
     links?: { label: string; link: string }[];
     link?: string;
     active?: boolean;
+    isWorkspaceChild?: boolean;
 }
 
 export function LinksGroup({ icon: Icon, label, initiallyOpened, links, link, active }: LinksGroupProps) {

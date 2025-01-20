@@ -20,7 +20,7 @@ import '@uppy/screen-capture/dist/style.css';
 import '@uppy/image-editor/dist/style.css';
 
 type UploaderProps = {
-    uploaderId: string
+    workspaceId: string
     backendEndpoint: string
     height: number
     width: number
@@ -42,7 +42,7 @@ type UploaderProps = {
 };
 
 const Uploader: React.FC<UploaderProps> = ({
-    uploaderId,
+    workspaceId,
     backendEndpoint,
     height,
     width,
@@ -66,23 +66,22 @@ const Uploader: React.FC<UploaderProps> = ({
 
 
     useEffect(() => {
-        if (!uploaderId) return;
-        fetch(`${backendEndpoint}/uploaders/${uploaderId}`)
+        if (!workspaceId) return;
+        fetch(`${backendEndpoint}/workspaces/${workspaceId}/config`)
             .then(response => response.json())
-            .then(data => {
-                const config = data.config;
+            .then(config => {
                 const uppy = new Uppy({
-                    id: uploaderId,
+                    id: workspaceId,
                     autoProceed: autoProceed,
                     debug: false,
                     restrictions: {
-                        maxFileSize: config.maxFileSize,
-                        minFileSize: config.minFileSize,
-                        maxNumberOfFiles: config.maxNumberOfFiles,
-                        minNumberOfFiles: config.minNumberOfFiles,
-                        allowedFileTypes: config.allowedFileTypes,
-                        maxTotalFileSize: config.maxTotalFileSize,
-                        requiredMetaFields: config.requiredMetadataFields
+                        maxFileSize: config?.maxFileSize,
+                        minFileSize: config?.minFileSize,
+                        maxNumberOfFiles: config?.maxNumberOfFiles,
+                        minNumberOfFiles: config?.minNumberOfFiles,
+                        allowedFileTypes: config?.allowedFileTypes && config.allowedFileTypes.length > 0 ? config.allowedFileTypes : undefined,
+                        maxTotalFileSize: config?.maxTotalFileSize,
+                        requiredMetaFields: config?.requiredMetadataFields && config.requiredMetadataFields.length > 0 ? config.requiredMetadataFields : []
                     }
                 });
                 uppy.use(Informer);
@@ -98,7 +97,7 @@ const Uploader: React.FC<UploaderProps> = ({
                 uppy.use(Tus, {
                     endpoint: `${backendEndpoint}/upload`,
                     headers: {
-                        'uploaderId': uploaderId,
+                        'workspaceId': workspaceId,
                         ...headers
                     },
                 });
@@ -111,7 +110,7 @@ const Uploader: React.FC<UploaderProps> = ({
                 if (metadata) uppy.setMeta(metadata);
                 setUppy(uppy);
             })
-    }, [uploaderId, backendEndpoint]);
+    }, [workspaceId, backendEndpoint]);
 
     return uppy && <Dashboard
         uppy={uppy}

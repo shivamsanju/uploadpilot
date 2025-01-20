@@ -18,14 +18,14 @@ import (
 )
 
 type tusdHandler struct {
-	upRepo  db.UploaderRepo
 	impRepo db.ImportRepo
+	wsRepo  db.WorkspaceRepo
 }
 
 func NewTusdHandler() *tusdHandler {
 	return &tusdHandler{
-		upRepo:  db.NewUploaderRepo(),
 		impRepo: db.NewImportRepo(),
+		wsRepo:  db.NewWorkspaceRepo(),
 	}
 }
 
@@ -63,15 +63,19 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 		PreFinishResponseCallback: func(hook tusd.HookEvent) (tusd.HTTPResponse, error) {
 			infra.Log.Infof("pre finish response -> %s", hook.Upload.ID)
 
-			// Remove uploads from local
-			defer hooks.RemoveTusUploadHook(hook)
-
 			// Extract Metadata
 			var metadata map[string]interface{}
 			err := mapstructure.Decode(hook.Upload.MetaData, &metadata)
 			if err != nil {
 				return tusdBadRequestResponse(), nil
 			}
+
+			// Remove uploads from local
+			fileName, ok := metadata["filename"]
+			if !ok || len(fileName.(string)) == 0 {
+				return tusdBadRequestResponse(), nil
+			}
+			defer hooks.RenameTusUploadHook(hook, fileName.(string))
 
 			// Create new upload
 			importId := primitive.NewObjectID()
@@ -88,16 +92,16 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 			}
 			go h.impRepo.Create(hook.Context, imp)
 
-			// Upload to datastore
-			err = hooks.UploadToDatastoreHook(hook, imp)
+			// Update metadata
+			err = hooks.UpdateImportMetadata(hook, imp)
 			if err != nil {
 				imp.Logs = append(imp.Logs, models.Log{
-					Message:   "Error importing the file: " + err.Error(),
+					Message:   "Error updating the metadata of the file: " + err.Error(),
 					TimeStamp: primitive.NewDateTimeFromTime(time.Now()),
 				})
 				imp.Status = models.ImportStatusFailed
 				infra.Log.Errorf("unable to upload to datastore: %s", err)
-				h.impRepo.Update(hook.Context, &importId, imp)
+				h.impRepo.Update(hook.Context, importId, imp)
 				return tusdOkResponse(), nil
 			}
 
@@ -107,7 +111,7 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 				TimeStamp: primitive.NewDateTimeFromTime(time.Now()),
 			})
 			imp.Status = models.ImportStatusSuccess
-			_, err = h.impRepo.Update(hook.Context, &importId, imp)
+			_, err = h.impRepo.Update(hook.Context, importId, imp)
 			if err != nil {
 				infra.Log.Errorf("unable to update import: %s", err)
 				return tusdOkResponse(), nil

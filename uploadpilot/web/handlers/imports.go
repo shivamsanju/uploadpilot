@@ -9,6 +9,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
 	"github.com/uploadpilot/uploadpilot/web/dto"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type importHandler struct {
@@ -21,14 +22,20 @@ func NewImportHandler() *importHandler {
 	}
 }
 
-func (h *importHandler) GetAllImportsForUploader(w http.ResponseWriter, r *http.Request) {
-	uploaderId := chi.URLParam(r, "uploaderId")
+func (h *importHandler) GetAllImportsForWorkspace(w http.ResponseWriter, r *http.Request) {
+	wID := chi.URLParam(r, "workspaceId")
+	workspaceID, err := primitive.ObjectIDFromHex(wID)
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+
 	skip, limit, search, err := utils.GetSkipLimitSearchParams(r)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	imports, totalRecords, err := h.impRepo.FindAllImportsByUploaderId(r.Context(), uploaderId, skip, limit, search)
+	imports, totalRecords, err := h.impRepo.FindAllImportsForWorkspace(r.Context(), workspaceID, skip, limit, search)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -41,7 +48,12 @@ func (h *importHandler) GetAllImportsForUploader(w http.ResponseWriter, r *http.
 
 func (h *importHandler) GetImportDetailsByID(w http.ResponseWriter, r *http.Request) {
 	impID := chi.URLParam(r, "importId")
-	cb, err := h.impRepo.Get(r.Context(), impID)
+	importID, err := primitive.ObjectIDFromHex(impID)
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	cb, err := h.impRepo.Get(r.Context(), importID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return

@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	"github.com/go-playground/validator/v10"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/uploadpilot/uploadpilot/internal/auth"
@@ -16,6 +18,8 @@ import (
 	"github.com/uploadpilot/uploadpilot/web/dto"
 	"golang.org/x/net/context"
 )
+
+var validate = validator.New()
 
 type authHandler struct {
 	userRepo db.UserRepo
@@ -33,10 +37,9 @@ func (h *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if user, err := gothic.CompleteUserAuth(w, r); err == nil {
 		token, err := auth.GetSignedToken(w, &user)
 		if err != nil {
-			utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+			redrectWithError(w, r, err)
 			return
 		}
-		infra.Log.Infof("user logged in: %+v", user)
 		redirectUri := getTokenRedirectURI(token)
 		http.Redirect(w, r, redirectUri, http.StatusSeeOther)
 	} else {
@@ -51,23 +54,28 @@ func (h *authHandler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	user, err := gothic.CompleteUserAuth(w, r)
 
 	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusUnauthorized, err)
+		redrectWithError(w, r, err)
 		return
 	}
-	exists, err := h.userRepo.CheckUserExists(r.Context(), user.UserID)
+	existingProvider, err := h.userRepo.GetUserProvider(r.Context(), user.Email)
 	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		redrectWithError(w, r, err)
+
 		return
 	}
-	if !exists {
+	if existingProvider != "" && existingProvider != provider {
+		err := fmt.Errorf("user with email %s already exists with provider %s. please login with the same provider you used earlier", user.Email, existingProvider)
+		redrectWithError(w, r, err)
+		return
+	}
+	if existingProvider == "" {
 		h.userRepo.CreateUser(r.Context(), mapUser(&user))
 	}
 	token, err := auth.GetSignedToken(w, &user)
 	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		redrectWithError(w, r, err)
 		return
 	}
-	infra.Log.Infof("user logged in: %+v", user)
 	redirectUri := getTokenRedirectURI(token)
 	http.Redirect(w, r, redirectUri, http.StatusSeeOther)
 }
@@ -102,7 +110,6 @@ func (h *authHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 }
 
 func mapUser(user *goth.User) *models.User {
-	infra.Log.Infof("mapping user: %+v", user)
 	return &models.User{
 		UserID:        user.UserID,
 		Email:         user.Email,
@@ -125,4 +132,9 @@ func getTokenRedirectURI(token string) string {
 
 func getLogoutRedirectURI() string {
 	return config.FrontendURI + "/auth"
+}
+
+func redrectWithError(w http.ResponseWriter, r *http.Request, err error) {
+	redirectUri := config.FrontendURI + "/error?error=" + err.Error()
+	http.Redirect(w, r, redirectUri, http.StatusSeeOther)
 }

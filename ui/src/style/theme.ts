@@ -2,9 +2,9 @@ import { createTheme, TextInput, Button, Select, Textarea, TagsInput, Badge } fr
 
 export const theme = createTheme({
     primaryColor: 'grape',
-    fontFamily: "Roboto",
+    fontFamily: "Inter",
     headings: {
-        fontFamily: "Roboto",
+        fontFamily: "Inter",
     },
     defaultRadius: "md",
     components: {

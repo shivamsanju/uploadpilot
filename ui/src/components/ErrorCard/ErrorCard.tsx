@@ -5,7 +5,7 @@ type ErrorCardProps = {
     message: string
     h?: string
 }
-const ErrorCard: React.FC<ErrorCardProps> = ({ title, message, h }) => {
+export const ErrorCard: React.FC<ErrorCardProps> = ({ title, message, h }) => {
     const refreshPage = () => window.location.reload();
     return (
         <Paper shadow="xs" p="sm" radius="xs" withBorder>
@@ -24,5 +24,3 @@ const ErrorCard: React.FC<ErrorCardProps> = ({ title, message, h }) => {
         </Paper>
     )
 }
-
-export default ErrorCard

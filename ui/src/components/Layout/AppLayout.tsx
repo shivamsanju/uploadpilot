@@ -1,6 +1,7 @@
 import {
     AppShell,
     Burger,
+    ScrollArea,
     useMantineColorScheme,
     useMantineTheme,
 } from "@mantine/core";
@@ -30,7 +31,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 navbar={{
                     width: 220,
                     breakpoint: 'sm',
-                    collapsed: { mobile: !opened, desktop: !opened },
+                    collapsed: { mobile: opened, desktop: !opened },
                 }}
                 padding="md"
                 transitionDuration={500}
@@ -51,7 +52,9 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                     <NavBar />
                 </AppShell.Navbar>
                 <AppShell.Main bg={bg} m={0}>
-                    {children}
+                    <ScrollArea scrollbarSize={6} h="95vh">
+                        {children}
+                    </ScrollArea>
                 </AppShell.Main>
             </AppShell>
         </AuthWrapper>
