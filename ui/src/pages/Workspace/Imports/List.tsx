@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState, } from 'react';
-import { Menu, Badge, Loader, Tooltip, Stack, Box, Button, Group, ActionIcon, Text } from '@mantine/core';
+import { Menu, Loader, Tooltip, Stack, Box, Button, Group, ActionIcon, Text } from '@mantine/core';
 import { IconCircleCheck, IconDots, IconExclamationCircle, IconBraces, IconChevronsDown, IconLogs, IconDownload, IconCopy } from '@tabler/icons-react';
 import { useParams } from 'react-router-dom';
 import { useGetImports } from '../../../apis/import';
@@ -9,6 +9,7 @@ import { formatBytes } from '../../../utils/utility';
 import { UploadPilotDataTable, useUploadPilotDataTable } from '../../../components/Table/Table';
 import { ErrorCard } from '../../../components/ErrorCard/ErrorCard';
 import { DataTableColumn } from 'mantine-datatable';
+import { getFileIcon } from '../../../utils/fileicons';
 
 const batchSize = 20;
 
@@ -27,7 +28,6 @@ const ImportsList = () => {
     const [modalVariant, setModalVariant] = useState<'logs' | 'metadata'>('logs')
     const [logs, setLogs] = useState([])
     const [metadata, setMetadata] = useState({})
-    const [selectedRecords, setSelectedRecords] = useState<any[]>([])
 
     const { workspaceId } = useParams();
     const { searchFilter, onSearchFilterChange } = useUploadPilotDataTable();
@@ -67,6 +67,15 @@ const ImportsList = () => {
     const colDefs: DataTableColumn[] = useMemo(() => {
         return [
             {
+                title: "",
+                accessor: 'id',
+                render: (params: any) => (
+                    <ActionIcon variant='transparent'>
+                        {getFileIcon(params?.metadata?.filetype, 30)}
+                    </ActionIcon>
+                ),
+            },
+            {
                 title: 'Name',
                 accessor: 'metadata.filename',
                 elipsis: true,
@@ -84,9 +93,10 @@ const ImportsList = () => {
                 title: 'File Type',
                 accessor: 'metadata.filetype',
                 textAlign: 'center',
+                width: 600,
                 render: (params: any) => (
                     <>
-                        <Badge size="xs" p="sm" variant='outline'>{params?.metadata?.filetype}</Badge>
+                        <Text fz="sm" >{params?.metadata?.filetype}</Text>
                         <Text fz="xs" c="dimmed">
                             Mime Type
                         </Text>
@@ -219,8 +229,6 @@ const ImportsList = () => {
                     onSearchFilterChange={onSearchFilterChange}
                     columns={colDefs}
                     records={imports}
-                    selectedRecords={selectedRecords}
-                    onSelectedRecordsChange={setSelectedRecords}
                     selectionCheckboxProps={{ style: { cursor: 'pointer' } }}
                     onScrollToBottom={fetchNextPage}
                     scrollViewportRef={scrollViewportRef}
