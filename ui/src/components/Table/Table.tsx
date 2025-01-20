@@ -75,12 +75,11 @@ export const UploadPilotDataTable: React.FC<TableProps> = (props) => {
                     }
                 </Group>
             </Group>
-            <Divider p={0} m={0} />
+            {(props.showSearch || props.showRefresh || props.showExport) && <Divider p={0} m={0} />}
             <DataTable
                 backgroundColor="transparent"
                 {...props}
             />
-
         </Stack >
     );
 }

@@ -13,11 +13,11 @@ import (
 
 type ImportRepo interface {
 	FindAll(ctx context.Context, skip int64, limit int64, search string) ([]models.Import, int64, error)
-	FindAllImportsByUploaderId(ctx context.Context, uploaderId string, skip int64, limit int64, search string) ([]models.Import, int64, error)
-	Get(ctx context.Context, id string) (*models.Import, error)
+	FindAllImportsForWorkspace(ctx context.Context, workspaceID primitive.ObjectID, skip int64, limit int64, search string) ([]models.Import, int64, error)
+	Get(ctx context.Context, importID primitive.ObjectID) (*models.Import, error)
 	Create(ctx context.Context, imp *models.Import) (*models.Import, error)
-	Update(ctx context.Context, id *primitive.ObjectID, imp *models.Import) (*models.Import, error)
-	Delete(ctx context.Context, id string) error
+	Update(ctx context.Context, importID primitive.ObjectID, imp *models.Import) (*models.Import, error)
+	Delete(ctx context.Context, importID primitive.ObjectID) error
 }
 
 type importRepo struct {
@@ -74,15 +74,10 @@ func (i *importRepo) FindAll(ctx context.Context, skip int64, limit int64, searc
 	return cb, totalRecords, nil
 }
 
-func (i *importRepo) FindAllImportsByUploaderId(ctx context.Context, id string, skip int64, limit int64, search string) ([]models.Import, int64, error) {
-	uploaderId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		infra.Log.Errorf("not a valid id: %v", err.Error())
-		return nil, 0, err
-	}
+func (i *importRepo) FindAllImportsForWorkspace(ctx context.Context, workspaceID primitive.ObjectID, skip int64, limit int64, search string) ([]models.Import, int64, error) {
 
-	// Build filter with uploaderId and optional search
-	filter := bson.M{"uploaderId": uploaderId}
+	// Build filter with workspaceId and optional search
+	filter := bson.M{"workspaceId": workspaceID}
 	if search != "" {
 		filter["$or"] = []bson.M{
 			{"name": bson.M{"$regex": search, "$options": "i"}},
@@ -123,15 +118,10 @@ func (i *importRepo) FindAllImportsByUploaderId(ctx context.Context, id string, 
 	return cb, totalRecords, nil
 }
 
-func (i *importRepo) Get(ctx context.Context, id string) (*models.Import, error) {
-	importId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		infra.Log.Errorf("not a valid id: %v", err.Error())
-		return nil, err
-	}
+func (i *importRepo) Get(ctx context.Context, importID primitive.ObjectID) (*models.Import, error) {
 	var cb models.Import
 	collection := db.Collection(i.collectionName)
-	err = collection.FindOne(ctx, bson.M{"_id": importId}).Decode(&cb)
+	err := collection.FindOne(ctx, bson.M{"_id": importID}).Decode(&cb)
 	if err != nil {
 		infra.Log.Errorf("failed to find import: %s", err.Error())
 		return nil, err
@@ -150,9 +140,9 @@ func (i *importRepo) Create(ctx context.Context, imp *models.Import) (*models.Im
 	return imp, nil
 }
 
-func (i *importRepo) Update(ctx context.Context, id *primitive.ObjectID, imp *models.Import) (*models.Import, error) {
+func (i *importRepo) Update(ctx context.Context, importID primitive.ObjectID, imp *models.Import) (*models.Import, error) {
 	collection := db.Collection(i.collectionName)
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": &id}, bson.M{"$set": imp})
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": importID}, bson.M{"$set": imp})
 	if err != nil {
 		infra.Log.Errorf("failed to update import: %s", err.Error())
 		return nil, err
@@ -160,14 +150,9 @@ func (i *importRepo) Update(ctx context.Context, id *primitive.ObjectID, imp *mo
 	return imp, nil
 }
 
-func (i *importRepo) Delete(ctx context.Context, id string) error {
-	importId, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		infra.Log.Errorf("not a valid id: %v", err.Error())
-		return err
-	}
+func (i *importRepo) Delete(ctx context.Context, importID primitive.ObjectID) error {
 	collection := db.Collection(i.collectionName)
-	_, err = collection.DeleteOne(ctx, bson.M{"_id": importId})
+	_, err := collection.DeleteOne(ctx, bson.M{"_id": importID})
 	if err != nil {
 		infra.Log.Errorf("failed to delete import: %s", err.Error())
 		return err

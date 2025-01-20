@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
+	"github.com/go-playground/validator/v10"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/uploadpilot/uploadpilot/internal/auth"
@@ -17,6 +18,8 @@ import (
 	"github.com/uploadpilot/uploadpilot/web/dto"
 	"golang.org/x/net/context"
 )
+
+var validate = validator.New()
 
 type authHandler struct {
 	userRepo db.UserRepo
@@ -54,7 +57,7 @@ func (h *authHandler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 		redrectWithError(w, r, err)
 		return
 	}
-	existingProvider, err := h.userRepo.CheckUserProvider(r.Context(), user.Email)
+	existingProvider, err := h.userRepo.GetUserProvider(r.Context(), user.Email)
 	if err != nil {
 		redrectWithError(w, r, err)
 
@@ -107,7 +110,6 @@ func (h *authHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 }
 
 func mapUser(user *goth.User) *models.User {
-	infra.Log.Infof("mapping user: %+v", user)
 	return &models.User{
 		UserID:        user.UserID,
 		Email:         user.Email,

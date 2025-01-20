@@ -6,7 +6,7 @@ import classes from './Auth.module.css';
 import { getApiDomain } from '../../utils/config';
 import TokenCatcher from './TokenCatcher';
 import { useEffect, useState } from 'react';
-import AppLoader from '../../components/Loader/AppLoader';
+import { AppLoader } from '../../components/Loader/AppLoader';
 import { useNavigate } from 'react-router-dom';
 
 const AuthPage = () => {

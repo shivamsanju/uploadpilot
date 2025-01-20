@@ -14,9 +14,7 @@ func Routes() *chi.Mux {
 	ih := handlers.NewTusdHandler()
 	authHandler := handlers.NewAuthHandler()
 	workspaceHandler := handlers.NewWorkspaceHandler()
-	uploaderHandler := handlers.NewuploaderHandler()
 	importHandler := handlers.NewImportHandler()
-	storageHandler := handlers.NewStorageConnectorHandler()
 
 	// Public routes
 	r.Group(func(r chi.Router) {
@@ -31,47 +29,42 @@ func Routes() *chi.Mux {
 		})
 
 		// Uploader details
-		r.Get("/workspaces/{workspaceId}/uploaders/{uploaderId}", uploaderHandler.GetUploaderByID)
+		r.Get("/workspaces/{workspaceId}/config", workspaceHandler.GetUploaderConfig)
 	})
 
 	// Protected routes
 	r.Group(func(r chi.Router) {
 		r.Use(AuthMiddleware)
 
-		// Session routes
+		// Session
 		r.Get("/session", authHandler.GetSession)
 
-		// Uploader routes
+		// Workspaces
 		r.Route("/workspaces", func(r chi.Router) {
 			r.Post("/", workspaceHandler.CreateWorkspace)
 			r.Get("/", workspaceHandler.GetWorkspacesForUser)
-			r.Post("/{workspaceId}/users", workspaceHandler.AddUserToWorkspace)
 
-			// Uploader routes
-			r.Route("/{workspaceId}/uploaders", func(r chi.Router) {
-				r.Post("/", uploaderHandler.CreateUploader)
-				r.Get("/", uploaderHandler.GetAllUploaders)
-				r.Get("/sources/allowed", uploaderHandler.GetAllAllowedSources)
-				r.Put("/{uploaderId}/config", uploaderHandler.UpdateUploaderConfig)
-				r.Delete("/{uploaderId}", uploaderHandler.DeleteUploader)
+			// Single workspace
+			r.Route("/{workspaceId}", func(r chi.Router) {
+				r.Put("/config", workspaceHandler.UpdateUploaderConfig)
+				r.Get("/allowedSources", workspaceHandler.GetAllAllowedSources)
 
-				// Import routes
-				r.Route("/{uploaderId}/imports", func(r chi.Router) {
-					r.Get("/", importHandler.GetAllImportsForUploader)
-					r.Get("/{importId}", importHandler.GetImportDetailsByID)
+				// Users
+				r.Route("/users", func(r chi.Router) {
+					r.Get("/", workspaceHandler.GetAllUsersInWorkspace)
+					r.Post("/", workspaceHandler.AddUserToWorkspace)
+					r.Delete("/", workspaceHandler.RemoveUserFromWorkspace)
+				})
+
+				// Imports
+				r.Route("/imports", func(r chi.Router) {
+					r.Get("/", importHandler.GetAllImportsForWorkspace)
+					r.Route("/{importId}", func(r chi.Router) {
+						r.Get("/", importHandler.GetImportDetailsByID)
+					})
 				})
 			})
-
-			// Storage connector routes
-			r.Route("/storageConnectors", func(r chi.Router) {
-				r.Post("/", storageHandler.CreateStorageConnector)
-				r.Get("/", storageHandler.GetAllStorageConnectors)
-				r.Get("/{id}", storageHandler.GetStorageConnectorByID)
-				r.Delete("/{id}", storageHandler.DeleteStorageConnector)
-			})
 		})
-
 	})
-
 	return r
 }

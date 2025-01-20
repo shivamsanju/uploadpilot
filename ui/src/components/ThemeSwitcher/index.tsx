@@ -39,7 +39,8 @@ const ThemeSwitcher = () => {
         <Menu
             width={200}
             position="left"
-            trigger='hover'
+            trigger='click'
+            closeOnItemClick={false}
         >
             <Menu.Target>
                 <Text size='sm'>Theme</Text>

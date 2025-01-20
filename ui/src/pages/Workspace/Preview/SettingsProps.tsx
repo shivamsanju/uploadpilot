@@ -1,8 +1,8 @@
 import { useState } from "react";
 
 export const useSettingsProps = () => {
-    const [height, setHeight] = useState<number>(600);
-    const [width, setWidth] = useState<number>(500);
+    const [height, setHeight] = useState<number>(400);
+    const [width, setWidth] = useState<number>(350);
     const [theme, setTheme] = useState<'auto' | 'light' | 'dark'>('auto');
     const [showStatusBar, setShowStatusBar] = useState<boolean>(true);
     const [autoProceed, setAutoProceed] = useState<boolean>(false);

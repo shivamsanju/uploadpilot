@@ -1,17 +1,13 @@
 import {
     AppShell,
-    Burger,
     ScrollArea,
     useMantineColorScheme,
     useMantineTheme,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
 import { AdminHeader } from "../Header/Header";
-import NavBar from "../Navigation/Navbar";
 import AuthWrapper from "../AuthWrapper/AuthWrapper";
 
-const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [opened, { toggle }] = useDisclosure(true);
+const WorkspacesLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { colorScheme } = useMantineColorScheme();
     const theme = useMantineTheme();
 
@@ -28,29 +24,13 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <AuthWrapper>
             <AppShell
                 header={{ height: "5vh" }}
-                navbar={{
-                    width: 220,
-                    breakpoint: 'sm',
-                    collapsed: { mobile: opened, desktop: !opened },
-                }}
                 padding="md"
                 transitionDuration={500}
                 transitionTimingFunction="ease"
             >
                 <AppShell.Header bg={navbarHeaderBg} style={{ borderColor: appShellBorderColor }}>
-                    <AdminHeader
-                        burger={
-                            <Burger
-                                opened={false}
-                                onClick={toggle}
-                                size="xs"
-                            />
-                        }
-                    />
+                    <AdminHeader />
                 </AppShell.Header>
-                <AppShell.Navbar bg={navbarHeaderBg} style={{ borderColor: appShellBorderColor }}>
-                    <NavBar />
-                </AppShell.Navbar>
                 <AppShell.Main bg={bg} m={0}>
                     <ScrollArea scrollbarSize={6} h="95vh">
                         {children}
@@ -61,4 +41,4 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     );
 }
 
-export default AppLayout
+export default WorkspacesLayout
