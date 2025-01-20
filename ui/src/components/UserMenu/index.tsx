@@ -31,6 +31,8 @@ const UserButton = () => {
 
     return (session.email || session.name) ? (
         <Menu
+            trigger='click'
+            transitionProps={{ transition: 'pop' }}
             width={200}
             position="bottom"
             trapFocus={false}

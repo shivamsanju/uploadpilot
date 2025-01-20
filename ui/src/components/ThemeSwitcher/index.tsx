@@ -37,6 +37,7 @@ const ThemeSwitcher = () => {
 
     return (
         <Menu
+            transitionProps={{ transition: 'pop' }}
             width={200}
             position="left"
             trigger='click'
