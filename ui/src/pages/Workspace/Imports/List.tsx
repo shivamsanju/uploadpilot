@@ -210,8 +210,7 @@ const ImportsList = () => {
                     minHeight={500}
                     verticalSpacing="lg"
                     horizontalSpacing="lg"
-                    // fetching={isPending || isFetchingNextPage || isFetching}
-                    fetching={true}
+                    fetching={isPending || isFetchingNextPage || isFetching}
                     noHeader={true}
                     showSearch={true}
                     showExport={true}
