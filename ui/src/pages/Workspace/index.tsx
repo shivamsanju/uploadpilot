@@ -45,7 +45,7 @@ const WorkspaceLandingPage = () => {
                     isPending ? <AppLoader h="55vh" />
                         : <Box>
                             <form onSubmit={form.onSubmit((values) => handleCreateWorkspace(values))}>
-                                <Stack h="20vh" w="40vw" miw="300" mt="xl">
+                                <Stack w="40vw" miw="300" mt="xl">
                                     <Text size="xl" fw={700} opacity={0.7}>{workspaces && workspaces.length > 0 ? 'Create a new workspace' : 'Create a new workspace to get started'}</Text>
                                     <TextInput
                                         placeholder="Enter a workspace name"

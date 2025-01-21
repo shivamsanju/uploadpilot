@@ -30,7 +30,6 @@ func Init() (*http.Server, error) {
 
 	// Mount the uploadpilot web routes
 	router.Group(func(r chi.Router) {
-		r.Use(CorsMiddleware)
 		r.Mount("/", Routes())
 	})
 

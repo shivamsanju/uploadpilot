@@ -8,7 +8,8 @@ import (
 )
 
 func Routes() *chi.Mux {
-	r := chi.NewRouter()
+	router := chi.NewRouter()
+	router.Use(AllowAllCorsMiddleware)
 
 	// Handlers for uploads
 	ih := handlers.NewTusdHandler()
@@ -17,23 +18,26 @@ func Routes() *chi.Mux {
 	importHandler := handlers.NewImportHandler()
 
 	// Public routes
-	r.Group(func(r chi.Router) {
+	router.Group(func(r chi.Router) {
 		r.Mount("/upload", http.StripPrefix("/upload", ih.GetTusHandler()))
+		// Uploader details
+		r.Get("/workspaces/{workspaceId}/config", workspaceHandler.GetUploaderConfig)
+	})
 
-		// Auth routes
+	// Auth routes
+	router.Group(func(r chi.Router) {
+		r.Use(CorsMiddleware)
 		r.Route("/auth", func(r chi.Router) {
 			r.Get("/{provider}/authorize", authHandler.Login)
 			r.Get("/{provider}/callback", authHandler.HandleCallback)
 			r.Get("/logout", authHandler.Logout)
 			r.Get("/logout/{provider}", authHandler.LogoutProvider)
 		})
-
-		// Uploader details
-		r.Get("/workspaces/{workspaceId}/config", workspaceHandler.GetUploaderConfig)
 	})
 
 	// Protected routes
-	r.Group(func(r chi.Router) {
+	router.Group(func(r chi.Router) {
+		r.Use(CorsMiddleware)
 		r.Use(AuthMiddleware)
 
 		// Session
@@ -66,5 +70,6 @@ func Routes() *chi.Mux {
 			})
 		})
 	})
-	return r
+
+	return router
 }

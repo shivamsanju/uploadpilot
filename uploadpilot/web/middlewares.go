@@ -27,6 +27,20 @@ func CorsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func AllowAllCorsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(response http.ResponseWriter, r *http.Request) {
+		response.Header().Set("Access-Control-Allow-Origin", "*")
+		response.Header().Set("Access-Control-Allow-Credentials", "true")
+		if r.Method == "OPTIONS" {
+			response.Header().Set("Access-Control-Allow-Methods", "*")
+			response.Header().Set("Access-Control-Allow-Headers", "*")
+			response.Write([]byte(""))
+		} else {
+			next.ServeHTTP(response, r)
+		}
+	})
+}
+
 func LoggerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)

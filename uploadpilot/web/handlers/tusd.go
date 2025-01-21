@@ -57,6 +57,12 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 				return tusdBadRequestResponse(), tusd.FileInfoChanges{}, nil
 			}
 
+			err = hooks.AuthHook(hook)
+			if err != nil {
+				infra.Log.Errorf("unable to validate upload: %s", err)
+				return tusdBadRequestResponse(401), tusd.FileInfoChanges{}, nil
+			}
+
 			return tusdOkResponse(), tusd.FileInfoChanges{}, nil
 		},
 		PreFinishResponseCallback: func(hook tusd.HookEvent) (tusd.HTTPResponse, error) {
@@ -105,7 +111,12 @@ func tusdOkResponse() tusd.HTTPResponse {
 	}
 }
 
-func tusdBadRequestResponse() tusd.HTTPResponse {
+func tusdBadRequestResponse(statusCode ...int) tusd.HTTPResponse {
+	if len(statusCode) > 0 && statusCode[0] > 0 {
+		return tusd.HTTPResponse{
+			StatusCode: statusCode[0],
+		}
+	}
 	return tusd.HTTPResponse{
 		StatusCode: http.StatusBadRequest,
 	}
