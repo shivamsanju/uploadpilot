@@ -12,6 +12,7 @@ import (
 
 type WebhookRepo interface {
 	GetWebhooks(ctx context.Context, workspaceID primitive.ObjectID) ([]models.Webhook, error)
+	GetEnabledWebhooksWithSecret(ctx context.Context, workspaceID primitive.ObjectID) ([]models.Webhook, error)
 	GetWebhook(ctx context.Context, workspaceID primitive.ObjectID, webhookID primitive.ObjectID) (*models.Webhook, error)
 	CreateWebhook(ctx context.Context, workspaceID primitive.ObjectID, webhook *models.Webhook) (*models.Webhook, error)
 	UpdateWebhook(ctx context.Context, workspaceID primitive.ObjectID, webhook *models.Webhook, updatedBy string) (*models.Webhook, error)
@@ -30,8 +31,22 @@ func NewWebhookRepo() WebhookRepo {
 func (wr *webhookRepo) GetWebhooks(ctx context.Context, workspaceID primitive.ObjectID) ([]models.Webhook, error) {
 	collection := db.Collection(wr.collectionName)
 	var webhooks []models.Webhook
-	opts := options.Find().SetProjection(bson.M{"signingSecret": 0})
+	opts := options.Find().SetProjection(bson.M{"signingSecret": 0}).SetSort(bson.D{{Key: "updatedAt", Value: -1}})
 	cursor, err := collection.Find(ctx, bson.M{"workspaceId": workspaceID}, opts)
+	if err != nil {
+		return nil, err
+	}
+	err = cursor.All(ctx, &webhooks)
+	if err != nil {
+		return nil, err
+	}
+	return webhooks, nil
+}
+
+func (wr *webhookRepo) GetEnabledWebhooksWithSecret(ctx context.Context, workspaceID primitive.ObjectID) ([]models.Webhook, error) {
+	collection := db.Collection(wr.collectionName)
+	var webhooks []models.Webhook
+	cursor, err := collection.Find(ctx, bson.M{"workspaceId": workspaceID, "enabled": true}, nil)
 	if err != nil {
 		return nil, err
 	}

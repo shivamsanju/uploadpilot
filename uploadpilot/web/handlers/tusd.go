@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -10,9 +12,10 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/config"
 	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/internal/hooks"
+	"github.com/uploadpilot/uploadpilot/internal/hooks/catalog"
 	"github.com/uploadpilot/uploadpilot/internal/storage"
 
-	"github.com/uploadpilot/uploadpilot/internal/hooks"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -48,51 +51,39 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 		RespectForwardedHeaders: true,
 		MaxSize:                 500 * 1024 * 1024,
 		PreUploadCreateCallback: func(hook tusd.HookEvent) (tusd.HTTPResponse, tusd.FileInfoChanges, error) {
-			infra.Log.Infof("pre upload create -> %s", hook.HTTPRequest.URI)
-
-			// Validate the upload
-			err := hooks.ValidateUpload(hook)
+			// Accept the upload
+			infra.Log.Infof("creating import for %s", hook.Upload.ID)
+			err := h.validateWorkspaceId(&hook)
 			if err != nil {
-				infra.Log.Errorf("unable to validate upload: %s", err)
-				return tusdBadRequestResponse(), tusd.FileInfoChanges{}, nil
+				return tusdBadRequestResponse(), tusd.FileInfoChanges{}, err
 			}
-
-			// err = hooks.AuthHook(hook)
-			// if err != nil {
-			// 	infra.Log.Errorf("unable to validate upload: %s", err)
-			// 	return tusdBadRequestResponse(401), tusd.FileInfoChanges{}, nil
-			// }
 
 			return tusdOkResponse(), tusd.FileInfoChanges{}, nil
 		},
-		PreFinishResponseCallback: func(hook tusd.HookEvent) (tusd.HTTPResponse, error) {
-			infra.Log.Infof("pre finish response -> %s", hook.Upload.ID)
-			var imp models.Import
-			err = hooks.UpdateImportMetadata(hook, s3Client, &imp)
-			go h.impRepo.Create(hook.Context, &imp)
 
+		PreFinishResponseCallback: func(tusdHook tusd.HookEvent) (tusd.HTTPResponse, error) {
+			imp, err := h.createImport(&tusdHook)
 			if err != nil {
-				imp.Logs = append(imp.Logs, models.Log{
-					Message:   "Error updating the metadata of the file: " + err.Error(),
-					TimeStamp: primitive.NewDateTimeFromTime(time.Now()),
-				})
-				imp.Status = models.ImportStatusFailed
-				infra.Log.Errorf("unable to upload to datastore: %s", err)
-				h.impRepo.Update(hook.Context, imp.ID, &imp)
-				return tusdOkResponse(), nil
+				infra.Log.Errorf("unable to get import: %s", err)
+				return tusdBadRequestResponse(), nil
+			}
+			prefinishExecutor := catalog.BuildPrefinishResponseHookExecutor()
+			err = prefinishExecutor.Start(tusdHook.Context, &hooks.HookInput{
+				Import:   imp,
+				TusdHook: &tusdHook,
+			}, false)
+			if err != nil {
+				infra.Log.Errorf("unable to execute prefinish hook: %s", err)
+				return tusdBadRequestResponse(), nil
 			}
 
-			// Update upload
-			imp.Logs = append(imp.Logs, models.Log{
-				Message:   "Import completed",
-				TimeStamp: primitive.NewDateTimeFromTime(time.Now()),
-			})
-			imp.Status = models.ImportStatusSuccess
-			_, err = h.impRepo.Update(hook.Context, imp.ID, &imp)
-			if err != nil {
-				infra.Log.Errorf("unable to update import: %s", err)
-				return tusdOkResponse(), nil
-			}
+			postfinishExecutor := catalog.BuildPostfinishResponseHookExecutor()
+			go postfinishExecutor.Start(tusdHook.Context, &hooks.HookInput{
+				Import:   imp,
+				TusdHook: &tusdHook,
+			}, false)
+
+			infra.Log.Infof("tusd upload finished for %s", tusdHook.Upload.ID)
 
 			return tusdOkResponse(), nil
 		},
@@ -103,6 +94,60 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 		panic(err)
 	}
 	return tusdHandler
+}
+
+func (tusdHandler *tusdHandler) validateWorkspaceId(tusdHook *tusd.HookEvent) error {
+	headers := tusdHook.HTTPRequest.Header
+	wsID := headers.Get("workspaceId")
+	if len(wsID) == 0 {
+		return errors.New("missing workspaceId in header")
+	}
+
+	workspaceID, err := primitive.ObjectIDFromHex(wsID)
+	if err != nil {
+		return fmt.Errorf("invalid workspaceId: %w", err)
+	}
+
+	wsRepo := db.NewWorkspaceRepo()
+	exists, err := wsRepo.CheckWorkspaceExists(tusdHook.Context, workspaceID)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return fmt.Errorf("workspace not found")
+	}
+
+	return nil
+}
+
+func (h *tusdHandler) createImport(tusdHook *tusd.HookEvent) (*models.Import, error) {
+	infra.Log.Infof("creating import for %s", tusdHook.Upload.ID)
+	headers := tusdHook.HTTPRequest.Header
+	wsID := headers.Get("workspaceId")
+	if len(wsID) == 0 {
+		return nil, errors.New("missing workspaceId in header")
+	}
+
+	workspaceID, err := primitive.ObjectIDFromHex(wsID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid workspaceId: %w", err)
+	}
+
+	imp := models.Import{}
+
+	imp.ID = primitive.NewObjectID()
+	imp.UploadID = tusdHook.Upload.ID
+	imp.Size = tusdHook.Upload.Size
+	imp.WorkspaceID = workspaceID
+	imp.StartedAt = primitive.NewDateTimeFromTime(time.Now())
+	imp.Status = models.ImportStatusInProgress
+	imp.Logs = []models.Log{{
+		Message:   "Import created successfully",
+		TimeStamp: primitive.NewDateTimeFromTime(time.Now()),
+	}}
+
+	createdImport, err := h.impRepo.Create(tusdHook.Context, &imp)
+	return createdImport, err
 }
 
 func tusdOkResponse() tusd.HTTPResponse {

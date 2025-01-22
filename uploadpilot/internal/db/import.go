@@ -15,6 +15,7 @@ type ImportRepo interface {
 	FindAll(ctx context.Context, skip int64, limit int64, search string) ([]models.Import, int64, error)
 	FindAllImportsForWorkspace(ctx context.Context, workspaceID primitive.ObjectID, skip int64, limit int64, search string) ([]models.Import, int64, error)
 	Get(ctx context.Context, importID primitive.ObjectID) (*models.Import, error)
+	GetImportByUploadID(ctx context.Context, uploadID string) (*models.Import, error)
 	Create(ctx context.Context, imp *models.Import) (*models.Import, error)
 	Update(ctx context.Context, importID primitive.ObjectID, imp *models.Import) (*models.Import, error)
 	Delete(ctx context.Context, importID primitive.ObjectID) error
@@ -122,6 +123,17 @@ func (i *importRepo) Get(ctx context.Context, importID primitive.ObjectID) (*mod
 	var cb models.Import
 	collection := db.Collection(i.collectionName)
 	err := collection.FindOne(ctx, bson.M{"_id": importID}).Decode(&cb)
+	if err != nil {
+		infra.Log.Errorf("failed to find import: %s", err.Error())
+		return nil, err
+	}
+	return &cb, nil
+}
+
+func (i *importRepo) GetImportByUploadID(ctx context.Context, uploadID string) (*models.Import, error) {
+	var cb models.Import
+	collection := db.Collection(i.collectionName)
+	err := collection.FindOne(ctx, bson.M{"uploadId": uploadID}).Decode(&cb)
 	if err != nil {
 		infra.Log.Errorf("failed to find import: %s", err.Error())
 		return nil, err
