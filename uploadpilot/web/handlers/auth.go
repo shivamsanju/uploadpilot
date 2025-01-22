@@ -96,7 +96,7 @@ func (h *authHandler) LogoutProvider(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *authHandler) GetSession(w http.ResponseWriter, r *http.Request) {
-	userID := r.Header.Get("userId")
+	userID := r.Context().Value("userId").(string)
 	cb, err := h.userRepo.GetUserByID(r.Context(), userID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)

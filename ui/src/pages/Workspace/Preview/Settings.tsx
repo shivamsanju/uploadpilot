@@ -35,7 +35,7 @@ type SettingsProps = {
 }
 
 
-const w = "15vw";
+const w = "300px";
 
 const Settings: React.FC<SettingsProps> = ({
     height,

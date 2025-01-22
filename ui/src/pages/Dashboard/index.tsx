@@ -1,42 +1,42 @@
 import {
     IconArrowDownRight,
     IconArrowUpRight,
-    IconCoin,
-    IconDiscount2,
-    IconReceipt2,
-    IconUserPlus,
+    IconCircleCheck,
+    IconExclamationCircle,
+    IconNumber,
+    IconServer2,
 } from '@tabler/icons-react';
 import { Box, Card, Group, Paper, SimpleGrid, Text, Title } from '@mantine/core';
 import classes from './dashboard.module.css';
 import { LineChart } from '@mantine/charts';
 
 const icons = {
-    user: IconUserPlus,
-    discount: IconDiscount2,
-    receipt: IconReceipt2,
-    coin: IconCoin,
+    total: IconNumber,
+    success: IconCircleCheck,
+    fail: IconExclamationCircle,
+    file: IconServer2,
 };
 
 const data = [
-    { title: 'Revenue', icon: 'receipt', value: '13,456', diff: 34 },
-    { title: 'Profit', icon: 'coin', value: '4,145', diff: -13 },
-    { title: 'Coupons usage', icon: 'discount', value: '745', diff: 18 },
-    { title: 'New customers', icon: 'user', value: '188', diff: -30 },
+    { title: 'Total Uploads', icon: 'total', value: '40,215', diff: 14 },
+    { title: 'Successful', icon: 'success', value: '40,145', diff: 13 },
+    { title: 'Failed', icon: 'fail', value: '70', diff: -18 },
+    { title: 'Total size', icon: 'file', value: '75 GB', diff: 4 },
 ] as const;
 
 const data2 = [
-    { date: 'Jan', temperature: -25 },
-    { date: 'Feb', temperature: -10 },
-    { date: 'Mar', temperature: 5 },
-    { date: 'Apr', temperature: 15 },
-    { date: 'May', temperature: 30 },
-    { date: 'Jun', temperature: 15 },
-    { date: 'Jul', temperature: 30 },
-    { date: 'Aug', temperature: 40 },
-    { date: 'Sep', temperature: 15 },
-    { date: 'Oct', temperature: 20 },
-    { date: 'Nov', temperature: 0 },
-    { date: 'Dec', temperature: -10 },
+    { date: 'Jan', uploads: 25000 },
+    { date: 'Feb', uploads: 10000 },
+    { date: 'Mar', uploads: 5000 },
+    { date: 'Apr', uploads: 15000 },
+    { date: 'May', uploads: 30000 },
+    { date: 'Jun', uploads: 15000 },
+    { date: 'Jul', uploads: 30000 },
+    { date: 'Aug', uploads: 40000 },
+    { date: 'Sep', uploads: 15000 },
+    { date: 'Oct', uploads: 20000 },
+    { date: 'Nov', uploads: 10000 },
+    { date: 'Dec', uploads: 10000 },
 ];
 
 const DashboardPage = () => {
@@ -69,15 +69,18 @@ const DashboardPage = () => {
         );
     });
     return (
-        <Box px="sm">
-            <Title order={3} mb="lg" opacity={0.7}>Dashboard</Title>
+        <Box px="sm" mb={30}>
+            <Title order={3} opacity={0.7}>Analytics</Title>
+            <Text c="dimmed" size="xs" mt={2} mb="lg">
+                Analyze file upload trends over the last 6 months
+            </Text>
             <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }}>{stats}</SimpleGrid>
             <Card mt="xl">
                 <LineChart
                     title='File upload trends'
-                    h={500}
+                    h={400}
                     data={data2}
-                    series={[{ name: 'temperature', label: 'Avg. Temperature' }]}
+                    series={[{ name: 'uploads', label: 'Number of uploads' }]}
                     dataKey="date"
                     type="gradient"
                     gradientStops={[
@@ -90,8 +93,8 @@ const DashboardPage = () => {
                     ]}
                     strokeWidth={5}
                     curveType="natural"
-                    yAxisProps={{ domain: [-25, 60] }}
-                    valueFormatter={(value) => `${value}°C`}
+                    yAxisProps={{ domain: [0, 60000] }}
+                    valueFormatter={(value) => `${value / 1000}K`}
                 />
             </Card>
         </Box>

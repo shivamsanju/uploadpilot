@@ -1,7 +1,9 @@
+import { useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axios";
 import { useQuery } from "@tanstack/react-query";
 
 export const useGetSession = () => {
+    const navigate = useNavigate();
 
     const { isPending, error, data: session } = useQuery({
         queryKey: ['session'],
@@ -10,8 +12,17 @@ export const useGetSession = () => {
         queryFn: () => {
             return axiosInstance
                 .get(`/session`)
-                .then((res) => res.data)
-        }
+                .then((res) => {
+                    if (res.status !== 200) {
+                        localStorage.removeItem('uploadpilottoken');
+                        navigate('/auth');
+                    }
+                    return res.data
+                }).catch(() => {
+                    localStorage.removeItem('uploadpilottoken');
+                    navigate('/auth');
+                })
+        },
     })
 
 

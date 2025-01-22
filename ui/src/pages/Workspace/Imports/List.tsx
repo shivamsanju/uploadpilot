@@ -79,7 +79,6 @@ const ImportsList = () => {
                 title: 'Name',
                 accessor: 'metadata.filename',
                 elipsis: true,
-                width: 500,
                 render: (params: any) => (
                     <>
                         <Text fz="sm">{params?.metadata?.filename}</Text>
@@ -93,7 +92,6 @@ const ImportsList = () => {
                 title: 'File Type',
                 accessor: 'metadata.filetype',
                 textAlign: 'center',
-                width: 600,
                 render: (params: any) => (
                     <>
                         <Text fz="sm" >{params?.metadata?.filetype}</Text>
@@ -132,7 +130,6 @@ const ImportsList = () => {
             {
                 title: 'Status',
                 accessor: 'status',
-                flex: 0.7,
                 textAlign: 'center',
                 render: (params: any) => (
                     <Tooltip label={params?.status} >
@@ -149,7 +146,6 @@ const ImportsList = () => {
             {
                 title: 'Actions',
                 accessor: 'actions',
-                flex: 0.4,
                 textAlign: 'center',
                 render: (params: any) => (
                     <Group gap={0} justify="flex-end">

@@ -14,17 +14,23 @@ import (
 )
 
 type WorkspaceRepo interface {
-	Create(ctx context.Context, workspace *models.Workspace, userId string) (*models.Workspace, error)
+	GetWorkspace(ctx context.Context, workspaceID primitive.ObjectID) (*models.Workspace, error)
+	Create(ctx context.Context, workspace *models.Workspace) (*models.Workspace, error)
 	Delete(ctx context.Context, workspaceID primitive.ObjectID) error
 	CheckWorkspaceExists(ctx context.Context, workspaceID primitive.ObjectID) (bool, error)
+
+	// users related
 	GetUsersInWorkspace(ctx context.Context, workspaceID primitive.ObjectID) ([]models.WorkspaceUserWithDetails, error)
 	GetWorkspacesForUser(ctx context.Context, userId string) ([]models.Workspace, error)
 	CheckIfUserExistsInWorkspace(ctx context.Context, workspaceID primitive.ObjectID, userID string) (bool, error)
 	AddUserToWorkspace(ctx context.Context, workspaceID primitive.ObjectID, user *models.WorkspaceUser) error
 	RemoveUserFromWorkspace(ctx context.Context, workspaceID primitive.ObjectID, userID string) error
 	GetUserRoleInWorkspace(ctx context.Context, workspaceID primitive.ObjectID, userID string) (models.UserRole, error)
+	ChangeUserRoleInWorkspace(ctx context.Context, workspaceID primitive.ObjectID, userID string, role models.UserRole) error
+
+	// uploader config related
 	GetUploaderConfig(ctx context.Context, workspaceID primitive.ObjectID) (*models.UploaderConfig, error)
-	UpdateUploaderConfig(ctx context.Context, workspaceID primitive.ObjectID, cb *models.UploaderConfig, updatedBy string) error
+	UpdateUploaderConfig(ctx context.Context, workspaceID primitive.ObjectID, cb *models.UploaderConfig) error
 }
 
 type workspaceRepo struct {
@@ -42,16 +48,33 @@ func NewWorkspaceRepo() WorkspaceRepo {
 	}
 }
 
+// GetWorkspace retrieves the workspace with the given ID from the workspaces collection.
+func (wr *workspaceRepo) GetWorkspace(ctx context.Context, workspaceID primitive.ObjectID) (*models.Workspace, error) {
+	collection := db.Collection(wr.collectionName)
+	var workspace models.Workspace
+	err := collection.FindOne(ctx, bson.M{"_id": workspaceID}).Decode(&workspace)
+	if err != nil {
+		return nil, err
+	}
+	return &workspace, nil
+}
+
 // Create creates a new workspace and adds the given user as owner to it.
 //
 // This method uses a transaction to ensure that either both the workspace and the user are updated,
 // or neither of them is.
 //
 // Note that the ID of the workspace is set by this method.
-func (wr *workspaceRepo) Create(ctx context.Context, workspace *models.Workspace, creatorUserID string) (*models.Workspace, error) {
+func (wr *workspaceRepo) Create(ctx context.Context, workspace *models.Workspace) (*models.Workspace, error) {
+	creatorEmail := ctx.Value("email").(string)
+	creatorUserID := ctx.Value("userId").(string)
+
 	workspace.ID = primitive.NewObjectID()
 	workspace.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
 	workspace.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
+	workspace.CreatedBy = creatorEmail
+	workspace.UpdatedBy = creatorEmail
+
 	workspace.Users = []models.WorkspaceUser{{UserID: creatorUserID, Role: models.UserRoleOwner}}
 
 	session, err := db.Client().StartSession()
@@ -136,6 +159,9 @@ func (wr *workspaceRepo) GetUsersInWorkspace(ctx context.Context, workspaceID pr
 				"name":   "$userDetails.name",
 				"email":  "$userDetails.email",
 			},
+		},
+		{
+			"$sort": bson.M{"name": 1},
 		},
 	}
 
@@ -279,6 +305,12 @@ func (wr *workspaceRepo) GetUserRoleInWorkspace(ctx context.Context, workspaceID
 	return models.UserRoleNotFound, nil
 }
 
+func (wr *workspaceRepo) ChangeUserRoleInWorkspace(ctx context.Context, workspaceID primitive.ObjectID, userID string, role models.UserRole) error {
+	collection := db.Collection(wr.collectionName)
+	_, err := collection.UpdateOne(ctx, bson.M{"_id": workspaceID, "users.userId": userID}, bson.M{"$set": bson.M{"users.$.role": role}})
+	return err
+}
+
 // GetUploaderConfig retrieves the uploader configuration associated with the given workspace ID.
 //
 // The retrieval is performed by finding the workspace document with the given ID and extracting the
@@ -304,7 +336,8 @@ func (wr *workspaceRepo) GetUploaderConfig(ctx context.Context, workspaceID prim
 // provided configuration. The function then updates the workspace document in the database by
 // setting the specified fields in the uploader configuration, and records the user who made the
 // update along with the timestamp of the update.
-func (wr *workspaceRepo) UpdateUploaderConfig(ctx context.Context, workspaceID primitive.ObjectID, updatedData *models.UploaderConfig, updatedBy string) error {
+func (wr *workspaceRepo) UpdateUploaderConfig(ctx context.Context, workspaceID primitive.ObjectID, updatedData *models.UploaderConfig) error {
+	updatedBy := ctx.Value("email").(string)
 
 	updateFields := utils.FilterNonEmptyBsonFields(bson.M{
 		"uploaderConfig.maxFileSize":            updatedData.MaxFileSize,

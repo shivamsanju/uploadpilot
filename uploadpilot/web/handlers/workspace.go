@@ -40,7 +40,6 @@ var DefaultUploaderConfig = &models.UploaderConfig{
 
 func (h *workspaceHandler) CreateWorkspace(w http.ResponseWriter, r *http.Request) {
 	infra.Log.Info("creating workspace")
-	userID := r.Header.Get("userId")
 	workspace := &models.Workspace{}
 	if err := render.DecodeJSON(r.Body, workspace); err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
@@ -48,8 +47,6 @@ func (h *workspaceHandler) CreateWorkspace(w http.ResponseWriter, r *http.Reques
 	}
 
 	workspace.UploaderConfig = DefaultUploaderConfig
-	workspace.CreatedBy = r.Header.Get("email")
-	workspace.UpdatedBy = r.Header.Get("email")
 
 	if err := validate.Struct(workspace); err != nil {
 		errors := make(map[string]string)
@@ -60,7 +57,7 @@ func (h *workspaceHandler) CreateWorkspace(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	cb, err := h.wsRepo.Create(r.Context(), workspace, userID)
+	cb, err := h.wsRepo.Create(r.Context(), workspace)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -69,7 +66,7 @@ func (h *workspaceHandler) CreateWorkspace(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *workspaceHandler) GetWorkspacesForUser(w http.ResponseWriter, r *http.Request) {
-	userId := r.Header.Get("userId")
+	userId := r.Context().Value("userId").(string)
 	ws, err := h.wsRepo.GetWorkspacesForUser(r.Context(), userId)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
@@ -143,8 +140,30 @@ func (h *workspaceHandler) RemoveUserFromWorkspace(w http.ResponseWriter, r *htt
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	userId := r.Header.Get("userId")
-	err = h.wsRepo.RemoveUserFromWorkspace(r.Context(), workspaceId, userId)
+	userID := chi.URLParam(r, "userId")
+	err = h.wsRepo.RemoveUserFromWorkspace(r.Context(), workspaceId, userID)
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	render.JSON(w, r, nil)
+}
+
+func (h *workspaceHandler) UpdateUserInWorkspace(w http.ResponseWriter, r *http.Request) {
+	wsId := chi.URLParam(r, "workspaceId")
+	workspaceId, err := primitive.ObjectIDFromHex(wsId)
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	userID := chi.URLParam(r, "userId")
+
+	updateRequest := &dto.EditUserInWorkspaceRequest{}
+	if err := render.DecodeJSON(r.Body, updateRequest); err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	err = h.wsRepo.ChangeUserRoleInWorkspace(r.Context(), workspaceId, userID, updateRequest.Role)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -184,7 +203,6 @@ func (h *workspaceHandler) GetUploaderConfig(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *workspaceHandler) UpdateUploaderConfig(w http.ResponseWriter, r *http.Request) {
-	userID := r.Header.Get("userId")
 	wsId := chi.URLParam(r, "workspaceId")
 	workspaceId, err := primitive.ObjectIDFromHex(wsId)
 	if err != nil {
@@ -207,7 +225,7 @@ func (h *workspaceHandler) UpdateUploaderConfig(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = h.wsRepo.UpdateUploaderConfig(r.Context(), workspaceId, uploaderConfig, userID)
+	err = h.wsRepo.UpdateUploaderConfig(r.Context(), workspaceId, uploaderConfig)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return

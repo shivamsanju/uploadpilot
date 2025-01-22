@@ -90,6 +90,7 @@ const UploaderPreviewPage = () => {
                                         "uploaderName": session.name || "sss"
                                     }}
                                     {...settingsProps}
+                                    note="Test your uploader"
                                 />
                             </Group>
                         </SimpleGrid>

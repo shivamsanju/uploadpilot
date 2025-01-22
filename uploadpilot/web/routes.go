@@ -16,6 +16,7 @@ func Routes() *chi.Mux {
 	authHandler := handlers.NewAuthHandler()
 	workspaceHandler := handlers.NewWorkspaceHandler()
 	importHandler := handlers.NewImportHandler()
+	webhooksHandler := handlers.NewWebhooksHandler()
 
 	// Public routes
 	router.Group(func(r chi.Router) {
@@ -57,7 +58,10 @@ func Routes() *chi.Mux {
 				r.Route("/users", func(r chi.Router) {
 					r.Get("/", workspaceHandler.GetAllUsersInWorkspace)
 					r.Post("/", workspaceHandler.AddUserToWorkspace)
-					r.Delete("/", workspaceHandler.RemoveUserFromWorkspace)
+					r.Route("/{userId}", func(r chi.Router) {
+						r.Put("/", workspaceHandler.UpdateUserInWorkspace)
+						r.Delete("/", workspaceHandler.RemoveUserFromWorkspace)
+					})
 				})
 
 				// Imports
@@ -65,6 +69,18 @@ func Routes() *chi.Mux {
 					r.Get("/", importHandler.GetAllImportsForWorkspace)
 					r.Route("/{importId}", func(r chi.Router) {
 						r.Get("/", importHandler.GetImportDetailsByID)
+					})
+				})
+
+				// Webhooks
+				r.Route("/webhooks", func(r chi.Router) {
+					r.Post("/", webhooksHandler.CreateWebhook)
+					r.Get("/", webhooksHandler.GetWebhooks)
+					r.Route("/{webhookId}", func(r chi.Router) {
+						r.Get("/", webhooksHandler.GetWebhook)
+						r.Put("/", webhooksHandler.UpdateWebhook)
+						r.Patch("/", webhooksHandler.PatchWebhook)
+						r.Delete("/", webhooksHandler.DeleteWebhook)
 					})
 				})
 			})

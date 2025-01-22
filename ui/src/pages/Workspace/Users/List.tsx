@@ -1,20 +1,52 @@
 import { IconDots, IconEdit, IconTrash } from '@tabler/icons-react';
-import { ActionIcon, Avatar, Box, Group, Menu, Text } from '@mantine/core';
-import { useGetUsersInWorkspace } from '../../../apis/workspace';
+import { ActionIcon, Avatar, Box, Group, Menu, Modal, Text } from '@mantine/core';
+import { useGetUsersInWorkspace, useRemoveUserFromWorkspaceMutation } from '../../../apis/workspace';
 import { useParams } from 'react-router-dom';
-import { useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { DataTableColumn } from 'mantine-datatable';
 import { UploadPilotDataTable } from '../../../components/Table/Table';
 import { ErrorCard } from '../../../components/ErrorCard/ErrorCard';
+import { showNotification } from '@mantine/notifications';
+import AddUserForm from './Add';
 
 const getRandomAvatar = () => {
     const randomIndex = Math.floor(Math.random() * 5) + 1;
     return `https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-${randomIndex}.png`
 }
 
-const WorkspaceUsersList = () => {
+const WorkspaceUsersList = ({ opened, setOpened }: { opened: boolean, setOpened: any }) => {
+    const [mode, setMode] = useState<'add' | 'edit'>('add');
+    const [initialValues, setInitialValues] = useState(null);
     const { workspaceId } = useParams();
     const { isPending, error, users } = useGetUsersInWorkspace(workspaceId || '');
+    const { mutateAsync } = useRemoveUserFromWorkspaceMutation();
+
+
+    const handleRemoveUser = useCallback(async (userId: string) => {
+        if (!workspaceId || workspaceId === '' || !userId || userId === '') {
+            showNotification({
+                color: 'red',
+                title: 'Error',
+                message: 'Workspace ID or User ID is not available'
+            })
+            return
+        };
+
+        try {
+            mutateAsync({ workspaceId, userId });
+        } catch (error) {
+            console.error(error);
+        }
+
+    }, [workspaceId, mutateAsync]);
+
+
+    const handleEditUser = useCallback((item: any) => {
+        setMode('edit');
+        setInitialValues(item);
+        setOpened(true);
+    }, [setMode, setInitialValues, setOpened]);
+
 
     const columns: DataTableColumn[] = useMemo(() => [
         {
@@ -47,8 +79,8 @@ const WorkspaceUsersList = () => {
             ),
         },
         {
-            accessor: 'rate',
-            title: 'Rate',
+            accessor: 'role',
+            title: 'Role',
             render: (item: any) => (
                 <>
                     <Text fz="sm">{item.role}</Text>
@@ -75,19 +107,26 @@ const WorkspaceUsersList = () => {
                             </ActionIcon>
                         </Menu.Target>
                         <Menu.Dropdown>
-                            <Menu.Item leftSection={<IconEdit size={16} stroke={1.5} />}>
+                            <Menu.Item
+                                leftSection={<IconEdit size={16} stroke={1.5} />}
+                                onClick={() => handleEditUser(item)}>
                                 Edit role
                             </Menu.Item>
-                            <Menu.Item leftSection={<IconTrash size={16} stroke={1.5} />} color="red">
+                            <Menu.Item
+                                leftSection={<IconTrash size={16} stroke={1.5} />}
+                                color="red"
+                                onClick={() => handleRemoveUser(item.userId)}
+                            >
                                 Remove from workspace
                             </Menu.Item>
+
                         </Menu.Dropdown>
                     </Menu>
                 </Group>
             )
         },
 
-    ], []);
+    ], [handleRemoveUser, handleEditUser]);
 
     if (error) {
         return <ErrorCard title="Error" message={error.message} h="70vh" />
@@ -106,6 +145,21 @@ const WorkspaceUsersList = () => {
                 noHeader={true}
                 noRecordsText="No users found"
             />
+            <Modal
+                padding="xl"
+                transitionProps={{ transition: 'pop' }}
+                opened={opened}
+                onClose={() => {
+                    setOpened(false);
+                    setMode('add');
+                    setInitialValues(null);
+                }}
+                title={mode === 'edit' ? 'Edit User' : 'Add User'}
+                closeOnClickOutside={false}
+                size="xl"
+            >
+                <AddUserForm mode={mode} setOpened={setOpened} workspaceId={workspaceId || ""} initialValues={initialValues} setInitialValues={setInitialValues} setMode={setMode} />
+            </Modal>
         </Box>
     );
 }

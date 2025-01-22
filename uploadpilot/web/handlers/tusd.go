@@ -57,11 +57,11 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 				return tusdBadRequestResponse(), tusd.FileInfoChanges{}, nil
 			}
 
-			err = hooks.AuthHook(hook)
-			if err != nil {
-				infra.Log.Errorf("unable to validate upload: %s", err)
-				return tusdBadRequestResponse(401), tusd.FileInfoChanges{}, nil
-			}
+			// err = hooks.AuthHook(hook)
+			// if err != nil {
+			// 	infra.Log.Errorf("unable to validate upload: %s", err)
+			// 	return tusdBadRequestResponse(401), tusd.FileInfoChanges{}, nil
+			// }
 
 			return tusdOkResponse(), tusd.FileInfoChanges{}, nil
 		},

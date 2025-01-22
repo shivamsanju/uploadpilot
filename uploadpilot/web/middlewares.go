@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -83,9 +84,11 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			utils.HandleHttpError(w, r, http.StatusUnauthorized, err)
 			return
 		}
-		r.Header.Set("userId", claims.UserID)
-		r.Header.Set("email", claims.Email)
-		r.Header.Set("name", claims.Name)
-		next.ServeHTTP(w, r)
+
+		ctx := context.WithValue(r.Context(), "userId", claims.UserID)
+		ctx = context.WithValue(ctx, "email", claims.Email)
+		ctx = context.WithValue(ctx, "name", claims.Name)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

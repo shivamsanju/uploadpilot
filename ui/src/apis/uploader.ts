@@ -24,14 +24,16 @@ export const useGetUploaderConfig = (workspaceId: string) => {
     return { isPending, error, config, invalidate }
 }
 
-export const useUpdateUploaderConfigMutation = (workspaceId: string) => {
+export const useUpdateUploaderConfigMutation = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationKey: ['workspace.uploaderConfig', workspaceId],
-        mutationFn: (config: UploaderConfig) => axiosInstance.put(`/workspaces/${workspaceId}/config`, config).then((res) => res.data),
+        mutationKey: ['workspace.uploaderConfig'],
+        mutationFn: ({ workspaceId, config }: { workspaceId: string, config: UploaderConfig }) => {
+            return axiosInstance.put(`/workspaces/${workspaceId}/config`, config).then((res) => res.data)
+        },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['workspace.uploaderConfig', workspaceId] });
+            queryClient.invalidateQueries({ queryKey: ['workspace.uploaderConfig'] });
             notifications.show({
                 title: "Success",
                 message: "Uploader configuration updated successfully",

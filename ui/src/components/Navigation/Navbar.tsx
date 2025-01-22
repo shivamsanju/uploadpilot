@@ -37,11 +37,6 @@ const NavBar = () => {
                 link: `/workspaces/${workspaceId}/configuration`,
             },
             {
-                label: 'Users',
-                icon: IconUsers,
-                link: `/workspaces/${workspaceId}/users`,
-            },
-            {
                 label: 'Hooks',
                 icon: IconWebhook,
                 link: `/workspaces/${workspaceId}/hooks`,
@@ -50,6 +45,11 @@ const NavBar = () => {
                 label: 'Webhooks',
                 icon: IconWebhook,
                 link: `/workspaces/${workspaceId}/webhooks`,
+            },
+            {
+                label: 'Users',
+                icon: IconUsers,
+                link: `/workspaces/${workspaceId}/users`,
             },
             {
                 label: 'Analytics',

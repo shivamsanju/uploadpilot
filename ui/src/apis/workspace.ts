@@ -41,7 +41,6 @@ export const useCreateWorkspaceMutation = () => {
     })
 };
 
-
 export const useGetAllAllowedSources = (workspaceId: string) => {
     const { isPending, error, data: allowedSources } = useQuery({
         queryKey: ['allowedSources'],
@@ -76,4 +75,84 @@ export const useGetUsersInWorkspace = (workspaceId: string) => {
 
     const invalidate = () => queryClient.invalidateQueries({ queryKey: ['workspaceUsers', workspaceId] });
     return { isPending, error, users: data, invalidate }
+}
+
+export const useAddUserToWorkspaceMutation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: ['workspaceUsers'],
+        mutationFn: ({ workspaceId, email, role }: { workspaceId: string, email: string, role: string }) => {
+            return axiosInstance.post(`/workspaces/${workspaceId}/users`, { email, role }).then((res) => res.data)
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['workspaceUsers'] });
+            notifications.show({
+                title: "Success",
+                message: "User added to workspace successfully",
+                color: "green",
+            });
+        },
+        onError: (error: any) => {
+            console.log(error)
+            notifications.show({
+                title: "Error",
+                message: `Failed to add user to workspace. Reason: ${error?.response?.data?.message || error.message}`,
+                color: "red",
+            });
+        }
+    })
+}
+
+export const useRemoveUserFromWorkspaceMutation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: ['workspaceUsers'],
+        mutationFn: ({ workspaceId, userId }: { workspaceId: string, userId: string }) => {
+            return axiosInstance.delete(`/workspaces/${workspaceId}/users/${userId}`).then((res) => res.data)
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['workspaceUsers'] });
+            notifications.show({
+                title: "Success",
+                message: "User removed from workspace successfully",
+                color: "green",
+            });
+        },
+        onError: (error: any) => {
+            notifications.show({
+                title: "Error",
+                message: "Failed to remove user from workspace. Reason: " + error?.response?.data?.message || error.message,
+                color: "red",
+            });
+        }
+    })
+}
+
+export const useEditUserInWorkspaceMutation = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationKey: ['workspaceUsers'],
+        mutationFn: ({ workspaceId, userId, role }: { workspaceId: string, userId: string, role: string }) => {
+            return axiosInstance.put(`/workspaces/${workspaceId}/users/${userId}`, { role }).then((res) => res.data)
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['workspaceUsers'] });
+            notifications.show({
+                title: "Success",
+                message: "User role modified successfully",
+                color: "green",
+            });
+        },
+        onError: (error: any) => {
+            console.log(error)
+            notifications.show({
+                title: "Error",
+                message: `Failed to modify user role. Reason: ${error?.response?.data?.message || error.message}`,
+                color: "red",
+            });
+        }
+    })
 }

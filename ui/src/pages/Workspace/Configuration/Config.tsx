@@ -10,7 +10,6 @@ import {
     SimpleGrid,
     Transition,
     Button,
-    Title,
     Paper,
 } from "@mantine/core";
 import { UploaderConfig } from "../../../types/uploader";
@@ -22,6 +21,7 @@ import { useGetAllAllowedSources } from "../../../apis/workspace";
 import { ErrorLoadingWrapper } from "../../../components/ErrorLoadingWrapper";
 import { IconDeviceFloppy, IconRestore } from "@tabler/icons-react";
 import { useUpdateUploaderConfigMutation } from "../../../apis/uploader";
+import { showNotification } from "@mantine/notifications";
 
 const w = "300px";
 
@@ -34,7 +34,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
 }) => {
     const { workspaceId } = useParams();
     const { isPending, error, allowedSources } = useGetAllAllowedSources(workspaceId || "");
-    const { mutateAsync } = useUpdateUploaderConfigMutation(workspaceId as string)
+    const { mutateAsync } = useUpdateUploaderConfigMutation()
 
 
     const form = useForm<UploaderConfig>({
@@ -50,8 +50,19 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
     });
 
     const handleEditAndSaveButton = async () => {
+        if (!workspaceId) {
+            showNotification({
+                color: "red",
+                title: "Error",
+                message: "Workspace ID is not available"
+            })
+            return
+        };
         if (form.isDirty()) {
-            mutateAsync(form.values)
+            mutateAsync({
+                workspaceId: workspaceId,
+                config: form.values
+            })
         }
         form.resetDirty();
     }
@@ -64,17 +75,16 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
     return (
         <ErrorLoadingWrapper error={error} isPending={isPending}>
             <form onSubmit={form.onSubmit(handleEditAndSaveButton)} onReset={handleResetButton}>
-                <Title order={3} opacity={0.7} mb="sm">Validations</Title>
                 <Paper p="sm">
-                    <SimpleGrid cols={{ sm: 1, md: 2 }}>
+                    <SimpleGrid cols={{ base: 1, xl: 2 }}>
                         <Stack p="md">
 
                             {/* Allowed input sources */}
-                            <Group justify="space-between" className={classes.item} gap="xl">
+                            <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Allowed input sources *</Text>
                                     <Text size="xs" c="dimmed">
-                                        Select allowed input sources for the file uploader
+                                        Allowed input sources for your uploader
                                     </Text>
                                 </div>
                                 <MultiSelect
@@ -88,7 +98,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                             </Group>
 
                             {/* Allowed file types */}
-                            <Group justify="space-between" className={classes.item} gap="xl">
+                            <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Allowed file types</Text>
                                     <Text size="xs" c="dimmed">
@@ -105,7 +115,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                             </Group>
 
                             {/* Max total file size */}
-                            {/* <Group justify="space-between" className={classes.item} gap="xl">
+                            {/* <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Max total file size (bytes)</Text>
                                     <Text size="xs" c="dimmed">
@@ -120,11 +130,11 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                                     min={0}
                                 />
                             </Group> */}
-                            <Group justify="space-between" className={classes.item} gap="xl">
+                            <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Required metadata fields</Text>
                                     <Text size="xs" c="dimmed">
-                                        Enter the required metadata fields (separated by commas)
+                                        Separated by commas
                                     </Text>
                                 </div>
                                 <TagsInput
@@ -138,7 +148,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                         </Stack>
                         <Stack p="md">
                             {/* Min file size */}
-                            <Group justify="space-between" className={classes.item} gap="xl">
+                            <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Min file size (bytes)</Text>
                                     <Text size="xs" c="dimmed">
@@ -155,7 +165,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                             </Group>
 
                             {/* Max file size */}
-                            <Group justify="space-between" className={classes.item} gap="xl">
+                            <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Max file size (bytes)</Text>
                                     <Text size="xs" c="dimmed">
@@ -172,7 +182,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                             </Group>
 
                             {/* Min number of files */}
-                            <Group justify="space-between" className={classes.item} gap="xl">
+                            <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Min number of files</Text>
                                     <Text size="xs" c="dimmed">
@@ -189,7 +199,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                             </Group>
 
                             {/* Max number of files */}
-                            <Group justify="space-between" className={classes.item} gap="xl">
+                            <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Max number of files</Text>
                                     <Text size="xs" c="dimmed">
@@ -207,11 +217,10 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                         </Stack>
                     </SimpleGrid>
                 </Paper>
-                <Title order={4} opacity={0.7} mb="sm" mt="xl">Settings</Title>
-                <Paper p="sm">
-                    <SimpleGrid cols={{ sm: 1, md: 2 }}>
+                <Paper p="sm" mt={50}>
+                    <SimpleGrid cols={{ sm: 1, lg: 2 }}>
                         <Stack p="md">
-                            <Group justify="space-between" className={classes.item} gap="xl">
+                            <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Allow pause and resume</Text>
                                     <Text size="xs" c="dimmed">
@@ -228,7 +237,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                                 />
                             </Group>
 
-                            <Group justify="space-between" className={classes.item} gap="xl">
+                            <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Enable image editing</Text>
                                     <Text size="xs" c="dimmed">
@@ -246,7 +255,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                             </Group>
                         </Stack>
                         <Stack p="md">
-                            <Group justify="space-between" className={classes.item} gap="xl">
+                            <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Use compression</Text>
                                     <Text size="xs" c="dimmed">
@@ -263,7 +272,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                                 />
                             </Group>
 
-                            <Group justify="space-between" className={classes.item} gap="xl">
+                            <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Use fault tolerant mode</Text>
                                     <Text size="xs" c="dimmed">
