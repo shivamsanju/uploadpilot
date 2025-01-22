@@ -40,7 +40,8 @@ func (c *hooksCatalogService) TriggerWebhookHookFunc(ctx context.Context, input 
 	for i := 0; i < len(webhooks); i++ {
 		res := <-resultChan
 		if res.Error != nil {
-			input.Import.Status = models.ImportStatusFailed
+			// TODO: add to logs
+			// input.Import.Status = models.ImportStatusFailed
 			input.Import.Logs = append(input.Import.Logs, models.Log{
 				Message:   fmt.Sprintf("Error while triggering webhook [%s]: %s", res.URL, res.Error.Error()),
 				TimeStamp: primitive.NewDateTimeFromTime(time.Now()),
