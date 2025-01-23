@@ -1,8 +1,9 @@
 package dto
 
-type PaginatedResponse[T any] struct {
-	Records      []T   `json:"records"`
-	TotalRecords int64 `json:"totalRecords"`
+type ApiUser struct {
+	UserID string `json:"userId"`
+	Name   string `json:"name"`
+	Email  string `json:"email"`
 }
 
 type SessionResponse struct {

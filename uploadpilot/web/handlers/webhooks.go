@@ -1,176 +1,109 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
-	"reflect"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/go-playground/validator/v10"
-	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
-	"github.com/uploadpilot/uploadpilot/web/dto"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/uploadpilot/uploadpilot/internal/webhook"
 )
 
 type webhooksHandler struct {
-	webhookRepo db.WebhookRepo
+	webhookSvc *webhook.WebhookService
 }
 
 func NewWebhooksHandler() *webhooksHandler {
 	return &webhooksHandler{
-		webhookRepo: db.NewWebhookRepo(),
+		webhookSvc: webhook.NewWebhookService(),
 	}
 }
 
 func (wh *webhooksHandler) GetWebhooks(w http.ResponseWriter, r *http.Request) {
-	wsID := chi.URLParam(r, "workspaceId")
-	workspaceId, err := primitive.ObjectIDFromHex(wsID)
+	workspaceID := chi.URLParam(r, "workspaceId")
+
+	webhooks, err := wh.webhookSvc.GetAllWebhooksInWorkspace(r.Context(), workspaceID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	webhooks, err := wh.webhookRepo.GetWebhooks(r.Context(), workspaceId)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
+
 	render.JSON(w, r, webhooks)
 }
 
-func (wh *webhooksHandler) CreateWebhook(w http.ResponseWriter, r *http.Request) {
-	wsID := chi.URLParam(r, "workspaceId")
-	workspaceId, err := primitive.ObjectIDFromHex(wsID)
+func (wh *webhooksHandler) GetWebhookDetailsByID(w http.ResponseWriter, r *http.Request) {
+	workspaceID := chi.URLParam(r, "workspaceId")
+	webhookID := chi.URLParam(r, "webhookId")
+
+	webhook, err := wh.webhookSvc.GetWebhook(r.Context(), workspaceID, webhookID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
+
+	render.JSON(w, r, webhook)
+}
+
+func (wh *webhooksHandler) CreateWebhook(w http.ResponseWriter, r *http.Request) {
+	workspaceID := chi.URLParam(r, "workspaceId")
+
 	webhook := &models.Webhook{}
 	if err := render.DecodeJSON(r.Body, webhook); err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-	webhook.Enabled = true
-
-	if err := validate.Struct(webhook); err != nil {
-		errors := make(map[string]string)
-		for _, err := range err.(validator.ValidationErrors) {
-			errors[err.Field()] = err.Tag()
-		}
-		utils.HandleHttpError(w, r, http.StatusBadRequest, fmt.Errorf("validation error: %v", errors))
+		utils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	webhook, err = wh.webhookRepo.CreateWebhook(r.Context(), workspaceId, webhook)
-	if err != nil {
+	if err := wh.webhookSvc.CreateWebhook(r.Context(), workspaceID, webhook); err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
+
 	render.JSON(w, r, webhook.ID)
 }
 
 func (wh *webhooksHandler) DeleteWebhook(w http.ResponseWriter, r *http.Request) {
-	wsID := chi.URLParam(r, "workspaceId")
-	workspaceId, err := primitive.ObjectIDFromHex(wsID)
-	if err != nil {
+	workspaceID := chi.URLParam(r, "workspaceId")
+	webhookID := chi.URLParam(r, "webhookId")
+
+	if err := wh.webhookSvc.DeleteWebhook(r.Context(), workspaceID, webhookID); err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	whID := chi.URLParam(r, "webhookId")
-	webhookId, err := primitive.ObjectIDFromHex(whID)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-	err = wh.webhookRepo.DeleteWebhook(r.Context(), workspaceId, webhookId)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-	render.JSON(w, r, nil)
+
+	render.JSON(w, r, true)
 }
 
 func (wh *webhooksHandler) UpdateWebhook(w http.ResponseWriter, r *http.Request) {
-	userEmail := r.Header.Get("email")
-	wsID := chi.URLParam(r, "workspaceId")
-	workspaceId, err := primitive.ObjectIDFromHex(wsID)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-	whID := chi.URLParam(r, "webhookId")
-	webhookId, err := primitive.ObjectIDFromHex(whID)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-	webhook := &models.Webhook{}
-	webhook.ID = webhookId
-	if err := render.DecodeJSON(r.Body, webhook); err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-	webhook, err = wh.webhookRepo.UpdateWebhook(r.Context(), workspaceId, webhook, userEmail)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-	render.JSON(w, r, webhook.ID)
-}
+	workspaceID := chi.URLParam(r, "workspaceId")
+	webhookID := chi.URLParam(r, "webhookId")
 
-func (wh *webhooksHandler) GetWebhook(w http.ResponseWriter, r *http.Request) {
-	wsID := chi.URLParam(r, "workspaceId")
-	workspaceId, err := primitive.ObjectIDFromHex(wsID)
-	if err != nil {
+	webhook := &models.Webhook{}
+	if err := render.DecodeJSON(r.Body, webhook); err != nil {
+		utils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	if err := wh.webhookSvc.UpdateWebhook(r.Context(), workspaceID, webhookID, webhook); err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	whID := chi.URLParam(r, "webhookId")
-	webhookId, err := primitive.ObjectIDFromHex(whID)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-	webhook, err := wh.webhookRepo.GetWebhook(r.Context(), workspaceId, webhookId)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-	render.JSON(w, r, webhook)
+
+	render.JSON(w, r, true)
 }
 
 func (wh *webhooksHandler) PatchWebhook(w http.ResponseWriter, r *http.Request) {
-	wsID := chi.URLParam(r, "workspaceId")
-	workspaceId, err := primitive.ObjectIDFromHex(wsID)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
+	workspaceID := chi.URLParam(r, "workspaceId")
+	webhookID := chi.URLParam(r, "webhookId")
 
-	whID := chi.URLParam(r, "webhookId")
-	webhookId, err := primitive.ObjectIDFromHex(whID)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
 	patchReq := &dto.PatchWebhookRequest{}
 	if err := render.DecodeJSON(r.Body, patchReq); err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		utils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	if reflect.TypeOf(patchReq.Enabled).Kind() != reflect.Bool {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, fmt.Errorf("invalid type for enabled: %T", patchReq.Enabled))
-		return
-	}
-
-	err = wh.webhookRepo.PatchWebhook(r.Context(), workspaceId, webhookId, &bson.M{
-		"enabled": patchReq.Enabled,
-	})
-	if err != nil {
+	if err := wh.webhookSvc.PatchWebhook(r.Context(), workspaceID, webhookID, patchReq); err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}

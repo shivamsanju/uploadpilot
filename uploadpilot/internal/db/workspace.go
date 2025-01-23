@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/internal/messages"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -13,69 +14,70 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type WorkspaceRepo interface {
-	GetWorkspace(ctx context.Context, workspaceID primitive.ObjectID) (*models.Workspace, error)
-	Create(ctx context.Context, workspace *models.Workspace) (*models.Workspace, error)
-	Delete(ctx context.Context, workspaceID primitive.ObjectID) error
-	CheckWorkspaceExists(ctx context.Context, workspaceID primitive.ObjectID) (bool, error)
-
-	// users related
-	GetUsersInWorkspace(ctx context.Context, workspaceID primitive.ObjectID) ([]models.WorkspaceUserWithDetails, error)
-	GetWorkspacesForUser(ctx context.Context, userId string) ([]models.Workspace, error)
-	CheckIfUserExistsInWorkspace(ctx context.Context, workspaceID primitive.ObjectID, userID string) (bool, error)
-	AddUserToWorkspace(ctx context.Context, workspaceID primitive.ObjectID, user *models.WorkspaceUser) error
-	RemoveUserFromWorkspace(ctx context.Context, workspaceID primitive.ObjectID, userID string) error
-	GetUserRoleInWorkspace(ctx context.Context, workspaceID primitive.ObjectID, userID string) (models.UserRole, error)
-	ChangeUserRoleInWorkspace(ctx context.Context, workspaceID primitive.ObjectID, userID string, role models.UserRole) error
-
-	// uploader config related
-	GetUploaderConfig(ctx context.Context, workspaceID primitive.ObjectID) (*models.UploaderConfig, error)
-	UpdateUploaderConfig(ctx context.Context, workspaceID primitive.ObjectID, cb *models.UploaderConfig) error
-}
-
-type workspaceRepo struct {
+type WorkspaceRepo struct {
 	collectionName     string
 	userColelctionName string
 }
 
 // NewWorkspaceRepo initializes a new instance of workspaceRepo with predefined
-// collection names for workspaces and users. It returns an interface that
-// defines the contract for workspace-related operations.
-func NewWorkspaceRepo() WorkspaceRepo {
-	return &workspaceRepo{
+// collection names for workspaces and users
+func NewWorkspaceRepo() *WorkspaceRepo {
+	return &WorkspaceRepo{
 		collectionName:     "workspaces",
 		userColelctionName: "users",
 	}
 }
 
-// GetWorkspace retrieves the workspace with the given ID from the workspaces collection.
-func (wr *workspaceRepo) GetWorkspace(ctx context.Context, workspaceID primitive.ObjectID) (*models.Workspace, error) {
+func (wr *WorkspaceRepo) GetAll(ctx context.Context, userId string) ([]models.Workspace, error) {
+	collection := db.Collection(wr.collectionName)
+	var workspaces []models.Workspace
+
+	findOptions := options.Find().SetProjection(bson.M{
+		"id":   1,
+		"name": 1,
+	})
+	findOptions.SetSort(bson.M{"updatedAt": -1})
+
+	cursor, err := collection.Find(ctx, bson.M{"users.userId": userId}, findOptions)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	if err := cursor.All(ctx, &workspaces); err != nil {
+		return nil, err
+	}
+
+	return workspaces, nil
+}
+
+func (wr *WorkspaceRepo) Get(ctx context.Context, workspaceID string) (*models.Workspace, error) {
+	id, err := primitive.ObjectIDFromHex(workspaceID)
+	if err != nil {
+		return nil, fmt.Errorf(messages.InvalidObjectID, workspaceID)
+	}
 	collection := db.Collection(wr.collectionName)
 	var workspace models.Workspace
-	err := collection.FindOne(ctx, bson.M{"_id": workspaceID}).Decode(&workspace)
+	err = collection.FindOne(ctx, bson.M{"_id": id}).Decode(&workspace)
 	if err != nil {
 		return nil, err
 	}
 	return &workspace, nil
 }
 
-// Create creates a new workspace and adds the given user as owner to it.
-//
-// This method uses a transaction to ensure that either both the workspace and the user are updated,
-// or neither of them is.
-//
-// Note that the ID of the workspace is set by this method.
-func (wr *workspaceRepo) Create(ctx context.Context, workspace *models.Workspace) (*models.Workspace, error) {
-	creatorEmail := ctx.Value("email").(string)
-	creatorUserID := ctx.Value("userId").(string)
+func (wr *WorkspaceRepo) Create(ctx context.Context, workspace *models.Workspace) (*models.Workspace, error) {
+	user, err := utils.GetUserDetailsFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	workspace.ID = primitive.NewObjectID()
 	workspace.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
 	workspace.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
-	workspace.CreatedBy = creatorEmail
-	workspace.UpdatedBy = creatorEmail
+	workspace.CreatedBy = user.Email
+	workspace.UpdatedBy = user.Email
 
-	workspace.Users = []models.WorkspaceUser{{UserID: creatorUserID, Role: models.UserRoleOwner}}
+	workspace.Users = []models.WorkspaceUser{{UserID: user.UserID, Role: models.UserRoleOwner}}
 
 	session, err := db.Client().StartSession()
 	if err != nil {
@@ -92,7 +94,7 @@ func (wr *workspaceRepo) Create(ctx context.Context, workspace *models.Workspace
 
 		// Update user collection
 		userCollection := db.Collection(wr.userColelctionName)
-		userFilter := bson.M{"userId": creatorUserID}
+		userFilter := bson.M{"userId": user.UserID}
 		userUpdate := bson.M{"$addToSet": bson.M{"workspaces": &models.UserWorkspace{WorkspaceID: workspace.ID, Role: models.UserRoleOwner}}}
 		if _, err := userCollection.UpdateOne(sessCtx, userFilter, userUpdate); err != nil {
 			return nil, err
@@ -109,48 +111,47 @@ func (wr *workspaceRepo) Create(ctx context.Context, workspace *models.Workspace
 
 }
 
-// Delete deletes the workspace with the given ID.
-//
-// The deletion is performed by finding and removing the document with the given ID from the workspaces collection.
-//
-// It is the caller's responsibility to ensure that the workspace is not in use by any other operations.
-func (wr *workspaceRepo) Delete(ctx context.Context, workspaceID primitive.ObjectID) error {
+func (wr *WorkspaceRepo) Delete(ctx context.Context, workspaceID primitive.ObjectID) error {
 	collection := db.Collection(wr.collectionName)
 	_, err := collection.DeleteOne(ctx, bson.M{"_id": workspaceID})
 	return err
 }
 
-// CheckWorkspaceExists checks if a workspace with the given ID exists in the workspaces collection.
-//
-// It returns true if the workspace exists, false otherwise.
-func (wr *workspaceRepo) CheckWorkspaceExists(ctx context.Context, workspaceID primitive.ObjectID) (bool, error) {
+func (wr *WorkspaceRepo) Exists(ctx context.Context, workspaceID string) (bool, error) {
+	id, err := primitive.ObjectIDFromHex(workspaceID)
+	if err != nil {
+		return false, fmt.Errorf(messages.InvalidObjectID, workspaceID)
+	}
 	collection := db.Collection(wr.collectionName)
-	count, err := collection.CountDocuments(ctx, bson.M{"_id": workspaceID})
+	count, err := collection.CountDocuments(ctx, bson.M{"_id": id})
 	return count > 0, err
 }
 
-// GetUsersInWorkspace retrieves a list of users associated with the given workspace ID.
-func (wr *workspaceRepo) GetUsersInWorkspace(ctx context.Context, workspaceID primitive.ObjectID) ([]models.WorkspaceUserWithDetails, error) {
+func (wr *WorkspaceRepo) GetUsersInWorkspace(ctx context.Context, workspaceID string) ([]models.WorkspaceUserWithDetails, error) {
+	id, err := primitive.ObjectIDFromHex(workspaceID)
+	if err != nil {
+		return nil, fmt.Errorf(messages.InvalidObjectID, workspaceID)
+	}
 	collection := db.Collection(wr.collectionName)
 	var users []models.WorkspaceUserWithDetails
 
 	pipeline := []bson.M{
 		{
-			"$match": bson.M{"_id": workspaceID},
+			"$match": bson.M{"_id": id},
 		},
 		{
-			"$unwind": "$users", // Unwind the users array to process each user individually
+			"$unwind": "$users",
 		},
 		{
 			"$lookup": bson.M{
-				"from":         wr.userColelctionName, // Collection containing user details
-				"localField":   "users.userId",        // Match workspace userId
-				"foreignField": "userId",              // With user collection's userId
-				"as":           "userDetails",         // Output array of matched user details
+				"from":         wr.userColelctionName,
+				"localField":   "users.userId",
+				"foreignField": "userId",
+				"as":           "userDetails",
 			},
 		},
 		{
-			"$unwind": "$userDetails", // Unwind userDetails array to access individual user details
+			"$unwind": "$userDetails",
 		},
 		{
 			"$project": bson.M{
@@ -177,44 +178,21 @@ func (wr *workspaceRepo) GetUsersInWorkspace(ctx context.Context, workspaceID pr
 	return users, nil
 }
 
-// GetWorkspacesForUser retrieves a list of workspaces associated with the specified user ID.
-// It returns a slice of models.Workspace containing only the ID and name fields, sorted by the
-// updatedAt field in descending order. If an error occurs during the database query, it returns
-// an error.
-func (wr *workspaceRepo) GetWorkspacesForUser(ctx context.Context, userId string) ([]models.Workspace, error) {
-	collection := db.Collection(wr.collectionName)
-	var workspaces []models.Workspace
-
-	findOptions := options.Find().SetProjection(bson.M{
-		"id":   1,
-		"name": 1,
-	})
-	findOptions.SetSort(bson.M{"updatedAt": -1})
-
-	cursor, err := collection.Find(ctx, bson.M{"users.userId": userId}, findOptions)
+func (wr *WorkspaceRepo) CheckIfUserExistsInWorkspace(ctx context.Context, workspaceID string, userID string) (bool, error) {
+	id, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return nil, err
+		return false, fmt.Errorf(messages.InvalidObjectID, workspaceID)
 	}
-	defer cursor.Close(ctx)
-
-	if err := cursor.All(ctx, &workspaces); err != nil {
-		return nil, err
-	}
-
-	return workspaces, nil
-}
-
-func (wr *workspaceRepo) CheckIfUserExistsInWorkspace(ctx context.Context, workspaceID primitive.ObjectID, userID string) (bool, error) {
 	collection := db.Collection(wr.collectionName)
-	count, err := collection.CountDocuments(ctx, bson.M{"_id": workspaceID, "users.userId": userID})
+	count, err := collection.CountDocuments(ctx, bson.M{"_id": id, "users.userId": userID})
 	return count > 0, err
 }
 
-// AddUserToWorkspace adds the given user to the given workspace using a transaction.
-//
-// The transaction ensures that either both the workspace and the user are updated,
-// or neither of them is.
-func (wr *workspaceRepo) AddUserToWorkspace(ctx context.Context, workspaceID primitive.ObjectID, user *models.WorkspaceUser) error {
+func (wr *WorkspaceRepo) AddUserToWorkspace(ctx context.Context, workspaceID string, user *models.WorkspaceUser) error {
+	id, err := primitive.ObjectIDFromHex(workspaceID)
+	if err != nil {
+		return fmt.Errorf(messages.InvalidObjectID, workspaceID)
+	}
 	session, err := db.Client().StartSession()
 	if err != nil {
 		return err
@@ -225,7 +203,7 @@ func (wr *workspaceRepo) AddUserToWorkspace(ctx context.Context, workspaceID pri
 	callback := func(sessCtx mongo.SessionContext) (interface{}, error) {
 		// Update workspace collection
 		workspaceCollection := db.Collection(wr.collectionName)
-		workspaceFilter := bson.M{"_id": workspaceID}
+		workspaceFilter := bson.M{"_id": id}
 		workspaceUpdate := bson.M{"$addToSet": bson.M{"users": user}}
 		if _, err := workspaceCollection.UpdateOne(sessCtx, workspaceFilter, workspaceUpdate); err != nil {
 			return nil, err
@@ -234,7 +212,7 @@ func (wr *workspaceRepo) AddUserToWorkspace(ctx context.Context, workspaceID pri
 		// Update user collection
 		userCollection := db.Collection(wr.userColelctionName)
 		userFilter := bson.M{"userId": user.UserID}
-		userUpdate := bson.M{"$addToSet": bson.M{"workspaces": &models.UserWorkspace{WorkspaceID: workspaceID, Role: user.Role}}}
+		userUpdate := bson.M{"$addToSet": bson.M{"workspaces": &models.UserWorkspace{WorkspaceID: id, Role: user.Role}}}
 		if _, err := userCollection.UpdateOne(sessCtx, userFilter, userUpdate); err != nil {
 			return nil, err
 		}
@@ -247,18 +225,18 @@ func (wr *workspaceRepo) AddUserToWorkspace(ctx context.Context, workspaceID pri
 	return err
 }
 
-// RemoveUserFromWorkspace removes the given user from the given workspace using a transaction.
-//
-// The transaction ensures that either both the workspace and the user are updated,
-// or neither of them is.
-func (wr *workspaceRepo) RemoveUserFromWorkspace(ctx context.Context, workspaceID primitive.ObjectID, userID string) error {
+func (wr *WorkspaceRepo) RemoveUserFromWorkspace(ctx context.Context, workspaceID string, userID string) error {
+	id, err := primitive.ObjectIDFromHex(workspaceID)
+	if err != nil {
+		return fmt.Errorf(messages.InvalidObjectID, workspaceID)
+	}
 	session, err := db.Client().StartSession()
 	if err != nil {
 		return err
 	}
 	defer session.EndSession(ctx)
 
-	userRole, err := wr.GetUserRoleInWorkspace(ctx, workspaceID, userID)
+	userRole, err := wr.GetUserRoleInWorkspace(ctx, id, userID)
 	if err != nil || userRole == models.UserRoleNotFound {
 		return fmt.Errorf("user %s not found in workspace %s", userID, workspaceID)
 	}
@@ -267,7 +245,7 @@ func (wr *workspaceRepo) RemoveUserFromWorkspace(ctx context.Context, workspaceI
 	callback := func(sessCtx mongo.SessionContext) (interface{}, error) {
 		// Update workspace collection
 		workspaceCollection := db.Collection(wr.collectionName)
-		workspaceFilter := bson.M{"_id": workspaceID}
+		workspaceFilter := bson.M{"_id": id}
 		workspaceUpdate := bson.M{"$pull": bson.M{"users": &models.WorkspaceUser{UserID: userID, Role: userRole}}}
 		if _, err := workspaceCollection.UpdateOne(sessCtx, workspaceFilter, workspaceUpdate); err != nil {
 			return nil, err
@@ -276,7 +254,7 @@ func (wr *workspaceRepo) RemoveUserFromWorkspace(ctx context.Context, workspaceI
 		// Update user collection
 		userCollection := db.Collection(wr.userColelctionName)
 		userFilter := bson.M{"userId": userID}
-		userUpdate := bson.M{"$pull": bson.M{"workspaces": &models.UserWorkspace{WorkspaceID: workspaceID, Role: userRole}}}
+		userUpdate := bson.M{"$pull": bson.M{"workspaces": &models.UserWorkspace{WorkspaceID: id, Role: userRole}}}
 		if _, err := userCollection.UpdateOne(sessCtx, userFilter, userUpdate); err != nil {
 			return nil, err
 		}
@@ -289,8 +267,7 @@ func (wr *workspaceRepo) RemoveUserFromWorkspace(ctx context.Context, workspaceI
 	return err
 }
 
-// GetUserRoleInWorkspace retrieves the role of the user in the given workspace.
-func (wr *workspaceRepo) GetUserRoleInWorkspace(ctx context.Context, workspaceID primitive.ObjectID, userID string) (models.UserRole, error) {
+func (wr *WorkspaceRepo) GetUserRoleInWorkspace(ctx context.Context, workspaceID primitive.ObjectID, userID string) (models.UserRole, error) {
 	collection := db.Collection(wr.collectionName)
 	var workspace models.Workspace
 	err := collection.FindOne(ctx, bson.M{"_id": workspaceID, "users.userId": userID}).Decode(&workspace)
@@ -305,53 +282,79 @@ func (wr *workspaceRepo) GetUserRoleInWorkspace(ctx context.Context, workspaceID
 	return models.UserRoleNotFound, nil
 }
 
-func (wr *workspaceRepo) ChangeUserRoleInWorkspace(ctx context.Context, workspaceID primitive.ObjectID, userID string, role models.UserRole) error {
+func (wr *WorkspaceRepo) ChangeUserRoleInWorkspace(ctx context.Context, workspaceID string, userID string, role models.UserRole) error {
+	id, err := primitive.ObjectIDFromHex(workspaceID)
+	if err != nil {
+		return fmt.Errorf(messages.InvalidObjectID, workspaceID)
+	}
 	collection := db.Collection(wr.collectionName)
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": workspaceID, "users.userId": userID}, bson.M{"$set": bson.M{"users.$.role": role}})
+	_, err = collection.UpdateOne(ctx, bson.M{"_id": id, "users.userId": userID}, bson.M{"$set": bson.M{"users.$.role": role}})
 	return err
 }
 
-// GetUploaderConfig retrieves the uploader configuration associated with the given workspace ID.
-//
-// The retrieval is performed by finding the workspace document with the given ID and extracting the
-// uploader configuration from it.
-//
-// If the ID is not a valid ObjectID, an error is returned.
-//
-// It is the caller's responsibility to ensure that the workspace is not in use by any other operations.
-func (wr *workspaceRepo) GetUploaderConfig(ctx context.Context, workspaceID primitive.ObjectID) (*models.UploaderConfig, error) {
+func (wr *WorkspaceRepo) IsUserLastOwner(ctx context.Context, workspaceID string, userID string) (bool, error) {
+	isLastOwner := true
+	id, err := primitive.ObjectIDFromHex(workspaceID)
+	if err != nil {
+		return isLastOwner, fmt.Errorf(messages.InvalidObjectID, workspaceID)
+	}
 	collection := db.Collection(wr.collectionName)
 	var workspace models.Workspace
-	err := collection.FindOne(ctx, bson.M{"_id": workspaceID}, options.FindOne().SetProjection(bson.M{"uploaderConfig": 1})).Decode(&workspace)
+	err = collection.FindOne(ctx, bson.M{"_id": id}).Decode(&workspace)
+	if err != nil {
+		return isLastOwner, err
+	}
+
+	for _, user := range workspace.Users {
+		if user.UserID != userID && user.Role == models.UserRoleOwner {
+			isLastOwner = false
+			break
+		}
+	}
+
+	return isLastOwner, nil
+}
+
+func (wr *WorkspaceRepo) GetUploaderConfig(ctx context.Context, workspaceID string) (*models.UploaderConfig, error) {
+	id, err := primitive.ObjectIDFromHex(workspaceID)
+	if err != nil {
+		return nil, fmt.Errorf(messages.InvalidObjectID, workspaceID)
+	}
+	collection := db.Collection(wr.collectionName)
+	var workspace models.Workspace
+	err = collection.FindOne(ctx, bson.M{"_id": id}, options.FindOne().SetProjection(bson.M{"uploaderConfig": 1})).Decode(&workspace)
 	if err != nil {
 		return nil, err
 	}
 	return workspace.UploaderConfig, nil
 }
 
-// UpdateUploaderConfig updates the uploader configuration for a specific workspace.
-//
-// This function takes the workspace ID, updated uploader configuration data, and the identifier
-// of the user making the update. It prepares a BSON update object containing the non-empty fields of the
-// provided configuration. The function then updates the workspace document in the database by
-// setting the specified fields in the uploader configuration, and records the user who made the
-// update along with the timestamp of the update.
-func (wr *workspaceRepo) UpdateUploaderConfig(ctx context.Context, workspaceID primitive.ObjectID, updatedData *models.UploaderConfig) error {
-	updatedBy := ctx.Value("email").(string)
+func (wr *WorkspaceRepo) SetUploaderConfig(ctx context.Context, workspaceID string, config *models.UploaderConfig) error {
+	id, err := primitive.ObjectIDFromHex(workspaceID)
+	if err != nil {
+		return fmt.Errorf(messages.InvalidObjectID, workspaceID)
+	}
+
+	user, err := utils.GetUserDetailsFromContext(ctx)
+	if err != nil {
+		return err
+	}
+	updatedBy := user.Email
 
 	updateFields := utils.FilterNonEmptyBsonFields(bson.M{
-		"uploaderConfig.maxFileSize":            updatedData.MaxFileSize,
-		"uploaderConfig.minFileSize":            updatedData.MinFileSize,
-		"uploaderConfig.maxNumberOfFiles":       updatedData.MaxNumberOfFiles,
-		"uploaderConfig.minNumberOfFiles":       updatedData.MinNumberOfFiles,
-		"uploaderConfig.maxTotalFileSize":       updatedData.MaxTotalFileSize,
-		"uploaderConfig.allowedFileTypes":       updatedData.AllowedFileTypes,
-		"uploaderConfig.allowedSources":         updatedData.AllowedSources,
-		"uploaderConfig.requiredMetadataFields": updatedData.RequiredMetadataFields,
-		"uploaderConfig.allowPauseAndResume":    updatedData.AllowPauseAndResume,
-		"uploaderConfig.enableImageEditing":     updatedData.EnableImageEditing,
-		"uploaderConfig.useCompression":         updatedData.UseCompression,
-		"uploaderConfig.useFaultTolerantMode":   updatedData.UseFaultTolerantMode,
+		"uploaderConfig.maxFileSize":            config.MaxFileSize,
+		"uploaderConfig.minFileSize":            config.MinFileSize,
+		"uploaderConfig.maxNumberOfFiles":       config.MaxNumberOfFiles,
+		"uploaderConfig.minNumberOfFiles":       config.MinNumberOfFiles,
+		"uploaderConfig.maxTotalFileSize":       config.MaxTotalFileSize,
+		"uploaderConfig.allowedFileTypes":       config.AllowedFileTypes,
+		"uploaderConfig.allowedSources":         config.AllowedSources,
+		"uploaderConfig.requiredMetadataFields": config.RequiredMetadataFields,
+		"uploaderConfig.allowPauseAndResume":    config.AllowPauseAndResume,
+		"uploaderConfig.enableImageEditing":     config.EnableImageEditing,
+		"uploaderConfig.useCompression":         config.UseCompression,
+		"uploaderConfig.useFaultTolerantMode":   config.UseFaultTolerantMode,
+		"uploaderConfig.authEndpoint":           config.AuthEndpoint,
 		"updatedBy":                             updatedBy,
 		"updatedAt":                             primitive.NewDateTimeFromTime(time.Now()),
 	})
@@ -359,6 +362,6 @@ func (wr *workspaceRepo) UpdateUploaderConfig(ctx context.Context, workspaceID p
 	update := bson.M{"$set": updateFields}
 
 	collection := db.Collection(wr.collectionName)
-	_, err := collection.UpdateOne(ctx, bson.M{"_id": workspaceID}, update)
+	_, err = collection.UpdateOne(ctx, bson.M{"_id": id}, update)
 	return err
 }

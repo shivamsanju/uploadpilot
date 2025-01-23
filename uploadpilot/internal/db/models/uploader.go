@@ -32,4 +32,5 @@ type UploaderConfig struct {
 	EnableImageEditing     bool             `bson:"enableImageEditing" json:"enableImageEditing"`
 	UseCompression         bool             `bson:"useCompression" json:"useCompression"`
 	UseFaultTolerantMode   bool             `bson:"useFaultTolerantMode" json:"useFaultTolerantMode"`
+	AuthEndpoint           string           `bson:"authEndpoint" json:"authEndpoint"`
 }

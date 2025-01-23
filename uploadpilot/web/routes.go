@@ -15,7 +15,7 @@ func Routes() *chi.Mux {
 	ih := handlers.NewTusdHandler()
 	authHandler := handlers.NewAuthHandler()
 	workspaceHandler := handlers.NewWorkspaceHandler()
-	importHandler := handlers.NewImportHandler()
+	uploadHandler := handlers.NewUploadHandler()
 	webhooksHandler := handlers.NewWebhooksHandler()
 
 	// Public routes
@@ -59,16 +59,16 @@ func Routes() *chi.Mux {
 					r.Get("/", workspaceHandler.GetAllUsersInWorkspace)
 					r.Post("/", workspaceHandler.AddUserToWorkspace)
 					r.Route("/{userId}", func(r chi.Router) {
-						r.Put("/", workspaceHandler.UpdateUserInWorkspace)
+						r.Put("/", workspaceHandler.ChangeUserRoleInWorkspace)
 						r.Delete("/", workspaceHandler.RemoveUserFromWorkspace)
 					})
 				})
 
-				// Imports
-				r.Route("/imports", func(r chi.Router) {
-					r.Get("/", importHandler.GetAllImportsForWorkspace)
-					r.Route("/{importId}", func(r chi.Router) {
-						r.Get("/", importHandler.GetImportDetailsByID)
+				// Uploads
+				r.Route("/uploads", func(r chi.Router) {
+					r.Get("/", uploadHandler.GetPaginatedUploads)
+					r.Route("/{uploadId}", func(r chi.Router) {
+						r.Get("/", uploadHandler.GetUploadDetailsByID)
 					})
 				})
 
@@ -77,7 +77,7 @@ func Routes() *chi.Mux {
 					r.Post("/", webhooksHandler.CreateWebhook)
 					r.Get("/", webhooksHandler.GetWebhooks)
 					r.Route("/{webhookId}", func(r chi.Router) {
-						r.Get("/", webhooksHandler.GetWebhook)
+						r.Get("/", webhooksHandler.GetWebhookDetailsByID)
 						r.Put("/", webhooksHandler.UpdateWebhook)
 						r.Patch("/", webhooksHandler.PatchWebhook)
 						r.Delete("/", webhooksHandler.DeleteWebhook)

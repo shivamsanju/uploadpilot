@@ -2,11 +2,11 @@ package dto
 
 import "github.com/uploadpilot/uploadpilot/internal/db/models"
 
-type AddUserToWorkspaceRequest struct {
+type AddWorkspaceUser struct {
 	Email string          `json:"email" validate:"email,required"`
 	Role  models.UserRole `json:"role" validate:"required"`
 }
 
-type EditUserInWorkspaceRequest struct {
+type EditUserRole struct {
 	Role models.UserRole `json:"role" validate:"required"`
 }

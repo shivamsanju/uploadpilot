@@ -1,5 +1,5 @@
-import { IconDots, IconEdit, IconTrash } from '@tabler/icons-react';
-import { ActionIcon, Avatar, Box, Group, Menu, Modal, Text } from '@mantine/core';
+import { IconDots, IconEdit, IconEye, IconTrash } from '@tabler/icons-react';
+import { ActionIcon, Avatar, Box, Group, LoadingOverlay, Menu, Modal, Text } from '@mantine/core';
 import { useGetUsersInWorkspace, useRemoveUserFromWorkspaceMutation } from '../../../apis/workspace';
 import { useParams } from 'react-router-dom';
 import { useCallback, useMemo, useState } from 'react';
@@ -8,6 +8,7 @@ import { UploadPilotDataTable } from '../../../components/Table/Table';
 import { ErrorCard } from '../../../components/ErrorCard/ErrorCard';
 import { showNotification } from '@mantine/notifications';
 import AddUserForm from './Add';
+import { useViewportSize } from '@mantine/hooks';
 
 const getRandomAvatar = () => {
     const randomIndex = Math.floor(Math.random() * 5) + 1;
@@ -15,11 +16,13 @@ const getRandomAvatar = () => {
 }
 
 const WorkspaceUsersList = ({ opened, setOpened }: { opened: boolean, setOpened: any }) => {
-    const [mode, setMode] = useState<'add' | 'edit'>('add');
+    const [mode, setMode] = useState<'add' | 'edit' | 'view'>('add');
+    const { width } = useViewportSize();
+
     const [initialValues, setInitialValues] = useState(null);
     const { workspaceId } = useParams();
     const { isPending, error, users } = useGetUsersInWorkspace(workspaceId || '');
-    const { mutateAsync } = useRemoveUserFromWorkspaceMutation();
+    const { mutateAsync, isPending: removePending } = useRemoveUserFromWorkspaceMutation();
 
 
     const handleRemoveUser = useCallback(async (userId: string) => {
@@ -33,7 +36,7 @@ const WorkspaceUsersList = ({ opened, setOpened }: { opened: boolean, setOpened:
         };
 
         try {
-            mutateAsync({ workspaceId, userId });
+            await mutateAsync({ workspaceId, userId });
         } catch (error) {
             console.error(error);
         }
@@ -41,8 +44,8 @@ const WorkspaceUsersList = ({ opened, setOpened }: { opened: boolean, setOpened:
     }, [workspaceId, mutateAsync]);
 
 
-    const handleEditUser = useCallback((item: any) => {
-        setMode('edit');
+    const handleViewEdit = useCallback((item: any, mode: "edit" | "view") => {
+        setMode(mode);
         setInitialValues(item);
         setOpened(true);
     }, [setMode, setInitialValues, setOpened]);
@@ -69,6 +72,7 @@ const WorkspaceUsersList = ({ opened, setOpened }: { opened: boolean, setOpened:
         {
             accessor: 'email',
             title: 'Email',
+            hidden: width < 768,
             render: (item: any) => (
                 <>
                     <Text fz="sm">{item.email}</Text>
@@ -108,8 +112,13 @@ const WorkspaceUsersList = ({ opened, setOpened }: { opened: boolean, setOpened:
                         </Menu.Target>
                         <Menu.Dropdown>
                             <Menu.Item
+                                leftSection={<IconEye size={16} stroke={1.5} />}
+                                onClick={() => handleViewEdit(item, "view")}>
+                                View
+                            </Menu.Item>
+                            <Menu.Item
                                 leftSection={<IconEdit size={16} stroke={1.5} />}
-                                onClick={() => handleEditUser(item)}>
+                                onClick={() => handleViewEdit(item, "edit")}>
                                 Edit role
                             </Menu.Item>
                             <Menu.Item
@@ -126,7 +135,7 @@ const WorkspaceUsersList = ({ opened, setOpened }: { opened: boolean, setOpened:
             )
         },
 
-    ], [handleRemoveUser, handleEditUser]);
+    ], [handleRemoveUser, handleViewEdit, width]);
 
     if (error) {
         return <ErrorCard title="Error" message={error.message} h="70vh" />
@@ -134,6 +143,7 @@ const WorkspaceUsersList = ({ opened, setOpened }: { opened: boolean, setOpened:
 
     return (
         <Box mr="md">
+            <LoadingOverlay visible={isPending} overlayProps={{ radius: "sm", blur: 1 }} />
             <UploadPilotDataTable
                 minHeight={500}
                 fetching={isPending}
@@ -154,7 +164,7 @@ const WorkspaceUsersList = ({ opened, setOpened }: { opened: boolean, setOpened:
                     setMode('add');
                     setInitialValues(null);
                 }}
-                title={mode === 'edit' ? 'Edit User' : 'Add User'}
+                title={mode === 'edit' ? 'Edit User' : mode === 'view' ? 'User Details' : 'Add User'}
                 closeOnClickOutside={false}
                 size="xl"
             >

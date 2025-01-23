@@ -5,13 +5,13 @@ import {
     useMantineColorScheme,
     useMantineTheme,
 } from "@mantine/core";
-import { useDisclosure } from "@mantine/hooks";
 import { AdminHeader } from "../Header/Header";
 import NavBar from "../Navigation/Navbar";
 import AuthWrapper from "../AuthWrapper/AuthWrapper";
+import { useState } from "react";
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [opened, { toggle }] = useDisclosure(true);
+    const [opened, toggle] = useState(true);
     const { colorScheme } = useMantineColorScheme();
     const theme = useMantineTheme();
 
@@ -42,14 +42,14 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                         burger={
                             <Burger
                                 opened={false}
-                                onClick={toggle}
+                                onClick={() => toggle((o) => !o)}
                                 size="xs"
                             />
                         }
                     />
                 </AppShell.Header>
                 <AppShell.Navbar bg={navbarHeaderBg} style={{ borderColor: appShellBorderColor }}>
-                    <NavBar />
+                    <NavBar toggle={toggle} />
                 </AppShell.Navbar>
                 <AppShell.Main bg={bg} m={0}>
                     <ScrollArea scrollbarSize={6} h="95vh">

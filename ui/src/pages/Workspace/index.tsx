@@ -1,4 +1,4 @@
-import { Box, Button, Divider, Group, Stack, Text, TextInput } from '@mantine/core';
+import { Box, Button, Divider, Group, LoadingOverlay, Stack, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useCreateWorkspaceMutation, useGetWorkspaces } from '../../apis/workspace';
 import { ErrorCard } from '../../components/ErrorCard/ErrorCard';
@@ -8,7 +8,7 @@ import classes from "./Workspace.module.css"
 
 const WorkspaceLandingPage = () => {
     const { isPending, error, workspaces } = useGetWorkspaces();
-    const { mutateAsync } = useCreateWorkspaceMutation();
+    const { mutateAsync, isPending: isCreating } = useCreateWorkspaceMutation();
     const navigate = useNavigate();
 
     const form = useForm({
@@ -29,11 +29,13 @@ const WorkspaceLandingPage = () => {
         }
     })
 
-    const handleCreateWorkspace = (values: any) => {
-        mutateAsync(values.name).then((id) => {
-            console.log(id)
+    const handleCreateWorkspace = async (values: any) => {
+        try {
+            const id = await mutateAsync(values.name)
             navigate(`/workspaces/${id}`);
-        })
+        } catch (error) {
+            console.error(error);
+        }
     }
 
 
@@ -44,6 +46,7 @@ const WorkspaceLandingPage = () => {
                     <ErrorCard title="Error" message={error.message} h="55vh" /> :
                     isPending ? <AppLoader h="55vh" />
                         : <Box>
+                            <LoadingOverlay visible={isCreating} overlayProps={{ radius: "sm", blur: 1 }} />
                             <form onSubmit={form.onSubmit((values) => handleCreateWorkspace(values))}>
                                 <Stack w="40vw" miw="300" mt="xl">
                                     <Text size="xl" fw={700} opacity={0.7}>{workspaces && workspaces.length > 0 ? 'Create a new workspace' : 'Create a new workspace to get started'}</Text>

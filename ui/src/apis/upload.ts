@@ -1,22 +1,22 @@
 import axiosInstance from "../utils/axios";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
-interface ImportParams {
+interface UploadParams {
     workspaceId: string;
     batchSize: number;
     search?: string;
 }
 
-interface ImportResponse {
+interface UploadResponse {
     records: any[];
     totalRecords: number;
 }
 
-export const useGetImports = ({
+export const useGetUploads = ({
     workspaceId,
     batchSize = 50,
     search = '',
-}: ImportParams) => {
+}: UploadParams) => {
     const queryClient = useQueryClient();
 
     const {
@@ -29,7 +29,7 @@ export const useGetImports = ({
         isFetching,
         isFetchNextPageError
     } = useInfiniteQuery({
-        queryKey: ['imports', { workspaceId, search }],
+        queryKey: ['uploads', { workspaceId, search }],
         staleTime: 30 * 1000,
         queryFn: ({ pageParam = 0 }) => {
             if (!workspaceId) {
@@ -39,8 +39,8 @@ export const useGetImports = ({
             const skipValue = pageParam * batchSize;
             const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
 
-            return axiosInstance.get<ImportResponse>(
-                `/workspaces/${workspaceId}/imports?skip=${skipValue}&limit=${batchSize}${searchParam}`
+            return axiosInstance.get<UploadResponse>(
+                `/workspaces/${workspaceId}/uploads?skip=${skipValue}&limit=${batchSize}${searchParam}`
             ).then(res => res.data);
         },
         getNextPageParam: (lastPage, allPages) => {
@@ -51,27 +51,27 @@ export const useGetImports = ({
         initialPageParam: 0,
     });
 
-    const allImports = data?.pages.flatMap(page => page?.records || []) ?? [];
+    const allUploads = data?.pages.flatMap(page => page?.records || []) ?? [];
     const totalRecords = data?.pages[0]?.totalRecords ?? 0;
 
     const invalidate = async () => {
         // Remove all existing data for this query
         await queryClient.cancelQueries({
-            queryKey: ['imports', { workspaceId, search }]
+            queryKey: ['uploads', { workspaceId, search }]
         });
 
         // Reset the query to its initial state
         queryClient.resetQueries({
-            queryKey: ['imports', { workspaceId, search }],
+            queryKey: ['uploads', { workspaceId, search }],
         });
 
         // Fetch only the first page
         return queryClient.fetchQuery({
-            queryKey: ['imports', { workspaceId, search }],
+            queryKey: ['uploads', { workspaceId, search }],
             queryFn: () => {
                 const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
-                return axiosInstance.get<ImportResponse>(
-                    `/workspaces/${workspaceId}/imports?skip=0&limit=${batchSize}${searchParam}`
+                return axiosInstance.get<UploadResponse>(
+                    `/workspaces/${workspaceId}/uploads?skip=0&limit=${batchSize}${searchParam}`
                 ).then(res => res.data);
             },
         });
@@ -81,7 +81,7 @@ export const useGetImports = ({
         isPending,
         error,
         isFetchNextPageError,
-        imports: allImports,
+        uploads: allUploads,
         totalRecords,
         fetchNextPage,
         hasNextPage,

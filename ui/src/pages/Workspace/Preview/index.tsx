@@ -9,6 +9,7 @@ import { getApiDomain } from "../../../utils/config";
 import { useGetSession } from "../../../apis/user";
 import Settings from "./Settings";
 import { useSettingsProps } from "./SettingsProps";
+import { useViewportSize } from "@mantine/hooks";
 
 const getCode = (workspaceId: string, backendEndpoint: string, settingsProps: any) => {
     const properties = [
@@ -55,6 +56,7 @@ const backendEndpoint = getApiDomain();
 
 const UploaderPreviewPage = () => {
     const settingsProps = useSettingsProps();
+    const { width } = useViewportSize();
     const { workspaceId } = useParams();
     const { isPending: isUserPending, session } = useGetSession();
     const { colorScheme } = useMantineColorScheme();
@@ -64,8 +66,29 @@ const UploaderPreviewPage = () => {
         return <AppLoader h="50vh" />
     }
 
+    // TODO: Heavy engineering: Need to find some smarter way to do this
+    const style = () => {
+        if (width > 768) {
+            return {};
+        }
+
+        let scale = 1;
+        if (width < 768 && width > 700) {
+            scale = (width / 768);
+        } else if (width < 700 && width > 500) {
+            scale = (width / 768) * 1.1;
+        } else {
+            scale = (width / 768) * 1.35;
+        }
+
+        return {
+            transform: `scale(${scale})`,
+            transformOrigin: 'top left',
+        };
+    }
+
     return (
-        <Stack justify="center" align="center" pt="sm" mb={50}>
+        <Stack justify="center" align="center" pt="sm" mb={50} style={style()}>
             <Timeline active={3} bulletSize={24} lineWidth={2}>
                 <Timeline.Item bullet={<IconEditCircle size={12} />} title="Customize">
                     <Text opacity={0.7} size="sm" mb="lg">Customize your uploader to match your requirements</Text>
@@ -91,6 +114,7 @@ const UploaderPreviewPage = () => {
                                     }}
                                     {...settingsProps}
                                     note="Test your uploader"
+                                    headers={{ "Authorization": "Bearer mysecrettoken" }}
                                 />
                             </Group>
                         </SimpleGrid>

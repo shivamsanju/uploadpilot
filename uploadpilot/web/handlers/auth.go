@@ -3,26 +3,26 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/go-playground/validator/v10"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
 	"github.com/uploadpilot/uploadpilot/internal/auth"
 	"github.com/uploadpilot/uploadpilot/internal/config"
 	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
-	"github.com/uploadpilot/uploadpilot/web/dto"
 	"golang.org/x/net/context"
 )
 
-var validate = validator.New()
+var TOKEN_EXPIRY_DURATION = time.Hour * 24 * 30
 
 type authHandler struct {
-	userRepo db.UserRepo
+	userRepo *db.UserRepo
 }
 
 func NewAuthHandler() *authHandler {
@@ -35,9 +35,9 @@ func (h *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 	provider := chi.URLParam(r, "provider")
 	r = r.WithContext(context.WithValue(r.Context(), "provider", provider))
 	if user, err := gothic.CompleteUserAuth(w, r); err == nil {
-		token, err := auth.GetSignedToken(w, &user)
+		token, err := auth.GenerateToken(w, &user, TOKEN_EXPIRY_DURATION)
 		if err != nil {
-			redrectWithError(w, r, err)
+			redirectWithError(w, r, err)
 			return
 		}
 		redirectUri := getTokenRedirectURI(token)
@@ -54,26 +54,26 @@ func (h *authHandler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	user, err := gothic.CompleteUserAuth(w, r)
 
 	if err != nil {
-		redrectWithError(w, r, err)
+		redirectWithError(w, r, err)
 		return
 	}
-	existingProvider, err := h.userRepo.GetUserProvider(r.Context(), user.Email)
+	existingProvider, err := h.userRepo.GetProvider(r.Context(), user.Email)
 	if err != nil {
-		redrectWithError(w, r, err)
+		redirectWithError(w, r, err)
 
 		return
 	}
 	if existingProvider != "" && existingProvider != provider {
 		err := fmt.Errorf("user with email %s already exists with provider %s. please login with the same provider you used earlier", user.Email, existingProvider)
-		redrectWithError(w, r, err)
+		redirectWithError(w, r, err)
 		return
 	}
 	if existingProvider == "" {
-		h.userRepo.CreateUser(r.Context(), mapUser(&user))
+		h.userRepo.Create(r.Context(), mapUser(&user))
 	}
-	token, err := auth.GetSignedToken(w, &user)
+	token, err := auth.GenerateToken(w, &user, TOKEN_EXPIRY_DURATION)
 	if err != nil {
-		redrectWithError(w, r, err)
+		redirectWithError(w, r, err)
 		return
 	}
 	redirectUri := getTokenRedirectURI(token)
@@ -82,7 +82,6 @@ func (h *authHandler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 
 func (h *authHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	gothic.Logout(w, r)
-	auth.RemoveBearerTokenInCookie(w)
 	redirectUri := getLogoutRedirectURI()
 	http.Redirect(w, r, redirectUri, http.StatusSeeOther)
 }
@@ -97,7 +96,7 @@ func (h *authHandler) LogoutProvider(w http.ResponseWriter, r *http.Request) {
 
 func (h *authHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value("userId").(string)
-	cb, err := h.userRepo.GetUserByID(r.Context(), userID)
+	cb, err := h.userRepo.GetByUserID(r.Context(), userID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -134,7 +133,7 @@ func getLogoutRedirectURI() string {
 	return config.FrontendURI + "/auth"
 }
 
-func redrectWithError(w http.ResponseWriter, r *http.Request, err error) {
+func redirectWithError(w http.ResponseWriter, r *http.Request, err error) {
 	redirectUri := config.FrontendURI + "/error?error=" + err.Error()
 	http.Redirect(w, r, redirectUri, http.StatusSeeOther)
 }

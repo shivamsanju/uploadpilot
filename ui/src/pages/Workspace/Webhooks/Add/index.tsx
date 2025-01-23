@@ -1,5 +1,5 @@
 import { useForm } from "@mantine/form";
-import { Button, Group, Modal, Select, SelectProps, Stack, Text, TextInput, UnstyledButton } from "@mantine/core";
+import { Button, Group, LoadingOverlay, Modal, Select, SelectProps, Stack, Text, TextInput, UnstyledButton } from "@mantine/core";
 import { IconCheck, IconCircleCheck, IconClockBolt, IconExclamationCircle, IconHttpPost, IconLock, IconTrash } from "@tabler/icons-react";
 import { useState } from "react";
 import { CodeHighlight } from "@mantine/code-highlight";
@@ -46,8 +46,8 @@ curl -X POST ${url || "https://example.com/webhook"} \\
 type Props = {
     setOpened: React.Dispatch<React.SetStateAction<boolean>>,
     workspaceId: string,
-    mode?: 'edit' | 'add',
-    setMode: React.Dispatch<React.SetStateAction<'edit' | 'add'>>,
+    mode?: 'edit' | 'add' | 'view',
+    setMode: React.Dispatch<React.SetStateAction<'edit' | 'add' | 'view'>>,
     initialValues?: any,
     setInitialValues: React.Dispatch<React.SetStateAction<any>>
 };
@@ -56,7 +56,7 @@ const AddWebhookForm: React.FC<Props> = ({ setInitialValues, setMode, setOpened,
     const [openSampleReq, setOpenSampleReq] = useState(false);
 
     const form = useForm({
-        initialValues: (mode === 'edit' && initialValues) ? initialValues : {
+        initialValues: ((mode === 'edit' || mode === 'view') && initialValues) ? initialValues : {
             url: "",
             event: "",
             signingSecret: "",
@@ -69,8 +69,8 @@ const AddWebhookForm: React.FC<Props> = ({ setInitialValues, setMode, setOpened,
         },
     });
 
-    const { mutateAsync: createMutateAsync } = useCreateWebhookMutation();
-    const { mutateAsync: updateMutateAsync } = useUpdateWebhookMutation();
+    const { mutateAsync: createMutateAsync, isPending: isCreating } = useCreateWebhookMutation();
+    const { mutateAsync: updateMutateAsync, isPending: isUpdating } = useUpdateWebhookMutation();
 
     const handleAdd = async (values: any) => {
         const body = {
@@ -102,6 +102,7 @@ const AddWebhookForm: React.FC<Props> = ({ setInitialValues, setMode, setOpened,
 
     return (
         <form onSubmit={form.onSubmit(handleAdd)}>
+            <LoadingOverlay visible={isCreating || isUpdating} overlayProps={{ radius: "sm", blur: 1 }} />
             <Stack gap="xl">
                 <Select
                     size="sm"
@@ -113,6 +114,7 @@ const AddWebhookForm: React.FC<Props> = ({ setInitialValues, setMode, setOpened,
                     data={EVENTS}
                     {...form.getInputProps('event')}
                     renderOption={renderSelectOption}
+                    disabled={mode === 'view'}
 
                 />
                 <TextInput
@@ -131,7 +133,7 @@ const AddWebhookForm: React.FC<Props> = ({ setInitialValues, setMode, setOpened,
                     )}
                     placeholder="Enter the webhook url"
                     {...form.getInputProps('url')}
-
+                    disabled={mode === 'view'}
                 />
 
                 <TextInput
@@ -142,14 +144,16 @@ const AddWebhookForm: React.FC<Props> = ({ setInitialValues, setMode, setOpened,
                     description="Signing secret for the webhook"
                     placeholder="Enter the signing secret"
                     {...form.getInputProps('signingSecret')}
-
+                    disabled={mode === 'view'}
                 />
             </Stack>
-            <Group justify="flex-end" mt={50}>
-                <Button type="submit" size="sm" >
-                    {mode === 'edit' ? 'Save' : 'Add'}
-                </Button>
-            </Group>
+            {mode !== "view" && (
+                <Group justify="flex-end" mt={50}>
+                    <Button type="submit" size="sm" >
+                        {mode === 'edit' ? 'Save' : 'Add'}
+                    </Button>
+                </Group>
+            )}
             <Modal
                 transitionProps={{ transition: 'pop' }}
                 opened={openSampleReq}

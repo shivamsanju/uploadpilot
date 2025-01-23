@@ -9,10 +9,6 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/config"
 )
 
-var (
-	secretKey []byte
-)
-
 func Init() error {
 	store := memstore.NewMemStore(
 		[]byte("authkey123"),

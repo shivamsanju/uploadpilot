@@ -10,26 +10,17 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-type UserRepo interface {
-	CreateUser(ctx context.Context, user *models.User) (*models.User, error)
-	GetUserByID(ctx context.Context, id string) (*models.User, error)
-	GetUserByEmail(ctx context.Context, email string) (*models.User, error)
-	CheckUserExists(ctx context.Context, email string) (bool, error)
-	GetUserProvider(ctx context.Context, email string) (string, error)
-}
-
-type userRepo struct {
+type UserRepo struct {
 	collectionName string
 }
 
-func NewUserRepo() UserRepo {
-	return &userRepo{collectionName: "users"}
+func NewUserRepo() *UserRepo {
+	return &UserRepo{
+		collectionName: "users",
+	}
 }
 
-// CreateUser inserts a new user into the database, generating a unique ObjectID for them.
-// It also initializes the user's Workspaces field as an empty slice.
-// Returns the created user with its ID populated, or an error if the insertion fails.
-func (u *userRepo) CreateUser(ctx context.Context, user *models.User) (*models.User, error) {
+func (u *UserRepo) Create(ctx context.Context, user *models.User) (*models.User, error) {
 	collection := db.Collection(u.collectionName)
 	user.ID = primitive.NewObjectID()
 	user.Workspaces = make([]models.UserWorkspace, 0)
@@ -41,10 +32,7 @@ func (u *userRepo) CreateUser(ctx context.Context, user *models.User) (*models.U
 	return user, nil
 }
 
-// GetUserByID retrieves a user document from the database by the given user ID.
-// It returns the user data as a models.User object, or an error if the retrieval fails.
-// The user ID is the unique identifier associated with the user, not the same as the user's email.
-func (u *userRepo) GetUserByID(ctx context.Context, userID string) (*models.User, error) {
+func (u *UserRepo) GetByUserID(ctx context.Context, userID string) (*models.User, error) {
 	collection := db.Collection(u.collectionName)
 	var user models.User
 	err := collection.FindOne(ctx, bson.M{"userId": userID}).Decode(&user)
@@ -54,9 +42,7 @@ func (u *userRepo) GetUserByID(ctx context.Context, userID string) (*models.User
 	return &user, nil
 }
 
-// GetUserByEmail retrieves a user document from the database by the given email address.
-// It returns the user data as a models.User object, or an error if the retrieval fails.
-func (u *userRepo) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
+func (u *UserRepo) GetByEmail(ctx context.Context, email string) (*models.User, error) {
 	collection := db.Collection(u.collectionName)
 	var user models.User
 	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
@@ -66,10 +52,7 @@ func (u *userRepo) GetUserByEmail(ctx context.Context, email string) (*models.Us
 	return &user, nil
 }
 
-// CheckUserExists checks if a user exists in the database with the given email address.
-// It returns true if a user is found, false otherwise. If an error occurs during the
-// database query, it returns false and the error.
-func (u *userRepo) CheckUserExists(ctx context.Context, email string) (bool, error) {
+func (u *UserRepo) EmailExists(ctx context.Context, email string) (bool, error) {
 	collection := db.Collection(u.collectionName)
 	var user models.User
 	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
@@ -82,11 +65,7 @@ func (u *userRepo) CheckUserExists(ctx context.Context, email string) (bool, err
 	return true, nil
 }
 
-// GetUserProvider retrieves the provider associated with a given email from the database.
-// It returns the provider as a string, or an empty string if no document is found with the given email.
-// If an error occurs during the database query, it returns an empty string and the error.
-
-func (u *userRepo) GetUserProvider(ctx context.Context, email string) (string, error) {
+func (u *UserRepo) GetProvider(ctx context.Context, email string) (string, error) {
 	collection := db.Collection(u.collectionName)
 	var user struct {
 		Provider string `bson:"provider"`

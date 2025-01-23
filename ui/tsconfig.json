@@ -22,5 +22,5 @@
     },
     "include": [
         "src"
-    ]
+, "src/apis/upload/.ts"    ]
 }

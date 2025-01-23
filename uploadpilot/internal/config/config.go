@@ -14,6 +14,7 @@ var (
 	MongoURI           string
 	DatabaseName       string
 	FrontendURI        string
+	AllowedOrigins     string
 	RootPassword       string
 	CompanionEndpoint  string
 	SelfEndpoint       string
@@ -68,6 +69,7 @@ func Init() error {
 	S3SecretKey = os.Getenv("S3_SECRET_KEY")
 	S3BucketName = os.Getenv("S3_BUCKET_NAME")
 	S3Region = os.Getenv("S3_REGION")
+	AllowedOrigins = os.Getenv("ALLOWED_ORIGINS")
 
 	TusUploadDir = "./tmp"
 	TusUploadBasePath = SelfEndpoint + "/upload"

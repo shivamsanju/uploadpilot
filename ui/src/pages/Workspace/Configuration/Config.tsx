@@ -1,4 +1,3 @@
-import React from "react";
 import {
     Group,
     MultiSelect,
@@ -11,6 +10,9 @@ import {
     Transition,
     Button,
     Paper,
+    TextInput,
+    Tooltip,
+    LoadingOverlay,
 } from "@mantine/core";
 import { UploaderConfig } from "../../../types/uploader";
 import { useForm } from "@mantine/form";
@@ -19,11 +21,17 @@ import classes from "./Form.module.css";
 import { useParams } from "react-router-dom";
 import { useGetAllAllowedSources } from "../../../apis/workspace";
 import { ErrorLoadingWrapper } from "../../../components/ErrorLoadingWrapper";
-import { IconDeviceFloppy, IconRestore } from "@tabler/icons-react";
+import { IconDeviceFloppy, IconInfoCircle, IconRestore } from "@tabler/icons-react";
 import { useUpdateUploaderConfigMutation } from "../../../apis/uploader";
 import { showNotification } from "@mantine/notifications";
 
 const w = "300px";
+const authEndpointTooltip = `
+If you have a custom authentication endpoint, enter it here.\n
+ We will send a request with all headers you set in uploader to this endpoint for authentication.\n
+You can use this to authenticate the upload by setting your token in the Authorization header.\n
+You can leave this field empty if you don't have a custom authentication endpoint.
+`;
 
 type NewUploaderConfigProps = {
     config: UploaderConfig;
@@ -34,7 +42,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
 }) => {
     const { workspaceId } = useParams();
     const { isPending, error, allowedSources } = useGetAllAllowedSources(workspaceId || "");
-    const { mutateAsync } = useUpdateUploaderConfigMutation()
+    const { mutateAsync, isPending: isPendingMutation } = useUpdateUploaderConfigMutation()
 
 
     const form = useForm<UploaderConfig>({
@@ -42,10 +50,12 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
             ...config,
             allowedFileTypes: config?.allowedFileTypes || [],
             allowedSources: config?.allowedSources || [],
-            requiredMetadataFields: config?.requiredMetadataFields || []
+            requiredMetadataFields: config?.requiredMetadataFields || [],
+            authEndpoint: config?.authEndpoint || "",
         },
         validate: {
             allowedSources: (value) => value.length === 0 ? "Please select at least one source" : null,
+            authEndpoint: (value) => (value && !/^https?:\/\//.test(value)) ? "Please enter a valid URL" : null
         }
     });
 
@@ -61,7 +71,15 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
         if (form.isDirty()) {
             mutateAsync({
                 workspaceId: workspaceId,
-                config: form.values
+                config: {
+                    ...form.values,
+                    minFileSize: form.values.minFileSize || 0,
+                    maxFileSize: form.values.maxFileSize || 0,
+                    minNumberOfFiles: form.values.minNumberOfFiles || 0,
+                    maxNumberOfFiles: form.values.maxNumberOfFiles || 0,
+                }
+            }).catch((error) => {
+                console.log(error)
             })
         }
         form.resetDirty();
@@ -72,9 +90,11 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
         form.resetDirty();
     }
 
+
     return (
         <ErrorLoadingWrapper error={error} isPending={isPending}>
             <form onSubmit={form.onSubmit(handleEditAndSaveButton)} onReset={handleResetButton}>
+                <LoadingOverlay visible={isPendingMutation} />
                 <Paper p="sm">
                     <SimpleGrid cols={{ base: 1, xl: 2 }}>
                         <Stack p="md">
@@ -114,22 +134,31 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                                 />
                             </Group>
 
-                            {/* Max total file size */}
-                            {/* <Group justify="space-between" className={classes.item}>
+                            {/*Auth Endpoint */}
+                            <Group justify="space-between" className={classes.item}>
                                 <div>
-                                    <Text size="sm">Max total file size (bytes)</Text>
+                                    <Text size="sm">Auth Endpoint</Text>
                                     <Text size="xs" c="dimmed">
-                                        Enter the maximum total file size allowed
+                                        Enter a auth endpoint{"  "}
+                                        <Tooltip
+                                            w="300px"
+                                            multiline
+                                            transitionProps={{ duration: 200 }}
+                                            label={authEndpointTooltip}
+                                        >
+                                            <IconInfoCircle size={14} />
+                                        </Tooltip>
                                     </Text>
                                 </div>
-                                <NumberInput
+                                <TextInput
                                     w={w}
+                                    type="url"
                                     size="xs"
-                                    {...form.getInputProps("maxTotalFileSize")}
+                                    {...form.getInputProps("authEndpoint")}
                                     // disabled={isPending || type === "view"}
                                     min={0}
                                 />
-                            </Group> */}
+                            </Group>
                             <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Required metadata fields</Text>
@@ -259,7 +288,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                                 <div>
                                     <Text size="sm">Use compression</Text>
                                     <Text size="xs" c="dimmed">
-                                        Toggle to enable file compression
+                                        Toggle to enable compression while uploading files
                                     </Text>
                                 </div>
                                 <Switch

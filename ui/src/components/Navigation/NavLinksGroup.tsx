@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { IconCalendarStats, IconChevronRight } from '@tabler/icons-react';
+import { IconChevronRight } from '@tabler/icons-react';
 import { Box, Collapse, Group, Text, ThemeIcon, UnstyledButton } from '@mantine/core';
 import classes from './NavLinksGroup.module.css';
 import { useNavigate } from 'react-router-dom';
+import { useViewportSize } from '@mantine/hooks';
 
 interface LinksGroupProps {
     icon: React.FC<any>;
@@ -12,10 +13,12 @@ interface LinksGroupProps {
     link?: string;
     active?: boolean;
     isWorkspaceChild?: boolean;
+    toggle: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export function LinksGroup({ icon: Icon, label, initiallyOpened, links, link, active }: LinksGroupProps) {
+export function LinksGroup({ icon: Icon, label, initiallyOpened, links, link, active, toggle }: LinksGroupProps) {
     const navigate = useNavigate();
+    const { width } = useViewportSize();
 
     const hasLinks = Array.isArray(links);
     const [opened, setOpened] = useState(initiallyOpened || false);
@@ -27,17 +30,36 @@ export function LinksGroup({ icon: Icon, label, initiallyOpened, links, link, ac
             href={link.link}
             key={link.label}
             onClick={(event) => {
+                console.log(width)
+                if (width < 768) {
+                    toggle(false);
+                }
                 event.preventDefault();
                 navigate(link.link);
+
             }}
         >
             {link.label}
         </Text>
     ));
 
+    const handleClick = () => {
+        if (hasLinks) {
+            setOpened((o) => !o);
+            return;
+        }
+        if (link) {
+            navigate(link);
+        }
+        if (width < 768) {
+            console.log(width)
+            toggle(true);
+        }
+    }
+
     return (
         <>
-            <UnstyledButton onClick={() => hasLinks ? setOpened((o) => !o) : (link ? navigate(link) : "")} className={classes.control}>
+            <UnstyledButton onClick={handleClick} className={classes.control}>
                 <Group justify="space-between" gap={0}>
                     <Box style={{ display: 'flex', alignItems: 'center' }}>
                         <ThemeIcon variant="light" size={30}>
@@ -57,23 +79,5 @@ export function LinksGroup({ icon: Icon, label, initiallyOpened, links, link, ac
             </UnstyledButton>
             {hasLinks ? <Collapse in={opened}>{items}</Collapse> : null}
         </>
-    );
-}
-
-const mockdata = {
-    label: 'Releases',
-    icon: IconCalendarStats,
-    links: [
-        { label: 'Upcoming releases', link: '/' },
-        { label: 'Previous releases', link: '/' },
-        { label: 'Releases schedule', link: '/' },
-    ],
-};
-
-export function NavbarLinksGroup() {
-    return (
-        <Box mih={220} p="md">
-            <LinksGroup {...mockdata} />
-        </Box>
     );
 }

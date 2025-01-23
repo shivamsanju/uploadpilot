@@ -3,7 +3,6 @@ export type UploaderConfig = {
     maxFileSize?: number;
     minNumberOfFiles?: number;
     maxNumberOfFiles?: number;
-    maxTotalFileSize?: number;
     allowedFileTypes: string[];
     allowedSources: string[];
     requiredMetadataFields?: string[];
@@ -11,4 +10,5 @@ export type UploaderConfig = {
     enableImageEditing?: boolean;
     useCompression?: boolean;
     useFaultTolerantMode?: boolean;
+    authEndpoint?: string;
 };

@@ -8,7 +8,7 @@ import ErrorQueryDisplay from "./pages/Error";
 import WorkspaceLandingPage from "./pages/Workspace";
 import WorkspacesLayout from "./components/Layout/WorkspacesLayout";
 import UploaderPreviewPage from "./pages/Workspace/Preview";
-import ImportsPage from "./pages/Workspace/Imports/Imports";
+import UploadsPage from "./pages/Workspace/Uploads/Uploads";
 import ConfigurationPage from "./pages/Workspace/Configuration";
 import WorkspaceUsersPage from "./pages/Workspace/Users";
 import WorkspaceHooksPage from "./pages/Workspace/Hooks";
@@ -48,9 +48,9 @@ const routes: Route[] = [
         element: <UploaderPreviewPage />
     },
     {
-        path: "/workspaces/:workspaceId/imports",
+        path: "/workspaces/:workspaceId/uploads",
         layout: AppLayout,
-        element: <ImportsPage />
+        element: <UploadsPage />
     },
     {
         path: "/workspaces/:workspaceId/configuration",

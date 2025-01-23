@@ -2,7 +2,7 @@ import { useCallback, useMemo, useRef, useState, } from 'react';
 import { Menu, Loader, Tooltip, Stack, Box, Button, Group, ActionIcon, Text } from '@mantine/core';
 import { IconCircleCheck, IconDots, IconExclamationCircle, IconBraces, IconChevronsDown, IconLogs, IconDownload, IconCopy } from '@tabler/icons-react';
 import { useParams } from 'react-router-dom';
-import { useGetImports } from '../../../apis/import';
+import { useGetUploads } from '../../../apis/upload';
 import { timeAgo } from '../../../utils/datetime';
 import MetadataLogsModal from './MetadataLogs';
 import { formatBytes } from '../../../utils/utility';
@@ -10,6 +10,7 @@ import { UploadPilotDataTable, useUploadPilotDataTable } from '../../../componen
 import { ErrorCard } from '../../../components/ErrorCard/ErrorCard';
 import { DataTableColumn } from 'mantine-datatable';
 import { getFileIcon } from '../../../utils/fileicons';
+import { useViewportSize } from '@mantine/hooks';
 
 const batchSize = 20;
 
@@ -21,9 +22,9 @@ const handleCopyToClipboard = (url: string) => {
     navigator.clipboard.writeText(url);
 }
 
-const ImportsList = () => {
+const UploadList = () => {
     const scrollViewportRef = useRef<HTMLDivElement>(null);
-
+    const { width } = useViewportSize();
     const [openModal, setOpenModal] = useState(false)
     const [modalVariant, setModalVariant] = useState<'logs' | 'metadata'>('logs')
     const [logs, setLogs] = useState([])
@@ -32,29 +33,29 @@ const ImportsList = () => {
     const { workspaceId } = useParams();
     const { searchFilter, onSearchFilterChange } = useUploadPilotDataTable();
 
-    const { isPending, error, isFetchNextPageError, imports, fetchNextPage, isFetchingNextPage, isFetching, invalidate, hasNextPage } = useGetImports({
+    const { isPending, error, isFetchNextPageError, uploads, fetchNextPage, isFetchingNextPage, isFetching, invalidate, hasNextPage } = useGetUploads({
         workspaceId: workspaceId || '',
         batchSize,
         search: searchFilter
     });
 
     const handleViewLogs = useCallback((importId: string) => {
-        const importItem = imports?.find((item: any) => item.id === importId);
-        if (importItem) {
+        const uploadItem = uploads?.find((item: any) => item.id === importId);
+        if (uploadItem) {
             setOpenModal(true)
-            setLogs(importItem.logs || [])
+            setLogs(uploadItem.logs || [])
             setModalVariant('logs')
         }
-    }, [imports])
+    }, [uploads])
 
     const handleViewMetadata = useCallback((importId: string) => {
-        const importItem = imports?.find((item: any) => item.id === importId);
-        if (importItem) {
+        const uploadItem = uploads?.find((item: any) => item.id === importId);
+        if (uploadItem) {
             setOpenModal(true)
-            setMetadata(importItem.metadata || {})
+            setMetadata(uploadItem.metadata || {})
             setModalVariant('metadata')
         }
-    }, [imports])
+    }, [uploads])
 
 
 
@@ -69,6 +70,7 @@ const ImportsList = () => {
             {
                 title: "",
                 accessor: 'id',
+                hidden: width < 768,
                 render: (params: any) => (
                     <ActionIcon variant='transparent'>
                         {getFileIcon(params?.metadata?.filetype, 30)}
@@ -92,6 +94,7 @@ const ImportsList = () => {
                 title: 'File Type',
                 accessor: 'metadata.filetype',
                 textAlign: 'center',
+                hidden: width < 768,
                 render: (params: any) => (
                     <>
                         <Text fz="sm" >{params?.metadata?.filetype}</Text>
@@ -105,6 +108,7 @@ const ImportsList = () => {
                 title: 'Size',
                 accessor: 'size',
                 textAlign: 'center',
+                hidden: width < 768,
                 render: (params: any) => (
                     <>
                         <Text fz="sm">{formatBytes(Number(params?.size))}</Text>
@@ -118,6 +122,7 @@ const ImportsList = () => {
                 title: 'Finished At',
                 accessor: 'finishedAt',
                 textAlign: 'center',
+                hidden: width < 768,
                 render: (params: any) => (
                     <>
                         <Text fz="sm">{params?.finishedAt && timeAgo.format(new Date(params?.finishedAt))}</Text>
@@ -191,7 +196,7 @@ const ImportsList = () => {
                 )
             },
         ]
-    }, [handleViewLogs, handleViewMetadata]);
+    }, [handleViewLogs, handleViewMetadata, width]);
 
     if (error) {
         return <ErrorCard title="Error" message={error.message} h="70vh" />
@@ -224,7 +229,7 @@ const ImportsList = () => {
                     onRefresh={handleRefresh}
                     onSearchFilterChange={onSearchFilterChange}
                     columns={colDefs}
-                    records={imports}
+                    records={uploads}
                     selectionCheckboxProps={{ style: { cursor: 'pointer' } }}
                     onScrollToBottom={fetchNextPage}
                     scrollViewportRef={scrollViewportRef}
@@ -249,4 +254,4 @@ const ImportsList = () => {
     );
 }
 
-export default ImportsList;
+export default UploadList;

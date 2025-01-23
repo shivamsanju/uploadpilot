@@ -1,5 +1,5 @@
-import { IconCircleCheck, IconCircleOff, IconDots, IconEdit, IconTrash, IconWebhook, IconWebhookOff } from '@tabler/icons-react';
-import { ActionIcon, Avatar, Badge, Box, Group, Menu, Modal, Paper, Stack, Text, Title } from '@mantine/core';
+import { IconCircleCheck, IconCircleOff, IconDots, IconEdit, IconEye, IconTrash, IconWebhook, IconWebhookOff } from '@tabler/icons-react';
+import { ActionIcon, Avatar, Badge, Box, Group, LoadingOverlay, Menu, Modal, Paper, Stack, Text, Title } from '@mantine/core';
 import { useParams } from 'react-router-dom';
 import { useCallback, useMemo, useState } from 'react';
 import { DataTableColumn } from 'mantine-datatable';
@@ -9,15 +9,17 @@ import { showNotification } from '@mantine/notifications';
 import { useDeleteWebhookMutation, useEnableDisableWebhookMutation, useGetWebhooks } from '../../../apis/webhooks';
 import AddWebhookForm from './Add';
 import { timeAgo } from '../../../utils/datetime';
+import { useViewportSize } from '@mantine/hooks';
 
 
 const WebhooksList = ({ opened, setOpened }: { opened: boolean, setOpened: any }) => {
-    const [mode, setMode] = useState<'add' | 'edit'>('add');
+    const [mode, setMode] = useState<'add' | 'edit' | 'view'>('add');
+    const { width } = useViewportSize();
     const [initialValues, setInitialValues] = useState(null);
     const { workspaceId } = useParams();
     const { isPending, error, webhooks } = useGetWebhooks(workspaceId || '');
-    const { mutateAsync } = useDeleteWebhookMutation();
-    const { mutateAsync: enableDisableWebhook } = useEnableDisableWebhookMutation();
+    const { mutateAsync, isPending: isDeleting } = useDeleteWebhookMutation();
+    const { mutateAsync: enableDisableWebhook, isPending: isEnabling } = useEnableDisableWebhookMutation();
 
 
     const handleRemoveWebhook = useCallback(async (webhookId: string) => {
@@ -56,11 +58,13 @@ const WebhooksList = ({ opened, setOpened }: { opened: boolean, setOpened: any }
 
     }, [workspaceId, enableDisableWebhook]);
 
-    const handleEdit = useCallback(async (values: any) => {
+    const handleViewEdit = useCallback(async (values: any, mode: 'view' | 'edit') => {
         setInitialValues(values);
-        setMode('edit');
+        setMode(mode);
         setOpened(true);
     }, [setOpened, setMode, setInitialValues]);
+
+
 
 
     const columns: DataTableColumn[] = useMemo(() => [
@@ -86,6 +90,7 @@ const WebhooksList = ({ opened, setOpened }: { opened: boolean, setOpened: any }
         {
             accessor: 'url',
             title: 'URL',
+            hidden: width < 768,
             render: (item: any) => (
                 <>
                     <Text fz="sm">{item.url}</Text>
@@ -98,6 +103,7 @@ const WebhooksList = ({ opened, setOpened }: { opened: boolean, setOpened: any }
         {
             title: 'updated At',
             accessor: 'updatedAt',
+            hidden: width < 768,
             render: (params: any) => (
                 <>
                     <Text fz="sm">{params?.updatedAt && timeAgo.format(new Date(params?.updatedAt))}</Text>
@@ -111,6 +117,7 @@ const WebhooksList = ({ opened, setOpened }: { opened: boolean, setOpened: any }
             accessor: 'enabled',
             title: 'Status',
             textAlign: 'center',
+            hidden: width < 768,
             render: (item: any) => (
                 <>
                     <Badge color={item?.enabled ? 'green' : 'red'} size="sm">{item?.enabled ? 'Enabled' : 'Disabled'}</Badge>
@@ -135,9 +142,16 @@ const WebhooksList = ({ opened, setOpened }: { opened: boolean, setOpened: any }
                         </Menu.Target>
                         <Menu.Dropdown>
                             <Menu.Item
+                                leftSection={<IconEye size={16} stroke={1.5} />}
+                                disabled={!item?.enabled}
+                                onClick={() => handleViewEdit(item, "view")}
+                            >
+                                View
+                            </Menu.Item>
+                            <Menu.Item
                                 leftSection={<IconEdit size={16} stroke={1.5} />}
                                 disabled={!item?.enabled}
-                                onClick={() => handleEdit(item)}
+                                onClick={() => handleViewEdit(item, "edit")}
                             >
                                 Edit
                             </Menu.Item>
@@ -161,7 +175,7 @@ const WebhooksList = ({ opened, setOpened }: { opened: boolean, setOpened: any }
             )
         },
 
-    ], [handleRemoveWebhook, handleEnableDisableWebhook, handleEdit]);
+    ], [handleRemoveWebhook, handleEnableDisableWebhook, handleViewEdit, width]);
 
     if (error) {
         return <ErrorCard title="Error" message={error.message} h="70vh" />
@@ -169,6 +183,7 @@ const WebhooksList = ({ opened, setOpened }: { opened: boolean, setOpened: any }
 
     return (
         <Box mr="md">
+            <LoadingOverlay visible={isDeleting || isEnabling} overlayProps={{ radius: "sm", blur: 1 }} />
             {!isPending && (!webhooks || webhooks.length === 0) ? (
                 <Stack justify="center" align="center">
                     <Title order={3} opacity={0.7}>Create your first webhook</Title>
@@ -199,7 +214,9 @@ const WebhooksList = ({ opened, setOpened }: { opened: boolean, setOpened: any }
                     setInitialValues(null);
                     setMode('add');
                 }}
-                title={<Title order={3} opacity={0.7}>Add Webhook</Title>}
+                title={<Title order={3} opacity={0.7}>
+                    {mode === 'edit' ? 'Edit Webhook' : mode === 'view' ? 'View Details' : 'Add Webhook'}
+                </Title>}
                 closeOnClickOutside={false}
                 size="xl"
             >

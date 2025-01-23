@@ -7,21 +7,20 @@ type Log struct {
 	Message   string             `bson:"message" json:"message"`
 }
 
-type ImportStatus string
+type UploadStatus string
 
 const (
-	ImportStatusInProgress ImportStatus = "In Progress"
-	ImportStatusFailed     ImportStatus = "Failed"
-	ImportStatusSuccess    ImportStatus = "Success"
-	ImportStatusCancelled  ImportStatus = "Cancelled"
-	ImportStatusDeleted    ImportStatus = "Deleted"
+	UploadStatusInProgress UploadStatus = "In Progress"
+	UploadStatusFailed     UploadStatus = "Failed"
+	UploadStatusSuccess    UploadStatus = "Success"
+	UploadStatusCancelled  UploadStatus = "Cancelled"
+	UploadStatusDeleted    UploadStatus = "Deleted"
 )
 
-type Import struct {
+type Upload struct {
 	ID             primitive.ObjectID     `bson:"_id" json:"id"`
 	WorkspaceID    primitive.ObjectID     `bson:"workspaceId" json:"workspaceId" validate:"required"`
-	Status         ImportStatus           `bson:"status" json:"status" validate:"required"`
-	UploadID       string                 `bson:"uploadId" json:"uploadId" validate:"required"`
+	Status         UploadStatus           `bson:"status" json:"status" validate:"required"`
 	Metadata       map[string]interface{} `bson:"metadata" json:"metadata"`
 	StoredFileName string                 `bson:"storedFileName" json:"storedFileName" validate:"required"`
 	URL            string                 `bson:"url" json:"url"`

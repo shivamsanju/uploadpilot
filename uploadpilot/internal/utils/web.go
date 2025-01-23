@@ -1,14 +1,17 @@
 package utils
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
-	"github.com/uploadpilot/uploadpilot/web/dto"
+	"github.com/uploadpilot/uploadpilot/internal/messages"
 )
 
 func GetSkipLimitSearchParams(r *http.Request) (skip int64, limit int64, search string, err error) {
@@ -27,10 +30,28 @@ func GetSkipLimitSearchParams(r *http.Request) (skip int64, limit int64, search 
 	}
 	return
 }
+
+func GetUserDetailsFromContext(ctx context.Context) (*dto.ApiUser, error) {
+	userID, ok1 := ctx.Value("userId").(string)
+	name, ok2 := ctx.Value("name").(string)
+	email, ok3 := ctx.Value("email").(string)
+
+	if !ok1 || !ok2 || !ok3 {
+		return nil, errors.New(messages.FailedToGetUserFromContext)
+	}
+
+	return &dto.ApiUser{
+		UserID: userID,
+		Name:   name,
+		Email:  email,
+	}, nil
+}
+
 func HandleHttpError(w http.ResponseWriter, r *http.Request, statusCode int, err error) {
 	reqID := middleware.GetReqID(r.Context())
 	infra.Log.Errorf("request with id [%s] failed: %s", reqID, err.Error())
 	render.Status(r, statusCode)
+	infra.Log.Infof("STATUS: %d", statusCode)
 	render.JSON(w, r, &dto.ErrorResponse{
 		RequestID: reqID,
 		Message:   err.Error(),

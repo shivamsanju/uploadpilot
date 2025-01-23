@@ -15,7 +15,7 @@ import { useMemo } from 'react';
 
 
 
-const NavBar = () => {
+const NavBar = ({ toggle }: { toggle: React.Dispatch<React.SetStateAction<boolean>> }) => {
     const { pathname } = useLocation();
     const { workspaceId } = useParams();
 
@@ -27,9 +27,9 @@ const NavBar = () => {
                 link: `/workspaces/${workspaceId}`,
             },
             {
-                label: 'Imports',
+                label: 'Uploads',
                 icon: IconDatabase,
-                link: `/workspaces/${workspaceId}/imports`,
+                link: `/workspaces/${workspaceId}/uploads`,
             },
             {
                 label: 'Configuration',
@@ -56,8 +56,8 @@ const NavBar = () => {
                 icon: IconGauge,
                 link: `/workspaces/${workspaceId}/analytics`,
             },
-        ].map((item) => <LinksGroup {...item} key={item.label} active={pathname === item.link} />)
-    }, [workspaceId, pathname])
+        ].map((item) => <LinksGroup {...item} key={item.label} active={pathname === item.link} toggle={toggle} />)
+    }, [workspaceId, pathname, toggle]);
 
 
     return (

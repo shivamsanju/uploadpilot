@@ -1,6 +1,6 @@
 import { useForm } from "@mantine/form";
 import { useAddUserToWorkspaceMutation, useEditUserInWorkspaceMutation } from "../../../../apis/workspace";
-import { Button, Group, Select, Stack, TextInput } from "@mantine/core";
+import { Button, Group, LoadingOverlay, Select, Stack, TextInput } from "@mantine/core";
 import { IconAt, IconLockAccess } from "@tabler/icons-react";
 
 const ROLES = ["Owner", "Contributor", "Viewer"];
@@ -8,15 +8,15 @@ const ROLES = ["Owner", "Contributor", "Viewer"];
 type Props = {
     setOpened: React.Dispatch<React.SetStateAction<boolean>>,
     workspaceId: string,
-    mode?: 'edit' | 'add',
-    setMode: React.Dispatch<React.SetStateAction<'edit' | 'add'>>,
+    mode?: 'edit' | 'add' | 'view',
+    setMode: React.Dispatch<React.SetStateAction<'edit' | 'add' | 'view'>>,
     initialValues?: any,
     setInitialValues: React.Dispatch<React.SetStateAction<any>>
 };
 
 const AddUserForm: React.FC<Props> = ({ setOpened, setInitialValues, setMode, workspaceId, mode = 'add', initialValues }) => {
     const form = useForm({
-        initialValues: (mode === 'edit' && initialValues) ? initialValues : {
+        initialValues: ((mode === 'edit' || mode === 'view') && initialValues) ? initialValues : {
             email: "",
             role: ""
         },
@@ -26,7 +26,7 @@ const AddUserForm: React.FC<Props> = ({ setOpened, setInitialValues, setMode, wo
         },
     });
 
-    const { mutateAsync } = useAddUserToWorkspaceMutation();
+    const { mutateAsync, isPending } = useAddUserToWorkspaceMutation();
     const { mutateAsync: editUser } = useEditUserInWorkspaceMutation();
 
     const handleAdd = async (values: any) => {
@@ -53,6 +53,7 @@ const AddUserForm: React.FC<Props> = ({ setOpened, setInitialValues, setMode, wo
 
     return (
         <form onSubmit={form.onSubmit(mode === 'edit' ? handleEdit : handleAdd)}>
+            <LoadingOverlay visible={isPending} overlayProps={{ radius: "sm", blur: 1 }} />
             <Stack gap="xl">
                 <TextInput
                     size="sm"
@@ -61,7 +62,7 @@ const AddUserForm: React.FC<Props> = ({ setOpened, setInitialValues, setMode, wo
                     label="Email"
                     description="Email address of the user"
                     placeholder="Email"
-                    disabled={mode === 'edit'}
+                    disabled={mode === 'edit' || mode === 'view'}
                     {...form.getInputProps('email')}
                 />
                 <Select
@@ -72,14 +73,18 @@ const AddUserForm: React.FC<Props> = ({ setOpened, setInitialValues, setMode, wo
                     description="Role to be assigned to the user"
                     placeholder="Role"
                     data={ROLES}
+                    disabled={mode === 'view'}
                     {...form.getInputProps('role')}
                 />
             </Stack>
-            <Group justify="flex-end" mt={50}>
-                <Button size="sm" type="submit">
-                    {mode === 'edit' ? 'Save' : 'Add'}
-                </Button>
-            </Group>
+            {mode !== 'view' && (
+                <Group justify="flex-end" mt={50}>
+                    <Button size="sm" type="submit">
+                        {mode === 'edit' && "Save"}
+                        {mode === 'add' && "Add"}
+                    </Button>
+                </Group>
+            )}
         </form>
     )
 }

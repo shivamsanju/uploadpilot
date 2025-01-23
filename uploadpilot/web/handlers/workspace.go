@@ -1,184 +1,107 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/go-playground/validator/v10"
-	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
-	"github.com/uploadpilot/uploadpilot/internal/infra"
+	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
-	"github.com/uploadpilot/uploadpilot/web/dto"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/uploadpilot/uploadpilot/internal/workspace"
 )
 
 type workspaceHandler struct {
-	wsRepo   db.WorkspaceRepo
-	userRepo db.UserRepo
+	workspaceSvc *workspace.WorkspaceService
 }
 
 func NewWorkspaceHandler() *workspaceHandler {
 	return &workspaceHandler{
-		wsRepo:   db.NewWorkspaceRepo(),
-		userRepo: db.NewUserRepo(),
+		workspaceSvc: workspace.NewWorkspaceService(),
 	}
-}
-
-var ValidRoles = map[models.UserRole]bool{
-	models.UserRoleOwner:       true,
-	models.UserRoleContributor: true,
-	models.UserRoleViewer:      true,
-}
-
-var DefaultUploaderConfig = &models.UploaderConfig{
-	AllowedSources:         []models.AllowedSources{models.FileUpload},
-	RequiredMetadataFields: []string{},
 }
 
 func (h *workspaceHandler) CreateWorkspace(w http.ResponseWriter, r *http.Request) {
-	infra.Log.Info("creating workspace")
 	workspace := &models.Workspace{}
 	if err := render.DecodeJSON(r.Body, workspace); err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		utils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	workspace.UploaderConfig = DefaultUploaderConfig
-
-	if err := validate.Struct(workspace); err != nil {
-		errors := make(map[string]string)
-		for _, err := range err.(validator.ValidationErrors) {
-			errors[err.Field()] = err.Tag()
-		}
-		utils.HandleHttpError(w, r, http.StatusBadRequest, fmt.Errorf("validation error: %v", errors))
-		return
-	}
-
-	cb, err := h.wsRepo.Create(r.Context(), workspace)
+	err := h.workspaceSvc.CreateWorkspace(r.Context(), workspace)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	render.JSON(w, r, cb.ID)
+	render.JSON(w, r, workspace.ID)
 }
 
 func (h *workspaceHandler) GetWorkspacesForUser(w http.ResponseWriter, r *http.Request) {
-	userId := r.Context().Value("userId").(string)
-	ws, err := h.wsRepo.GetWorkspacesForUser(r.Context(), userId)
+	user, err := utils.GetUserDetailsFromContext(r.Context())
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	render.JSON(w, r, ws)
+	workspaces, err := h.workspaceSvc.GetUserWorkspaces(r.Context(), user.UserID)
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	render.JSON(w, r, workspaces)
 }
 
 func (h *workspaceHandler) AddUserToWorkspace(w http.ResponseWriter, r *http.Request) {
-	wsId := chi.URLParam(r, "workspaceId")
-	workspaceId, err := primitive.ObjectIDFromHex(wsId)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
+	workspaceID := chi.URLParam(r, "workspaceId")
 
-	addRequest := &dto.AddUserToWorkspaceRequest{}
+	addRequest := &dto.AddWorkspaceUser{}
 	if err := render.DecodeJSON(r.Body, addRequest); err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		utils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	if err := validate.Struct(addRequest); err != nil {
-		errors := make(map[string]string)
-		for _, err := range err.(validator.ValidationErrors) {
-			errors[err.Field()] = err.Tag()
-		}
-		utils.HandleHttpError(w, r, http.StatusBadRequest, fmt.Errorf("validation error: %v", errors))
-		return
-	}
-
-	user, err := h.userRepo.GetUserByEmail(r.Context(), addRequest.Email)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, fmt.Errorf("unknown user: %s", addRequest.Email))
-		return
-	}
-
-	exists, err := h.wsRepo.CheckIfUserExistsInWorkspace(r.Context(), workspaceId, user.UserID)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-	if exists {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, fmt.Errorf("user already exists in workspace"))
-		return
-	}
-
-	if !ValidRoles[addRequest.Role] {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, fmt.Errorf("unknown role: %s", addRequest.Role))
-		return
-	}
-
-	workspaceUser := &models.WorkspaceUser{
-		UserID: user.UserID,
-		Role:   addRequest.Role,
-	}
-
-	err = h.wsRepo.AddUserToWorkspace(r.Context(), workspaceId, workspaceUser)
+	err := h.workspaceSvc.AddUserToWorkspace(r.Context(), workspaceID, addRequest)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
 	render.JSON(w, r, nil)
-
 }
 
 func (h *workspaceHandler) RemoveUserFromWorkspace(w http.ResponseWriter, r *http.Request) {
-	wsId := chi.URLParam(r, "workspaceId")
-	workspaceId, err := primitive.ObjectIDFromHex(wsId)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
+	workspaceID := chi.URLParam(r, "workspaceId")
 	userID := chi.URLParam(r, "userId")
-	err = h.wsRepo.RemoveUserFromWorkspace(r.Context(), workspaceId, userID)
+
+	err := h.workspaceSvc.RemoveUserFromWorkspace(r.Context(), workspaceID, userID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	render.JSON(w, r, nil)
+
+	render.JSON(w, r, true)
 }
 
-func (h *workspaceHandler) UpdateUserInWorkspace(w http.ResponseWriter, r *http.Request) {
-	wsId := chi.URLParam(r, "workspaceId")
-	workspaceId, err := primitive.ObjectIDFromHex(wsId)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
+func (h *workspaceHandler) ChangeUserRoleInWorkspace(w http.ResponseWriter, r *http.Request) {
+	workspaceID := chi.URLParam(r, "workspaceId")
 	userID := chi.URLParam(r, "userId")
 
-	updateRequest := &dto.EditUserInWorkspaceRequest{}
-	if err := render.DecodeJSON(r.Body, updateRequest); err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+	body := &dto.EditUserRole{}
+	if err := render.DecodeJSON(r.Body, body); err != nil {
+		utils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
 		return
 	}
-	err = h.wsRepo.ChangeUserRoleInWorkspace(r.Context(), workspaceId, userID, updateRequest.Role)
+
+	err := h.workspaceSvc.ChangeUserRoleInWorkspace(r.Context(), workspaceID, userID, body.Role)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	render.JSON(w, r, nil)
+
+	render.JSON(w, r, true)
 }
 
 func (h *workspaceHandler) GetAllUsersInWorkspace(w http.ResponseWriter, r *http.Request) {
-	wsId := chi.URLParam(r, "workspaceId")
-	workspaceId, err := primitive.ObjectIDFromHex(wsId)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-	users, err := h.wsRepo.GetUsersInWorkspace(r.Context(), workspaceId)
+	workspaceID := chi.URLParam(r, "workspaceId")
+	users, err := h.workspaceSvc.GetWorkspaceUsers(r.Context(), workspaceID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -187,14 +110,8 @@ func (h *workspaceHandler) GetAllUsersInWorkspace(w http.ResponseWriter, r *http
 }
 
 func (h *workspaceHandler) GetUploaderConfig(w http.ResponseWriter, r *http.Request) {
-	wsId := chi.URLParam(r, "workspaceId")
-	workspaceId, err := primitive.ObjectIDFromHex(wsId)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-
-	uploaderConfig, err := h.wsRepo.GetUploaderConfig(r.Context(), workspaceId)
+	workspaceID := chi.URLParam(r, "workspaceId")
+	uploaderConfig, err := h.workspaceSvc.GetUploaderConfig(r.Context(), workspaceID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -203,29 +120,15 @@ func (h *workspaceHandler) GetUploaderConfig(w http.ResponseWriter, r *http.Requ
 }
 
 func (h *workspaceHandler) UpdateUploaderConfig(w http.ResponseWriter, r *http.Request) {
-	wsId := chi.URLParam(r, "workspaceId")
-	workspaceId, err := primitive.ObjectIDFromHex(wsId)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
+	workspaceID := chi.URLParam(r, "workspaceId")
 
 	uploaderConfig := &models.UploaderConfig{}
 	if err := render.DecodeJSON(r.Body, uploaderConfig); err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		utils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	if err := validate.Struct(uploaderConfig); err != nil {
-		errors := make(map[string]string)
-		for _, err := range err.(validator.ValidationErrors) {
-			errors[err.Field()] = err.Tag()
-		}
-		utils.HandleHttpError(w, r, http.StatusBadRequest, fmt.Errorf("validation error: %v", errors))
-		return
-	}
-
-	err = h.wsRepo.UpdateUploaderConfig(r.Context(), workspaceId, uploaderConfig)
+	err := h.workspaceSvc.SetUploaderConfig(r.Context(), workspaceID, uploaderConfig)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -234,20 +137,5 @@ func (h *workspaceHandler) UpdateUploaderConfig(w http.ResponseWriter, r *http.R
 }
 
 func (h *workspaceHandler) GetAllAllowedSources(w http.ResponseWriter, r *http.Request) {
-	render.JSON(w, r, []models.AllowedSources{
-		models.FileUpload,
-		models.Webcamera,
-		models.Audio,
-		models.ScreenCapture,
-		models.Box,
-		models.Dropbox,
-		models.Facebook,
-		models.GoogleDrive,
-		models.GooglePhotos,
-		models.Instagram,
-		models.OneDrive,
-		models.Unsplash,
-		models.Url,
-		models.Zoom,
-	})
+	render.JSON(w, r, workspace.AllowedSources)
 }
