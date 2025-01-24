@@ -114,19 +114,19 @@ const WorkspaceUsersList = ({ opened, setOpened }: { opened: boolean, setOpened:
                             <Menu.Item
                                 leftSection={<IconEye size={16} stroke={1.5} />}
                                 onClick={() => handleViewEdit(item, "view")}>
-                                View
+                                <Text>View</Text>
                             </Menu.Item>
                             <Menu.Item
                                 leftSection={<IconEdit size={16} stroke={1.5} />}
                                 onClick={() => handleViewEdit(item, "edit")}>
-                                Edit role
+                                <Text>Edit role</Text>
                             </Menu.Item>
                             <Menu.Item
                                 leftSection={<IconTrash size={16} stroke={1.5} />}
                                 color="red"
                                 onClick={() => handleRemoveUser(item.userId)}
                             >
-                                Remove from workspace
+                                <Text>Remove from workspace</Text>
                             </Menu.Item>
 
                         </Menu.Dropdown>

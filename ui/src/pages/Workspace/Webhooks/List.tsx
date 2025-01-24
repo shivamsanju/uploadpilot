@@ -146,28 +146,28 @@ const WebhooksList = ({ opened, setOpened }: { opened: boolean, setOpened: any }
                                 disabled={!item?.enabled}
                                 onClick={() => handleViewEdit(item, "view")}
                             >
-                                View
+                                <Text>View</Text>
                             </Menu.Item>
                             <Menu.Item
                                 leftSection={<IconEdit size={16} stroke={1.5} />}
                                 disabled={!item?.enabled}
                                 onClick={() => handleViewEdit(item, "edit")}
                             >
-                                Edit
+                                <Text>Edit</Text>
                             </Menu.Item>
                             <Menu.Item
                                 leftSection={item?.enabled ? <IconCircleOff size={16} stroke={1.5} /> : <IconCircleCheck size={16} stroke={1.5} />}
                                 color={item?.enabled ? 'red' : 'green'}
                                 onClick={() => handleEnableDisableWebhook(item.id, !item?.enabled)}
                             >
-                                {item?.enabled ? 'Disable' : 'Enable'}
+                                <Text>{item?.enabled ? 'Disable' : 'Enable'}</Text>
                             </Menu.Item>
                             <Menu.Item
                                 leftSection={<IconTrash size={16} stroke={1.5} />}
                                 color="red"
                                 onClick={() => handleRemoveWebhook(item.id)}
                             >
-                                Delete
+                                <Text>Delete</Text>
                             </Menu.Item>
                         </Menu.Dropdown>
                     </Menu>

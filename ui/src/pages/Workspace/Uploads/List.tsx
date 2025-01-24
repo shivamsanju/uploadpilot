@@ -171,25 +171,25 @@ const UploadList = () => {
                                     onClick={() => handleDownload(params?.url)}
                                     leftSection={<IconDownload size={18} />}
                                 >
-                                    Download
+                                    <Text>Download</Text>
                                 </Menu.Item>}
                                 {params?.url && <Menu.Item
                                     onClick={() => handleCopyToClipboard(params?.url)}
                                     leftSection={<IconCopy size={18} />}
                                 >
-                                    Copy URL
+                                    <Text>Copy URL</Text>
                                 </Menu.Item>}
                                 <Menu.Item
                                     onClick={() => handleViewLogs(params?.id)}
                                     leftSection={<IconLogs size={18} />}
                                 >
-                                    View Logs
+                                    <Text>View Logs</Text>
                                 </Menu.Item>
                                 <Menu.Item
                                     onClick={() => handleViewMetadata(params?.id)}
                                     leftSection={<IconBraces size={18} />}
                                 >
-                                    View Metadata
+                                    <Text>View Metadata</Text>
                                 </Menu.Item>
                             </Menu.Dropdown>
                         </Menu>
