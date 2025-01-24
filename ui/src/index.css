@@ -13,27 +13,12 @@ code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
-.ag-select-list * {
-    background-color: rgb(248, 249, 250);
+/* For dark mode bg body*/
+:root[data-mantine-color-scheme="dark"] {
+    --mantine-color-body: #151515 !important;
+
 }
 
-.ag-select-list *:hover {
-    background-color: var(--mantine-color-gray-1);
-}
-
-.ag-picker-field-wrapper {
-    background-color: rgb(248, 249, 250);
-}
-
-/* For dark theme */
-.ag-dark .ag-select-list * {
-    background-color: var(--mantine-color-dark-7);
-}
-
-.ag-dark .ag-select-list *:hover {
-    background-color: var(--mantine-color-dark-8);
-}
-
-.ag-dark .ag-picker-field-wrapper {
-    background-color: var(--mantine-color-dark-7);
+:root[data-mantine-color-scheme="dark"] * {
+    --input-bg: transparent !important;
 }

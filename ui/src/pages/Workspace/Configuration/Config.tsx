@@ -13,6 +13,7 @@ import {
     TextInput,
     Tooltip,
     LoadingOverlay,
+    Title,
 } from "@mantine/core";
 import { UploaderConfig } from "../../../types/uploader";
 import { useForm } from "@mantine/form";
@@ -93,26 +94,26 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
 
     return (
         <ErrorLoadingWrapper error={error} isPending={isPending}>
-            <form onSubmit={form.onSubmit(handleEditAndSaveButton)} onReset={handleResetButton}>
+            <form onSubmit={form.onSubmit(handleEditAndSaveButton)} onReset={handleResetButton} >
                 <LoadingOverlay visible={isPendingMutation} />
-                <Paper p="sm">
+                <Title order={5} opacity={0.7} mb="sm" mt="md">Basic Validations</Title>
+                <Paper p="sm" mb={50}>
                     <SimpleGrid cols={{ base: 1, xl: 2 }}>
                         <Stack p="md">
-
                             {/* Allowed input sources */}
                             <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Allowed input sources *</Text>
-                                    <Text size="xs" c="dimmed">
+                                    <Text c="dimmed">
                                         Allowed input sources for your uploader
                                     </Text>
                                 </div>
                                 <MultiSelect
                                     w={w}
-                                    size="xs"
                                     data={allowedSources || []}
                                     {...form.getInputProps("allowedSources")}
                                     disabled={isPending}
+                                    searchable
                                 // disabled={isPending || type === "view"}
                                 />
                             </Group>
@@ -121,15 +122,15 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                             <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Allowed file types</Text>
-                                    <Text size="xs" c="dimmed">
+                                    <Text c="dimmed">
                                         Select allowed file types for the file uploader
                                     </Text>
                                 </div>
                                 <MultiSelect
                                     w={w}
-                                    size="xs"
                                     data={MIME_TYPES}
                                     {...form.getInputProps("allowedFileTypes")}
+                                    searchable
                                 // disabled={isPending || type === "view"}
                                 />
                             </Group>
@@ -138,7 +139,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                             <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Auth Endpoint</Text>
-                                    <Text size="xs" c="dimmed">
+                                    <Text c="dimmed">
                                         Enter a auth endpoint{"  "}
                                         <Tooltip
                                             w="300px"
@@ -153,7 +154,6 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                                 <TextInput
                                     w={w}
                                     type="url"
-                                    size="xs"
                                     {...form.getInputProps("authEndpoint")}
                                     // disabled={isPending || type === "view"}
                                     min={0}
@@ -162,13 +162,12 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                             <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Required metadata fields</Text>
-                                    <Text size="xs" c="dimmed">
+                                    <Text c="dimmed">
                                         Separated by commas
                                     </Text>
                                 </div>
                                 <TagsInput
                                     w={w}
-                                    size="xs"
                                     {...form.getInputProps("requiredMetadataFields")}
                                     // disabled={isPending || type === "view"}
                                     min={0}
@@ -180,13 +179,12 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                             <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Min file size (bytes)</Text>
-                                    <Text size="xs" c="dimmed">
+                                    <Text c="dimmed">
                                         Enter minimum file size in bytes
                                     </Text>
                                 </div>
                                 <NumberInput
                                     w={w}
-                                    size="xs"
                                     {...form.getInputProps("minFileSize")}
                                     // disabled={isPending || type === "view"}
                                     min={0}
@@ -197,13 +195,12 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                             <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Max file size (bytes)</Text>
-                                    <Text size="xs" c="dimmed">
+                                    <Text c="dimmed">
                                         Enter maximum file size in bytes
                                     </Text>
                                 </div>
                                 <NumberInput
                                     w={w}
-                                    size="xs"
                                     {...form.getInputProps("maxFileSize")}
                                     // disabled={isPending || type === "view"}
                                     min={0}
@@ -214,13 +211,12 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                             <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Min number of files</Text>
-                                    <Text size="xs" c="dimmed">
+                                    <Text c="dimmed">
                                         Specify the minimum number of files required
                                     </Text>
                                 </div>
                                 <NumberInput
                                     w={w}
-                                    size="xs"
                                     {...form.getInputProps("minNumberOfFiles")}
                                     // disabled={isPending || type === "view"}
                                     min={0}
@@ -231,13 +227,12 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                             <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Max number of files</Text>
-                                    <Text size="xs" c="dimmed">
+                                    <Text c="dimmed">
                                         Specify the maximum number of files allowed
                                     </Text>
                                 </div>
                                 <NumberInput
                                     w={w}
-                                    size="xs"
                                     {...form.getInputProps("maxNumberOfFiles")}
                                     // disabled={isPending || type === "view"}
                                     min={1}
@@ -246,19 +241,19 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                         </Stack>
                     </SimpleGrid>
                 </Paper>
-                <Paper p="sm" mt={50}>
+                <Title order={5} opacity={0.7} mb="sm" >Uploader Settings</Title>
+                <Paper p="sm" >
                     <SimpleGrid cols={{ sm: 1, lg: 2 }}>
                         <Stack p="md">
                             <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Allow pause and resume</Text>
-                                    <Text size="xs" c="dimmed">
+                                    <Text c="dimmed">
                                         Toggle to allow pause and resume in the uploader
                                     </Text>
                                 </div>
                                 <Switch
                                     className={classes.switch}
-                                    size="lg"
                                     onLabel="ON" offLabel="OFF"
                                     checked={form.values.allowPauseAndResume}
                                     onChange={(e) => form.setFieldValue("allowPauseAndResume", e.target.checked)}
@@ -269,13 +264,12 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                             <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Enable image editing</Text>
-                                    <Text size="xs" c="dimmed">
+                                    <Text c="dimmed">
                                         Toggle to enable image editing in the uploader ui
                                     </Text>
                                 </div>
                                 <Switch
                                     className={classes.switch}
-                                    size="lg"
                                     onLabel="ON" offLabel="OFF"
                                     checked={form.values.enableImageEditing}
                                     onChange={(e) => form.setFieldValue("enableImageEditing", e.target.checked)}
@@ -287,13 +281,12 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                             <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Use compression</Text>
-                                    <Text size="xs" c="dimmed">
+                                    <Text c="dimmed">
                                         Toggle to enable compression while uploading files
                                     </Text>
                                 </div>
                                 <Switch
                                     className={classes.switch}
-                                    size="lg"
                                     onLabel="ON" offLabel="OFF"
                                     checked={form.values.useCompression}
                                     onChange={(e) => form.setFieldValue("useCompression", e.target.checked)}
@@ -304,13 +297,12 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                             <Group justify="space-between" className={classes.item}>
                                 <div>
                                     <Text size="sm">Use fault tolerant mode</Text>
-                                    <Text size="xs" c="dimmed">
+                                    <Text c="dimmed">
                                         Fault tolerant mode allows to recover from browser crashes
                                     </Text>
                                 </div>
                                 <Switch
                                     className={classes.switch}
-                                    size="lg"
                                     onLabel="ON" offLabel="OFF"
                                     checked={form.values.useFaultTolerantMode}
                                     onChange={(e) => form.setFieldValue("useFaultTolerantMode", e.target.checked)}

@@ -50,10 +50,10 @@ const UserButton = () => {
             </Menu.Target>
 
             <Menu.Dropdown>
-                <Menu.Item leftSection={<IconUser size={16} />} onClick={handleProfileClick}>Profile</Menu.Item>
+                <Menu.Item leftSection={<IconUser size={16} />} onClick={handleProfileClick}><Text>Profile</Text></Menu.Item>
                 <Menu.Item leftSection={<IconSun size={16} />} closeMenuOnClick={false}> <ThemeSwitcher /></Menu.Item>
                 <Menu.Divider />
-                <Menu.Item leftSection={<IconLogout size={16} />} onClick={handleSignOut}>Sign Out</Menu.Item>
+                <Menu.Item c="red" leftSection={<IconLogout size={16} />} onClick={handleSignOut}><Text>Logout</Text></Menu.Item>
             </Menu.Dropdown>
 
         </Menu >

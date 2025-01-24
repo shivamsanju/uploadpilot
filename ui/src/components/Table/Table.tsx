@@ -42,7 +42,6 @@ export const UploadPilotDataTable: React.FC<TableProps> = (props) => {
                             leftSection={<IconSearch size={18} />}
                             variant="subtle"
                             placeholder="Search"
-                            size="xs"
                             className={classes.search}
                             onChange={(e) => handleSearchChange(e.target.value)}
                         />
@@ -50,7 +49,6 @@ export const UploadPilotDataTable: React.FC<TableProps> = (props) => {
                 </Box>
                 <Group gap="md" justify='flex-end'>
                     {props.showExport && <Button
-                        size="xs"
                         variant='subtle'
                         className={classes.tableExtraBtn}
                         leftSection={<IconDownload size={18} />}
@@ -59,7 +57,6 @@ export const UploadPilotDataTable: React.FC<TableProps> = (props) => {
                     </Button>}
                     {props.showRefresh &&
                         <Button
-                            size="xs"
                             className={classes.tableExtraBtn}
                             onClick={handleRefresh}
                             variant="subtle"

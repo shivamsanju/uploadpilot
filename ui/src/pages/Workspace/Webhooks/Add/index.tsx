@@ -127,7 +127,7 @@ const AddWebhookForm: React.FC<Props> = ({ setInitialValues, setMode, setOpened,
                         <Group align="center" justify="space-between" p={0} m={0}>
                             A post request will be sent to this URL
                             <UnstyledButton variant="subtle" onClick={() => setOpenSampleReq(true)} p={0} m={0}>
-                                <Text size="xs">View sample request</Text>
+                                <Text >View sample request</Text>
                             </UnstyledButton>
                         </Group>
                     )}

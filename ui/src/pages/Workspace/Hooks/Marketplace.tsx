@@ -36,7 +36,7 @@ export const HooksMarketPlace = () => {
     const theme = useMantineTheme();
     const features = mockdata.map((feature) => (
         <Paper key={feature.title} radius="md" p="xl">
-            <feature.icon size={50} stroke={2} color={theme.colors.grape[6]} />
+            <feature.icon size={50} stroke={2} color={theme.colors.appcolor[6]} />
             <Text fz="lg" fw={500} className={classes.cardTitle} mt="md">
                 {feature.title}
             </Text>

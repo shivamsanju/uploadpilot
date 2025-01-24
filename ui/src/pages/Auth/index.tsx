@@ -50,10 +50,10 @@ const AuthPage = () => {
                     >
                         Google
                     </Button>
-                    <Text size="xs" ta="center" c="dimmed">OR</Text>
+                    <Text ta="center" c="dimmed">OR</Text>
                     <Button
                         variant='default'
-                        leftSection={<Image src={GithubIcon} width={20} height={20} />}
+                        leftSection={<Image src={GithubIcon} width={25} height={25} />}
                         onClick={() => handleLogin('github')}
                         size="sm"
                     >

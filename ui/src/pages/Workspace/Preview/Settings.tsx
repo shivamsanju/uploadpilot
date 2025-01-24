@@ -71,18 +71,19 @@ const Settings: React.FC<SettingsProps> = ({
     setShowRemoveButtonAfterComplete
     */
 }) => {
+
     return (
         <Stack align='space-between' h="100%" gap="xl">
             <Group justify="space-between" wrap="nowrap" gap="xl">
                 <div>
                     <Text size="sm">Height</Text>
-                    <Text size="xs" c="dimmed">
+                    <Text c="dimmed">
                         Set the height of the file uploader in px
                     </Text>
                 </div>
                 <NumberInput
                     w={w}
-                    size="xs"
+
                     placeholder="Enter height in px"
                     value={height}
                     onChange={(e) => setHeight(Number(e))}
@@ -91,13 +92,13 @@ const Settings: React.FC<SettingsProps> = ({
             <Group justify="space-between" wrap="nowrap" gap="xl">
                 <div>
                     <Text size="sm">Width</Text>
-                    <Text size="xs" c="dimmed">
+                    <Text c="dimmed">
                         Set the width of the file uploader in px
                     </Text>
                 </div>
                 <NumberInput
                     w={w}
-                    size="xs"
+
                     placeholder="Enter width in px"
                     value={width}
                     onChange={(e) => setWidth(Number(e))}
@@ -107,13 +108,12 @@ const Settings: React.FC<SettingsProps> = ({
             <Group justify="space-between" wrap="nowrap" gap="xl">
                 <div>
                     <Text size="sm">Choose Theme</Text>
-                    <Text size="xs" c="dimmed">
+                    <Text c="dimmed">
                         Set the theme of the file uploader
                     </Text>
                 </div>
                 <SegmentedControl
                     w={w}
-                    size="xs"
                     onChange={(value) => setTheme(value as 'light' | 'dark' | 'auto')}
                     value={theme}
                     data={[
@@ -140,18 +140,17 @@ const Settings: React.FC<SettingsProps> = ({
                         <Text size="sm">
                             Auto Proceed
                         </Text>
-                        <Text size="xs" c="red" opacity={0.9}>
+                        <Text c="red" opacity={0.9}>
                             {hideUploadButton && !autoProceed && "* (If you hide the upload button, you must enable auto proceed)"}
                         </Text>
                     </Group>
-                    <Text size="xs" c="dimmed">
+                    <Text c="dimmed">
                         Toggle to start uploading file as soon as it is selected
                     </Text>
 
                 </div>
                 <Switch
                     className={classes.switch}
-                    size="lg"
                     onLabel="ON" offLabel="OFF"
                     checked={autoProceed}
                     onChange={(e) => setAutoProceed(e.target.checked)}
@@ -162,13 +161,12 @@ const Settings: React.FC<SettingsProps> = ({
             <Group justify="space-between" className={classes.item} wrap="nowrap" gap="xl">
                 <div>
                     <Text size="sm">Show status bar</Text>
-                    <Text size="xs" c="dimmed">
+                    <Text c="dimmed">
                         Toggle to show the status bar in the uploader
                     </Text>
                 </div>
                 <Switch
                     className={classes.switch}
-                    size="lg"
                     onLabel="ON" offLabel="OFF"
                     checked={showStatusBar}
                     onChange={(e) => setShowStatusBar(e.target.checked)}
@@ -179,13 +177,12 @@ const Settings: React.FC<SettingsProps> = ({
             <Group justify="space-between" className={classes.item} wrap="nowrap" gap="xl">
                 <div>
                     <Text size="sm">Show progress bar</Text>
-                    <Text size="xs" c="dimmed">
+                    <Text c="dimmed">
                         Toggle to show the progress bar in the uploader
                     </Text>
                 </div>
                 <Switch
                     className={classes.switch}
-                    size="lg"
                     onLabel="ON" offLabel="OFF"
                     checked={showProgress}
                     onChange={(e) => setShowProgress(e.target.checked)}
@@ -196,13 +193,12 @@ const Settings: React.FC<SettingsProps> = ({
             <Group justify="space-between" className={classes.item} wrap="nowrap" gap="xl">
                 <div>
                     <Text size="sm">Hide upload button</Text>
-                    <Text size="xs" c="dimmed">
+                    <Text c="dimmed">
                         Toggle to hide the upload button in the uploader
                     </Text>
                 </div>
                 <Switch
                     className={classes.switch}
-                    size="lg"
                     onLabel="ON" offLabel="OFF"
                     checked={hideUploadButton}
                     onChange={(e) => setHideUploadButton(e.target.checked)}
@@ -213,13 +209,12 @@ const Settings: React.FC<SettingsProps> = ({
             <Group justify="space-between" className={classes.item} wrap="nowrap" gap="xl">
                 <div>
                     <Text size="sm">Hide cancel button</Text>
-                    <Text size="xs" c="dimmed">
+                    <Text c="dimmed">
                         Toggle to hide the cancel button in the uploader
                     </Text>
                 </div>
                 <Switch
                     className={classes.switch}
-                    size="lg"
                     onLabel="ON" offLabel="OFF"
                     checked={hideCancelButton}
                     onChange={(e) => setHideCancelButton(e.target.checked)}
@@ -230,13 +225,12 @@ const Settings: React.FC<SettingsProps> = ({
             <Group justify="space-between" className={classes.item} wrap="nowrap" gap="xl">
                 <div>
                     <Text size="sm">Hide retry button</Text>
-                    <Text size="xs" c="dimmed">
+                    <Text c="dimmed">
                         Toggle to hide the retry button in the uploader
                     </Text>
                 </div>
                 <Switch
                     className={classes.switch}
-                    size="lg"
                     onLabel="ON" offLabel="OFF"
                     checked={hideRetryButton}
                     onChange={(e) => setHideRetryButton(e.target.checked)}

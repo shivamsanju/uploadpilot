@@ -3,6 +3,7 @@ import {
     IconCircles,
     IconDatabase,
     IconGauge,
+    IconTransform,
     IconUsers,
     IconWebhook,
 } from '@tabler/icons-react';
@@ -37,11 +38,6 @@ const NavBar = ({ toggle }: { toggle: React.Dispatch<React.SetStateAction<boolea
                 link: `/workspaces/${workspaceId}/configuration`,
             },
             {
-                label: 'Hooks',
-                icon: IconWebhook,
-                link: `/workspaces/${workspaceId}/hooks`,
-            },
-            {
                 label: 'Webhooks',
                 icon: IconWebhook,
                 link: `/workspaces/${workspaceId}/webhooks`,
@@ -50,6 +46,11 @@ const NavBar = ({ toggle }: { toggle: React.Dispatch<React.SetStateAction<boolea
                 label: 'Users',
                 icon: IconUsers,
                 link: `/workspaces/${workspaceId}/users`,
+            },
+            {
+                label: 'Hooks',
+                icon: IconTransform,
+                link: `/workspaces/${workspaceId}/hooks`,
             },
             {
                 label: 'Analytics',

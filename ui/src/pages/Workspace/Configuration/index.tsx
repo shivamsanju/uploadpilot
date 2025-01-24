@@ -16,9 +16,9 @@ const ConfigurationPage = () => {
 
     return (
         <ErrorLoadingWrapper error={error} isPending={isPending}>
-            <Title order={3} opacity={0.7}>Uploader Configuration</Title>
+            <Title order={3} opacity={0.7}>Configuration</Title>
             <Text c="dimmed" size="xs" mt={2} mb="lg">
-                Configure your uploader to match your requirements by editing the settings below
+                Configure your uploader to match your requirements
             </Text>
             <Stack gap="md" justify='space-between'>
                 <Box mb="xl">

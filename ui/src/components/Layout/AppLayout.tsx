@@ -16,13 +16,13 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const theme = useMantineTheme();
 
     const bg =
-        colorScheme === "dark" ? theme.colors.dark[8] : theme.colors.gray[0];
+        colorScheme === "dark" ? "#0A0A0A" : theme.colors.gray[0];
 
     const navbarHeaderBg =
-        colorScheme === "dark" ? theme.colors.dark[6] : "";
+        colorScheme === "dark" ? theme.colors.dark[9] : "";
 
     const appShellBorderColor =
-        colorScheme === "dark" ? theme.colors.dark[5] : theme.colors.gray[1];
+        colorScheme === "dark" ? theme.colors.dark[8] : theme.colors.gray[1];
 
     return (
         <AuthWrapper>
@@ -43,7 +43,6 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                             <Burger
                                 opened={false}
                                 onClick={() => toggle((o) => !o)}
-                                size="xs"
                             />
                         }
                     />

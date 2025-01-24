@@ -1,9 +1,11 @@
+import { useMantineColorScheme } from "@mantine/core";
 import { useState } from "react";
 
 export const useSettingsProps = () => {
+    const { colorScheme } = useMantineColorScheme();
     const [height, setHeight] = useState<number>(400);
     const [width, setWidth] = useState<number>(350);
-    const [theme, setTheme] = useState<'auto' | 'light' | 'dark'>('auto');
+    const [theme, setTheme] = useState<'auto' | 'light' | 'dark'>(colorScheme);
     const [showStatusBar, setShowStatusBar] = useState<boolean>(true);
     const [autoProceed, setAutoProceed] = useState<boolean>(false);
     const [showProgress, setShowProgress] = useState<boolean>(true);

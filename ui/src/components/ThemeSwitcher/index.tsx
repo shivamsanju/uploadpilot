@@ -23,7 +23,7 @@ const ThemeSwitcher = () => {
         <IconMoonStars
             style={{ width: rem(16), height: rem(16) }}
             stroke={2.5}
-            color={theme.colors.grape[6]}
+            color={theme.colors.appcolor[6]}
         />
     );
 
@@ -44,7 +44,7 @@ const ThemeSwitcher = () => {
             closeOnItemClick={false}
         >
             <Menu.Target>
-                <Text size='sm'>Theme</Text>
+                <Text>Theme</Text>
             </Menu.Target>
 
             <Menu.Dropdown>
@@ -53,14 +53,14 @@ const ThemeSwitcher = () => {
                     onClick={() => changeTheme("light")}
                     rightSection={colorScheme === "light" && checkIcon}
                 >
-                    Light
+                    <Text>Light</Text>
                 </Menu.Item>
                 <Menu.Item
                     leftSection={moonIcon}
                     onClick={() => changeTheme("dark")}
                     rightSection={colorScheme === "dark" && checkIcon}
                 >
-                    Dark
+                    <Text>Dark</Text>
                 </Menu.Item>
             </Menu.Dropdown>
 

@@ -13,7 +13,7 @@ const WorkspaceWebhooksPage = () => {
     return (
         <Box pb="xl">
             <Title order={3} opacity={0.7}>Hooks</Title>
-            <Text c="dimmed" mb="md" size="xs" mt={2}>
+            <Text c="dimmed" mb="md" mt={2}>
                 Hooks let you add more fine tuned transformations and validations to your data.
             </Text>
             <HooksMarketPlace />

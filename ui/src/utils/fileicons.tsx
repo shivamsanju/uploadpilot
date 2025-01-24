@@ -53,7 +53,7 @@ export const MIME_TYPE_ICONS: { [key: string]: any } = {
 };
 
 
-export const getFileIcon = (mimeType: string, size: number = 16): ReactNode => {
+export const getFileIcon = (mimeType: string, size?: number): ReactNode => {
     const IconComponent = MIME_TYPE_ICONS[mimeType];
     return IconComponent ? <IconComponent size={size} /> : <IconFileUnknown size={size} />;
 };

@@ -38,9 +38,9 @@
 }
 
 .active {
-    color: var(--mantine-color-grape-filled);
+    color: var(--mantine-color-appcolor-filled);
 }
 
 .active:hover {
-    color: var(--mantine-color-grape-filled);
+    color: var(--mantine-color-appcolor-filled);
 }

@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useRef, useState, } from 'react';
-import { Menu, Loader, Tooltip, Stack, Box, Button, Group, ActionIcon, Text } from '@mantine/core';
+import { Menu, Loader, Tooltip, Stack, Box, Button, Group, ActionIcon, Text, Avatar } from '@mantine/core';
 import { IconCircleCheck, IconDots, IconExclamationCircle, IconBraces, IconChevronsDown, IconLogs, IconDownload, IconCopy } from '@tabler/icons-react';
 import { useParams } from 'react-router-dom';
 import { useGetUploads } from '../../../apis/upload';
@@ -72,9 +72,9 @@ const UploadList = () => {
                 accessor: 'id',
                 hidden: width < 768,
                 render: (params: any) => (
-                    <ActionIcon variant='transparent'>
-                        {getFileIcon(params?.metadata?.filetype, 30)}
-                    </ActionIcon>
+                    <Avatar size={40} radius={40} variant='light'>
+                        {getFileIcon(params?.metadata?.filetype, 20)}
+                    </Avatar>
                 ),
             },
             {
@@ -239,7 +239,6 @@ const UploadList = () => {
                 <Stack align='center' justify='center' p="md" key="selectedRecords">
                     <Button
                         display={hasNextPage ? 'block' : 'none'}
-                        size="xs"
                         leftSection={<IconChevronsDown size={16} />}
                         variant="subtle"
                         disabled={isPending || isFetchingNextPage || isFetching || !hasNextPage}
