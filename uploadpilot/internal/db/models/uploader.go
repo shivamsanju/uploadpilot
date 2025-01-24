@@ -34,3 +34,20 @@ type UploaderConfig struct {
 	UseFaultTolerantMode   bool             `bson:"useFaultTolerantMode" json:"useFaultTolerantMode"`
 	AuthEndpoint           string           `bson:"authEndpoint" json:"authEndpoint"`
 }
+
+var AllAllowedSources = []AllowedSources{
+	FileUpload,
+	Webcamera,
+	Audio,
+	ScreenCapture,
+	Box,
+	Dropbox,
+	Facebook,
+	GoogleDrive,
+	GooglePhotos,
+	Instagram,
+	OneDrive,
+	Unsplash,
+	Url,
+	Zoom,
+}

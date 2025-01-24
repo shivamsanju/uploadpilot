@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/internal/events"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type webhookRoutineResponse struct {
@@ -19,11 +19,11 @@ type webhookRoutineResponse struct {
 	Error error
 }
 
-func (c *WebhookService) TriggerWebhook(upload *models.Upload) error {
+func (s *WebhookService) TriggerWebhook(upload *models.Upload, event *events.UploadEvent) error {
 	ctx := context.Background()
 	workspaceID := upload.WorkspaceID.Hex()
 
-	webhooks, err := c.webRepo.GetEnabledWebhooksWithSecret(ctx, workspaceID)
+	webhooks, err := s.webRepo.GetEnabledWebhooksWithSecret(ctx, workspaceID)
 	if err != nil {
 		return err
 	}
@@ -36,28 +36,19 @@ func (c *WebhookService) TriggerWebhook(upload *models.Upload) error {
 	}
 	wg.Wait()
 
-	logs := []models.Log{}
 	for i := 0; i < len(webhooks); i++ {
 		res := <-resultChan
-		now := primitive.NewDateTimeFromTime(time.Now())
 		if res.Error != nil {
-			logs = append(logs, models.Log{
-				Message:   fmt.Sprintf("Error while triggering webhook [%s]: %s", res.URL, res.Error.Error()),
-				TimeStamp: now,
-			})
+			message := fmt.Sprintf("Failed to deliver to webhook [%s]. Reason: %s", res.URL, res.Error.Error())
+			infra.Log.Error(message)
+			s.logsEventBus.Publish(events.NewLogEvent(ctx, workspaceID, upload.ID.Hex(), message, models.UploadLogLevelError))
 		} else {
-			logs = append(logs, models.Log{
-				Message:   fmt.Sprintf("Delivered to webhook [%s] successfully", res.URL),
-				TimeStamp: now,
-			})
+			message := fmt.Sprintf("Delivered to webhook [%s] successfully", res.URL)
+			infra.Log.Info(message)
+			s.logsEventBus.Publish(events.NewLogEvent(ctx, workspaceID, upload.ID.Hex(), message, models.UploadLogLevelInfo))
 		}
 	}
 
-	if len(logs) > 0 {
-		if err := c.upRepo.AddLogs(ctx, workspaceID, upload.ID.Hex(), logs); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 

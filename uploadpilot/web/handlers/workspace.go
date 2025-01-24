@@ -137,5 +137,5 @@ func (h *workspaceHandler) UpdateUploaderConfig(w http.ResponseWriter, r *http.R
 }
 
 func (h *workspaceHandler) GetAllAllowedSources(w http.ResponseWriter, r *http.Request) {
-	render.JSON(w, r, workspace.AllowedSources)
+	render.JSON(w, r, models.AllAllowedSources)
 }

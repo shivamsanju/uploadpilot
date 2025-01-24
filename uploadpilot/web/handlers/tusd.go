@@ -1,13 +1,11 @@
 package handlers
 
 import (
-	"context"
 	"net/http"
 
 	tusd "github.com/tus/tusd/v2/pkg/handler"
 	"github.com/tus/tusd/v2/pkg/s3store"
 	"github.com/uploadpilot/uploadpilot/internal/config"
-	"github.com/uploadpilot/uploadpilot/internal/storage"
 	"github.com/uploadpilot/uploadpilot/internal/upload"
 	"github.com/uploadpilot/uploadpilot/internal/webhook"
 	"github.com/uploadpilot/uploadpilot/internal/workspace"
@@ -31,7 +29,8 @@ func NewTusdHandler() *tusdHandler {
 
 func (h *tusdHandler) GetTusHandler() http.Handler {
 	infra.Log.Infof("initializing tusd handler with upload dir: %s", config.TusUploadDir)
-	s3Client, err := storage.S3Client(context.Background())
+	// A seperate s3 client for tusd
+	s3Client, err := infra.NewS3Client()
 	if err != nil {
 		panic(err)
 	}
@@ -62,17 +61,12 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 		},
 
 		PreFinishResponseCallback: func(hook tusd.HookEvent) (tusd.HTTPResponse, error) {
-			upload, err := h.uploadSvc.GetUploadDetailsFromTusdEvent(&hook)
-			if err != nil {
-				infra.Log.Errorf("unable to get upload details from tusd event: %s", err)
-				return tusd.HTTPResponse{StatusCode: http.StatusBadRequest}, nil
-			}
-			if err := h.uploadSvc.FinishUpload(hook.Context, upload); err != nil {
+			uploadID := hook.Upload.MetaData["uploadId"]
+			if err := h.uploadSvc.FinishUpload(hook.Context, uploadID); err != nil {
 				infra.Log.Errorf("unable to finish upload: %s", err)
 				return tusd.HTTPResponse{StatusCode: http.StatusBadRequest}, nil
 			}
 
-			go h.webhookSvc.TriggerWebhook(upload)
 			return tusd.HTTPResponse{StatusCode: http.StatusOK}, nil
 		},
 	})

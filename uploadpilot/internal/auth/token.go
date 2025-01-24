@@ -7,7 +7,7 @@ import (
 
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/markbates/goth"
-	"github.com/uploadpilot/uploadpilot/internal/messages"
+	"github.com/uploadpilot/uploadpilot/internal/msg"
 )
 
 var (
@@ -23,7 +23,7 @@ type Claims struct {
 
 func GenerateToken(w http.ResponseWriter, user *goth.User, expiry time.Duration) (string, error) {
 	if secretKey == nil {
-		return "", errors.New(messages.JWTSecretKeyNotSet)
+		return "", errors.New(msg.JWTSecretKeyNotSet)
 	}
 	claims := &Claims{
 		UserID: user.UserID,
@@ -54,11 +54,11 @@ func ValidateToken(jwtToken string) (*Claims, error) {
 	}
 	claims, ok := token.Claims.(*Claims)
 	if !ok {
-		return claims, errors.New(messages.InvalidToken)
+		return claims, errors.New(msg.InvalidToken)
 	}
 
 	if claims.ExpiresAt < time.Now().Local().Unix() {
-		return claims, errors.New(messages.TokenExpired)
+		return claims, errors.New(msg.TokenExpired)
 	}
 	return claims, nil
 }

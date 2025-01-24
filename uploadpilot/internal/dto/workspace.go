@@ -10,3 +10,8 @@ type AddWorkspaceUser struct {
 type EditUserRole struct {
 	Role models.UserRole `json:"role" validate:"required"`
 }
+
+type WorkspaceNameID struct {
+	Name string `bson:"name" json:"name" validate:"required"`
+	ID   string `bson:"_id" json:"id" validate:"required"`
+}

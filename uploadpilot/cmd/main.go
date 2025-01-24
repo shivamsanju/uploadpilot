@@ -14,7 +14,8 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/auth"
 	"github.com/uploadpilot/uploadpilot/internal/config"
 	"github.com/uploadpilot/uploadpilot/internal/db"
-	"github.com/uploadpilot/uploadpilot/internal/utils"
+	"github.com/uploadpilot/uploadpilot/internal/infra"
+	"github.com/uploadpilot/uploadpilot/internal/listeners"
 	"github.com/uploadpilot/uploadpilot/web"
 )
 
@@ -64,9 +65,9 @@ func initServices() (*http.Server, error) {
 		return nil, wrapError("config initialization failed", err)
 	}
 
-	// Initialize logger.
-	if err := utils.InitLogger(); err != nil {
-		return nil, wrapError("logger initialization failed", err)
+	// Initialize infra.
+	if err := infra.Init(); err != nil {
+		return nil, wrapError("infra initialization failed", err)
 	}
 
 	// Initialize database.
@@ -78,6 +79,9 @@ func initServices() (*http.Server, error) {
 	if err := auth.Init(); err != nil {
 		return nil, wrapError("auth initialization failed", err)
 	}
+
+	// Initialize listeners.
+	listeners.StartListeners()
 
 	// Initialize the web server.
 	srv, err := web.Init()

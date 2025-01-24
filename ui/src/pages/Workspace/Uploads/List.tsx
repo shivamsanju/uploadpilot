@@ -1,16 +1,18 @@
-import { useCallback, useEffect, useMemo, useRef, useState, } from 'react';
-import { Menu, Loader, Tooltip, Stack, Box, Button, Group, ActionIcon, Text, Avatar } from '@mantine/core';
-import { IconCircleCheck, IconDots, IconExclamationCircle, IconBraces, IconChevronsDown, IconLogs, IconDownload, IconCopy } from '@tabler/icons-react';
+import { useCallback, useMemo, useRef, useState, } from 'react';
+import { Menu, Stack, Box, Button, Group, ActionIcon, Text, Avatar } from '@mantine/core';
+import { IconDots, IconBraces, IconChevronsDown, IconLogs, IconDownload, IconCopy } from '@tabler/icons-react';
 import { useParams } from 'react-router-dom';
 import { useGetUploads } from '../../../apis/upload';
 import { timeAgo } from '../../../utils/datetime';
-import MetadataLogsModal from './MetadataLogs';
 import { formatBytes } from '../../../utils/utility';
 import { UploadPilotDataTable, useUploadPilotDataTable } from '../../../components/Table/Table';
 import { ErrorCard } from '../../../components/ErrorCard/ErrorCard';
 import { DataTableColumn } from 'mantine-datatable';
 import { getFileIcon } from '../../../utils/fileicons';
-import { useInViewport, useViewportSize } from '@mantine/hooks';
+import { useViewportSize } from '@mantine/hooks';
+import { UploadStatus } from './Status';
+import { LogsModal } from './Logs';
+import { MetadataModal } from './Metadata';
 
 const batchSize = 20;
 
@@ -27,7 +29,7 @@ const UploadList = () => {
     const { width } = useViewportSize();
     const [openModal, setOpenModal] = useState(false)
     const [modalVariant, setModalVariant] = useState<'logs' | 'metadata'>('logs')
-    const [logs, setLogs] = useState([])
+    const [uploadId, setUploadId] = useState<string | null>(null)
     const [metadata, setMetadata] = useState({})
 
 
@@ -44,7 +46,7 @@ const UploadList = () => {
         const uploadItem = uploads?.find((item: any) => item.id === importId);
         if (uploadItem) {
             setOpenModal(true)
-            setLogs(uploadItem.logs || [])
+            setUploadId(uploadItem.id)
             setModalVariant('logs')
         }
     }, [uploads])
@@ -137,16 +139,7 @@ const UploadList = () => {
                 title: 'Status',
                 accessor: 'status',
                 textAlign: 'center',
-                render: (params: any) => (
-                    <Tooltip label={params?.status} >
-                        <div>
-                            {params?.status === 'Success' && <IconCircleCheck size={18} style={{ color: 'green' }} />}
-                            {params?.status === 'Failed' && <IconExclamationCircle size={18} style={{ color: 'red' }} />}
-                            {params?.status !== 'Success' && params?.status !== 'Failed' && <Loader size={18} />}
-                        </div>
-                    </Tooltip >
-
-                )
+                render: (params: any) => (<UploadStatus status={params?.status} />),
 
             },
             {
@@ -210,12 +203,16 @@ const UploadList = () => {
 
     return (
         <>
-            <MetadataLogsModal
-                open={openModal}
+            <LogsModal
+                open={openModal && modalVariant === 'logs'}
                 onClose={() => setOpenModal(false)}
-                variant={modalVariant}
-                logs={logs}
-                metadata={metadata}
+                uploadId={uploadId || ""}
+                workspaceId={workspaceId || ""}
+            />
+            <MetadataModal
+                open={openModal && modalVariant === 'metadata'}
+                onClose={() => setOpenModal(false)}
+                metadata={metadata || {}}
             />
             <Box mr="md">
                 <UploadPilotDataTable

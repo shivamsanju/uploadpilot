@@ -6,7 +6,8 @@ import (
 	"time"
 
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
-	"github.com/uploadpilot/uploadpilot/internal/messages"
+	"github.com/uploadpilot/uploadpilot/internal/dto"
+	"github.com/uploadpilot/uploadpilot/internal/msg"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -28,9 +29,9 @@ func NewWorkspaceRepo() *WorkspaceRepo {
 	}
 }
 
-func (wr *WorkspaceRepo) GetAll(ctx context.Context, userId string) ([]models.Workspace, error) {
+func (wr *WorkspaceRepo) GetAll(ctx context.Context, userId string) ([]dto.WorkspaceNameID, error) {
 	collection := db.Collection(wr.collectionName)
-	var workspaces []models.Workspace
+	var workspaces []dto.WorkspaceNameID
 
 	findOptions := options.Find().SetProjection(bson.M{
 		"id":   1,
@@ -54,7 +55,7 @@ func (wr *WorkspaceRepo) GetAll(ctx context.Context, userId string) ([]models.Wo
 func (wr *WorkspaceRepo) Get(ctx context.Context, workspaceID string) (*models.Workspace, error) {
 	id, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return nil, fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return nil, fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
 	collection := db.Collection(wr.collectionName)
 	var workspace models.Workspace
@@ -120,7 +121,7 @@ func (wr *WorkspaceRepo) Delete(ctx context.Context, workspaceID primitive.Objec
 func (wr *WorkspaceRepo) Exists(ctx context.Context, workspaceID string) (bool, error) {
 	id, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return false, fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return false, fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
 	collection := db.Collection(wr.collectionName)
 	count, err := collection.CountDocuments(ctx, bson.M{"_id": id})
@@ -130,7 +131,7 @@ func (wr *WorkspaceRepo) Exists(ctx context.Context, workspaceID string) (bool, 
 func (wr *WorkspaceRepo) GetUsersInWorkspace(ctx context.Context, workspaceID string) ([]models.WorkspaceUserWithDetails, error) {
 	id, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return nil, fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return nil, fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
 	collection := db.Collection(wr.collectionName)
 	var users []models.WorkspaceUserWithDetails
@@ -181,7 +182,7 @@ func (wr *WorkspaceRepo) GetUsersInWorkspace(ctx context.Context, workspaceID st
 func (wr *WorkspaceRepo) CheckIfUserExistsInWorkspace(ctx context.Context, workspaceID string, userID string) (bool, error) {
 	id, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return false, fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return false, fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
 	collection := db.Collection(wr.collectionName)
 	count, err := collection.CountDocuments(ctx, bson.M{"_id": id, "users.userId": userID})
@@ -191,7 +192,7 @@ func (wr *WorkspaceRepo) CheckIfUserExistsInWorkspace(ctx context.Context, works
 func (wr *WorkspaceRepo) AddUserToWorkspace(ctx context.Context, workspaceID string, user *models.WorkspaceUser) error {
 	id, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
 	session, err := db.Client().StartSession()
 	if err != nil {
@@ -228,7 +229,7 @@ func (wr *WorkspaceRepo) AddUserToWorkspace(ctx context.Context, workspaceID str
 func (wr *WorkspaceRepo) RemoveUserFromWorkspace(ctx context.Context, workspaceID string, userID string) error {
 	id, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
 	session, err := db.Client().StartSession()
 	if err != nil {
@@ -285,7 +286,7 @@ func (wr *WorkspaceRepo) GetUserRoleInWorkspace(ctx context.Context, workspaceID
 func (wr *WorkspaceRepo) ChangeUserRoleInWorkspace(ctx context.Context, workspaceID string, userID string, role models.UserRole) error {
 	id, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
 	collection := db.Collection(wr.collectionName)
 	_, err = collection.UpdateOne(ctx, bson.M{"_id": id, "users.userId": userID}, bson.M{"$set": bson.M{"users.$.role": role}})
@@ -296,7 +297,7 @@ func (wr *WorkspaceRepo) IsUserLastOwner(ctx context.Context, workspaceID string
 	isLastOwner := true
 	id, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return isLastOwner, fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return isLastOwner, fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
 	collection := db.Collection(wr.collectionName)
 	var workspace models.Workspace
@@ -318,7 +319,7 @@ func (wr *WorkspaceRepo) IsUserLastOwner(ctx context.Context, workspaceID string
 func (wr *WorkspaceRepo) GetUploaderConfig(ctx context.Context, workspaceID string) (*models.UploaderConfig, error) {
 	id, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return nil, fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return nil, fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
 	collection := db.Collection(wr.collectionName)
 	var workspace models.Workspace
@@ -332,7 +333,7 @@ func (wr *WorkspaceRepo) GetUploaderConfig(ctx context.Context, workspaceID stri
 func (wr *WorkspaceRepo) SetUploaderConfig(ctx context.Context, workspaceID string, config *models.UploaderConfig) error {
 	id, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
 
 	user, err := utils.GetUserDetailsFromContext(ctx)

@@ -12,7 +12,7 @@ import (
 	"github.com/go-chi/render"
 	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
-	"github.com/uploadpilot/uploadpilot/internal/messages"
+	"github.com/uploadpilot/uploadpilot/internal/msg"
 )
 
 func GetSkipLimitSearchParams(r *http.Request) (skip int64, limit int64, search string, err error) {
@@ -38,7 +38,7 @@ func GetUserDetailsFromContext(ctx context.Context) (*dto.ApiUser, error) {
 	email, ok3 := ctx.Value("email").(string)
 
 	if !ok1 || !ok2 || !ok3 {
-		return nil, errors.New(messages.FailedToGetUserFromContext)
+		return nil, errors.New(msg.FailedToGetUserFromContext)
 	}
 
 	return &dto.ApiUser{

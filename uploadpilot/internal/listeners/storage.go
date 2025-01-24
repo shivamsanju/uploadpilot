@@ -1,0 +1,93 @@
+package listeners
+
+import (
+	"context"
+	"time"
+
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/uploadpilot/uploadpilot/internal/config"
+	"github.com/uploadpilot/uploadpilot/internal/db"
+	"github.com/uploadpilot/uploadpilot/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/internal/events"
+	"github.com/uploadpilot/uploadpilot/internal/infra"
+)
+
+type StorageListener struct {
+	eventChan   chan events.UploadEvent
+	uploadRepo  *db.UploadRepo
+	logEventBus *events.LogEventBus
+}
+
+func NewStorageListener() *StorageListener {
+	eventBus := events.GetUploadEventBus()
+
+	eventChan := make(chan events.UploadEvent)
+	eventBus.Subscribe(events.EventUploadComplete, eventChan)
+
+	return &StorageListener{
+		eventChan:   eventChan,
+		uploadRepo:  db.NewUploadRepo(),
+		logEventBus: events.GetLogEventBus(),
+	}
+}
+
+func (l *StorageListener) Start() {
+	infra.Log.Info("starting upload storage listener...")
+	for event := range l.eventChan {
+		ctx := event.Context
+		uploadID := event.Upload.ID.Hex()
+
+		// Delete tus info file from S3 (no need to throw an error)
+		go l.cleanUploadInfoFileRoutine(ctx, uploadID)
+
+		url, objectName, err := l.generateUploadURL(ctx, uploadID)
+		if err != nil {
+			l.logEventBus.Publish(events.NewLogEvent(ctx, event.Upload.WorkspaceID.Hex(), uploadID, "Failed to generate a link of the uploaded file", models.UploadLogLevelError))
+			infra.Log.Errorf("failed to generate upload url: %s", err.Error())
+			continue
+		}
+
+		patchMap := map[string]interface{}{
+			"url":            url,
+			"storedFileName": objectName,
+		}
+
+		if err := l.uploadRepo.Patch(ctx, uploadID, patchMap); err != nil {
+			l.logEventBus.Publish(events.NewLogEvent(ctx, event.Upload.WorkspaceID.Hex(), uploadID, "Failed to save the link of the uploaded file", models.UploadLogLevelError))
+			infra.Log.Errorf("failed to patch upload: %s", err.Error())
+		}
+	}
+}
+
+func (l *StorageListener) cleanUploadInfoFileRoutine(ctx context.Context, uploadID string) {
+	objectFileName := uploadID
+	if len(objectFileName) > 32 {
+		objectFileName = objectFileName[:32]
+	}
+
+	infoFileName := objectFileName + ".info"
+
+	infra.S3Client.DeleteObject(ctx, &s3.DeleteObjectInput{Bucket: &config.S3BucketName, Key: &infoFileName})
+}
+
+func (l *StorageListener) generateUploadURL(ctx context.Context, uploadID string) (string, string, error) {
+	objectFileName := uploadID
+
+	if len(objectFileName) > 32 {
+		objectFileName = objectFileName[:32]
+	}
+
+	url, err := s3.NewPresignClient(infra.S3Client).PresignGetObject(
+		ctx,
+		&s3.GetObjectInput{Bucket: &config.S3BucketName, Key: &objectFileName},
+		func(opts *s3.PresignOptions) {
+			opts.Expires = time.Duration(7 * 24 * time.Hour)
+		},
+	)
+
+	if err != nil {
+		return "", "", err
+	}
+
+	return url.URL, objectFileName, nil
+}

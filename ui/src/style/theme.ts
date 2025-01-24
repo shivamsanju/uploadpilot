@@ -1,7 +1,8 @@
 import {
     createTheme, TextInput, Button, Select, Textarea, TagsInput, Badge, NumberInput,
     Text, virtualColor, MultiSelect, Input, PasswordInput, Anchor, Burger,
-    Paper, Switch, SegmentedControl
+    Paper, Switch, SegmentedControl,
+    Loader,
 } from "@mantine/core";
 
 export const myAppTheme = createTheme({
@@ -112,6 +113,11 @@ export const myAppTheme = createTheme({
         Paper: Paper.extend({
             defaultProps: {
                 radius: "sm",
+            }
+        }),
+        Loader: Loader.extend({
+            defaultProps: {
+                type: "dots"
             }
         })
     }

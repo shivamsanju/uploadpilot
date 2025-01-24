@@ -9,7 +9,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
-	"github.com/uploadpilot/uploadpilot/internal/messages"
+	"github.com/uploadpilot/uploadpilot/internal/msg"
 )
 
 var ValidUserRoles = map[models.UserRole]bool{
@@ -32,13 +32,13 @@ func (s *WorkspaceService) AddUserToWorkspace(ctx context.Context, workspaceID s
 		for _, err := range err.(validator.ValidationErrors) {
 			errors[err.Field()] = err.Tag()
 		}
-		return fmt.Errorf(messages.ValidationErr, errors)
+		return fmt.Errorf(msg.ValidationErr, errors)
 	}
 
 	user, err := s.userRepo.GetByEmail(ctx, addReq.Email)
 	if err != nil {
 		infra.Log.Errorf("failed to get user by email: %s", err.Error())
-		return fmt.Errorf(messages.UserNotFound, addReq.Email)
+		return fmt.Errorf(msg.UserNotFound, addReq.Email)
 	}
 
 	exists, err := s.wsRepo.CheckIfUserExistsInWorkspace(ctx, workspaceID, user.UserID)
@@ -47,11 +47,11 @@ func (s *WorkspaceService) AddUserToWorkspace(ctx context.Context, workspaceID s
 	}
 
 	if exists {
-		return fmt.Errorf(messages.UserAlreadyExistsInWorkspace, user.Email)
+		return fmt.Errorf(msg.UserAlreadyExistsInWorkspace, user.Email)
 	}
 
 	if !ValidUserRoles[addReq.Role] {
-		return fmt.Errorf(messages.UnknownRole, addReq.Role)
+		return fmt.Errorf(msg.UnknownRole, addReq.Role)
 	}
 
 	workspaceUser := &models.WorkspaceUser{
@@ -69,21 +69,21 @@ func (s *WorkspaceService) RemoveUserFromWorkspace(ctx context.Context, workspac
 		return err
 	}
 	if isLastOwner {
-		return errors.New(messages.LastOwnerCannotBeRemoved)
+		return errors.New(msg.LastOwnerCannotBeRemoved)
 	}
 	return s.wsRepo.RemoveUserFromWorkspace(ctx, workspaceID, userID)
 }
 
 func (s *WorkspaceService) ChangeUserRoleInWorkspace(ctx context.Context, workspaceID string, userID string, role models.UserRole) error {
 	if !ValidUserRoles[role] {
-		return fmt.Errorf(messages.UnknownRole, role)
+		return fmt.Errorf(msg.UnknownRole, role)
 	}
 	isLastOwner, err := s.wsRepo.IsUserLastOwner(ctx, workspaceID, userID)
 	if err != nil {
 		return err
 	}
 	if isLastOwner && role == models.UserRoleOwner {
-		return errors.New(messages.LastOwnerRoleCannotBeChanged)
+		return errors.New(msg.LastOwnerRoleCannotBeChanged)
 	}
 	return s.wsRepo.ChangeUserRoleInWorkspace(ctx, workspaceID, userID, role)
 }

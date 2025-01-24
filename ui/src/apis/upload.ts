@@ -1,5 +1,5 @@
 import axiosInstance from "../utils/axios";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { areBracketsBalanced } from "../utils/utility";
 
 interface UploadParams {
@@ -92,3 +92,20 @@ export const useGetUploads = ({
         isFetching
     };
 };
+
+export const UseGetUploadLogs = (workspaceId: string, uploadId: string) => {
+    const queryClient = useQueryClient();
+    const { isPending, error, data } = useQuery({
+        queryKey: ['uploadLogs', workspaceId, uploadId],
+        queryFn: () => {
+            if (!workspaceId || !uploadId) {
+                return Promise.reject(new Error('workspaceId and uploadId are required'))
+            }
+            return axiosInstance
+                .get(`/workspaces/${workspaceId}/uploads/${uploadId}/logs`)
+                .then((res) => res.data)
+        }
+    })
+    const invalidate = () => queryClient.invalidateQueries({ queryKey: ['uploadLogs', workspaceId, uploadId] })
+    return { isPending, error, data, invalidate }
+}

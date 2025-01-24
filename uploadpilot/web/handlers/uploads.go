@@ -44,13 +44,25 @@ func (h *uploadHandler) GetPaginatedUploads(w http.ResponseWriter, r *http.Reque
 
 func (h *uploadHandler) GetUploadDetailsByID(w http.ResponseWriter, r *http.Request) {
 	uploadID := chi.URLParam(r, "uploadId")
-	worspaceID := chi.URLParam(r, "workspaceId")
+	workspaceID := chi.URLParam(r, "workspaceId")
 
-	details, err := h.uploadSvc.GetUploadDetails(r.Context(), worspaceID, uploadID)
+	details, err := h.uploadSvc.GetUploadDetails(r.Context(), workspaceID, uploadID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
 
 	render.JSON(w, r, details)
+}
+
+func (h *uploadHandler) GetUploadLogs(w http.ResponseWriter, r *http.Request) {
+	uploadID := chi.URLParam(r, "uploadId")
+
+	logs, err := h.uploadSvc.GetLogs(r.Context(), uploadID)
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+
+	render.JSON(w, r, logs)
 }

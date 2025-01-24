@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
-	"github.com/uploadpilot/uploadpilot/internal/messages"
+	"github.com/uploadpilot/uploadpilot/internal/msg"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,7 +24,7 @@ func NewWebhookRepo() *WebhookRepo {
 func (wr *WebhookRepo) GetAll(ctx context.Context, workspaceID string) ([]models.Webhook, error) {
 	id, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return nil, fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return nil, fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
 
 	collection := db.Collection(wr.collectionName)
@@ -46,12 +46,12 @@ func (wr *WebhookRepo) GetAll(ctx context.Context, workspaceID string) ([]models
 func (wr *WebhookRepo) Get(ctx context.Context, workspaceID, webhookID string) (*models.Webhook, error) {
 	wsID, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return nil, fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return nil, fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
 
 	id, err := primitive.ObjectIDFromHex(webhookID)
 	if err != nil {
-		return nil, fmt.Errorf(messages.InvalidObjectID, webhookID)
+		return nil, fmt.Errorf(msg.InvalidObjectID, webhookID)
 	}
 
 	collection := db.Collection(wr.collectionName)
@@ -69,8 +69,15 @@ func (wr *WebhookRepo) Get(ctx context.Context, workspaceID, webhookID string) (
 func (wr *WebhookRepo) Create(ctx context.Context, workspaceID string, webhook *models.Webhook) error {
 	wsID, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
+	user, err := utils.GetUserDetailsFromContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	webhook.CreatedBy = user.Email
+	webhook.UpdatedBy = user.Email
 	webhook.Enabled = true
 	webhook.WorkspaceID = wsID
 	webhook.ID = primitive.NewObjectID()
@@ -89,12 +96,12 @@ func (wr *WebhookRepo) Create(ctx context.Context, workspaceID string, webhook *
 func (wr *WebhookRepo) Delete(ctx context.Context, workspaceID, webhookID string) error {
 	wsID, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
 
 	id, err := primitive.ObjectIDFromHex(webhookID)
 	if err != nil {
-		return fmt.Errorf(messages.InvalidObjectID, webhookID)
+		return fmt.Errorf(msg.InvalidObjectID, webhookID)
 	}
 
 	collection := db.Collection(wr.collectionName)
@@ -108,12 +115,12 @@ func (wr *WebhookRepo) Delete(ctx context.Context, workspaceID, webhookID string
 func (wr *WebhookRepo) Update(ctx context.Context, workspaceID string, webhookID string, webhook *models.Webhook) error {
 	wsID, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
 
 	id, err := primitive.ObjectIDFromHex(webhookID)
 	if err != nil {
-		return fmt.Errorf(messages.InvalidObjectID, webhookID)
+		return fmt.Errorf(msg.InvalidObjectID, webhookID)
 	}
 
 	user, err := utils.GetUserDetailsFromContext(ctx)
@@ -135,12 +142,12 @@ func (wr *WebhookRepo) Update(ctx context.Context, workspaceID string, webhookID
 func (wr *WebhookRepo) Patch(ctx context.Context, workspaceID, webhookID string, patch bson.M) error {
 	wsID, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
 
 	id, err := primitive.ObjectIDFromHex(webhookID)
 	if err != nil {
-		return fmt.Errorf(messages.InvalidObjectID, webhookID)
+		return fmt.Errorf(msg.InvalidObjectID, webhookID)
 	}
 
 	user, err := utils.GetUserDetailsFromContext(ctx)
@@ -159,7 +166,7 @@ func (wr *WebhookRepo) Patch(ctx context.Context, workspaceID, webhookID string,
 func (wr *WebhookRepo) GetEnabledWebhooksWithSecret(ctx context.Context, workspaceID string) ([]models.Webhook, error) {
 	id, err := primitive.ObjectIDFromHex(workspaceID)
 	if err != nil {
-		return nil, fmt.Errorf(messages.InvalidObjectID, workspaceID)
+		return nil, fmt.Errorf(msg.InvalidObjectID, workspaceID)
 	}
 
 	collection := db.Collection(wr.collectionName)

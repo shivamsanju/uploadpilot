@@ -143,7 +143,7 @@ const WorkspaceUsersList = ({ opened, setOpened }: { opened: boolean, setOpened:
 
     return (
         <Box mr="md">
-            <LoadingOverlay visible={isPending} overlayProps={{ radius: "sm", blur: 1 }} />
+            <LoadingOverlay visible={removePending} overlayProps={{ radius: "sm", blur: 1 }} />
             <UploadPilotDataTable
                 minHeight={500}
                 fetching={isPending}

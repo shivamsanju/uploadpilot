@@ -2,19 +2,19 @@ package models
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
-type Log struct {
-	TimeStamp primitive.DateTime `bson:"timestamp" json:"timestamp"`
-	Message   string             `bson:"message" json:"message"`
-}
-
 type UploadStatus string
 
 const (
-	UploadStatusInProgress UploadStatus = "In Progress"
-	UploadStatusFailed     UploadStatus = "Failed"
-	UploadStatusSuccess    UploadStatus = "Success"
-	UploadStatusCancelled  UploadStatus = "Cancelled"
-	UploadStatusDeleted    UploadStatus = "Deleted"
+	UploadStatusStarted            UploadStatus = "Started"
+	UploadStatusSkipped            UploadStatus = "Skipped"
+	UploadStatusInProgress         UploadStatus = "In Progress"
+	UploadStatusComplete           UploadStatus = "Uploaded"
+	UploadStatusFailed             UploadStatus = "Failed"
+	UploadStatusCancelled          UploadStatus = "Cancelled"
+	UploadStatusProcessing         UploadStatus = "Processing"
+	UploadStatusProcessingFailed   UploadStatus = "Processing Failed"
+	UploadStatusProcessingComplete UploadStatus = "Processing Complete"
+	UploadStatusDeleted            UploadStatus = "Deleted"
 )
 
 type Upload struct {
@@ -23,9 +23,27 @@ type Upload struct {
 	Status         UploadStatus           `bson:"status" json:"status" validate:"required"`
 	Metadata       map[string]interface{} `bson:"metadata" json:"metadata"`
 	StoredFileName string                 `bson:"storedFileName" json:"storedFileName" validate:"required"`
-	URL            string                 `bson:"url" json:"url"`
 	Size           int64                  `bson:"size" json:"size" validate:"required"`
+	URL            string                 `bson:"url" json:"url"`
+	ProcesedURL    string                 `bson:"processedUrl" json:"processedUrl"`
 	StartedAt      primitive.DateTime     `bson:"startedAt" json:"startedAt"`
 	FinishedAt     primitive.DateTime     `bson:"finishedAt" json:"finishedAt"`
-	Logs           []Log                  `bson:"logs" json:"logs"`
 }
+
+var UploadTerminalStates = []UploadStatus{
+	UploadStatusSkipped,
+	UploadStatusComplete,
+	UploadStatusFailed,
+	UploadStatusCancelled,
+	UploadStatusProcessingFailed,
+	UploadStatusProcessingComplete,
+	UploadStatusDeleted,
+}
+
+var UploadNonTerminalStates = []UploadStatus{
+	UploadStatusStarted,
+	UploadStatusInProgress,
+	UploadStatusProcessing,
+}
+
+var UploadAllStates = append(UploadTerminalStates, UploadNonTerminalStates...)

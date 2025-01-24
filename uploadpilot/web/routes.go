@@ -69,6 +69,7 @@ func Routes() *chi.Mux {
 					r.Get("/", uploadHandler.GetPaginatedUploads)
 					r.Route("/{uploadId}", func(r chi.Router) {
 						r.Get("/", uploadHandler.GetUploadDetailsByID)
+						r.Get("/logs", uploadHandler.GetUploadLogs)
 					})
 				})
 
