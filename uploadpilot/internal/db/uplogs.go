@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/msg"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -20,14 +21,14 @@ func NewUploadLogsRepo() *UploadLogsRepo {
 	}
 }
 
-func (u *UploadLogsRepo) GetLogs(ctx context.Context, uploadID string) ([]bson.M, error) {
+func (u *UploadLogsRepo) GetLogs(ctx context.Context, uploadID string) ([]dto.UploadLogNoIDs, error) {
 	id, err := primitive.ObjectIDFromHex(uploadID)
 	if err != nil {
 		return nil, fmt.Errorf(msg.InvalidObjectID, uploadID)
 	}
 
 	collection := db.Collection(u.collectionName)
-	var logs []bson.M
+	var logs []dto.UploadLogNoIDs
 
 	opts := options.Find().SetSort(bson.D{{Key: "timestamp", Value: 1}}).SetProjection(bson.M{"uploadId": 0, "workspaceId": 0})
 	cursor, err := collection.Find(ctx, bson.M{"uploadId": id}, opts)

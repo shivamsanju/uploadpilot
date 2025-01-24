@@ -10,11 +10,11 @@ import (
 	tusd "github.com/tus/tusd/v2/pkg/handler"
 	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/events"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
 	"github.com/uploadpilot/uploadpilot/internal/msg"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -125,7 +125,7 @@ func (us *UploadService) FinishUpload(ctx context.Context, uploadID string) erro
 	return nil
 }
 
-func (us *UploadService) GetLogs(ctx context.Context, uploadID string) ([]bson.M, error) {
+func (us *UploadService) GetLogs(ctx context.Context, uploadID string) ([]dto.UploadLogNoIDs, error) {
 	logs, err := us.logRepo.GetLogs(ctx, uploadID)
 	if err != nil {
 		return nil, err
