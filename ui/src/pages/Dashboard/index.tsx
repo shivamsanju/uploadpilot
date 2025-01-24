@@ -69,7 +69,7 @@ const DashboardPage = () => {
         );
     });
     return (
-        <Box px="sm" mb={30}>
+        <Box mb={50}>
             <Title order={3} opacity={0.7}>Analytics</Title>
             <Text c="dimmed" size="xs" mt={2} mb="lg">
                 Analyze file upload trends over the last 6 months

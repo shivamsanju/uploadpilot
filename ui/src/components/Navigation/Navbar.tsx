@@ -38,6 +38,11 @@ const NavBar = ({ toggle }: { toggle: React.Dispatch<React.SetStateAction<boolea
                 link: `/workspaces/${workspaceId}/configuration`,
             },
             {
+                label: 'Utilities',
+                icon: IconTransform,
+                link: `/workspaces/${workspaceId}/utilities`,
+            },
+            {
                 label: 'Webhooks',
                 icon: IconWebhook,
                 link: `/workspaces/${workspaceId}/webhooks`,
@@ -46,11 +51,6 @@ const NavBar = ({ toggle }: { toggle: React.Dispatch<React.SetStateAction<boolea
                 label: 'Users',
                 icon: IconUsers,
                 link: `/workspaces/${workspaceId}/users`,
-            },
-            {
-                label: 'Hooks',
-                icon: IconTransform,
-                link: `/workspaces/${workspaceId}/hooks`,
             },
             {
                 label: 'Analytics',

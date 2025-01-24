@@ -15,7 +15,7 @@ const WorkspaceUsersPage = () => {
     }
 
     return (
-        <Box pb="xl">
+        <Box mb={50}>
             <Group justify="space-between">
                 <Title order={3} opacity={0.7}>Users</Title>
                 <ActionIcon size="lg" variant="outline" onClick={() => setWorkspaceUsersOpened(true)} mr="xl">

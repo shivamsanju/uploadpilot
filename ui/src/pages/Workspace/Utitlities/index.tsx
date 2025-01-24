@@ -1,9 +1,9 @@
 import { Box, Text, Title } from "@mantine/core"
 import { useParams } from "react-router-dom"
 import { AppLoader } from "../../../components/Loader/AppLoader"
-import { HooksMarketPlace } from "./Marketplace";
+import { UtilitiesGrid } from "./Grid";
 
-const WorkspaceWebhooksPage = () => {
+const UtilitiesPage = () => {
     const { workspaceId } = useParams();
 
     if (!workspaceId) {
@@ -11,14 +11,14 @@ const WorkspaceWebhooksPage = () => {
     }
 
     return (
-        <Box pb="xl">
-            <Title order={3} opacity={0.7}>Hooks</Title>
+        <Box mb={50} mr="sm">
+            <Title order={3} opacity={0.7}>Utilities</Title>
             <Text c="dimmed" mb="md" mt={2}>
-                Hooks let you add more fine tuned transformations and validations to your data.
+                Add more features and transformations to your files
             </Text>
-            <HooksMarketPlace />
+            <UtilitiesGrid />
         </Box>
     )
 }
 
-export default WorkspaceWebhooksPage
+export default UtilitiesPage

@@ -14,7 +14,7 @@ const WorkspaceWebhooksPage = () => {
     }
 
     return (
-        <Box pb="xl">
+        <Box mb={50}>
             <Group justify="space-between" m={0} p={0}>
                 <Title order={3} opacity={0.7}>Webhooks</Title>
                 <ActionIcon size="lg" variant="outline" onClick={() => setWorkspaceWebhooksOpened(true)} mr="xl">

@@ -342,22 +342,23 @@ func (wr *WorkspaceRepo) SetUploaderConfig(ctx context.Context, workspaceID stri
 	updatedBy := user.Email
 
 	updateFields := utils.FilterNonEmptyBsonFields(bson.M{
-		"uploaderConfig.maxFileSize":            config.MaxFileSize,
-		"uploaderConfig.minFileSize":            config.MinFileSize,
-		"uploaderConfig.maxNumberOfFiles":       config.MaxNumberOfFiles,
-		"uploaderConfig.minNumberOfFiles":       config.MinNumberOfFiles,
-		"uploaderConfig.maxTotalFileSize":       config.MaxTotalFileSize,
-		"uploaderConfig.allowedFileTypes":       config.AllowedFileTypes,
-		"uploaderConfig.allowedSources":         config.AllowedSources,
-		"uploaderConfig.requiredMetadataFields": config.RequiredMetadataFields,
-		"uploaderConfig.allowPauseAndResume":    config.AllowPauseAndResume,
-		"uploaderConfig.enableImageEditing":     config.EnableImageEditing,
-		"uploaderConfig.useCompression":         config.UseCompression,
-		"uploaderConfig.useFaultTolerantMode":   config.UseFaultTolerantMode,
-		"uploaderConfig.authEndpoint":           config.AuthEndpoint,
-		"updatedBy":                             updatedBy,
-		"updatedAt":                             primitive.NewDateTimeFromTime(time.Now()),
+		"uploaderConfig.maxFileSize":      config.MaxFileSize,
+		"uploaderConfig.minFileSize":      config.MinFileSize,
+		"uploaderConfig.maxNumberOfFiles": config.MaxNumberOfFiles,
+		"uploaderConfig.minNumberOfFiles": config.MinNumberOfFiles,
+		"uploaderConfig.maxTotalFileSize": config.MaxTotalFileSize,
 	})
+
+	updateFields["uploaderConfig.allowedFileTypes"] = config.AllowedFileTypes
+	updateFields["uploaderConfig.allowedSources"] = config.AllowedSources
+	updateFields["uploaderConfig.requiredMetadataFields"] = config.RequiredMetadataFields
+	updateFields["uploaderConfig.allowPauseAndResume"] = config.AllowPauseAndResume
+	updateFields["uploaderConfig.enableImageEditing"] = config.EnableImageEditing
+	updateFields["uploaderConfig.useCompression"] = config.UseCompression
+	updateFields["uploaderConfig.useFaultTolerantMode"] = config.UseFaultTolerantMode
+	updateFields["uploaderConfig.authEndpoint"] = config.AuthEndpoint
+	updateFields["updatedBy"] = updatedBy
+	updateFields["updatedAt"] = primitive.NewDateTimeFromTime(time.Now())
 
 	update := bson.M{"$set": updateFields}
 

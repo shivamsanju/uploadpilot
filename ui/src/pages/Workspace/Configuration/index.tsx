@@ -1,4 +1,4 @@
-import { Box, Stack, Text, Title } from '@mantine/core';
+import { Box, Text, Title } from '@mantine/core';
 import UploaderConfigForm from './Config';
 import { useGetUploaderConfig } from '../../../apis/uploader';
 import { useParams } from 'react-router-dom';
@@ -20,11 +20,9 @@ const ConfigurationPage = () => {
             <Text c="dimmed" size="xs" mt={2} mb="lg">
                 Configure your uploader to match your requirements
             </Text>
-            <Stack gap="md" justify='space-between'>
-                <Box mb="xl">
-                    <UploaderConfigForm config={config} />
-                </Box>
-            </Stack>
+            <Box mb={50}>
+                <UploaderConfigForm config={config} />
+            </Box>
         </ErrorLoadingWrapper>
     );
 }

@@ -11,8 +11,8 @@ import UploaderPreviewPage from "./pages/Workspace/Preview";
 import UploadsPage from "./pages/Workspace/Uploads/Uploads";
 import ConfigurationPage from "./pages/Workspace/Configuration";
 import WorkspaceUsersPage from "./pages/Workspace/Users";
-import WorkspaceHooksPage from "./pages/Workspace/Hooks";
-import WorkspaceWebhooksPage from "./pages/Workspace/Webhooks";
+import UtilitiesPage from "./pages/Workspace/Utitlities";
+import WebhooksPage from "./pages/Workspace/Webhooks";
 
 type Route = {
     path: string
@@ -63,14 +63,14 @@ const routes: Route[] = [
         element: <WorkspaceUsersPage />
     },
     {
-        path: "/workspaces/:workspaceId/hooks",
+        path: "/workspaces/:workspaceId/utilities",
         layout: AppLayout,
-        element: <WorkspaceHooksPage />
+        element: <UtilitiesPage />
     },
     {
         path: "/workspaces/:workspaceId/webhooks",
         layout: AppLayout,
-        element: <WorkspaceWebhooksPage />
+        element: <WebhooksPage />
     },
     {
         path: "/workspaces/:workspaceId/analytics",

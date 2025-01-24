@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState, } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, } from 'react';
 import { Menu, Loader, Tooltip, Stack, Box, Button, Group, ActionIcon, Text, Avatar } from '@mantine/core';
 import { IconCircleCheck, IconDots, IconExclamationCircle, IconBraces, IconChevronsDown, IconLogs, IconDownload, IconCopy } from '@tabler/icons-react';
 import { useParams } from 'react-router-dom';
@@ -10,7 +10,7 @@ import { UploadPilotDataTable, useUploadPilotDataTable } from '../../../componen
 import { ErrorCard } from '../../../components/ErrorCard/ErrorCard';
 import { DataTableColumn } from 'mantine-datatable';
 import { getFileIcon } from '../../../utils/fileicons';
-import { useViewportSize } from '@mantine/hooks';
+import { useInViewport, useViewportSize } from '@mantine/hooks';
 
 const batchSize = 20;
 
@@ -29,6 +29,7 @@ const UploadList = () => {
     const [modalVariant, setModalVariant] = useState<'logs' | 'metadata'>('logs')
     const [logs, setLogs] = useState([])
     const [metadata, setMetadata] = useState({})
+
 
     const { workspaceId } = useParams();
     const { searchFilter, onSearchFilterChange } = useUploadPilotDataTable();
