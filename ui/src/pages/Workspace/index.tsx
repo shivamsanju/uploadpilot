@@ -63,12 +63,12 @@ const WorkspaceLandingPage = () => {
                             </form>
                             {workspaces && workspaces.length > 0 && (
                                 <>
-                                    <Divider />
+                                    <Divider mt="xl" />
                                     <Stack mt="md" >
                                         <Text size="xl" fw={700} opacity={0.7}>Choose an existing workspace</Text>
                                         {workspaces && workspaces.length > 0 && workspaces.map((workspace: any) => (
                                             <Group justify='space-between' key={workspace.id} className={classes.wsItem} pt="lg">
-                                                <Text fw="bold" opacity={0.7} >{workspace.name}</Text>
+                                                <Text size="sm" fw="bold" opacity={0.7} >{workspace.name}</Text>
                                                 <Button key={workspace.id} variant='outline' onClick={() => navigate(`/workspaces/${workspace.id}`)}>Open</Button>
                                             </Group>
                                         ))}

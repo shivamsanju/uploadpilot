@@ -9,3 +9,24 @@ export const formatBytes = (bytes: number, decimals: number = 2) => {
 
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
 }
+
+export const areBracketsBalanced = (input: string) => {
+    const stack = [];
+    const brackets: { [key: string]: string } = {
+        ')': '(',
+        '}': '{',
+        ']': '[',
+    };
+
+    for (const char of input) {
+        if (['(', '{', '['].includes(char)) {
+            stack.push(char);
+        } else if ([')', '}', ']'].includes(char)) {
+            if (stack.pop() !== brackets[char]) {
+                return false;
+            }
+        }
+    }
+
+    return stack.length === 0;
+}

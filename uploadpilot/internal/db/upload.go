@@ -70,6 +70,51 @@ func (i *UploadRepo) GetAll(ctx context.Context, workspaceID string, skip int64,
 	return cb, totalRecords, nil
 }
 
+func (i *UploadRepo) GetAllFilterByMetadata(ctx context.Context, workspaceID string, skip, limit int64, search map[string]string) ([]models.Upload, int64, error) {
+	id, err := primitive.ObjectIDFromHex(workspaceID)
+	if err != nil {
+		return nil, 0, fmt.Errorf(messages.InvalidObjectID, workspaceID)
+	}
+
+	filter := bson.M{"workspaceId": id}
+	for key, value := range search {
+		if key != "" && value != "" {
+			filter["metadata."+key] = value
+		}
+	}
+
+	// Count total records matching the filter
+	collection := db.Collection(i.collectionName)
+	totalRecords, err := collection.CountDocuments(ctx, filter)
+	if err != nil {
+		infra.Log.Errorf("failed to count imports: %s", err.Error())
+		return nil, 0, err
+	}
+
+	// Apply pagination and sorting
+	opts := options.Find().
+		SetSort(bson.D{{Key: "finishedAt", Value: -1}}).
+		SetSkip(skip).
+		SetLimit(limit)
+
+	// Fetch documents
+	cursor, err := collection.Find(ctx, filter, opts)
+	if err != nil {
+		infra.Log.Errorf("failed to find imports: %s", err.Error())
+		return nil, 0, err
+	}
+	defer cursor.Close(ctx)
+
+	// Decode documents into the result slice
+	var cb []models.Upload
+	if err := cursor.All(ctx, &cb); err != nil {
+		infra.Log.Errorf("failed to decode imports: %s", err.Error())
+		return nil, 0, err
+	}
+
+	return cb, totalRecords, nil
+}
+
 func (i *UploadRepo) Get(ctx context.Context, workspaceID, uploadID string) (*models.Upload, error) {
 	id, err := primitive.ObjectIDFromHex(uploadID)
 	if err != nil {

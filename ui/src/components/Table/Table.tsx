@@ -8,6 +8,7 @@ import { useDebouncedState, useDisclosure, useTimeout } from '@mantine/hooks';
 
 export type TableProps = {
     showSearch?: boolean
+    searchPlaceholder?: string
     showRefresh?: boolean
     showExport?: boolean
     onRefresh?: () => void
@@ -41,7 +42,7 @@ export const UploadPilotDataTable: React.FC<TableProps> = (props) => {
                         <TextInput
                             leftSection={<IconSearch size={18} />}
                             variant="subtle"
-                            placeholder="Search"
+                            placeholder={props.searchPlaceholder || 'Search'}
                             className={classes.search}
                             onChange={(e) => handleSearchChange(e.target.value)}
                         />
@@ -84,7 +85,7 @@ export const UploadPilotDataTable: React.FC<TableProps> = (props) => {
 
 
 
-export const useUploadPilotDataTable = (searchDelay = 500) => {
+export const useUploadPilotDataTable = (searchDelay = 1000) => {
     const [searchFilter, onSearchFilterChange] = useDebouncedState<string>('', searchDelay);
 
     const [page, onPageChange] = useState<number>(1);

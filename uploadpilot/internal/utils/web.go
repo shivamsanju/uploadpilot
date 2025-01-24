@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
@@ -71,4 +72,23 @@ func GetStatusLabel(status int) string {
 	default:
 		return fmt.Sprintf("%d Unknown", status)
 	}
+}
+
+func ExtractKeyValuePairs(search string) (map[string]string, error) {
+	params := make(map[string]string)
+	search = strings.TrimSpace(search)
+	search = strings.ReplaceAll(search, "{", "")
+	search = strings.ReplaceAll(search, "}", "")
+	pairs := strings.Split(search, ",")
+	for _, pair := range pairs {
+		parts := strings.Split(pair, ":")
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid search format: %s", pair)
+		}
+		key := strings.TrimSpace(parts[0])
+		value := strings.TrimSpace(parts[1])
+		params[key] = value
+	}
+
+	return params, nil
 }

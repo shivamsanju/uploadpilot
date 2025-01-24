@@ -1,5 +1,6 @@
 import axiosInstance from "../utils/axios";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { areBracketsBalanced } from "../utils/utility";
 
 interface UploadParams {
     workspaceId: string;
@@ -19,6 +20,8 @@ export const useGetUploads = ({
 }: UploadParams) => {
     const queryClient = useQueryClient();
 
+    let formattedSearch = search?.length > 2 && areBracketsBalanced(search) ? search : "";
+
     const {
         isPending,
         error,
@@ -29,15 +32,14 @@ export const useGetUploads = ({
         isFetching,
         isFetchNextPageError
     } = useInfiniteQuery({
-        queryKey: ['uploads', { workspaceId, search }],
+        queryKey: ['uploads', { workspaceId, formattedSearch }],
         staleTime: 10 * 1000,
         queryFn: ({ pageParam = 0 }) => {
             if (!workspaceId) {
                 throw new Error('workspaceId is required');
             }
-
             const skipValue = pageParam * batchSize;
-            const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
+            const searchParam = search ? `&search=${encodeURIComponent(formattedSearch)}` : '';
 
             return axiosInstance.get<UploadResponse>(
                 `/workspaces/${workspaceId}/uploads?skip=${skipValue}&limit=${batchSize}${searchParam}`

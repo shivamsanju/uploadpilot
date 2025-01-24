@@ -3,16 +3,26 @@ package upload
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	tusd "github.com/tus/tusd/v2/pkg/handler"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
 	"github.com/uploadpilot/uploadpilot/internal/messages"
+	"github.com/uploadpilot/uploadpilot/internal/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (us *UploadService) GetAllUploads(ctx context.Context, workspaceID string, skip int64, limit int64, search string) ([]models.Upload, int64, error) {
+	if strings.HasPrefix(search, "{") {
+		searchParams, err := utils.ExtractKeyValuePairs(search)
+		if err != nil {
+			return nil, 0, err
+		}
+		return us.upRepo.GetAllFilterByMetadata(ctx, workspaceID, skip, limit, searchParams)
+	}
+
 	return us.upRepo.GetAll(ctx, workspaceID, skip, limit, search)
 }
 

@@ -225,6 +225,7 @@ const UploadList = () => {
                     fetching={isPending || isFetchingNextPage || isFetching}
                     noHeader={true}
                     showSearch={true}
+                    searchPlaceholder='Search imports by name or status. For metadata search use {key: "regex"}'
                     showExport={true}
                     showRefresh={true}
                     onRefresh={handleRefresh}
