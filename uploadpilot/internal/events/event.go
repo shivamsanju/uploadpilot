@@ -25,7 +25,7 @@ const (
 
 type UploadEvent struct {
 	Key     UploadEventKey
-	Upload  *models.Upload
+	Upload  models.Upload // this is a copy so no subscriber can change the upload
 	Context context.Context
 	Message string
 	Error   error
@@ -42,7 +42,7 @@ var uploadEventBus *UploadEventBus
 func NewUploadEvent(ctx context.Context, Key UploadEventKey, upload *models.Upload, message string, err error) UploadEvent {
 	return UploadEvent{
 		Key:     Key,
-		Upload:  upload,
+		Upload:  *upload,
 		Context: ctx,
 		Message: message,
 		Error:   err,

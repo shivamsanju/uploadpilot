@@ -13,7 +13,7 @@ import (
 )
 
 type UploadLogsListener struct {
-	eventChan      chan events.LogEvent
+	eventChan      chan *events.LogEvent
 	uploadLogsRepo *db.UploadLogsRepo
 	logBuffer      []interface{}
 	flushInterval  time.Duration
@@ -24,7 +24,7 @@ type UploadLogsListener struct {
 func NewUploadLogsListener(flushInterval time.Duration, bufferSize int) *UploadLogsListener {
 	eventBus := events.GetLogEventBus()
 
-	eventChan := make(chan events.LogEvent)
+	eventChan := make(chan *events.LogEvent)
 	eventBus.Subscribe(eventChan)
 
 	return &UploadLogsListener{

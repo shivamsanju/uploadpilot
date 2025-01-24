@@ -26,6 +26,6 @@ func NewWebhookListener() *WebhookListener {
 func (l *WebhookListener) Start() {
 	infra.Log.Info("starting webhook listener...")
 	for event := range l.eventChan {
-		_ = l.webhookSvc.TriggerWebhook(event.Upload, &event)
+		_ = l.webhookSvc.TriggerWebhook(&event.Upload, &event)
 	}
 }
