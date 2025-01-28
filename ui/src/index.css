@@ -15,7 +15,7 @@ code {
 
 /* For dark mode bg body*/
 :root[data-mantine-color-scheme="dark"] {
-    --mantine-color-body: #151515 !important;
+    --mantine-color-body: #161616 !important;
 
 }
 

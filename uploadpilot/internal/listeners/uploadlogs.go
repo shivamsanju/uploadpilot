@@ -33,6 +33,7 @@ func NewUploadLogsListener(flushInterval time.Duration, bufferSize int) *UploadL
 		logBuffer:      make([]interface{}, bufferSize),
 		flushInterval:  flushInterval,
 		bufferSize:     bufferSize,
+		mu:             sync.Mutex{},
 	}
 }
 
@@ -42,21 +43,20 @@ func (l *UploadLogsListener) Start() {
 
 	for event := range l.eventChan {
 		infra.Log.Infof("processing log event %s", event.UploadID)
-		l.mu.Lock()
 
 		uploadID, err := primitive.ObjectIDFromHex(event.UploadID)
 		if err != nil {
 			infra.Log.Errorf("invalid upload id in log: %s", err.Error())
-			l.mu.Unlock()
 			continue
 		}
 
 		workspaceID, err := primitive.ObjectIDFromHex(event.WorkspaceID)
 		if err != nil {
 			infra.Log.Errorf("invalid workspace id in log: %s", err.Error())
-			l.mu.Unlock()
 			continue
 		}
+
+		l.mu.Lock()
 
 		l.logBuffer = append(l.logBuffer, &models.UploadLog{
 			ID:          primitive.NewObjectID(),

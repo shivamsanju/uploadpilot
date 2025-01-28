@@ -2,6 +2,7 @@ import {
     IconAdjustments,
     IconCircles,
     IconDatabase,
+    IconDiabolo,
     IconGauge,
     IconTransform,
     IconUsers,
@@ -38,19 +39,24 @@ const NavBar = ({ toggle }: { toggle: React.Dispatch<React.SetStateAction<boolea
                 link: `/workspaces/${workspaceId}/configuration`,
             },
             {
-                label: 'Utilities',
-                icon: IconTransform,
-                link: `/workspaces/${workspaceId}/utilities`,
-            },
-            {
-                label: 'Webhooks',
-                icon: IconWebhook,
-                link: `/workspaces/${workspaceId}/webhooks`,
+                label: 'Processor',
+                icon: IconDiabolo,
+                link: `/workspaces/${workspaceId}/processors`,
             },
             {
                 label: 'Users',
                 icon: IconUsers,
                 link: `/workspaces/${workspaceId}/users`,
+            },
+            {
+                label: 'Tools',
+                icon: IconTransform,
+                link: `/workspaces/${workspaceId}/tools`,
+            },
+            {
+                label: 'Webhooks',
+                icon: IconWebhook,
+                link: `/workspaces/${workspaceId}/webhooks`,
             },
             {
                 label: 'Analytics',

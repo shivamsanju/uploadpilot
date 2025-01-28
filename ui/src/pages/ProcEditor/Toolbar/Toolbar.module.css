@@ -1,0 +1,23 @@
+.toolbarContainer {
+    background-color: var(--mantine-color-body);
+    height: 100%;
+}
+
+.block {
+    cursor: move;
+    cursor: grab;
+    cursor: -moz-grab;
+    cursor: -webkit-grab;
+
+    &+& {
+        padding-top: var(--mantine-spacing-sm);
+        margin-top: var(--mantine-spacing-sm);
+        border-top: 1px solid light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-8));
+    }
+}
+
+.block:active {
+    cursor: grabbing;
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing;
+}

@@ -11,16 +11,17 @@ import (
 type UploadEventKey string
 
 const (
-	EventUploadStarted          UploadEventKey = "upload_started"
-	EventUploadSkipped          UploadEventKey = "upload_skipped"
-	EventUploadInProgress       UploadEventKey = "upload_in_progress"
-	EventUploadFailed           UploadEventKey = "upload_failed"
-	EventUploadComplete         UploadEventKey = "upload_complete"
-	EventUploadCancelled        UploadEventKey = "upload_cancelled"
-	EventUploadProcessing       UploadEventKey = "processing_upload"
-	EventUploadProcessingFailed UploadEventKey = "upload_processing_failed"
-	EventUploadProcessed        UploadEventKey = "upload_processed"
-	EventUploadDeleted          UploadEventKey = "upload_deleted"
+	EventUploadStarted             UploadEventKey = "upload_started"
+	EventUploadSkipped             UploadEventKey = "upload_skipped"
+	EventUploadInProgress          UploadEventKey = "upload_in_progress"
+	EventUploadFailed              UploadEventKey = "upload_failed"
+	EventUploadComplete            UploadEventKey = "upload_complete"
+	EventUploadCancelled           UploadEventKey = "upload_cancelled"
+	EventUploadProcessing          UploadEventKey = "processing_upload"
+	EventUploadProcessingFailed    UploadEventKey = "upload_processing_failed"
+	EventUploadProcessingCancelled UploadEventKey = "upload_processing_canceled"
+	EventUploadProcessed           UploadEventKey = "upload_processed"
+	EventUploadDeleted             UploadEventKey = "upload_deleted"
 )
 
 type UploadEvent struct {

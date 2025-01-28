@@ -42,70 +42,72 @@ const ProfilePage = () => {
 
     return isPending ? <AppLoader h="70vh" /> : (session.email || session.name) ? (
         <Container size="md" mt="xl">
-            <Card shadow="sm" padding="lg" radius="md" withBorder>
-                <Group>
+
+            <Group>
+                <Group p="center">
+                    <Avatar size={100} src={form.values.avatarUrl} alt="Profile Photo" />
+                </Group>
+                <Stack>
                     <Group p="center">
-                        <Avatar size={100} src={form.values.avatarUrl} alt="Profile Photo" />
+                        <FileButton onChange={() => { }} accept="image/png,image/jpeg">
+                            {(props) => <Button {...props}>Upload New Photo</Button>}
+                        </FileButton>
+                        <Button variant="default">
+                            Reset
+                        </Button>
                     </Group>
-                    <Stack>
-                        <Group p="center">
-                            <FileButton onChange={() => { }} accept="image/png,image/jpeg">
-                                {(props) => <Button {...props}>Upload New Photo</Button>}
-                            </FileButton>
-                            <Button variant="light">
+                    <Text size="sm" c="dimmed">
+                        Allowed JPG, GIF or PNG. Max size of 800K
+                    </Text>
+                </Stack>
+            </Group>
+
+            <form onSubmit={form.onSubmit(handleSave)}>
+                <Grid mt="lg">
+                    <Grid.Col span={12}>
+                        <TextInput
+                            size="sm"
+                            label="First Name"
+                            placeholder="Enter your first name"
+                            {...form.getInputProps('firstName')}
+                            value={form.values.name}
+                            disabled={!isEditing}
+                        />
+                    </Grid.Col>
+                    <Grid.Col span={12}>
+                        <TextInput
+                            size="sm"
+                            label="E-mail"
+                            placeholder="Enter your email"
+                            {...form.getInputProps('email')}
+                            value={form.values.email}
+                            disabled={true}
+                        />
+                    </Grid.Col>
+                    <Grid.Col span={12}>
+                        <TextInput
+                            size="sm"
+                            label="Organization"
+                            placeholder="Enter your organization"
+                            {...form.getInputProps('organization')}
+                            value={form.values.organization}
+                            disabled={true}
+                        />
+                    </Grid.Col>
+                </Grid>
+                <Group p="apart" mt="xl">
+                    {isEditing ? (
+                        <>
+                            <Button type="submit">Save Changes</Button>
+                            <Button onClick={handleEditToggle} variant="light">
                                 Reset
                             </Button>
-                        </Group>
-                        <Text size="sm" c="dimmed">
-                            Allowed JPG, GIF or PNG. Max size of 800K
-                        </Text>
-                    </Stack>
+                        </>
+                    ) : (
+                        <Button onClick={handleEditToggle}>Edit Profile</Button>
+                    )}
                 </Group>
-
-                <form onSubmit={form.onSubmit(handleSave)}>
-                    <Grid mt="lg">
-                        <Grid.Col span={6}>
-                            <TextInput
-                                label="First Name"
-                                placeholder="Enter your first name"
-                                {...form.getInputProps('firstName')}
-                                value={form.values.name}
-                                disabled={!isEditing}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={6}>
-                            <TextInput
-                                label="E-mail"
-                                placeholder="Enter your email"
-                                {...form.getInputProps('email')}
-                                value={form.values.email}
-                                disabled={true}
-                            />
-                        </Grid.Col>
-                        <Grid.Col span={6}>
-                            <TextInput
-                                label="Organization"
-                                placeholder="Enter your organization"
-                                {...form.getInputProps('organization')}
-                                value={form.values.organization}
-                                disabled={true}
-                            />
-                        </Grid.Col>
-                    </Grid>
-                    <Group p="apart" mt="xl">
-                        {isEditing ? (
-                            <>
-                                <Button type="submit">Save Changes</Button>
-                                <Button onClick={handleEditToggle} variant="light">
-                                    Reset
-                                </Button>
-                            </>
-                        ) : (
-                            <Button onClick={handleEditToggle}>Edit Profile</Button>
-                        )}
-                    </Group>
-                </form>
-            </Card>
+            </form>
         </Container>
     ) : <></>;
 }

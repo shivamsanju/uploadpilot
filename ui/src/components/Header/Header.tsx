@@ -1,26 +1,24 @@
-"use client";
-
-import { Box } from "@mantine/core";
-import classes from "./Header.module.css";
-import { Logo } from "../Logo/Logo";
+import { Box, Group, Text, Title } from "@mantine/core";
 import UserMenu from "../UserMenu";
 import { useNavigate } from "react-router-dom";
+import { useViewportSize } from "@mantine/hooks";
 
 interface Props {
   burger?: React.ReactNode;
 }
 
 export function AdminHeader({ burger }: Props) {
-
+  const { width } = useViewportSize();
   const navigate = useNavigate();
   return (
-    <header className={classes.header}>
+    <Group justify="space-between" align="center" px="md" h="100%" gap={width > 768 ? "xl" : "md"} wrap="nowrap">
       {burger}
       <Box onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
-        <Logo height="40" width="129.64" />
+        <Title order={4} opacity={0.7}>Upload Pilot</Title>
+        {width > 768 && <Text c="dimmed">Set your uploads on autopilot</Text>}
       </Box>
       <Box style={{ flex: 1 }} />
       <UserMenu />
-    </header>
+    </Group>
   );
 }

@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
@@ -27,12 +26,8 @@ func (s *WorkspaceService) GetWorkspaceUsers(ctx context.Context, workspaceID st
 }
 
 func (s *WorkspaceService) AddUserToWorkspace(ctx context.Context, workspaceID string, addReq *dto.AddWorkspaceUser) error {
-	if err := infra.Validate.Struct(addReq); err != nil {
-		errors := make(map[string]string)
-		for _, err := range err.(validator.ValidationErrors) {
-			errors[err.Field()] = err.Tag()
-		}
-		return fmt.Errorf(msg.ValidationErr, errors)
+	if err := infra.Validator.ValidateBody(addReq); err != nil {
+		return err
 	}
 
 	user, err := s.userRepo.GetByEmail(ctx, addReq.Email)

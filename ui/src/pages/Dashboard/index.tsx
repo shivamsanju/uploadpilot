@@ -70,10 +70,10 @@ const DashboardPage = () => {
     });
     return (
         <Box mb={50}>
-            <Title order={3} opacity={0.7}>Analytics</Title>
-            <Text c="dimmed" size="xs" mt={2} mb="lg">
+            <Title order={3} opacity={0.7} mb="xl">Analytics</Title>
+            {/* <Text c="dimmed" size="xs" mt={2} mb="lg">
                 Analyze file upload trends over the last 6 months
-            </Text>
+            </Text> */}
             <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }}>{stats}</SimpleGrid>
             <Card mt="xl">
                 <LineChart

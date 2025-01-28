@@ -7,12 +7,15 @@ import EmptyLayout from "./components/Layout/EmptyLayout";
 import ErrorQueryDisplay from "./pages/Error";
 import WorkspaceLandingPage from "./pages/Workspace";
 import WorkspacesLayout from "./components/Layout/WorkspacesLayout";
-import UploaderPreviewPage from "./pages/Workspace/Preview";
-import UploadsPage from "./pages/Workspace/Uploads/Uploads";
-import ConfigurationPage from "./pages/Workspace/Configuration";
-import WorkspaceUsersPage from "./pages/Workspace/Users";
-import UtilitiesPage from "./pages/Workspace/Utitlities";
-import WebhooksPage from "./pages/Workspace/Webhooks";
+import UploaderPreviewPage from "./pages/GetStarted";
+import UploadsPage from "./pages/Uploads/Uploads";
+import ConfigurationPage from "./pages/Configuration";
+import WorkspaceUsersPage from "./pages/Users";
+import ToolsPage from "./pages/Tools";
+import WebhooksPage from "./pages/Webhooks";
+import ProcEditorPage from "./pages/ProcEditor";
+import ProcessorPage from "./pages/Processors";
+import EmptyAuthLayout from "./components/Layout/EmptyAuthLayout";
 
 type Route = {
     path: string
@@ -58,14 +61,24 @@ const routes: Route[] = [
         element: <ConfigurationPage />
     },
     {
+        path: "/workspaces/:workspaceId/processors",
+        layout: AppLayout,
+        element: <ProcessorPage />
+    },
+    {
+        path: "/workspaces/:workspaceId/processors/:processorId",
+        layout: EmptyAuthLayout,
+        element: <ProcEditorPage />
+    },
+    {
         path: "/workspaces/:workspaceId/users",
         layout: AppLayout,
         element: <WorkspaceUsersPage />
     },
     {
-        path: "/workspaces/:workspaceId/utilities",
+        path: "/workspaces/:workspaceId/tools",
         layout: AppLayout,
-        element: <UtilitiesPage />
+        element: <ToolsPage />
     },
     {
         path: "/workspaces/:workspaceId/webhooks",

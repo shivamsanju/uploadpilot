@@ -30,4 +30,11 @@ var (
 	InvalidWorkspaceIDInHeaders = "invalid workspace id in headers: %s"
 	FileTypeNotAllowed          = "file type not allowed: %s"
 	UploadAuthenticationFailed  = "authentication failed for upload request: %s"
+
+	// Processors
+	ProcTaskFailed = "task %s failed for workspaceID %s and processorID %s and uploadID %s. error: %s"
+
+	ProcessingFailed    = "upload processing failed for processorID %s"
+	ProcessingComplete  = "upload processing complete for processorID %s"
+	ProcessingCancelled = "upload processing cancelled for processorID %s"
 )

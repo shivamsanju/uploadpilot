@@ -3,6 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "dependencies": {
+        "@hello-pangea/dnd": "^17.0.0",
         "@mantine/charts": "^7.15.3",
         "@mantine/code-highlight": "^7.15.3",
         "@mantine/core": "^7.15.0",
@@ -11,6 +12,7 @@
         "@mantine/notifications": "^7.15.0",
         "@tabler/icons-react": "^3.24.0",
         "@tanstack/react-query": "^5.63.0",
+        "@xyflow/react": "^12.4.2",
         "axios": "^0.28.0",
         "clsx": "^2.1.1",
         "javascript-time-ago": "^2.5.11",
@@ -20,7 +22,8 @@
         "react-router-dom": "^6.2.1",
         "react-scripts": "5.0.1",
         "recharts": "^2.15.0",
-        "uppy-react": "^1.0.4"
+        "uppy-react": "^1.0.4",
+        "uuidv4": "^6.2.13"
     },
     "devDependencies": {
         "@types/node": "^16.11.56",

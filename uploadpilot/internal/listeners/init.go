@@ -14,4 +14,7 @@ func StartListeners() {
 
 	uploadLogsListener := NewUploadLogsListener(time.Second, 1000)
 	go uploadLogsListener.Start()
+
+	procListener := NewProcListener()
+	go procListener.Start()
 }

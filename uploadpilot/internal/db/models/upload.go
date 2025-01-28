@@ -5,16 +5,17 @@ import "go.mongodb.org/mongo-driver/bson/primitive"
 type UploadStatus string
 
 const (
-	UploadStatusStarted            UploadStatus = "Started"
-	UploadStatusSkipped            UploadStatus = "Skipped"
-	UploadStatusInProgress         UploadStatus = "In Progress"
-	UploadStatusComplete           UploadStatus = "Uploaded"
-	UploadStatusFailed             UploadStatus = "Failed"
-	UploadStatusCancelled          UploadStatus = "Cancelled"
-	UploadStatusProcessing         UploadStatus = "Processing"
-	UploadStatusProcessingFailed   UploadStatus = "Processing Failed"
-	UploadStatusProcessingComplete UploadStatus = "Processing Complete"
-	UploadStatusDeleted            UploadStatus = "Deleted"
+	UploadStatusStarted             UploadStatus = "Started"
+	UploadStatusSkipped             UploadStatus = "Skipped"
+	UploadStatusInProgress          UploadStatus = "In Progress"
+	UploadStatusComplete            UploadStatus = "Uploaded"
+	UploadStatusFailed              UploadStatus = "Failed"
+	UploadStatusCancelled           UploadStatus = "Cancelled"
+	UploadStatusProcessing          UploadStatus = "Processing"
+	UploadStatusProcessingFailed    UploadStatus = "Processing Failed"
+	UploadStatusProcessingComplete  UploadStatus = "Processing Complete"
+	UploadStatusProcessingCancelled UploadStatus = "Processing Cancelled"
+	UploadStatusDeleted             UploadStatus = "Deleted"
 )
 
 type Upload struct {

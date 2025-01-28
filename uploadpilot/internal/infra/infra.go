@@ -2,19 +2,25 @@ package infra
 
 import (
 	"context"
+	"fmt"
 
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/go-playground/validator/v10"
 	"github.com/uploadpilot/uploadpilot/internal/config"
+	"github.com/uploadpilot/uploadpilot/internal/msg"
 	"go.uber.org/zap"
 )
 
+type customValidator struct {
+	*validator.Validate
+}
+
 var (
-	Log      *zap.SugaredLogger
-	Validate = validator.New()
-	S3Client *s3.Client
+	Log       *zap.SugaredLogger
+	Validator *customValidator
+	S3Client  *s3.Client
 )
 
 func Init() error {
@@ -29,6 +35,8 @@ func Init() error {
 		return err
 	}
 	S3Client = c
+
+	Validator = NewValidator()
 
 	return nil
 }
@@ -59,4 +67,19 @@ func NewS3Client() (*s3.Client, error) {
 	}
 	client := s3.NewFromConfig(awscfg)
 	return client, nil
+}
+
+func NewValidator() *customValidator {
+	return &customValidator{validator.New()}
+}
+
+func (c *customValidator) ValidateBody(st interface{}) error {
+	if err := Validator.Struct(st); err != nil {
+		errs := make(map[string]string)
+		for _, err := range err.(validator.ValidationErrors) {
+			errs[err.Field()] = err.Tag()
+		}
+		return fmt.Errorf(msg.ValidationErr, errs)
+	}
+	return nil
 }

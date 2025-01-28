@@ -13,16 +13,17 @@ type StatusListener struct {
 }
 
 var EventStatusMap = map[events.UploadEventKey]models.UploadStatus{
-	events.EventUploadStarted:          models.UploadStatusStarted,
-	events.EventUploadInProgress:       models.UploadStatusInProgress,
-	events.EventUploadSkipped:          models.UploadStatusSkipped,
-	events.EventUploadComplete:         models.UploadStatusComplete,
-	events.EventUploadFailed:           models.UploadStatusFailed,
-	events.EventUploadCancelled:        models.UploadStatusCancelled,
-	events.EventUploadDeleted:          models.UploadStatusDeleted,
-	events.EventUploadProcessing:       models.UploadStatusProcessing,
-	events.EventUploadProcessingFailed: models.UploadStatusProcessingFailed,
-	events.EventUploadProcessed:        models.UploadStatusProcessingComplete,
+	events.EventUploadStarted:             models.UploadStatusStarted,
+	events.EventUploadInProgress:          models.UploadStatusInProgress,
+	events.EventUploadSkipped:             models.UploadStatusSkipped,
+	events.EventUploadComplete:            models.UploadStatusComplete,
+	events.EventUploadFailed:              models.UploadStatusFailed,
+	events.EventUploadCancelled:           models.UploadStatusCancelled,
+	events.EventUploadDeleted:             models.UploadStatusDeleted,
+	events.EventUploadProcessing:          models.UploadStatusProcessing,
+	events.EventUploadProcessingFailed:    models.UploadStatusProcessingFailed,
+	events.EventUploadProcessed:           models.UploadStatusProcessingComplete,
+	events.EventUploadProcessingCancelled: models.UploadStatusProcessingCancelled,
 }
 
 func NewStatusListener() *StatusListener {
@@ -39,15 +40,15 @@ func NewStatusListener() *StatusListener {
 	}
 }
 
-func (handler *StatusListener) Start() {
+func (l *StatusListener) Start() {
 	infra.Log.Info("starting upload status listener...")
-	for event := range handler.eventChan {
+	for event := range l.eventChan {
 		infra.Log.Infof("processing upload event %s", event.Key)
 		status, ok := EventStatusMap[event.Key]
 		if !ok {
 			infra.Log.Warn("skipping unknown event key: %s", event.Key)
 			continue
 		}
-		_ = handler.uploadRepo.SetStatus(event.Context, event.Upload.ID.Hex(), status)
+		_ = l.uploadRepo.SetStatus(event.Context, event.Upload.ID.Hex(), status)
 	}
 }

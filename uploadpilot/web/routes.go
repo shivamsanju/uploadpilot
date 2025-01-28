@@ -17,6 +17,7 @@ func Routes() *chi.Mux {
 	workspaceHandler := handlers.NewWorkspaceHandler()
 	uploadHandler := handlers.NewUploadHandler()
 	webhooksHandler := handlers.NewWebhooksHandler()
+	procHandler := handlers.NewProcessorsHandler()
 
 	// Public routes
 	router.Group(func(r chi.Router) {
@@ -70,6 +71,21 @@ func Routes() *chi.Mux {
 					r.Route("/{uploadId}", func(r chi.Router) {
 						r.Get("/", uploadHandler.GetUploadDetailsByID)
 						r.Get("/logs", uploadHandler.GetUploadLogs)
+					})
+				})
+
+				// processors
+				r.Route("/processors", func(r chi.Router) {
+					r.Get("/", procHandler.GetProcessors)
+					r.Post("/", procHandler.CreateProcessor)
+					r.Get("/blocks", procHandler.GetProcBlock)
+					r.Route("/{processorId}", func(r chi.Router) {
+						r.Get("/", procHandler.GetProcessorDetailsByID)
+						r.Put("/", procHandler.UpdateProcessor)
+						r.Delete("/", procHandler.DeleteProcessor)
+						r.Put("/enable", procHandler.EnableProcessor)
+						r.Put("/disable", procHandler.DisableProcessor)
+						r.Put("/tasks", procHandler.UpdateTasks)
 					})
 				})
 

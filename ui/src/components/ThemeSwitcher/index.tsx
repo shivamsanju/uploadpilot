@@ -44,7 +44,7 @@ const ThemeSwitcher = () => {
             closeOnItemClick={false}
         >
             <Menu.Target>
-                <Text>Theme</Text>
+                <Text size="sm">Theme</Text>
             </Menu.Target>
 
             <Menu.Dropdown>
@@ -53,14 +53,14 @@ const ThemeSwitcher = () => {
                     onClick={() => changeTheme("light")}
                     rightSection={colorScheme === "light" && checkIcon}
                 >
-                    <Text>Light</Text>
+                    <Text size="sm">Light</Text>
                 </Menu.Item>
                 <Menu.Item
                     leftSection={moonIcon}
                     onClick={() => changeTheme("dark")}
                     rightSection={colorScheme === "dark" && checkIcon}
                 >
-                    <Text>Dark</Text>
+                    <Text size="sm">Dark</Text>
                 </Menu.Item>
             </Menu.Dropdown>
 

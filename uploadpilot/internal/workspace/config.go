@@ -2,12 +2,9 @@ package workspace
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
-	"github.com/uploadpilot/uploadpilot/internal/msg"
 )
 
 var DefaultUploaderConfig = &models.UploaderConfig{
@@ -24,12 +21,8 @@ func (s *WorkspaceService) GetUploaderConfig(ctx context.Context, workspaceID st
 }
 
 func (s *WorkspaceService) SetUploaderConfig(ctx context.Context, workspaceID string, config *models.UploaderConfig) error {
-	if err := infra.Validate.Struct(config); err != nil {
-		errors := make(map[string]string)
-		for _, err := range err.(validator.ValidationErrors) {
-			errors[err.Field()] = err.Tag()
-		}
-		return fmt.Errorf(msg.ValidationErr, errors)
+	if err := infra.Validator.ValidateBody(config); err != nil {
+		return err
 	}
 	err := s.wsRepo.SetUploaderConfig(ctx, workspaceID, config)
 	if err != nil {

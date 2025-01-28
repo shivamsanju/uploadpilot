@@ -5,13 +5,11 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/events"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
-	"github.com/uploadpilot/uploadpilot/internal/msg"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -40,7 +38,7 @@ func (ws *WebhookService) GetWebhook(ctx context.Context, workspaceID, webhookID
 }
 
 func (ws *WebhookService) CreateWebhook(ctx context.Context, workspaceID string, webhook *models.Webhook) error {
-	if err := ws.validateWebhookBody(webhook); err != nil {
+	if err := infra.Validator.ValidateBody(webhook); err != nil {
 		return err
 	}
 
@@ -48,7 +46,7 @@ func (ws *WebhookService) CreateWebhook(ctx context.Context, workspaceID string,
 }
 
 func (ws *WebhookService) UpdateWebhook(ctx context.Context, workspaceID, webhookID string, webhook *models.Webhook) error {
-	if err := ws.validateWebhookBody(webhook); err != nil {
+	if err := infra.Validator.ValidateBody(webhook); err != nil {
 		return err
 	}
 
@@ -67,15 +65,4 @@ func (ws *WebhookService) PatchWebhook(ctx context.Context, workspaceID, webhook
 	return ws.webRepo.Patch(ctx, workspaceID, webhookID, bson.M{
 		"enabled": patch.Enabled,
 	})
-}
-
-func (ws *WebhookService) validateWebhookBody(webhook *models.Webhook) error {
-	if err := infra.Validate.Struct(webhook); err != nil {
-		errors := make(map[string]string)
-		for _, err := range err.(validator.ValidationErrors) {
-			errors[err.Field()] = err.Tag()
-		}
-		return fmt.Errorf(msg.ValidationErr, errors)
-	}
-	return nil
 }

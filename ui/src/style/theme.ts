@@ -113,6 +113,9 @@ export const myAppTheme = createTheme({
         Paper: Paper.extend({
             defaultProps: {
                 radius: "sm",
+                style: {
+                    borderColor: "light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-8))",
+                }
             }
         }),
         Loader: Loader.extend({

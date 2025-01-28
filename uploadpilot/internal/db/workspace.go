@@ -7,6 +7,7 @@ import (
 
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/dto"
+	"github.com/uploadpilot/uploadpilot/internal/infra"
 	"github.com/uploadpilot/uploadpilot/internal/msg"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
 	"go.mongodb.org/mongo-driver/bson"
@@ -88,6 +89,10 @@ func (wr *WorkspaceRepo) Create(ctx context.Context, workspace *models.Workspace
 	defer session.EndSession(ctx)
 	callback := func(sessCtx mongo.SessionContext) (interface{}, error) {
 		collection := db.Collection(wr.collectionName)
+		// validate before insert
+		if err := infra.Validator.ValidateBody(workspace); err != nil {
+			return nil, err
+		}
 		result, err := collection.InsertOne(ctx, workspace)
 		if err != nil {
 			return nil, err

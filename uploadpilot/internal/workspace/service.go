@@ -2,14 +2,10 @@ package workspace
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/dto"
-	"github.com/uploadpilot/uploadpilot/internal/infra"
-	"github.com/uploadpilot/uploadpilot/internal/msg"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -29,10 +25,6 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, workspace *model
 	workspace.UploaderConfig = DefaultUploaderConfig
 	workspace.ID = primitive.NewObjectID()
 
-	if err := s.validateWorkspaceBody(workspace); err != nil {
-		return err
-	}
-
 	_, err := s.wsRepo.Create(ctx, workspace)
 	return err
 }
@@ -51,15 +43,4 @@ func (s *WorkspaceService) GetUserWorkspaces(ctx context.Context, userID string)
 		return nil, err
 	}
 	return workspaces, nil
-}
-
-func (s *WorkspaceService) validateWorkspaceBody(workspace *models.Workspace) error {
-	if err := infra.Validate.Struct(workspace); err != nil {
-		errs := make(map[string]string)
-		for _, err := range err.(validator.ValidationErrors) {
-			errs[err.Field()] = err.Tag()
-		}
-		return fmt.Errorf(msg.ValidationErr, errs)
-	}
-	return nil
 }
