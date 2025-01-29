@@ -1,5 +1,5 @@
 import { useForm } from "@mantine/form";
-import { Button, Group, Modal, Paper, ScrollArea, Select, Stack, Text, TextInput, UnstyledButton } from "@mantine/core";
+import { Button, Group, Modal, Paper, ScrollArea, Stack, Text, TextInput, UnstyledButton } from "@mantine/core";
 import { IconClockBolt, IconHttpPost, IconLock, IconX } from "@tabler/icons-react";
 import { useState } from "react";
 import { CodeHighlight } from "@mantine/code-highlight";
