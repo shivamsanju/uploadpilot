@@ -6,9 +6,6 @@ func StartListeners() {
 	storageListener := NewStorageListener()
 	go storageListener.Start()
 
-	webhookListener := NewWebhookListener()
-	go webhookListener.Start()
-
 	statusHandler := NewStatusListener()
 	go statusHandler.Start()
 

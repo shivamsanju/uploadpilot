@@ -16,7 +16,6 @@ func Routes() *chi.Mux {
 	authHandler := handlers.NewAuthHandler()
 	workspaceHandler := handlers.NewWorkspaceHandler()
 	uploadHandler := handlers.NewUploadHandler()
-	webhooksHandler := handlers.NewWebhooksHandler()
 	procHandler := handlers.NewProcessorsHandler()
 
 	// Public routes
@@ -86,18 +85,6 @@ func Routes() *chi.Mux {
 						r.Put("/enable", procHandler.EnableProcessor)
 						r.Put("/disable", procHandler.DisableProcessor)
 						r.Put("/tasks", procHandler.UpdateTasks)
-					})
-				})
-
-				// Webhooks
-				r.Route("/webhooks", func(r chi.Router) {
-					r.Post("/", webhooksHandler.CreateWebhook)
-					r.Get("/", webhooksHandler.GetWebhooks)
-					r.Route("/{webhookId}", func(r chi.Router) {
-						r.Get("/", webhooksHandler.GetWebhookDetailsByID)
-						r.Put("/", webhooksHandler.UpdateWebhook)
-						r.Patch("/", webhooksHandler.PatchWebhook)
-						r.Delete("/", webhooksHandler.DeleteWebhook)
 					})
 				})
 			})

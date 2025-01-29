@@ -11,6 +11,7 @@ type ProcEditorContextType = {
     error: Error | null;
     nodes: any[];
     edges: any[];
+    openedNodeId: string;
     onNodesChange: (changes: any) => void;
     onEdgesChange: (changes: any) => void;
     onConnect: (connection: any) => void;
@@ -18,8 +19,7 @@ type ProcEditorContextType = {
     setEdges: (edges: any) => void;
     handleSave: () => Promise<void>;
     handleDiscard: () => Promise<void>;
-
-
+    setOpenedNodeId: (id: string) => void
 }
 
 export const ProcEditorContext = createContext<ProcEditorContextType>({
@@ -30,6 +30,7 @@ export const ProcEditorContext = createContext<ProcEditorContextType>({
     isPending: false,
     isUpdating: false,
     error: null,
+    openedNodeId: '',
     onNodesChange: (changes: any) => { },
     onEdgesChange: (changes: any) => { },
     onConnect: (connection: any) => { },
@@ -37,6 +38,7 @@ export const ProcEditorContext = createContext<ProcEditorContextType>({
     setEdges: (edges: any) => { },
     handleSave: async () => { },
     handleDiscard: async () => { },
+    setOpenedNodeId: (id: string) => { }
 });
 
 export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -47,6 +49,8 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     const [nodes, setNodes] = useState<any[]>([]);
     const [edges, setEdges] = useState<any[]>([]);
+    const [openedNodeId, setOpenedNodeId] = useState('');
+
 
     const onNodesChange = (changes: any) => {
         setNodes((prevNodes) => applyNodeChanges(changes, prevNodes));
@@ -96,13 +100,15 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 isPending,
                 isUpdating,
                 error,
+                openedNodeId,
                 onNodesChange,
                 onEdgesChange,
                 onConnect,
                 setNodes,
                 setEdges,
                 handleSave,
-                handleDiscard
+                handleDiscard,
+                setOpenedNodeId
             }}
         >
             {children}

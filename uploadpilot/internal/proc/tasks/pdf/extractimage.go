@@ -1,34 +1,33 @@
 package pdf
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 
-	"github.com/ledongthuc/pdf"
+	"github.com/pdfcpu/pdfcpu/pkg/api"
 	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/events"
 	"github.com/uploadpilot/uploadpilot/internal/proc/tasks"
 )
 
-type extractPDFContentTask struct {
+type extractPDFImageTask struct {
 	*tasks.BaseTask
 	uploadRepo *db.UploadRepo
 	leb        *events.LogEventBus
 }
 
-func NewExtractPDFContentTask() tasks.Task {
-	return &extractPDFContentTask{
+func NewExtractPDFImageTask() tasks.Task {
+	return &extractPDFImageTask{
 		uploadRepo: db.NewUploadRepo(),
 		leb:        events.GetLogEventBus(),
 		BaseTask:   &tasks.BaseTask{},
 	}
 }
 
-func (t *extractPDFContentTask) Do(ctx context.Context) error {
+func (t *extractPDFImageTask) Do(ctx context.Context) error {
 	t.Setup()
 	defer t.Cleanup()
 
@@ -41,7 +40,7 @@ func (t *extractPDFContentTask) Do(ctx context.Context) error {
 		return err
 	}
 
-	if err := t.extractPDFContent(); err != nil {
+	if err := t.extractPDFImage(); err != nil {
 		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, err.Error(), models.UploadLogLevelError))
 		return err
 	}
@@ -55,7 +54,7 @@ func (t *extractPDFContentTask) Do(ctx context.Context) error {
 	return nil
 }
 
-func (t *extractPDFContentTask) extractPDFContent() error {
+func (t *extractPDFImageTask) extractPDFImage() error {
 	inputDir := t.GetTaskInputDir()
 	outDir := t.GetTaskOutDir()
 
@@ -68,12 +67,7 @@ func (t *extractPDFContentTask) extractPDFContent() error {
 			return nil
 		}
 
-		txt, err := readPdf(pathname)
-		if err != nil {
-			return err
-		}
-
-		if err := os.WriteFile(filepath.Join(outDir, filepath.Base(pathname)+".txt"), []byte(txt), os.ModePerm); err != nil {
+		if err := api.ExtractContentFile(pathname, outDir, nil, nil); err != nil {
 			return err
 		}
 		return nil
@@ -85,26 +79,4 @@ func (t *extractPDFContentTask) extractPDFContent() error {
 	}
 
 	return nil
-}
-
-func readPdf(path string) (string, error) {
-	_, r, err := pdf.Open(path)
-	if err != nil {
-		return "", err
-	}
-	totalPage := r.NumPage()
-
-	var textBuilder bytes.Buffer
-	for pageIndex := 1; pageIndex <= totalPage; pageIndex++ {
-		p := r.Page(pageIndex)
-		if p.V.IsNull() {
-			continue
-		}
-		txt, err := p.GetPlainText(nil)
-		if err != nil {
-			return "", err
-		}
-		textBuilder.WriteString(txt)
-	}
-	return textBuilder.String(), nil
 }

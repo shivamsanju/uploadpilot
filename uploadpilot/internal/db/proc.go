@@ -45,20 +45,15 @@ func (i *ProcessorRepo) GetAll(ctx context.Context, workspaceID string) ([]model
 	return processors, nil
 }
 
-func (i *ProcessorRepo) Get(ctx context.Context, workspaceID string, processorID string) (*models.Processor, error) {
+func (i *ProcessorRepo) Get(ctx context.Context, processorID string) (*models.Processor, error) {
 	id, err := primitive.ObjectIDFromHex(processorID)
 	if err != nil {
 		return nil, fmt.Errorf(msg.InvalidObjectID, processorID)
 	}
 
-	wsID, err := primitive.ObjectIDFromHex(workspaceID)
-	if err != nil {
-		return nil, fmt.Errorf(msg.InvalidObjectID, workspaceID)
-	}
-
 	collection := db.Collection(i.collectionName)
 	var cb models.Processor
-	err = collection.FindOne(ctx, bson.M{"workspaceId": wsID, "_id": id}).Decode(&cb)
+	err = collection.FindOne(ctx, bson.M{"_id": id}).Decode(&cb)
 	if err != nil {
 		return nil, err
 	}
@@ -66,18 +61,12 @@ func (i *ProcessorRepo) Get(ctx context.Context, workspaceID string, processorID
 	return &cb, nil
 }
 
-func (i *ProcessorRepo) Create(ctx context.Context, workspaceID string, processor *models.Processor) error {
-	wsID, err := primitive.ObjectIDFromHex(workspaceID)
-	if err != nil {
-		return fmt.Errorf(msg.InvalidObjectID, workspaceID)
-	}
-
+func (i *ProcessorRepo) Create(ctx context.Context, processor *models.Processor) error {
 	user, err := utils.GetUserDetailsFromContext(ctx)
 	if err != nil {
 		return err
 	}
 	now := primitive.NewDateTimeFromTime(time.Now())
-	processor.WorkspaceID = wsID
 	processor.ID = primitive.NewObjectID()
 	processor.UpdatedAt = now
 	processor.UpdatedBy = user.Email
@@ -100,12 +89,7 @@ func (i *ProcessorRepo) Create(ctx context.Context, workspaceID string, processo
 	return nil
 }
 
-func (wr *ProcessorRepo) Patch(ctx context.Context, workspaceID, processorID string, patch bson.M) error {
-	wsID, err := primitive.ObjectIDFromHex(workspaceID)
-	if err != nil {
-		return fmt.Errorf(msg.InvalidObjectID, workspaceID)
-	}
-
+func (wr *ProcessorRepo) Patch(ctx context.Context, processorID string, patch bson.M) error {
 	id, err := primitive.ObjectIDFromHex(processorID)
 	if err != nil {
 		return fmt.Errorf(msg.InvalidObjectID, processorID)
@@ -120,23 +104,18 @@ func (wr *ProcessorRepo) Patch(ctx context.Context, workspaceID, processorID str
 	patch["updatedAt"] = primitive.NewDateTimeFromTime(time.Now())
 
 	collection := db.Collection(wr.collectionName)
-	_, err = collection.UpdateOne(ctx, bson.M{"workspaceId": wsID, "_id": id}, bson.M{"$set": patch})
+	_, err = collection.UpdateOne(ctx, bson.M{"_id": id}, bson.M{"$set": patch})
 	return err
 }
 
-func (wr *ProcessorRepo) Delete(ctx context.Context, workspaceID string, processorID string) error {
-	wsID, err := primitive.ObjectIDFromHex(workspaceID)
-	if err != nil {
-		return fmt.Errorf(msg.InvalidObjectID, workspaceID)
-	}
-
+func (wr *ProcessorRepo) Delete(ctx context.Context, processorID string) error {
 	id, err := primitive.ObjectIDFromHex(processorID)
 	if err != nil {
 		return fmt.Errorf(msg.InvalidObjectID, processorID)
 	}
 
 	collection := db.Collection(wr.collectionName)
-	if _, err := collection.DeleteOne(ctx, bson.M{"workspaceId": wsID, "_id": id}); err != nil {
+	if _, err := collection.DeleteOne(ctx, bson.M{"_id": id}); err != nil {
 		return err
 	}
 

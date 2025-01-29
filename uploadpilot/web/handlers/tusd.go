@@ -7,7 +7,6 @@ import (
 	"github.com/tus/tusd/v2/pkg/s3store"
 	"github.com/uploadpilot/uploadpilot/internal/config"
 	"github.com/uploadpilot/uploadpilot/internal/upload"
-	"github.com/uploadpilot/uploadpilot/internal/webhook"
 	"github.com/uploadpilot/uploadpilot/internal/workspace"
 
 	"github.com/uploadpilot/uploadpilot/internal/infra"
@@ -16,14 +15,12 @@ import (
 type tusdHandler struct {
 	workspaceSvc *workspace.WorkspaceService
 	uploadSvc    *upload.UploadService
-	webhookSvc   *webhook.WebhookService
 }
 
 func NewTusdHandler() *tusdHandler {
 	return &tusdHandler{
 		workspaceSvc: workspace.NewWorkspaceService(),
 		uploadSvc:    upload.NewUploadService(),
-		webhookSvc:   webhook.NewWebhookService(),
 	}
 }
 

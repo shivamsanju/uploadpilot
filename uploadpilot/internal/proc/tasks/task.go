@@ -4,6 +4,7 @@ import (
 	"context"
 	"sync"
 
+	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -11,46 +12,48 @@ type TaskKey string
 
 type Task interface {
 	Do(ctx context.Context) error
-	AddInput(data *TaskData)
-	GetOutput() *TaskData
-}
-
-type TaskData struct {
-	RunID           string
-	ProcessorID     string
-	WorkspaceID     string
-	UploadID        string
-	TmpDir          string
-	TmpDirLock      *sync.Mutex
-	ContinueOnError bool
-}
-
-func NewTaskData(workspaceID, processorID, uploadID, tmpDir string, continueOnError bool) *TaskData {
-	return &TaskData{
-		RunID:           primitive.NewObjectID().Hex(),
-		ProcessorID:     processorID,
-		WorkspaceID:     workspaceID,
-		UploadID:        uploadID,
-		TmpDir:          tmpDir,
-		ContinueOnError: continueOnError,
-		TmpDirLock:      &sync.Mutex{},
-	}
+	GetTask() *BaseTask
+	MakeTask(data *BaseTask)
 }
 
 type BaseTask struct {
-	Data *TaskData
+	RunID       string
+	TaskID      string
+	ProcessorID string
+	WorkspaceID string
+	UploadID    string
+	TmpDir      string
+	TmpDirLock  *sync.Mutex
+	TaskParams  models.JSON
+	Input       map[string]interface{}
+	Output      map[string]interface{}
 }
 
-func NewBaseTask() *BaseTask {
+func NewBaseTask(workspaceID, processorID, uploadID, tmpDir, inputObjId string) *BaseTask {
 	return &BaseTask{
-		Data: &TaskData{},
+		RunID:       primitive.NewObjectID().Hex(),
+		WorkspaceID: workspaceID,
+		ProcessorID: processorID,
+		UploadID:    uploadID,
+		TmpDir:      tmpDir,
+		Input:       map[string]interface{}{"inputObjId": inputObjId},
+		TmpDirLock:  &sync.Mutex{},
 	}
 }
 
-func (t *BaseTask) AddInput(data *TaskData) {
-	t.Data = data
+func (t *BaseTask) MakeTask(data *BaseTask) {
+	t.RunID = data.RunID
+	t.TaskID = data.TaskID
+	t.ProcessorID = data.ProcessorID
+	t.WorkspaceID = data.WorkspaceID
+	t.UploadID = data.UploadID
+	t.TmpDir = data.TmpDir
+	t.TmpDirLock = data.TmpDirLock
+	t.TaskParams = data.TaskParams
+	t.Input = data.Input
+	t.Output = data.Output
 }
 
-func (t *BaseTask) GetOutput() *TaskData {
-	return t.Data
+func (t *BaseTask) GetTask() *BaseTask {
+	return t
 }

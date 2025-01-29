@@ -14,14 +14,17 @@ type ProcessingCleanupTask struct {
 
 func NewCleanupTask() tasks.Task {
 	return &ProcessingCleanupTask{
-		BaseTask: tasks.NewBaseTask(),
+		BaseTask: &tasks.BaseTask{},
 	}
 }
 
 func (t *ProcessingCleanupTask) Do(ctx context.Context) error {
 	infra.Log.Info("processing cleanup task...")
-	t.Data.TmpDirLock.Lock()
-	os.RemoveAll(t.Data.TmpDir)
-	t.Data.TmpDirLock.Unlock()
+	t.TmpDirLock.Lock()
+	err := os.RemoveAll(t.TmpDir)
+	if err != nil {
+		infra.Log.Errorf("failed to remove tmp dir: %s", err.Error())
+	}
+	t.TmpDirLock.Unlock()
 	return nil
 }

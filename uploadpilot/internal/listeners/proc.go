@@ -2,7 +2,6 @@ package listeners
 
 import (
 	"fmt"
-	"os"
 	"sync"
 
 	"github.com/uploadpilot/uploadpilot/internal/db"
@@ -10,7 +9,6 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/events"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
 	"github.com/uploadpilot/uploadpilot/internal/proc"
-	"github.com/uploadpilot/uploadpilot/internal/proc/tasks"
 )
 
 type ProcListener struct {
@@ -73,20 +71,17 @@ func (l *ProcListener) startSingleProcessor(wg *sync.WaitGroup, event events.Upl
 	m := "started processing upload for processor " + processor.Name
 	l.leb.Publish(events.NewLogEvent(event.Context, wID, uID, m, models.UploadLogLevelInfo))
 
-	tmpDir := os.TempDir() + "/" + processor.ID.Hex()
-	initData := tasks.NewTaskData(wID, pID, uID, tmpDir, false)
-
 	r := proc.NewProcWorkflowRunner()
-	if err := r.Build(event.Context, initData); err != nil {
-		m := fmt.Sprintf("failed to build workflow for processor %s: %s", processor.Name, err.Error())
+	if err := r.Build(event.Context, wID, pID, uID); err != nil {
+		m := fmt.Sprintf("failed to build workflow for processor %s and upload %s: %s", processor.Name, uID, err.Error())
 		infra.Log.Error(m)
 		l.leb.Publish(events.NewLogEvent(event.Context, wID, uID, m, models.UploadLogLevelError))
 		return
 	}
 
 	if err := r.Run(event.Context); err != nil {
-		m := fmt.Sprintf("workflow run failed for processor %s: %s", processor.Name, err.Error())
-		infra.Log.Error(m)
+		m := fmt.Sprintf("workflow run failed for processor %s and upload %s", processor.Name, uID)
+		infra.Log.Error(m, err)
 		l.leb.Publish(events.NewLogEvent(event.Context, wID, uID, m, models.UploadLogLevelError))
 		return
 	}

@@ -1,5 +1,5 @@
 import { IconCircleCheck, IconCircleOff, IconDots, IconEye, IconTrash, IconDiabolo, IconDiaboloOff, IconEdit, IconChevronRightPipe, IconChevronRight } from '@tabler/icons-react';
-import { ActionIcon, Avatar, Badge, Box, Group, LoadingOverlay, Menu, Modal, Paper, Pill, Stack, Text, Title } from '@mantine/core';
+import { ActionIcon, Avatar, Badge, Box, Container, Group, LoadingOverlay, Menu, Modal, Paper, Pill, Stack, Text, Title } from '@mantine/core';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCallback, useMemo, useState } from 'react';
 import { DataTableColumn } from 'mantine-datatable';
@@ -216,12 +216,12 @@ const ProcessorList = ({ opened, setOpened }: { opened: boolean, setOpened: any 
         <Box mr="md">
             <LoadingOverlay visible={isDeleting || isEnabling} overlayProps={{ radius: "sm", blur: 1 }} />
             {!isPending && (!processors || processors.length === 0) ? (
-                <Stack justify="center" align="center">
-                    <Title order={3} opacity={0.7}>Create your first Processor</Title>
-                    <Paper p={{ base: "md", md: "xl" }} mt="md" miw="300" maw="1000" w="50vw">
+                <Container mt="md">
+                    <Paper p={{ base: "md", md: "xl" }} miw="300" maw="1000" w="40vw">
+                        <Title order={4} opacity={0.7} ta="center" mb="lg">Create your first Processor</Title>
                         <AddProcessorForm mode={mode} setOpened={setOpened} workspaceId={workspaceId || ""} initialValues={initialValues} setInitialValues={setInitialValues} setMode={setMode} />
                     </Paper>
-                </Stack>
+                </Container>
             ) : (
                 <UploadPilotDataTable
                     minHeight={700}

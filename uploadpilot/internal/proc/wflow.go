@@ -3,6 +3,7 @@ package proc
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	flow "github.com/Azure/go-workflow"
@@ -15,49 +16,17 @@ import (
 )
 
 type ProcWorkflowRunner struct {
-	procRepo *db.ProcessorRepo
-	wf       *flow.Workflow
+	procRepo   *db.ProcessorRepo
+	uploadRepo *db.UploadRepo
+	wf         *flow.Workflow
 }
 
 func NewProcWorkflowRunner() *ProcWorkflowRunner {
 	return &ProcWorkflowRunner{
-		procRepo: db.NewProcessorRepo(),
-		wf:       new(flow.Workflow),
+		procRepo:   db.NewProcessorRepo(),
+		uploadRepo: db.NewUploadRepo(),
+		wf:         new(flow.Workflow),
 	}
-}
-
-func (r *ProcWorkflowRunner) Build(ctx context.Context, initialData *tasks.TaskData) error {
-	infra.Log.Infof("hghghghg, %+v, %+v", r, initialData)
-	processor, err := r.procRepo.Get(ctx, initialData.WorkspaceID, initialData.ProcessorID)
-	if err != nil {
-		return err
-	}
-	infra.Log.Errorf("some sss %+v", processor)
-
-	nodes, edges, err := r.getNodesAndEdgesMap(processor)
-	if err != nil {
-		return err
-	}
-
-	steps := make([]flow.Builder, 0, len(nodes))
-	tsks := make([]flow.Steper, 0, len(nodes))
-
-	for id, task := range nodes {
-		depKeys := edges[id]
-		var prevTasks []tasks.Task
-		for _, depKey := range depKeys {
-			prevTasks = append(prevTasks, nodes[depKey])
-		}
-
-		build := r.buildStepWithDependencies(&processor.Tasks.Nodes[0], task, prevTasks, initialData)
-		steps = append(steps, build)
-		tsks = append(tsks, task)
-	}
-
-	steps = r.addCommonSteps(steps, tsks, initialData)
-	r.wf.Add(steps...)
-
-	return nil
 }
 
 func (r *ProcWorkflowRunner) Run(ctx context.Context) error {
@@ -68,13 +37,64 @@ func (r *ProcWorkflowRunner) Run(ctx context.Context) error {
 	return nil
 }
 
-func (r *ProcWorkflowRunner) buildStepWithDependencies(pt *models.ProcTask, task tasks.Task, prevTasks []tasks.Task, initialData *tasks.TaskData) *flow.AddStep[tasks.Task] {
+func (r *ProcWorkflowRunner) Build(ctx context.Context, workspaceID, processorID, uploadID string) error {
+	infra.Log.Infof("creating workflow for upload: %s, processor: %s, workspace: %s", uploadID, processorID, workspaceID)
+
+	processor, err := r.procRepo.Get(ctx, processorID)
+	if err != nil {
+		return err
+	}
+
+	upload, err := r.uploadRepo.Get(ctx, uploadID)
+	if err != nil {
+		infra.Log.Errorf("failed to get upload: %s", err.Error())
+		return err
+	}
+
+	taskfnMap, procTaskMap, edges, err := r.getNodesAndEdgesMap(processor)
+	if err != nil {
+		return err
+	}
+
+	tmpDir := os.TempDir() + "/" + processorID + "/" + uploadID
+	os.MkdirAll(tmpDir, os.ModePerm)
+	firstTask := tasks.NewBaseTask(workspaceID, processorID, uploadID, tmpDir, upload.StoredFileName)
+
+	steps := make([]flow.Builder, 0, len(taskfnMap))
+	tsks := make([]flow.Steper, 0, len(taskfnMap))
+
+	infra.Log.Infof("ProcTaskMap: %+v", procTaskMap)
+	for id, task := range taskfnMap {
+		depKeys := edges[id]
+		var prevTasks []tasks.Task
+		for _, depKey := range depKeys {
+			prevTasks = append(prevTasks, taskfnMap[depKey])
+		}
+
+		pt, ok := procTaskMap[id]
+		if !ok {
+			return fmt.Errorf("failed to get task %s", id)
+		}
+		build := r.buildStepWithDependencies(pt, task, prevTasks, firstTask)
+		steps = append(steps, build)
+		tsks = append(tsks, task)
+	}
+
+	steps = r.addCommonSteps(steps, tsks, firstTask)
+	r.wf.Add(steps...)
+
+	return nil
+}
+
+func (r *ProcWorkflowRunner) buildStepWithDependencies(pt *models.ProcTask, task tasks.Task, prevTasks []tasks.Task, firstTask *tasks.BaseTask) *flow.AddStep[tasks.Task] {
+	infra.Log.Infof("building step for task: %s, map: %+v", pt.Key, pt)
 	step := flow.Step(task).
 		AfterStep(func(ctx context.Context, _ flow.Steper, err error) error {
-			to := task.GetOutput()
+			// throw errror only if continue on error is false
+			prevTask := task.GetTask()
 			if err != nil {
-				infra.Log.Errorf(msg.ProcTaskFailed, pt.Key, to.WorkspaceID, to.ProcessorID, to.UploadID, err.Error())
-				if to.ContinueOnError {
+				infra.Log.Errorf(msg.ProcTaskFailed, pt.Key, prevTask.WorkspaceID, prevTask.ProcessorID, prevTask.UploadID, err.Error())
+				if pt.ContinueOnError {
 					return nil
 				}
 				return err
@@ -84,17 +104,22 @@ func (r *ProcWorkflowRunner) buildStepWithDependencies(pt *models.ProcTask, task
 
 	if len(prevTasks) == 0 {
 		step = step.Input(func(ctx context.Context, t tasks.Task) error {
-			infra.Log.Infof("initial data %+v, task %+v", initialData, t)
-			t.AddInput(initialData)
+			firstTask.TaskID = pt.ID
+			firstTask.TaskParams = pt.Data
+			t.MakeTask(firstTask)
 			return nil
 		})
 	} else {
+		// There will be a single parent task only for now
 		for _, prevTask := range prevTasks {
 			step = step.DependsOn(prevTask).
 				Input(func(ctx context.Context, t tasks.Task) error {
-					pto := prevTask.GetOutput()
-					pto.ContinueOnError = pt.ContinueOnError
-					t.AddInput(pto)
+					inp := prevTask.GetTask()
+					inp.TaskID = pt.ID       // add current task id to input
+					inp.TaskParams = pt.Data // add current task data
+					inp.Input = inp.Output
+					inp.Output = nil
+					t.MakeTask(inp)
 					return nil
 				})
 		}
@@ -113,12 +138,12 @@ func (r *ProcWorkflowRunner) buildStepWithDependencies(pt *models.ProcTask, task
 	return &step
 }
 
-func (r *ProcWorkflowRunner) addCommonSteps(steps []flow.Builder, tsks []flow.Steper, initialData *tasks.TaskData) []flow.Builder {
+func (r *ProcWorkflowRunner) addCommonSteps(steps []flow.Builder, tsks []flow.Steper, firstTask *tasks.BaseTask) []flow.Builder {
 	success := flow.Step(commontasks.NewSuccessTask()).
 		DependsOn(tsks...).
 		When(flow.AllSucceededOrSkipped).
 		Input(func(ctx context.Context, t tasks.Task) error {
-			t.AddInput(initialData)
+			t.MakeTask(firstTask)
 			return nil
 		})
 
@@ -126,7 +151,7 @@ func (r *ProcWorkflowRunner) addCommonSteps(steps []flow.Builder, tsks []flow.St
 		DependsOn(tsks...).
 		When(flow.AnyFailed).
 		Input(func(ctx context.Context, t tasks.Task) error {
-			t.AddInput(initialData)
+			t.MakeTask(firstTask)
 			return nil
 		})
 
@@ -134,7 +159,7 @@ func (r *ProcWorkflowRunner) addCommonSteps(steps []flow.Builder, tsks []flow.St
 		DependsOn(tsks...).
 		When(flow.BeCanceled).
 		Input(func(ctx context.Context, t tasks.Task) error {
-			t.AddInput(initialData)
+			t.MakeTask(firstTask)
 			return nil
 		})
 
@@ -142,24 +167,26 @@ func (r *ProcWorkflowRunner) addCommonSteps(steps []flow.Builder, tsks []flow.St
 		DependsOn(tsks...).
 		When(flow.Always).
 		Input(func(ctx context.Context, t tasks.Task) error {
-			t.AddInput(initialData)
+			t.MakeTask(firstTask)
 			return nil
 		})
 
 	return append(steps, success, failure, cancelled, cleanup)
 }
 
-func (r *ProcWorkflowRunner) getNodesAndEdgesMap(processor *models.Processor) (map[string]tasks.Task, map[string][]string, error) {
-	nodes := make(map[string]tasks.Task)
+func (r *ProcWorkflowRunner) getNodesAndEdgesMap(processor *models.Processor) (map[string]tasks.Task, map[string]*models.ProcTask, map[string][]string, error) {
+	taskfnMap := make(map[string]tasks.Task)
+	taskMap := make(map[string]*models.ProcTask)
 	edges := make(map[string][]string)
 
 	for _, t := range processor.Tasks.Nodes {
 		task, ok := GetTaskFromRegistry(t.Key)
 		if !ok {
-			return nil, nil, fmt.Errorf("unknown task key: %s", t.Key)
+			return nil, nil, nil, fmt.Errorf("unknown task key: %s", t.Key)
 		}
 
-		nodes[t.ID] = task
+		taskfnMap[t.ID] = task
+		taskMap[t.ID] = &t
 
 		for _, edge := range processor.Tasks.Edges {
 			if edge.Source == t.ID {
@@ -168,5 +195,5 @@ func (r *ProcWorkflowRunner) getNodesAndEdgesMap(processor *models.Processor) (m
 		}
 	}
 
-	return nodes, edges, nil
+	return taskfnMap, taskMap, edges, nil
 }

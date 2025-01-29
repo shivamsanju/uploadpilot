@@ -24,16 +24,16 @@ func NewFailedTask() tasks.Task {
 		ueb:      events.GetUploadEventBus(),
 		leb:      events.GetLogEventBus(),
 		upRepo:   db.NewUploadRepo(),
-		BaseTask: tasks.NewBaseTask(),
+		BaseTask: &tasks.BaseTask{},
 	}
 }
 
 func (t *ProcessingFailedTask) Do(ctx context.Context) error {
 	infra.Log.Info("processing failed task...")
 
-	uID := t.Data.UploadID
-	wID := t.Data.WorkspaceID
-	pID := t.Data.ProcessorID
+	uID := t.UploadID
+	wID := t.WorkspaceID
+	pID := t.ProcessorID
 
 	upload, err := t.upRepo.Get(ctx, uID)
 	if err != nil {

@@ -6,7 +6,6 @@ import {
     IconGauge,
     IconTransform,
     IconUsers,
-    IconWebhook,
 } from '@tabler/icons-react';
 import { ScrollArea } from '@mantine/core';
 import { LinksGroup } from './NavLinksGroup';
@@ -52,11 +51,6 @@ const NavBar = ({ toggle }: { toggle: React.Dispatch<React.SetStateAction<boolea
                 label: 'Tools',
                 icon: IconTransform,
                 link: `/workspaces/${workspaceId}/tools`,
-            },
-            {
-                label: 'Webhooks',
-                icon: IconWebhook,
-                link: `/workspaces/${workspaceId}/webhooks`,
             },
             {
                 label: 'Analytics',

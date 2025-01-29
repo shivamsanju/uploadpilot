@@ -1,9 +1,9 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import { ReactFlow, Controls, Background, BackgroundVariant, Panel } from '@xyflow/react';
 import { Transition, useMantineColorScheme, useMantineTheme } from '@mantine/core';
 import { BaseNode } from './Node/BaseNode';
 import '@xyflow/react/dist/style.css';
-import SampleNodeForm from './Form';
+import { NodeForm } from './Node/Form';
 import { useCanvas, useDragAndDrop } from '../../hooks/DndCanvas';
 
 export const ProcessorCanvas = () => {
@@ -13,15 +13,14 @@ export const ProcessorCanvas = () => {
   const bg = colorScheme === "dark" ? "#0A0A0A" : theme.colors.gray[0];
   const nodeTypes = useMemo(() => ({ baseNode: BaseNode }), []);
 
-  const [activeNode, setActiveNode] = useState("");
-  const { nodes, edges, onConnect, onEdgesChange, onNodesChange } = useCanvas();
+  const { nodes, edges, onConnect, onEdgesChange, onNodesChange, openedNodeId } = useCanvas();
   const { onDrop, onDragOver } = useDragAndDrop();
 
   return (
     <div style={{ width: '100%', height: '92vh' }} ref={reactFlowWrapper} className='reactflow-wrapper'>
       <ReactFlow
         fitView
-        fitViewOptions={{ padding: 3 }}
+        fitViewOptions={{ padding: 1 }}
         style={{ background: bg }}
         colorMode={colorScheme === "auto" ? "dark" : colorScheme}
         nodeTypes={nodeTypes}
@@ -32,16 +31,12 @@ export const ProcessorCanvas = () => {
         onConnect={onConnect}
         onDrop={onDrop}
         onDragOver={onDragOver}
-        onNodeDoubleClick={(e) => {
-          console.log(e)
-          setActiveNode("e.id");
-        }}
       >
         <Controls />
         <Panel position="top-right">
-          <Transition mounted={activeNode !== ""} transition="pop" duration={100} timingFunction="ease">
+          <Transition mounted={openedNodeId !== ""} transition="pop" duration={100} timingFunction="ease">
             {(styles) => <div style={styles} className="transition" >
-              <SampleNodeForm workspaceId={""} setActive={setActiveNode} />
+              <NodeForm />
             </div>}
           </Transition>
         </Panel>

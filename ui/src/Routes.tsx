@@ -12,7 +12,6 @@ import UploadsPage from "./pages/Uploads/Uploads";
 import ConfigurationPage from "./pages/Configuration";
 import WorkspaceUsersPage from "./pages/Users";
 import ToolsPage from "./pages/Tools";
-import WebhooksPage from "./pages/Webhooks";
 import ProcEditorPage from "./pages/ProcEditor";
 import ProcessorPage from "./pages/Processors";
 import EmptyAuthLayout from "./components/Layout/EmptyAuthLayout";
@@ -79,11 +78,6 @@ const routes: Route[] = [
         path: "/workspaces/:workspaceId/tools",
         layout: AppLayout,
         element: <ToolsPage />
-    },
-    {
-        path: "/workspaces/:workspaceId/webhooks",
-        layout: AppLayout,
-        element: <WebhooksPage />
     },
     {
         path: "/workspaces/:workspaceId/analytics",

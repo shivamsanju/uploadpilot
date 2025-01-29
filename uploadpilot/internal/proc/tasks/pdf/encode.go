@@ -17,13 +17,13 @@ type encodePDFContentTask struct {
 
 func NewEncodePDFContentTask() tasks.Task {
 	return &encodePDFContentTask{
-		BaseTask:   tasks.NewBaseTask(),
 		uploadRepo: db.NewUploadRepo(),
 		leb:        events.GetLogEventBus(),
+		BaseTask:   &tasks.BaseTask{},
 	}
 }
 
 func (t *encodePDFContentTask) Do(ctx context.Context) error {
-	t.leb.Publish(events.NewLogEvent(ctx, t.Data.WorkspaceID, t.Data.UploadID, "encoding pdf content", models.UploadLogLevelInfo))
+	t.leb.Publish(events.NewLogEvent(ctx, t.WorkspaceID, t.UploadID, "encoding pdf content", models.UploadLogLevelInfo))
 	return nil
 }

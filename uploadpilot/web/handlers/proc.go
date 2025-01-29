@@ -34,10 +34,9 @@ func (h *processorHandler) GetProcessors(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *processorHandler) GetProcessorDetailsByID(w http.ResponseWriter, r *http.Request) {
-	workspaceID := chi.URLParam(r, "workspaceId")
 	processorID := chi.URLParam(r, "processorId")
 
-	processor, err := h.processorSvc.GetProcessor(r.Context(), workspaceID, processorID)
+	processor, err := h.processorSvc.GetProcessor(r.Context(), processorID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -64,7 +63,6 @@ func (h *processorHandler) CreateProcessor(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *processorHandler) UpdateProcessor(w http.ResponseWriter, r *http.Request) {
-	workspaceID := chi.URLParam(r, "workspaceId")
 	processorID := chi.URLParam(r, "processorId")
 
 	processor := &dto.EditProcRequest{}
@@ -73,7 +71,7 @@ func (h *processorHandler) UpdateProcessor(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err := h.processorSvc.EditNameAndTrigger(r.Context(), workspaceID, processorID, processor)
+	err := h.processorSvc.EditNameAndTrigger(r.Context(), processorID, processor)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -83,10 +81,9 @@ func (h *processorHandler) UpdateProcessor(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *processorHandler) DeleteProcessor(w http.ResponseWriter, r *http.Request) {
-	workspaceID := chi.URLParam(r, "workspaceId")
 	processorID := chi.URLParam(r, "processorId")
 
-	if err := h.processorSvc.DeleteProcessor(r.Context(), workspaceID, processorID); err != nil {
+	if err := h.processorSvc.DeleteProcessor(r.Context(), processorID); err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
@@ -95,7 +92,6 @@ func (h *processorHandler) DeleteProcessor(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *processorHandler) UpdateTasks(w http.ResponseWriter, r *http.Request) {
-	workspaceID := chi.URLParam(r, "workspaceId")
 	processorID := chi.URLParam(r, "processorId")
 
 	tasks := &models.ProcTaskCanvas{}
@@ -104,7 +100,7 @@ func (h *processorHandler) UpdateTasks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.processorSvc.UpdateTasks(r.Context(), workspaceID, processorID, tasks); err != nil {
+	if err := h.processorSvc.UpdateTasks(r.Context(), processorID, tasks); err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
@@ -113,10 +109,9 @@ func (h *processorHandler) UpdateTasks(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *processorHandler) EnableProcessor(w http.ResponseWriter, r *http.Request) {
-	workspaceID := chi.URLParam(r, "workspaceId")
 	processorID := chi.URLParam(r, "processorId")
 
-	err := h.processorSvc.EnableDisableProcessor(r.Context(), workspaceID, processorID, true)
+	err := h.processorSvc.EnableDisableProcessor(r.Context(), processorID, true)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -126,10 +121,9 @@ func (h *processorHandler) EnableProcessor(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *processorHandler) DisableProcessor(w http.ResponseWriter, r *http.Request) {
-	workspaceID := chi.URLParam(r, "workspaceId")
 	processorID := chi.URLParam(r, "processorId")
 
-	err := h.processorSvc.EnableDisableProcessor(r.Context(), workspaceID, processorID, false)
+	err := h.processorSvc.EnableDisableProcessor(r.Context(), processorID, false)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return

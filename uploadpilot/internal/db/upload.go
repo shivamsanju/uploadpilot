@@ -123,7 +123,8 @@ func (i *UploadRepo) Get(ctx context.Context, uploadID string) (*models.Upload, 
 	}
 	var cb models.Upload
 	collection := db.Collection(i.collectionName)
-	err = collection.FindOne(ctx, bson.M{"_id": id}).Decode(&cb)
+	item := collection.FindOne(ctx, bson.M{"_id": id})
+	err = item.Decode(&cb)
 	if err != nil {
 		infra.Log.Errorf("failed to find import: %s", err.Error())
 		return nil, err
