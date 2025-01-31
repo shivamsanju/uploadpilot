@@ -4,7 +4,7 @@ import UploadList from "./List"
 const UploadsPage = () => {
     return (
         <Box mb={50}>
-            <Group mb="xl" align="center" justify="space-between">
+            <Group align="center" justify="space-between">
                 <Title order={3} opacity={0.7} >Uploads</Title>
                 <Text c="dimmed" opacity={0.7} mr="lg">
                     Uploaded files may take a few seconds to appear here after upload. Please click the refresh button if you don't see any new files.

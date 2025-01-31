@@ -69,7 +69,9 @@ const WorkspaceLandingPage = () => {
                                         {workspaces && workspaces.length > 0 && workspaces.map((workspace: any) => (
                                             <Group justify='space-between' key={workspace.id} className={classes.wsItem} pt="lg">
                                                 <Text size="sm" fw="bold" opacity={0.7} >{workspace.name}</Text>
-                                                <Button key={workspace.id} variant='outline' onClick={() => navigate(`/workspaces/${workspace.id}`)}>Open</Button>
+                                                <Button key={workspace.id} variant='light' onClick={() => navigate(`/workspaces/${workspace.id}`)}>
+                                                    Open
+                                                </Button>
                                             </Group>
                                         ))}
                                     </Stack>

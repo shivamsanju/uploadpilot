@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container, Card, Text, Group, Button, TextInput, Grid, FileButton, Avatar, Stack } from '@mantine/core';
+import { Container, Text, Group, Button, TextInput, Grid, FileButton, Avatar, Stack } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useGetSession } from '../../apis/user';
 import { AppLoader } from '../../components/Loader/AppLoader';

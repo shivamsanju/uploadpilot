@@ -42,7 +42,7 @@ const WebhookNodeForm: React.FC<NodeFormProps> = ({ nodeData, saveNodeData, setO
                 <Text size="lg" fw={500}>Webhook</Text>
                 <IconX size={18} onClick={() => setOpenedNodeId("")} cursor="pointer" />
             </Group>
-            <Stack gap="lg" >
+            <Stack gap="lg">
                 <TextInput
                     leftSection={<IconHttpPost size={16} color="#E0A526" />}
                     withAsterisk

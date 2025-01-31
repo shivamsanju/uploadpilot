@@ -1,4 +1,4 @@
-import { Box, Button, Group, Stack } from "@mantine/core";
+import { Paper } from "@mantine/core";
 import WebhookNodeForm from "./WebhookNodeForm";
 import { useCanvas } from "../../../context/EditorCtx";
 
@@ -9,17 +9,17 @@ export type NodeFormProps = {
 };
 
 
-const getNodeForm = (key: string): React.FC<NodeFormProps> => {
+const getNodeForm = (key: string): any => {
     switch (key) {
         case 'webhook':
             return WebhookNodeForm
         default:
-            return () => <>Not found</>
+            return null
     }
 }
 
 export const NodeForm = () => {
-    const { nodes, setNodes, openedNodeId, setOpenedNodeId, isUpdating, isPending, handleSave, handleDiscard } = useCanvas();
+    const { nodes, setNodes, openedNodeId, setOpenedNodeId } = useCanvas();
 
     const saveNodeData = (data: any) => {
         setNodes((nds: any) => nds.map((node: any) => {
@@ -28,8 +28,9 @@ export const NodeForm = () => {
                     ...node,
                     data: {
                         ...node.data,
-                        ...data
-                    }
+                        ...data,
+                        isComplete: true,
+                    },
                 };
             }
             return node;
@@ -41,16 +42,13 @@ export const NodeForm = () => {
     const nodeData = nodes?.find((node) => node.id === openedNodeId)?.data;
 
     const Form = getNodeForm(key);
+
+    if (!Form || !openedNodeId) return (<></>);
+
     return (
-        <Stack justify="space-between" h="100%" p="sm" px="md">
-            <Box >
-                <Form nodeData={nodeData} saveNodeData={saveNodeData} setOpenedNodeId={setOpenedNodeId} />
-            </Box>
-            <Group justify="center" >
-                <Button variant="default" c="dimmed" loading={isUpdating || isPending} onClick={handleDiscard}>Discard</Button>
-                <Button loading={isUpdating || isPending} onClick={handleSave}>Save</Button>
-            </Group>
-        </Stack>
+        <Paper h="88vh" p="md">
+            <Form nodeData={nodeData} saveNodeData={saveNodeData} setOpenedNodeId={setOpenedNodeId} />
+        </Paper>
     )
 }
 

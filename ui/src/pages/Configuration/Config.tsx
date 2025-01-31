@@ -13,7 +13,6 @@ import {
     TextInput,
     Tooltip,
     LoadingOverlay,
-    Title,
 } from "@mantine/core";
 import { UploaderConfig } from "../../types/uploader";
 import { useForm } from "@mantine/form";

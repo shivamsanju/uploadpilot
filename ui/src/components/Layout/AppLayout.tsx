@@ -1,7 +1,6 @@
 import {
     ActionIcon,
     AppShell,
-    Burger,
     ScrollArea,
     useMantineColorScheme,
     useMantineTheme,

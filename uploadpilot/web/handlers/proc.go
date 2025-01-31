@@ -42,6 +42,14 @@ func (h *processorHandler) GetProcessorDetailsByID(w http.ResponseWriter, r *htt
 		return
 	}
 
+	// p := struct {
+	// 	*models.Processor
+	// 	time int64
+	// }{
+	// 	Processor: processor,
+	// 	time:      time.Now().Unix(),
+	// }
+
 	render.JSON(w, r, processor)
 }
 

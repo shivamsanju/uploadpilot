@@ -79,10 +79,5 @@ func ZipAndUploadToS3(ctx context.Context, dirToZip, zipFileName string) (string
 	if err != nil {
 		return "", fmt.Errorf("failed to upload zip file to S3: %w", err)
 	}
-
-	if err != nil {
-		return "", err
-	}
-
 	return objectName, nil
 }

@@ -1,4 +1,4 @@
-import { IconCircleCheck, IconCircleOff, IconDots, IconEye, IconTrash, IconDiabolo, IconDiaboloOff, IconEdit, IconChevronRightPipe, IconChevronRight } from '@tabler/icons-react';
+import { IconCircleCheck, IconCircleOff, IconDots, IconEye, IconTrash, IconRoute, IconRouteOff, IconEdit, IconChevronRightPipe, IconChevronRight } from '@tabler/icons-react';
 import { ActionIcon, Avatar, Badge, Box, Container, Group, LoadingOverlay, Menu, Modal, Paper, Pill, Text, Title } from '@mantine/core';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCallback, useMemo, useState } from 'react';
@@ -74,7 +74,7 @@ const ProcessorList = ({ opened, setOpened }: { opened: boolean, setOpened: any 
             render: (item: any) => (
                 <Group gap="sm">
                     <Avatar size={40} radius={40} variant='light' color={item?.enabled ? 'appcolor' : 'gray'}>
-                        {item?.enabled ? <IconDiabolo /> : <IconDiaboloOff />}
+                        {item?.enabled ? <IconRoute /> : <IconRouteOff />}
                     </Avatar>
                     <div>
                         <Text fz="sm" fw={500}>

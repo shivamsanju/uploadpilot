@@ -2,6 +2,10 @@
     border-color: light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-6));
 }
 
+.nodeActive {
+    border-color: var(--mantine-color-appcolor-filled) !important;
+}
+
 .targetHandle {
     height: 1 !important;
     width: 1 !important;

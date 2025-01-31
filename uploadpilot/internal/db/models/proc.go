@@ -17,6 +17,7 @@ type ProcTask struct {
 	Position        JSON    `bson:"position" json:"position"`
 	Measured        JSON    `bson:"measured" json:"measured"`
 	Deletable       bool    `bson:"deletable" json:"deletable"`
+	IsComplete      bool    `bson:"isComplete" json:"isComplete"`
 }
 
 type ProcTaskEdge struct {

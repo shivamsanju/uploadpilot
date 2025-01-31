@@ -2,7 +2,7 @@ import {
     IconAdjustments,
     IconCircles,
     IconDatabase,
-    IconDiabolo,
+    IconRoute,
     IconGauge,
     IconTransform,
     IconUsers,
@@ -39,7 +39,7 @@ const NavBar = ({ toggle }: { toggle: React.Dispatch<React.SetStateAction<boolea
             },
             {
                 label: 'Processor',
-                icon: IconDiabolo,
+                icon: IconRoute,
                 link: `/workspaces/${workspaceId}/processors`,
             },
             {

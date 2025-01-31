@@ -56,7 +56,6 @@ const AddUserForm: React.FC<Props> = ({ setOpened, setInitialValues, setMode, wo
             <LoadingOverlay visible={isPending} overlayProps={{ radius: "sm", blur: 1 }} />
             <Stack gap="xl">
                 <TextInput
-                    size="sm"
                     leftSection={<IconAt size={16} />}
                     withAsterisk
                     label="Email"
@@ -66,7 +65,6 @@ const AddUserForm: React.FC<Props> = ({ setOpened, setInitialValues, setMode, wo
                     {...form.getInputProps('email')}
                 />
                 <Select
-                    size="sm"
                     withAsterisk
                     leftSection={<IconLockAccess size={16} />}
                     label="Role"
@@ -79,7 +77,7 @@ const AddUserForm: React.FC<Props> = ({ setOpened, setInitialValues, setMode, wo
             </Stack>
             {mode !== 'view' && (
                 <Group justify="flex-end" mt={50}>
-                    <Button size="sm" type="submit">
+                    <Button type="submit">
                         {mode === 'edit' && "Save"}
                         {mode === 'add' && "Add"}
                     </Button>

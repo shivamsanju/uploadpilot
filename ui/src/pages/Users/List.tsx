@@ -166,7 +166,7 @@ const WorkspaceUsersList = ({ opened, setOpened }: { opened: boolean, setOpened:
                 }}
                 title={mode === 'edit' ? 'Edit User' : mode === 'view' ? 'User Details' : 'Add User'}
                 closeOnClickOutside={false}
-                size="xl"
+                size="lg"
             >
                 <AddUserForm mode={mode} setOpened={setOpened} workspaceId={workspaceId || ""} initialValues={initialValues} setInitialValues={setInitialValues} setMode={setMode} />
             </Modal>

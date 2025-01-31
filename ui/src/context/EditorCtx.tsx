@@ -4,10 +4,12 @@ import { useParams } from 'react-router-dom';
 import { useGetProcessor, useUpdateProcessorTaskMutation } from '../apis/processors';
 import { v4 as uuid } from 'uuid';
 import { useDisclosure } from '@mantine/hooks';
-
+import { stratify, tree } from 'd3-hierarchy';
+import { isDataNode } from '../components/EditorNode/IsDataNode';
 type ProcEditorContextType = {
     workspaceId: string | undefined;
     processorId: string | undefined;
+    processor: any;
     isPending: boolean;
     isUpdating: boolean;
     error: Error | null;
@@ -29,6 +31,7 @@ type ProcEditorContextType = {
     openedBlocksModal: boolean,
     openBlocksModal: () => void
     closeBlocksModal: () => void
+    getLayoutedElements: (nodes: any[], edges: any[], options: any) => any
 }
 
 export const ProcEditorContext = createContext<ProcEditorContextType>({
@@ -36,6 +39,7 @@ export const ProcEditorContext = createContext<ProcEditorContextType>({
     edges: [],
     workspaceId: undefined,
     processorId: undefined,
+    processor: {},
     isPending: false,
     isUpdating: false,
     error: null,
@@ -55,13 +59,13 @@ export const ProcEditorContext = createContext<ProcEditorContextType>({
     openedBlocksModal: false,
     openBlocksModal: () => { },
     closeBlocksModal: () => { },
+    getLayoutedElements: (nodes, edges, options) => { },
 
 });
 
 export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { workspaceId, processorId } = useParams();
     const [openedBlocksModal, { open: openBlocksModal, close: closeBlocksModal }] = useDisclosure();
-
     const { isPending, error, processor, invalidate } = useGetProcessor(workspaceId as string, processorId as string);
     const { mutateAsync, isPending: isUpdating } = useUpdateProcessorTaskMutation();
 
@@ -69,7 +73,25 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const [edges, setEdges] = useState<any[]>([]);
     const [openedNodeId, setOpenedNodeId] = useState('');
     const [connectionStateNodeId, setconnectionStateNodeId] = useState<any>(null);
+    const g = tree();
 
+    const getLayoutedElements = useCallback((nodes: any, edges: any, options: any) => {
+        if (nodes.length === 0) return { nodes, edges };
+        if (!document) return { nodes, edges };
+        const { width, height }: any = document.querySelector(`[data-id="${nodes[0].id}"]`)?.getBoundingClientRect();
+        const hierarchy = stratify()
+            .id((node: any) => node.id)
+            .parentId((node: any) => edges.find((edge: any) => edge.target === node.id)?.source);
+        const root = hierarchy(nodes);
+        const layout = g.nodeSize([width * 2, height * 5])(root);
+
+        return {
+            nodes: layout
+                .descendants()
+                .map((node: any) => ({ ...nodes.find((n: any) => n.id === node.id), position: { x: node.x, y: node.y } })),
+            edges,
+        };
+    }, [g]);
 
     const onNodesChange = (changes: any) => {
         setNodes((prevNodes) => applyNodeChanges(changes, prevNodes));
@@ -145,9 +167,12 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 retry: 0,
                 continueOnError: false,
                 timeoutMilSec: 1000000,
-                data: item,
+                data: {
+                    ...item,
+                    isComplete: isDataNode(item?.key) ? false : true
+                },
+                deletable: true,
             };
-
             setNodes((nds: any[]) => nds.concat(newNode));
             setEdges((eds: any[]) =>
                 eds.concat({ id: uuid(), source: connectionStateNodeId, target: id, deletable: false }),
@@ -168,6 +193,9 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         }
     }, [processor]);
 
+
+
+
     return (
         <ProcEditorContext.Provider
             value={{
@@ -175,6 +203,7 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 edges: edges.map((e: any) => ({ ...e, type: ConnectionLineType.SmoothStep, animated: true })),
                 workspaceId,
                 processorId,
+                processor,
                 isPending,
                 isUpdating,
                 error,
@@ -193,7 +222,8 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
                 setOpenedNodeId,
                 setconnectionStateNodeId,
                 onConnectEnd,
-                onSelectNewNode
+                onSelectNewNode,
+                getLayoutedElements,
             }}
         >
             {children}

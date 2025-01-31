@@ -36,7 +36,7 @@ const UploadList = () => {
     const { workspaceId } = useParams();
     const { searchFilter, onSearchFilterChange } = useUploadPilotDataTable();
 
-    const { isPending, error, isFetchNextPageError, uploads, fetchNextPage, isFetchingNextPage, isFetching, invalidate, hasNextPage } = useGetUploads({
+    const { isPending, error, isFetchNextPageError, uploads, fetchNextPage, totalRecords, isFetchingNextPage, isFetching, invalidate, hasNextPage } = useGetUploads({
         workspaceId: workspaceId || '',
         batchSize,
         search: searchFilter
@@ -139,7 +139,12 @@ const UploadList = () => {
                 title: 'Status',
                 accessor: 'status',
                 textAlign: 'center',
-                render: (params: any) => (<UploadStatus status={params?.status} />),
+                render: (params: any) => (<>
+                    <UploadStatus status={params?.status} />
+                    <Text fz="xs" c="dimmed">
+                        {params?.status}
+                    </Text>
+                </>),
 
             },
             {
@@ -215,6 +220,7 @@ const UploadList = () => {
                 metadata={metadata || {}}
             />
             <Box mr="md">
+                <Text fw="bold" c="dimmed" mb="md" ml='sm'>Total : {totalRecords}</Text>
                 <UploadPilotDataTable
                     minHeight={500}
                     verticalSpacing="lg"
@@ -247,7 +253,7 @@ const UploadList = () => {
                         Load More
                     </Button>
                 </Stack>
-            </Box>
+            </Box >
         </>
     );
 }
