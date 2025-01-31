@@ -34,16 +34,17 @@ func (t *ProcessingFailedTask) Do(ctx context.Context) error {
 	uID := t.UploadID
 	wID := t.WorkspaceID
 	pID := t.ProcessorID
+	tID := "WorkflowFailed"
 
 	upload, err := t.upRepo.Get(ctx, uID)
 	if err != nil {
 		m := fmt.Sprintf("failed to mark processing status of upload [%s] as failed", uID)
-		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, m, models.UploadLogLevelError))
+		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, m, &pID, &tID, models.UploadLogLevelError))
 		return err
 	}
 
 	t.ueb.Publish(events.NewUploadEvent(ctx, events.EventUploadProcessingFailed, upload, "", nil))
 
-	t.leb.Publish(events.NewLogEvent(ctx, wID, uID, fmt.Sprintf(msg.ProcessingFailed, pID), models.UploadLogLevelInfo))
+	t.leb.Publish(events.NewLogEvent(ctx, wID, uID, fmt.Sprintf(msg.ProcessingFailed, pID), &pID, &tID, models.UploadLogLevelInfo))
 	return nil
 }

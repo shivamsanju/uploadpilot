@@ -16,6 +16,8 @@ type UploadLog struct {
 	ID          primitive.ObjectID `bson:"_id" json:"id"`
 	WorkspaceID primitive.ObjectID `bson:"workspaceId" json:"workspaceId"`
 	UploadID    primitive.ObjectID `bson:"uploadId" json:"uploadId"`
+	ProcessorID primitive.ObjectID `bson:"processorId" json:"processorId"`
+	TaskID      string             `bson:"taskId" json:"taskId"`
 	Level       UploadLogLevel     `bson:"level" json:"level"`
 	Timestamp   primitive.DateTime `bson:"timestamp" json:"timestamp"`
 	Message     string             `bson:"message" json:"message"`

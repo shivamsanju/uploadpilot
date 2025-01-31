@@ -40,45 +40,47 @@ func NewWebhookTask() tasks.Task {
 func (t *webhookTask) Do(ctx context.Context) error {
 	wID := t.WorkspaceID
 	uID := t.UploadID
+	pID := t.ProcessorID
 	tID := t.TaskID
-	t.leb.Publish(events.NewLogEvent(ctx, wID, uID, "triggering webhook", models.UploadLogLevelInfo))
+	t.leb.Publish(events.NewLogEvent(ctx, wID, uID, "triggering webhook", &pID, &tID, models.UploadLogLevelInfo))
 
 	var webhook *webhookInput
 	tStr := t.TaskParams.String()
 	if err := json.Unmarshal([]byte(tStr), &webhook); err != nil {
 		m := fmt.Sprintf("error unmarshalling json: %s", err.Error())
-		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, m, models.UploadLogLevelError))
+		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, m, &pID, &tID, models.UploadLogLevelError))
 		return err
 	}
 
 	inputObjId, ok := t.Input["inputObjId"].(string)
 	if !ok {
 		m := fmt.Sprintf("missing required input: inputObjId for task %s", tID)
-		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, m, models.UploadLogLevelError))
+		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, m, &pID, &tID, models.UploadLogLevelError))
 		return errors.New(m)
 	}
 
-	time := time.Now().Add(time.Duration(300 * 24 * time.Hour))
-	assetUrl, err := s3.NewPresignClient(infra.S3Client).PresignGetObject(ctx, &s3.GetObjectInput{
-		Bucket:          &config.S3BucketName,
-		Key:             &inputObjId,
-		ResponseExpires: &time,
-	})
+	assetUrl, err := s3.NewPresignClient(infra.S3Client).PresignGetObject(
+		ctx,
+		&s3.GetObjectInput{Bucket: &config.S3BucketName, Key: &inputObjId},
+		func(opts *s3.PresignOptions) {
+			opts.Expires = time.Duration(7 * 24 * time.Hour)
+		},
+	)
 	if err != nil {
 		m := fmt.Sprintf("failed to presign object for task %s: %s", tID, err.Error())
-		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, m, models.UploadLogLevelError))
+		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, m, &pID, &tID, models.UploadLogLevelError))
 		return err
 	}
 
 	if err := doWebhookRequest(webhook, assetUrl.URL); err != nil {
 		m := fmt.Sprintf("failed to trigger webhook for task %s: %s", tID, err.Error())
-		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, m, models.UploadLogLevelError))
+		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, m, &pID, &tID, models.UploadLogLevelError))
 		return err
 	}
 
 	message := fmt.Sprintf("Delivered to webhook [%s] successfully", webhook.URL)
 	infra.Log.Info(message)
-	t.leb.Publish(events.NewLogEvent(ctx, wID, uID, message, models.UploadLogLevelInfo))
+	t.leb.Publish(events.NewLogEvent(ctx, wID, uID, message, &pID, &tID, models.UploadLogLevelInfo))
 
 	return nil
 }

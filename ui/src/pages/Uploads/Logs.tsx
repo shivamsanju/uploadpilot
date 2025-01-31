@@ -3,11 +3,12 @@ import { LoadingOverlay, Modal } from "@mantine/core";
 import React from "react";
 import { UseGetUploadLogs } from "../../apis/upload";
 import { ErrorCard } from "../../components/ErrorCard/ErrorCard";
+import { RefreshButton } from "../../components/RefreshButton/RefreshButton";
 
 const formatLogs = (logs: any[]) => {
     let str = ""
     for (const log of logs) {
-        str += `${log?.timestamp} | [${log?.level?.toUpperCase()}] ${log?.message}\n`;
+        str += `${log?.timestamp} | [${log?.level?.toUpperCase()}] | ${log?.processorId ? log?.taskId && `(processor: '${log?.processorId}', task: '${log?.taskId}')` : ""} ${log?.message}\n`;
     }
     return str
 }
@@ -19,12 +20,13 @@ type LogsModalProps = {
 }
 export const LogsModal: React.FC<LogsModalProps> = ({ open, onClose, uploadId, workspaceId }) => {
 
-    const { isPending, error, data } = UseGetUploadLogs(workspaceId, uploadId)
+    const { isPending, error, data, invalidate } = UseGetUploadLogs(workspaceId, uploadId)
 
 
     return (
         <Modal
             opened={open}
+            fullScreen
             title="Logs"
             onClose={onClose}
             size="100%"
@@ -32,6 +34,7 @@ export const LogsModal: React.FC<LogsModalProps> = ({ open, onClose, uploadId, w
             {error ? <ErrorCard message={error.message} title={error.name} /> : (
                 <>
                     <LoadingOverlay visible={isPending} overlayProps={{ radius: 'sm', blur: 1 }} />
+                    <RefreshButton onClick={invalidate} my="sm" />
                     <CodeHighlight mih={300} code={formatLogs(data || [])} />
                 </>
             )}

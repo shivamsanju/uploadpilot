@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	flow "github.com/Azure/go-workflow"
@@ -38,8 +39,8 @@ func (r *ProcWorkflowRunner) Run(ctx context.Context) error {
 }
 
 func (r *ProcWorkflowRunner) Build(ctx context.Context, workspaceID, processorID, uploadID string) error {
+	r.wf.DontPanic = true
 	infra.Log.Infof("creating workflow for upload: %s, processor: %s, workspace: %s", uploadID, processorID, workspaceID)
-
 	processor, err := r.procRepo.Get(ctx, processorID)
 	if err != nil {
 		return err
@@ -67,14 +68,18 @@ func (r *ProcWorkflowRunner) Build(ctx context.Context, workspaceID, processorID
 	for id, task := range taskfnMap {
 		depKeys := edges[id]
 		var prevTasks []tasks.Task
+		var PrevtasksKeys []string
 		for _, depKey := range depKeys {
 			prevTasks = append(prevTasks, taskfnMap[depKey])
+			PrevtasksKeys = append(PrevtasksKeys, depKey)
 		}
 
 		pt, ok := procTaskMap[id]
 		if !ok {
 			return fmt.Errorf("failed to get task %s", id)
 		}
+		infra.Log.Infof("task: %s, prevTasks: %s", pt.Key, strings.Join(PrevtasksKeys, ","))
+
 		build := r.buildStepWithDependencies(pt, task, prevTasks, firstTask)
 		steps = append(steps, build)
 		tsks = append(tsks, task)
@@ -118,7 +123,6 @@ func (r *ProcWorkflowRunner) buildStepWithDependencies(pt *models.ProcTask, task
 					inp.TaskID = pt.ID       // add current task id to input
 					inp.TaskParams = pt.Data // add current task data
 					inp.Input = inp.Output
-					inp.Output = nil
 					t.MakeTask(inp)
 					return nil
 				})
@@ -177,7 +181,7 @@ func (r *ProcWorkflowRunner) addCommonSteps(steps []flow.Builder, tsks []flow.St
 func (r *ProcWorkflowRunner) getNodesAndEdgesMap(processor *models.Processor) (map[string]tasks.Task, map[string]*models.ProcTask, map[string][]string, error) {
 	taskfnMap := make(map[string]tasks.Task)
 	taskMap := make(map[string]*models.ProcTask)
-	edges := make(map[string][]string)
+	prevTasks := make(map[string][]string)
 
 	for _, t := range processor.Tasks.Nodes {
 		task, ok := GetTaskFromRegistry(t.Key)
@@ -187,13 +191,15 @@ func (r *ProcWorkflowRunner) getNodesAndEdgesMap(processor *models.Processor) (m
 
 		taskfnMap[t.ID] = task
 		taskMap[t.ID] = &t
+	}
 
+	for _, t := range processor.Tasks.Nodes {
 		for _, edge := range processor.Tasks.Edges {
 			if edge.Source == t.ID {
-				edges[t.ID] = append(edges[t.ID], edge.Target)
+				prevTasks[edge.Target] = append(prevTasks[edge.Target], t.ID)
 			}
 		}
 	}
 
-	return taskfnMap, taskMap, edges, nil
+	return taskfnMap, taskMap, prevTasks, nil
 }

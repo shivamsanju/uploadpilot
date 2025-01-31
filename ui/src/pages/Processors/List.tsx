@@ -245,11 +245,11 @@ const ProcessorList = ({ opened, setOpened }: { opened: boolean, setOpened: any 
                     setInitialValues(null);
                     setMode('add');
                 }}
-                title={<Title order={3} opacity={0.7}>
+                title={<Title order={5} opacity={0.7}>
                     {mode === 'edit' ? 'Edit Processor' : mode === 'view' ? 'View Details' : 'Add Processor'}
                 </Title>}
                 closeOnClickOutside={false}
-                size="xl"
+                size="lg"
             >
                 <AddProcessorForm mode={mode} setOpened={setOpened} workspaceId={workspaceId || ""} initialValues={initialValues} setInitialValues={setInitialValues} setMode={setMode} />
             </Modal>

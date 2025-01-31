@@ -26,7 +26,7 @@ func (us *UploadService) ValidateUploadSizeLimits(hook *tusd.HookEvent, workspac
 		maxFileSize = "no_limit"
 	}
 	mesg := fmt.Sprintf("upload size: %d is within allowed range: %d to %s", hook.Upload.Size, config.MinFileSize, maxFileSize)
-	us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, uploadID, mesg, models.UploadLogLevelInfo))
+	us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, uploadID, mesg, nil, nil, models.UploadLogLevelInfo))
 	return nil
 }
 
@@ -37,8 +37,8 @@ func (us *UploadService) ValidateUploadFileType(hook *tusd.HookEvent, workspaceI
 
 	for _, fileType := range config.AllowedFileTypes {
 		if hook.Upload.MetaData["type"] == fileType {
-			mesg := fmt.Sprintf("file type: %s is among the allowed file types: %s", hook.Upload.MetaData["type"], config.AllowedFileTypes)
-			us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, uploadID, mesg, models.UploadLogLevelInfo))
+			mesg := fmt.Sprintf("file type: %s is among the allowed file types: %s", hook.Upload.MetaData["filetype"], config.AllowedFileTypes)
+			us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, uploadID, mesg, nil, nil, models.UploadLogLevelInfo))
 			return nil
 		}
 	}
@@ -76,6 +76,6 @@ func (us *UploadService) AuthenticateUpload(hook *tusd.HookEvent, workspaceID, u
 	}
 
 	mesg := fmt.Sprintf("upload is authenticated by auth endpoint: %s", config.AuthEndpoint)
-	us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, uploadID, mesg, models.UploadLogLevelInfo))
+	us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, uploadID, mesg, nil, nil, models.UploadLogLevelInfo))
 	return nil
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/events"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
+	"github.com/uploadpilot/uploadpilot/internal/utils"
 )
 
 type StatusListener struct {
@@ -41,6 +42,7 @@ func NewStatusListener() *StatusListener {
 }
 
 func (l *StatusListener) Start() {
+	defer utils.Recover()
 	infra.Log.Info("starting upload status listener...")
 	for event := range l.eventChan {
 		infra.Log.Infof("processing upload event %s", event.Key)

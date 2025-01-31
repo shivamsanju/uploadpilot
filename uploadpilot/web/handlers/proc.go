@@ -133,5 +133,5 @@ func (h *processorHandler) DisableProcessor(w http.ResponseWriter, r *http.Reque
 }
 
 func (h *processorHandler) GetProcBlock(w http.ResponseWriter, r *http.Request) {
-	render.JSON(w, r, proc.ProcTaskBlocks)
+	render.JSON(w, r, proc.ProcTaskBlocks[1:])
 }

@@ -12,6 +12,8 @@ type LogEvent struct {
 	Context     context.Context
 	WorkspaceID string
 	UploadID    string
+	ProcessorID *string
+	TaskID      *string
 	Message     string
 	Level       models.UploadLogLevel
 }
@@ -24,8 +26,16 @@ type LogEventBus struct {
 var logEventBus *LogEventBus
 var logEventOnce sync.Once
 
-func NewLogEvent(ctx context.Context, workspaceID, uploadID, message string, level models.UploadLogLevel) *LogEvent {
-	return &LogEvent{Context: ctx, WorkspaceID: workspaceID, UploadID: uploadID, Message: message, Level: level}
+func NewLogEvent(ctx context.Context, workspaceID, uploadID, message string, proccessorID, taskID *string, level models.UploadLogLevel) *LogEvent {
+	return &LogEvent{
+		Context:     ctx,
+		WorkspaceID: workspaceID,
+		UploadID:    uploadID,
+		Message:     message,
+		Level:       level,
+		ProcessorID: proccessorID,
+		TaskID:      taskID,
+	}
 }
 
 func GetLogEventBus() *LogEventBus {

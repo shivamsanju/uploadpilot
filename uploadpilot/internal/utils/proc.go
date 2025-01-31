@@ -6,7 +6,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/uploadpilot/uploadpilot/internal/config"
@@ -81,17 +80,9 @@ func ZipAndUploadToS3(ctx context.Context, dirToZip, zipFileName string) (string
 		return "", fmt.Errorf("failed to upload zip file to S3: %w", err)
 	}
 
-	url, err := s3.NewPresignClient(infra.S3Client).PresignGetObject(
-		ctx,
-		&s3.GetObjectInput{Bucket: &config.S3BucketName, Key: &objectName},
-		func(opts *s3.PresignOptions) {
-			opts.Expires = time.Duration(7 * 24 * time.Hour)
-		},
-	)
-
 	if err != nil {
 		return "", err
 	}
 
-	return url.URL, nil
+	return objectName, nil
 }

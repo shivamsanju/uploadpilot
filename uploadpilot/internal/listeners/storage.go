@@ -10,6 +10,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/events"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
+	"github.com/uploadpilot/uploadpilot/internal/utils"
 )
 
 type StorageListener struct {
@@ -32,6 +33,8 @@ func NewStorageListener() *StorageListener {
 }
 
 func (l *StorageListener) Start() {
+	defer utils.Recover()
+
 	infra.Log.Info("starting upload storage listener...")
 	for event := range l.eventChan {
 		ctx := event.Context
@@ -42,7 +45,7 @@ func (l *StorageListener) Start() {
 
 		url, objectName, err := l.generateUploadURL(ctx, uploadID)
 		if err != nil {
-			l.logEventBus.Publish(events.NewLogEvent(ctx, event.Upload.WorkspaceID.Hex(), uploadID, "Failed to generate a link of the uploaded file", models.UploadLogLevelError))
+			l.logEventBus.Publish(events.NewLogEvent(ctx, event.Upload.WorkspaceID.Hex(), uploadID, "Failed to generate a link of the uploaded file", nil, nil, models.UploadLogLevelError))
 			infra.Log.Errorf("failed to generate upload url: %s", err.Error())
 			continue
 		}
@@ -53,13 +56,15 @@ func (l *StorageListener) Start() {
 		}
 
 		if err := l.uploadRepo.Patch(ctx, uploadID, patchMap); err != nil {
-			l.logEventBus.Publish(events.NewLogEvent(ctx, event.Upload.WorkspaceID.Hex(), uploadID, "Failed to save the link of the uploaded file", models.UploadLogLevelError))
+			l.logEventBus.Publish(events.NewLogEvent(ctx, event.Upload.WorkspaceID.Hex(), uploadID, "Failed to save the link of the uploaded file", nil, nil, models.UploadLogLevelError))
 			infra.Log.Errorf("failed to patch upload: %s", err.Error())
 		}
 	}
 }
 
 func (l *StorageListener) cleanUploadInfoFileRoutine(ctx context.Context, uploadID string) {
+	defer utils.Recover()
+
 	objectFileName := uploadID
 	if len(objectFileName) > 32 {
 		objectFileName = objectFileName[:32]

@@ -9,6 +9,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/events"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
+	"github.com/uploadpilot/uploadpilot/internal/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -38,6 +39,8 @@ func NewUploadLogsListener(flushInterval time.Duration, bufferSize int) *UploadL
 }
 
 func (l *UploadLogsListener) Start() {
+	defer utils.Recover()
+
 	infra.Log.Info("starting upload logs listener...")
 	go l.startBatchFlush()
 
@@ -58,14 +61,29 @@ func (l *UploadLogsListener) Start() {
 
 		l.mu.Lock()
 
-		l.logBuffer = append(l.logBuffer, &models.UploadLog{
+		log := &models.UploadLog{
 			ID:          primitive.NewObjectID(),
 			WorkspaceID: workspaceID,
 			UploadID:    uploadID,
 			Message:     event.Message,
 			Level:       event.Level,
 			Timestamp:   primitive.NewDateTimeFromTime(time.Now()),
-		})
+		}
+
+		if event.ProcessorID != nil {
+			pID, err := primitive.ObjectIDFromHex(*event.ProcessorID)
+			if err != nil {
+				infra.Log.Errorf("invalid processor id in log: %s", err.Error())
+				continue
+			}
+			log.ProcessorID = pID
+		}
+
+		if event.TaskID != nil {
+			log.TaskID = *event.TaskID
+		}
+
+		l.logBuffer = append(l.logBuffer, log)
 
 		if len(l.logBuffer) >= l.bufferSize {
 			l.uploadLogsRepo.BatchAddLogs(context.Background(), l.logBuffer)
@@ -77,6 +95,8 @@ func (l *UploadLogsListener) Start() {
 
 // startBatchFlush will flush logs every `flushInterval`
 func (l *UploadLogsListener) startBatchFlush() {
+	defer utils.Recover()
+
 	ticker := time.NewTicker(l.flushInterval)
 	defer ticker.Stop()
 

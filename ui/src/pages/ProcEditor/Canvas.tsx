@@ -1,10 +1,10 @@
 import { useMemo, useRef } from 'react';
-import { ReactFlow, Controls, Background, BackgroundVariant, Panel } from '@xyflow/react';
-import { Transition, useMantineColorScheme, useMantineTheme } from '@mantine/core';
-import { BaseNode } from './Node/BaseNode';
+import { ReactFlow, Controls, Background, BackgroundVariant, ConnectionLineType } from '@xyflow/react';
+import { useMantineColorScheme, useMantineTheme } from '@mantine/core';
+import { BaseNode } from '../../components/EditorNode/BaseNode';
+import { BlockSearch } from '../../components/BlockSearch';
 import '@xyflow/react/dist/style.css';
-import { NodeForm } from './Node/Form';
-import { useCanvas, useDragAndDrop } from '../../hooks/DndCanvas';
+import { useCanvas } from '../../context/EditorCtx';
 
 export const ProcessorCanvas = () => {
   const reactFlowWrapper = useRef(null);
@@ -13,8 +13,7 @@ export const ProcessorCanvas = () => {
   const bg = colorScheme === "dark" ? "#0A0A0A" : theme.colors.gray[0];
   const nodeTypes = useMemo(() => ({ baseNode: BaseNode }), []);
 
-  const { nodes, edges, onConnect, onEdgesChange, onNodesChange, openedNodeId } = useCanvas();
-  const { onDrop, onDragOver } = useDragAndDrop();
+  const { nodes, edges, onEdgesChange, onNodesChange, onNodesDelete, openedBlocksModal, closeBlocksModal } = useCanvas();
 
   return (
     <div style={{ width: '100%', height: '92vh' }} ref={reactFlowWrapper} className='reactflow-wrapper'>
@@ -28,20 +27,13 @@ export const ProcessorCanvas = () => {
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onDrop={onDrop}
-        onDragOver={onDragOver}
+        onNodesDelete={onNodesDelete}
+        connectionLineType={ConnectionLineType.SmoothStep}
       >
         <Controls />
-        <Panel position="top-right">
-          <Transition mounted={openedNodeId !== ""} transition="pop" duration={100} timingFunction="ease">
-            {(styles) => <div style={styles} className="transition" >
-              <NodeForm />
-            </div>}
-          </Transition>
-        </Panel>
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
       </ReactFlow>
+      <BlockSearch opened={openedBlocksModal} close={closeBlocksModal} />
     </div>
   );
 }

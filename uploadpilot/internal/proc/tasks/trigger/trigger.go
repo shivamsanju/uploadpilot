@@ -1,29 +1,30 @@
-package pdf
+package trigger
 
 import (
 	"context"
 
 	"github.com/uploadpilot/uploadpilot/internal/db"
-	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/events"
 	"github.com/uploadpilot/uploadpilot/internal/proc/tasks"
 )
 
-type encodePDFContentTask struct {
+type triggerTask struct {
 	*tasks.BaseTask
 	uploadRepo *db.UploadRepo
+	procRepo   *db.ProcessorRepo
 	leb        *events.LogEventBus
 }
 
-func NewEncodePDFContentTask() tasks.Task {
-	return &encodePDFContentTask{
+func NewTriggerTask() tasks.Task {
+	return &triggerTask{
 		uploadRepo: db.NewUploadRepo(),
+		procRepo:   db.NewProcessorRepo(),
 		leb:        events.GetLogEventBus(),
 		BaseTask:   &tasks.BaseTask{},
 	}
 }
 
-func (t *encodePDFContentTask) Do(ctx context.Context) error {
-	t.leb.Publish(events.NewLogEvent(ctx, t.WorkspaceID, t.UploadID, "encoding pdf content", &t.ProcessorID, &t.TaskID, models.UploadLogLevelInfo))
+func (t *triggerTask) Do(ctx context.Context) error {
+	t.Output = t.Input
 	return nil
 }

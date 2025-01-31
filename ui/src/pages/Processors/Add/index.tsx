@@ -92,7 +92,6 @@ const AddWebhookForm: React.FC<Props> = ({ setInitialValues, setMode, setOpened,
             <LoadingOverlay visible={isCreating || isUpdating} overlayProps={{ radius: "sm", blur: 1 }} />
             <Stack gap="xl">
                 <TextInput
-                    size="sm"
                     withAsterisk
                     label="Name"
                     description="Name of the processor"
@@ -103,7 +102,6 @@ const AddWebhookForm: React.FC<Props> = ({ setInitialValues, setMode, setOpened,
                 />
                 <MultiSelect
                     searchable
-                    size="sm"
                     withAsterisk
                     leftSection={<IconClockBolt size={16} />}
                     label="Trigger"
@@ -118,7 +116,7 @@ const AddWebhookForm: React.FC<Props> = ({ setInitialValues, setMode, setOpened,
             </Stack>
             {mode !== "view" && (
                 <Group justify="flex-end" mt={50}>
-                    <Button type="submit" size="sm" >
+                    <Button type="submit"  >
                         {mode === 'edit' ? 'Save' : 'Add'}
                     </Button>
                 </Group>

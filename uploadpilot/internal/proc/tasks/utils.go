@@ -54,12 +54,12 @@ func (t *BaseTask) SaveInputFile(ctx context.Context) error {
 	return utils.DownloadFileFromS3(ctx, inputObjId, taskInputDir+"/"+inputObjId)
 }
 
-func (t *BaseTask) SaveOutputFile(ctx context.Context) error {
-	_, err := utils.ZipAndUploadToS3(ctx, t.GetTaskOutDir(), t.TaskID)
+func (t *BaseTask) SaveOutputFile(ctx context.Context) (string, error) {
+	objectName, err := utils.ZipAndUploadToS3(ctx, t.GetTaskOutDir(), t.TaskID)
 	if err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return objectName, nil
 }
 
 func (t *BaseTask) Setup() error {

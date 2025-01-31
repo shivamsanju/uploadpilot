@@ -1,6 +1,6 @@
-import { Box } from "@mantine/core";
-import { useCanvas } from "../../../../hooks/DndCanvas";
+import { Box, Button, Group, Stack } from "@mantine/core";
 import WebhookNodeForm from "./WebhookNodeForm";
+import { useCanvas } from "../../../context/EditorCtx";
 
 export type NodeFormProps = {
     nodeData: any,
@@ -19,7 +19,7 @@ const getNodeForm = (key: string): React.FC<NodeFormProps> => {
 }
 
 export const NodeForm = () => {
-    const { nodes, setNodes, openedNodeId, setOpenedNodeId } = useCanvas();
+    const { nodes, setNodes, openedNodeId, setOpenedNodeId, isUpdating, isPending, handleSave, handleDiscard } = useCanvas();
 
     const saveNodeData = (data: any) => {
         setNodes((nds: any) => nds.map((node: any) => {
@@ -37,15 +37,20 @@ export const NodeForm = () => {
         setOpenedNodeId('');
     }
 
-
     const key = nodes?.find((node) => node.id === openedNodeId)?.key;
     const nodeData = nodes?.find((node) => node.id === openedNodeId)?.data;
 
     const Form = getNodeForm(key);
     return (
-        <Box>
-            <Form nodeData={nodeData} saveNodeData={saveNodeData} setOpenedNodeId={setOpenedNodeId} />
-        </Box>
+        <Stack justify="space-between" h="100%" p="sm" px="md">
+            <Box >
+                <Form nodeData={nodeData} saveNodeData={saveNodeData} setOpenedNodeId={setOpenedNodeId} />
+            </Box>
+            <Group justify="center" >
+                <Button variant="default" c="dimmed" loading={isUpdating || isPending} onClick={handleDiscard}>Discard</Button>
+                <Button loading={isUpdating || isPending} onClick={handleSave}>Save</Button>
+            </Group>
+        </Stack>
     )
 }
 

@@ -33,23 +33,30 @@ func (t *extractPDFImageTask) Do(ctx context.Context) error {
 
 	wID := t.WorkspaceID
 	uID := t.UploadID
-	t.leb.Publish(events.NewLogEvent(ctx, wID, uID, "extracting pdf content", models.UploadLogLevelInfo))
+	pID := t.ProcessorID
+	tID := t.TaskID
+	t.leb.Publish(events.NewLogEvent(ctx, wID, uID, "extracting images from pdf", &pID, &tID, models.UploadLogLevelInfo))
 
 	if err := t.SaveInputFile(ctx); err != nil {
-		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, err.Error(), models.UploadLogLevelError))
+		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, err.Error(), &pID, &tID, models.UploadLogLevelError))
 		return err
 	}
 
 	if err := t.extractPDFImage(); err != nil {
-		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, err.Error(), models.UploadLogLevelError))
+		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, err.Error(), &pID, &tID, models.UploadLogLevelError))
+		return err
+	}
+	objectName, err := t.SaveOutputFile(ctx)
+	if err != nil {
+		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, err.Error(), &pID, &tID, models.UploadLogLevelError))
 		return err
 	}
 
-	t.leb.Publish(events.NewLogEvent(ctx, wID, uID, fmt.Sprintf("pdf content extracted to %s", t.TaskID), models.UploadLogLevelInfo))
-
 	t.Output = map[string]interface{}{
-		"inputObjId": t.TaskID,
+		"inputObjId": objectName,
 	}
+
+	t.leb.Publish(events.NewLogEvent(ctx, wID, uID, fmt.Sprintf("pdf image extracted to %s", objectName), &pID, &tID, models.UploadLogLevelInfo))
 
 	return nil
 }
@@ -67,7 +74,7 @@ func (t *extractPDFImageTask) extractPDFImage() error {
 			return nil
 		}
 
-		if err := api.ExtractContentFile(pathname, outDir, nil, nil); err != nil {
+		if err := api.ExtractImagesFile(pathname, outDir, nil, nil); err != nil {
 			return err
 		}
 		return nil

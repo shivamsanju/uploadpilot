@@ -5,6 +5,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/proc/tasks"
 	"github.com/uploadpilot/uploadpilot/internal/proc/tasks/notify"
 	"github.com/uploadpilot/uploadpilot/internal/proc/tasks/pdf"
+	"github.com/uploadpilot/uploadpilot/internal/proc/tasks/trigger"
 )
 
 type TaskBlock struct {
@@ -15,6 +16,7 @@ type TaskBlock struct {
 }
 
 var (
+	TriggerTaskKey           models.TaskKey = "trigger"
 	ExtractPDFContentTaskKey models.TaskKey = "extract_pdf_content"
 	ExtractPDFImageTaskKey   models.TaskKey = "extract_pdf_image"
 	EncodePDFContentTaskKey  models.TaskKey = "encode_pdf_content"
@@ -23,6 +25,12 @@ var (
 )
 
 var ProcTaskBlocks = []TaskBlock{
+	{
+		Key:         TriggerTaskKey,
+		Label:       "",
+		Description: "",
+		TaskBuilder: trigger.NewTriggerTask,
+	},
 	{
 		Key:         ExtractPDFContentTaskKey,
 		Label:       "Extract PDF content",

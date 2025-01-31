@@ -34,6 +34,29 @@ func (s *ProcessorService) CreateProcessor(ctx context.Context, workspaceID stri
 		return err
 	}
 	processor.WorkspaceID = wsObjID
+	processor.Tasks = &models.ProcTaskCanvas{
+		Nodes: []models.ProcTask{
+			{
+				ID:              primitive.NewObjectID().Hex(),
+				Key:             TriggerTaskKey,
+				Type:            "baseNode",
+				Retry:           0,
+				ContinueOnError: true,
+				TimeoutMilSec:   0,
+				Deletable:       false,
+				Data: models.JSON{
+					"label":       "Trigger",
+					"description": "Trigger the processor to start processing the files",
+				},
+				Position: models.JSON{
+					"x": 0,
+					"y": 0,
+				},
+				Measured: models.JSON{},
+			},
+		},
+		Edges: []models.ProcTaskEdge{},
+	}
 	return s.wsRepo.Create(ctx, processor)
 }
 

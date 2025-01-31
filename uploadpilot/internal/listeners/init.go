@@ -1,8 +1,11 @@
 package listeners
 
-import "time"
+import (
+	"time"
+)
 
 func StartListeners() {
+
 	storageListener := NewStorageListener()
 	go storageListener.Start()
 

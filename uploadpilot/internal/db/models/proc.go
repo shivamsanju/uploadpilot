@@ -16,12 +16,14 @@ type ProcTask struct {
 	Data            JSON    `bson:"data" json:"data" validate:"required"`
 	Position        JSON    `bson:"position" json:"position"`
 	Measured        JSON    `bson:"measured" json:"measured"`
+	Deletable       bool    `bson:"deletable" json:"deletable"`
 }
 
 type ProcTaskEdge struct {
-	ID     string `bson:"id" json:"id" validate:"required"`
-	Source string `bson:"source" json:"source" validate:"required"`
-	Target string `bson:"target" json:"target" validate:"required"`
+	ID        string `bson:"id" json:"id" validate:"required"`
+	Source    string `bson:"source" json:"source" validate:"required"`
+	Target    string `bson:"target" json:"target" validate:"required"`
+	Deletable bool   `bson:"deletable" json:"deletable"`
 }
 
 type ProcTaskCanvas struct {

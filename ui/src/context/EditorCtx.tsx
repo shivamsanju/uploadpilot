@@ -1,7 +1,9 @@
-import { createContext, useEffect, useState } from 'react';
-import { addEdge, applyNodeChanges, applyEdgeChanges } from '@xyflow/react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { applyNodeChanges, applyEdgeChanges, getIncomers, getOutgoers, getConnectedEdges, ConnectionLineType } from '@xyflow/react';
 import { useParams } from 'react-router-dom';
 import { useGetProcessor, useUpdateProcessorTaskMutation } from '../apis/processors';
+import { v4 as uuid } from 'uuid';
+import { useDisclosure } from '@mantine/hooks';
 
 type ProcEditorContextType = {
     workspaceId: string | undefined;
@@ -14,12 +16,19 @@ type ProcEditorContextType = {
     openedNodeId: string;
     onNodesChange: (changes: any) => void;
     onEdgesChange: (changes: any) => void;
-    onConnect: (connection: any) => void;
+    onNodesDelete: (nodes: any) => void;
     setNodes: (nodes: any) => void;
     setEdges: (edges: any) => void;
     handleSave: () => Promise<void>;
     handleDiscard: () => Promise<void>;
     setOpenedNodeId: (id: string) => void
+    connectionStateNodeId: any;
+    setconnectionStateNodeId: (connectionStateNodeId: any) => void;
+    onSelectNewNode: (item: any, type: string) => void
+    onConnectEnd: (fromId: any) => void
+    openedBlocksModal: boolean,
+    openBlocksModal: () => void
+    closeBlocksModal: () => void
 }
 
 export const ProcEditorContext = createContext<ProcEditorContextType>({
@@ -33,16 +42,25 @@ export const ProcEditorContext = createContext<ProcEditorContextType>({
     openedNodeId: '',
     onNodesChange: (changes: any) => { },
     onEdgesChange: (changes: any) => { },
-    onConnect: (connection: any) => { },
+    onNodesDelete: (nodes: any) => { },
     setNodes: (nodes: any) => { },
     setEdges: (edges: any) => { },
     handleSave: async () => { },
     handleDiscard: async () => { },
-    setOpenedNodeId: (id: string) => { }
+    setOpenedNodeId: (id: string) => { },
+    connectionStateNodeId: null,
+    setconnectionStateNodeId: () => { },
+    onConnectEnd: (fromId) => { },
+    onSelectNewNode: (item, type) => { },
+    openedBlocksModal: false,
+    openBlocksModal: () => { },
+    closeBlocksModal: () => { },
+
 });
 
 export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { workspaceId, processorId } = useParams();
+    const [openedBlocksModal, { open: openBlocksModal, close: closeBlocksModal }] = useDisclosure();
 
     const { isPending, error, processor, invalidate } = useGetProcessor(workspaceId as string, processorId as string);
     const { mutateAsync, isPending: isUpdating } = useUpdateProcessorTaskMutation();
@@ -50,6 +68,7 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const [nodes, setNodes] = useState<any[]>([]);
     const [edges, setEdges] = useState<any[]>([]);
     const [openedNodeId, setOpenedNodeId] = useState('');
+    const [connectionStateNodeId, setconnectionStateNodeId] = useState<any>(null);
 
 
     const onNodesChange = (changes: any) => {
@@ -58,10 +77,6 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     const onEdgesChange = (changes: any) => {
         setEdges((prevEdges) => applyEdgeChanges(changes, prevEdges));
-    };
-
-    const onConnect = (connection: any) => {
-        setEdges((prevEdges) => addEdge(connection, prevEdges));
     };
 
     const handleSave = async () => {
@@ -83,6 +98,69 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         await invalidate();
     }
 
+    const onNodesDelete = useCallback(
+        (deleted: any) => {
+            setEdges(
+                deleted.reduce((acc: any, node: any) => {
+                    const incomers = getIncomers(node, nodes, edges);
+                    const outgoers = getOutgoers(node, nodes, edges);
+                    const connectedEdges = getConnectedEdges([node], edges);
+
+                    const remainingEdges = acc.filter(
+                        (edge: any) => !connectedEdges.includes(edge),
+                    );
+
+                    const createdEdges = incomers.flatMap(({ id: source }) =>
+                        outgoers.map(({ id: target }) => ({
+                            id: `${source}->${target}`,
+                            deletable: false,
+                            source,
+                            target,
+                        })),
+                    );
+
+                    return [...remainingEdges, ...createdEdges];
+                }, edges),
+            );
+        },
+        [nodes, edges],
+    );
+
+    const onSelectNewNode = useCallback(
+        (item: any, type: string) => {
+            const node = nodes.find((n: any) => n.id === connectionStateNodeId);
+            const numEdges = edges.filter((e: any) => e.source === connectionStateNodeId).length;
+            if (!node) return;
+
+            const id = uuid();
+
+            const newNode: any = {
+                id: id,
+                type,
+                position: {
+                    x: node?.position?.x + (350 * numEdges),
+                    y: node?.position?.y + 200,
+                },
+                key: item?.key,
+                retry: 0,
+                continueOnError: false,
+                timeoutMilSec: 1000000,
+                data: item,
+            };
+
+            setNodes((nds: any[]) => nds.concat(newNode));
+            setEdges((eds: any[]) =>
+                eds.concat({ id: uuid(), source: connectionStateNodeId, target: id, deletable: false }),
+            );
+            setconnectionStateNodeId(null);
+        },
+        [connectionStateNodeId, nodes, edges],
+    );
+
+    const onConnectEnd = useCallback((fromNodeId: any) => {
+        setconnectionStateNodeId(fromNodeId);
+    }, []);
+
     useEffect(() => {
         if (processor && processor.tasks) {
             setNodes(processor.tasks.nodes);
@@ -93,25 +171,35 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return (
         <ProcEditorContext.Provider
             value={{
-                nodes,
-                edges,
+                nodes: nodes,
+                edges: edges.map((e: any) => ({ ...e, type: ConnectionLineType.SmoothStep, animated: true })),
                 workspaceId,
                 processorId,
                 isPending,
                 isUpdating,
                 error,
                 openedNodeId,
+                connectionStateNodeId,
+                openedBlocksModal,
+                closeBlocksModal,
+                openBlocksModal,
                 onNodesChange,
                 onEdgesChange,
-                onConnect,
+                onNodesDelete,
                 setNodes,
                 setEdges,
                 handleSave,
                 handleDiscard,
-                setOpenedNodeId
+                setOpenedNodeId,
+                setconnectionStateNodeId,
+                onConnectEnd,
+                onSelectNewNode
             }}
         >
             {children}
         </ProcEditorContext.Provider>
     );
 };
+
+
+export const useCanvas = () => useContext(ProcEditorContext);

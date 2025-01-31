@@ -1,12 +1,12 @@
-import { Group, Title, Text, Button, ActionIcon, Box } from "@mantine/core";
+import { Group, Title, Text, ActionIcon, Box } from "@mantine/core";
 import { IconChevronLeft } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import UserButton from "../../../components/UserMenu";
-import { useCanvas } from "../../../hooks/DndCanvas";
+import { useCanvas } from "../../../context/EditorCtx";
 
 export const ProcEditorHeader = () => {
     const navigate = useNavigate();
-    const { isUpdating, isPending, handleSave, handleDiscard, workspaceId } = useCanvas();
+    const { workspaceId } = useCanvas();
 
     const handleBack = () => navigate(`/workspaces/${workspaceId}/processors`);
 
@@ -20,10 +20,6 @@ export const ProcEditorHeader = () => {
                     <Title order={4} opacity={0.7}>Processor XYZ</Title>
                     <Text c="dimmed">Manage users and roles in this workspace</Text>
                 </Box>
-            </Group>
-            <Group>
-                <Button variant="default" size="sm" c="dimmed" loading={isUpdating || isPending} onClick={handleDiscard}>Discard</Button>
-                <Button size="sm" loading={isUpdating || isPending} onClick={handleSave}>Save</Button>
             </Group>
             <UserButton />
         </Group>

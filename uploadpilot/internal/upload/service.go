@@ -49,7 +49,7 @@ func (us *UploadService) GetAllUploads(ctx context.Context, workspaceID string, 
 }
 
 func (us *UploadService) GetUploadDetails(ctx context.Context, workspaceID, uploadID string) (*models.Upload, error) {
-	us.logEventBus.Publish(events.NewLogEvent(ctx, workspaceID, uploadID, "uploader details fetched", models.UploadLogLevelInfo))
+	us.logEventBus.Publish(events.NewLogEvent(ctx, workspaceID, uploadID, "uploader details fetched", nil, nil, models.UploadLogLevelInfo))
 	return us.upRepo.Get(ctx, uploadID)
 }
 
@@ -73,7 +73,7 @@ func (us *UploadService) CreateUpload(hook *tusd.HookEvent) (*models.Upload, err
 		Status:    models.UploadStatusInProgress,
 		StartedAt: now,
 	}
-	us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, upload.ID.Hex(), "upload started", models.UploadLogLevelInfo))
+	us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, upload.ID.Hex(), "upload started", nil, nil, models.UploadLogLevelInfo))
 
 	logErrorAndUpdateUpload := func(err error) error {
 		if repoErr := us.upRepo.Create(hook.Context, workspaceID, upload); repoErr != nil {
@@ -82,7 +82,7 @@ func (us *UploadService) CreateUpload(hook *tusd.HookEvent) (*models.Upload, err
 		}
 
 		us.eventBus.Publish(events.NewUploadEvent(hook.Context, events.EventUploadFailed, upload, "", err))
-		us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, upload.ID.Hex(), "upload failed: "+err.Error(), models.UploadLogLevelError))
+		us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, upload.ID.Hex(), "upload failed: "+err.Error(), nil, nil, models.UploadLogLevelError))
 
 		return err
 	}
@@ -121,7 +121,7 @@ func (us *UploadService) FinishUpload(ctx context.Context, uploadID string) erro
 	}
 	infra.Log.Infof("upload completed: %s", uploadID)
 	us.eventBus.Publish(events.NewUploadEvent(ctx, events.EventUploadComplete, upload, "", nil))
-	us.logEventBus.Publish(events.NewLogEvent(ctx, upload.WorkspaceID.Hex(), upload.ID.Hex(), "upload completed", models.UploadLogLevelInfo))
+	us.logEventBus.Publish(events.NewLogEvent(ctx, upload.WorkspaceID.Hex(), upload.ID.Hex(), "upload completed", nil, nil, models.UploadLogLevelInfo))
 	return nil
 }
 
