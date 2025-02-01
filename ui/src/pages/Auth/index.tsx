@@ -1,4 +1,4 @@
-import { Button, Image, Paper, Stack, Text } from '@mantine/core';
+import { Button, Image, Box, Stack, Text } from '@mantine/core';
 import classes from './Auth.module.css';
 import { getApiDomain } from '../../utils/config';
 import TokenCatcher from './TokenCatcher';
@@ -25,7 +25,6 @@ const AuthPage = () => {
         setLoading(false);
     }, [navigate]);
 
-    console.log(loading);
 
     if (loading) {
         return <AppLoader h="100vh" />;
@@ -34,25 +33,25 @@ const AuthPage = () => {
     return (
         <div className={classes.wrapper}>
             <TokenCatcher />
-            <Paper className={classes.form} radius={0} p={30}>
-                <Stack align="center" gap="xs">
+            <Box className={classes.form} p="70" bg="white" pt="lg">
+                <Stack gap="xs" mb="60">
                     <Logo2 enableOnClick={false} />
-                    <Text size="md" fw={500}>
-                        Welcome to UploadPilot, Login with
-                    </Text>
                 </Stack>
                 <Stack mt="xl">
+                    <Text size="xs" ta="center" c="dimmed">
+                        By continuing, you agree to our Terms of Service and acknowledge you have read our Privacy Policy
+                    </Text>
                     <Button
-                        variant='default'
+                        variant='outline'
                         leftSection={<Image src={GoogleIcon} width={20} height={20} />}
                         onClick={() => handleLogin('google')}
                         size="sm"
                     >
                         Google
                     </Button>
-                    <Text ta="center" c="dimmed">OR</Text>
+                    <Text ta="center" c="dimmed">or</Text>
                     <Button
-                        variant='default'
+                        variant='outline'
                         leftSection={<Image src={GithubIcon} width={25} height={25} />}
                         onClick={() => handleLogin('github')}
                         size="sm"
@@ -60,7 +59,7 @@ const AuthPage = () => {
                         Github
                     </Button>
                 </Stack>
-            </Paper>
+            </Box>
         </div>
     );
 }
