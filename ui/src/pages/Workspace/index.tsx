@@ -48,28 +48,30 @@ const WorkspaceLandingPage = () => {
                         : <Box>
                             <LoadingOverlay visible={isCreating} overlayProps={{ radius: "sm", blur: 1 }} />
                             <form onSubmit={form.onSubmit((values) => handleCreateWorkspace(values))}>
-                                <Stack w="40vw" miw="300" mt="xl">
+                                <Stack className={classes.wsForm} align='center' >
                                     <Text size="xl" fw={700} opacity={0.7}>{workspaces && workspaces.length > 0 ? 'Create a new workspace' : 'Create a new workspace to get started'}</Text>
                                     <TextInput
+                                        w="100%"
                                         placeholder="Enter a workspace name"
                                         {...form.getInputProps('name')}
                                     />
-                                    {/* <TagsInput
-                                        placeholder="Enter tags(comma-separated)"
-                                        {...form.getInputProps('tags')}
-                                    /> */}
-                                    <Button type="submit">Create</Button>
+                                    <Button type="submit" w="100%">Create</Button>
                                 </Stack>
                             </form>
                             {workspaces && workspaces.length > 0 && (
                                 <>
-                                    <Divider mt="xl" />
-                                    <Stack mt="md" >
+                                    <Divider mt={50} mb={50} />
+                                    <Stack >
                                         <Text size="xl" fw={700} opacity={0.7}>Choose an existing workspace</Text>
                                         {workspaces && workspaces.length > 0 && workspaces.map((workspace: any) => (
                                             <Group justify='space-between' key={workspace.id} className={classes.wsItem} pt="lg">
                                                 <Text size="sm" fw="bold" opacity={0.7} >{workspace.name}</Text>
-                                                <Button key={workspace.id} variant='filled' onClick={() => navigate(`/workspaces/${workspace.id}`)}>
+                                                <Button
+                                                    className={classes.wsBtn}
+                                                    key={workspace.id}
+                                                    variant='outline'
+                                                    onClick={() => navigate(`/workspaces/${workspace.id}`)}
+                                                >
                                                     Open
                                                 </Button>
                                             </Group>
