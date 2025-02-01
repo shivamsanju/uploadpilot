@@ -3,6 +3,8 @@ package proc
 import (
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/proc/tasks"
+	"github.com/uploadpilot/uploadpilot/internal/proc/tasks/file"
+	"github.com/uploadpilot/uploadpilot/internal/proc/tasks/image"
 	"github.com/uploadpilot/uploadpilot/internal/proc/tasks/notify"
 	"github.com/uploadpilot/uploadpilot/internal/proc/tasks/pdf"
 	"github.com/uploadpilot/uploadpilot/internal/proc/tasks/trigger"
@@ -19,7 +21,7 @@ var (
 	TriggerTaskKey           models.TaskKey = "trigger"
 	ExtractPDFContentTaskKey models.TaskKey = "extract_pdf_content"
 	ExtractPDFImageTaskKey   models.TaskKey = "extract_pdf_image"
-	EncodePDFContentTaskKey  models.TaskKey = "encode_pdf_content"
+	EncryptContentTaskKey    models.TaskKey = "encrypt_content"
 	WebhookTaskKey           models.TaskKey = "webhook"
 	OCRTaskKey               models.TaskKey = "ocr"
 )
@@ -38,10 +40,10 @@ var ProcTaskBlocks = []TaskBlock{
 		TaskBuilder: pdf.NewExtractPDFContentTask,
 	},
 	{
-		Key:         EncodePDFContentTaskKey,
-		Label:       "Encode PDF content",
-		Description: "Encodes the PDF content into a zip file.",
-		TaskBuilder: pdf.NewEncodePDFContentTask,
+		Key:         EncryptContentTaskKey,
+		Label:       "Encrypt file content",
+		Description: "Encrypts the content of the uploaded file.",
+		TaskBuilder: file.NewEncryptContentTask,
 	},
 	{
 		Key:         ExtractPDFImageTaskKey,
@@ -54,5 +56,11 @@ var ProcTaskBlocks = []TaskBlock{
 		Label:       "Webhook",
 		Description: "Executes a webhook.",
 		TaskBuilder: notify.NewWebhookTask,
+	},
+	{
+		Key:         OCRTaskKey,
+		Label:       "Extract text from image",
+		Description: "Extracts text from an image.",
+		TaskBuilder: image.NewExtractTextFromImageTask,
 	},
 }

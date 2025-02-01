@@ -1,9 +1,10 @@
 import { useForm } from "@mantine/form";
-import { Button, Group, Modal, Stack, Text, TextInput, UnstyledButton } from "@mantine/core";
-import { IconClockBolt, IconHttpPost, IconLock, IconX } from "@tabler/icons-react";
+import { Button, Group, Modal, ScrollArea, Stack, Text, TextInput, UnstyledButton } from "@mantine/core";
+import { IconDeviceFloppy, IconHttpPost, IconLock, IconX } from "@tabler/icons-react";
 import { useState } from "react";
 import { CodeHighlight } from "@mantine/code-highlight";
 import { NodeFormProps } from ".";
+import { CommonForm } from "./Common";
 
 const getSampleCurl = (url: string) => {
     return `
@@ -38,40 +39,45 @@ const WebhookNodeForm: React.FC<NodeFormProps> = ({ nodeData, saveNodeData, setO
 
     return (
         <form onSubmit={form.onSubmit(saveNodeData)}>
-            <Group justify="space-between" align="center" mb="lg">
-                <Text size="lg" fw={500}>Webhook</Text>
-                <IconX size={18} onClick={() => setOpenedNodeId("")} cursor="pointer" />
-            </Group>
-            <Stack gap="lg">
-                <TextInput
-                    leftSection={<IconHttpPost size={16} color="#E0A526" />}
-                    withAsterisk
-                    label="Target URL"
-                    type="url"
-                    description={(
-                        <Group align="center" justify="space-between" p={0} m={0}>
-                            A post request will be sent to this URL
-                            <UnstyledButton variant="subtle" onClick={() => setOpenSampleReq(true)} p={0} m={0}>
-                                <Text >View sample request</Text>
-                            </UnstyledButton>
-                        </Group>
-                    )}
-                    placeholder="Enter the webhook url"
-                    {...form.getInputProps('url')}
-                />
+            <Stack justify="space-between" h="85vh">
+                <ScrollArea scrollbarSize={6}>
+                    <Group justify="space-between" align="center" mb="lg" >
+                        <Text size="lg" fw={500}>Webhook</Text>
+                        <IconX size={18} onClick={() => setOpenedNodeId("")} cursor="pointer" />
+                    </Group>
+                    <Stack gap="lg" pr="lg">
+                        <TextInput
+                            leftSection={<IconHttpPost size={16} color="#E0A526" />}
+                            withAsterisk
+                            label="Target URL"
+                            type="url"
+                            description={(
+                                <Group align="center" justify="space-between" p={0} m={0}>
+                                    A post request will be sent to this URL
+                                    <UnstyledButton variant="subtle" onClick={() => setOpenSampleReq(true)} p={0} m={0}>
+                                        <Text >View sample request</Text>
+                                    </UnstyledButton>
+                                </Group>
+                            )}
+                            placeholder="Enter the webhook url"
+                            {...form.getInputProps('url')}
+                        />
 
-                <TextInput
-                    leftSection={<IconLock size={16} />}
-                    withAsterisk
-                    label="Signing Secret"
-                    description="Signing secret for the webhook"
-                    placeholder="Enter the signing secret"
-                    {...form.getInputProps('secret')}
-                />
+                        <TextInput
+                            leftSection={<IconLock size={16} />}
+                            withAsterisk
+                            label="Signing Secret"
+                            description="Signing secret for the webhook"
+                            placeholder="Enter the signing secret"
+                            {...form.getInputProps('secret')}
+                        />
+                        <CommonForm form={form} />
+                    </Stack>
+                </ScrollArea>
+                <Group justify="center">
+                    <Button type="submit" leftSection={<IconDeviceFloppy size={16} />} >Save</Button>
+                </Group>
             </Stack>
-            <Group justify="flex-end" mt="xl">
-                <Button type="submit" leftSection={<IconClockBolt size={16} />} >Save</Button>
-            </Group>
             <Modal
                 transitionProps={{ transition: 'pop' }}
                 opened={openSampleReq}

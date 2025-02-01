@@ -40,7 +40,7 @@ const WorkspaceLandingPage = () => {
 
 
     return (
-        <Group justify='center' pb="xl">
+        <Group justify='center' mb="50">
             {
                 error ?
                     <ErrorCard title="Error" message={error.message} h="55vh" /> :
@@ -69,7 +69,7 @@ const WorkspaceLandingPage = () => {
                                         {workspaces && workspaces.length > 0 && workspaces.map((workspace: any) => (
                                             <Group justify='space-between' key={workspace.id} className={classes.wsItem} pt="lg">
                                                 <Text size="sm" fw="bold" opacity={0.7} >{workspace.name}</Text>
-                                                <Button key={workspace.id} variant='light' onClick={() => navigate(`/workspaces/${workspace.id}`)}>
+                                                <Button key={workspace.id} variant='filled' onClick={() => navigate(`/workspaces/${workspace.id}`)}>
                                                     Open
                                                 </Button>
                                             </Group>

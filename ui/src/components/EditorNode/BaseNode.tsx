@@ -21,9 +21,9 @@ export const BaseNode = (node: any) => {
 
     return (
         <>
-            <Group align="center" justify="center" mt="sm">
+            {/* <Group align="center" justify="center" mt="sm">
                 <Text c="dimmed">{node?.id}</Text>
-            </Group>
+            </Group> */}
             <Paper p="sm" withBorder className={`${classes.node} ${openedNodeId === node.id ? classes.nodeActive : ''}`} w={300} radius="sm" onDoubleClick={() => setOpenedNodeId(node.id)}>
                 <Grid>
                     <Grid.Col span={11}>

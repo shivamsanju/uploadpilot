@@ -2,6 +2,7 @@ package proc
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -80,7 +81,10 @@ func (r *ProcWorkflowRunner) Build(ctx context.Context, workspaceID, processorID
 		}
 		infra.Log.Infof("task: %s, prevTasks: %s", pt.Key, strings.Join(PrevtasksKeys, ","))
 
-		build := r.buildStepWithDependencies(pt, task, prevTasks, firstTask)
+		build, err := r.buildStepWithDependencies(pt, task, prevTasks, firstTask)
+		if err != nil {
+			return err
+		}
 		steps = append(steps, build)
 		tsks = append(tsks, task)
 	}
@@ -91,15 +95,20 @@ func (r *ProcWorkflowRunner) Build(ctx context.Context, workspaceID, processorID
 	return nil
 }
 
-func (r *ProcWorkflowRunner) buildStepWithDependencies(pt *models.ProcTask, task tasks.Task, prevTasks []tasks.Task, firstTask *tasks.BaseTask) *flow.AddStep[tasks.Task] {
+func (r *ProcWorkflowRunner) buildStepWithDependencies(pt *models.ProcTask, task tasks.Task, prevTasks []tasks.Task, firstTask *tasks.BaseTask) (*flow.AddStep[tasks.Task], error) {
 	infra.Log.Infof("building step for task: %s, map: %+v", pt.Key, pt)
+	var params *TaskParams
+	tStr := pt.Data.String()
+	if err := json.Unmarshal([]byte(tStr), &params); err != nil {
+		return nil, err
+	}
 	step := flow.Step(task).
 		AfterStep(func(ctx context.Context, _ flow.Steper, err error) error {
 			// throw errror only if continue on error is false
 			prevTask := task.GetTask()
 			if err != nil {
 				infra.Log.Errorf(msg.ProcTaskFailed, pt.Key, prevTask.WorkspaceID, prevTask.ProcessorID, prevTask.UploadID, err.Error())
-				if pt.ContinueOnError {
+				if params.ContinueOnError {
 					return nil
 				}
 				return err
@@ -129,17 +138,17 @@ func (r *ProcWorkflowRunner) buildStepWithDependencies(pt *models.ProcTask, task
 		}
 	}
 
-	if pt.Retry > 0 {
+	if params.Retry > 0 {
 		step = step.Retry(func(ro *flow.RetryOption) {
-			ro.Attempts = pt.Retry
+			ro.Attempts = params.Retry
 		})
 	}
 
-	if pt.TimeoutMilSec > 0 {
-		step = step.Timeout(time.Duration(pt.TimeoutMilSec) * time.Second)
+	if params.TimeoutMilSec > 0 {
+		step = step.Timeout(time.Duration(params.TimeoutMilSec) * time.Second)
 	}
 
-	return &step
+	return &step, nil
 }
 
 func (r *ProcWorkflowRunner) addCommonSteps(steps []flow.Builder, tsks []flow.Steper, firstTask *tasks.BaseTask) []flow.Builder {
@@ -202,4 +211,10 @@ func (r *ProcWorkflowRunner) getNodesAndEdgesMap(processor *models.Processor) (m
 	}
 
 	return taskfnMap, taskMap, prevTasks, nil
+}
+
+type TaskParams struct {
+	ContinueOnError bool   `json:"continueOnError" validate:"required"`
+	TimeoutMilSec   uint64 `json:"timeoutMilSec" validate:"required"`
+	Retry           uint64 `json:"retry" validate:"required"`
 }

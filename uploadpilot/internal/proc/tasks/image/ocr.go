@@ -1,7 +1,8 @@
-package pdf
+package image
 
 import (
 	"context"
+	"errors"
 
 	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
@@ -9,21 +10,21 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/proc/tasks"
 )
 
-type encodePDFContentTask struct {
+type extractTextFromImageTask struct {
 	*tasks.BaseTask
 	uploadRepo *db.UploadRepo
 	leb        *events.LogEventBus
 }
 
-func NewEncodePDFContentTask() tasks.Task {
-	return &encodePDFContentTask{
+func NewExtractTextFromImageTask() tasks.Task {
+	return &extractTextFromImageTask{
 		uploadRepo: db.NewUploadRepo(),
 		leb:        events.GetLogEventBus(),
 		BaseTask:   &tasks.BaseTask{},
 	}
 }
 
-func (t *encodePDFContentTask) Do(ctx context.Context) error {
-	t.leb.Publish(events.NewLogEvent(ctx, t.WorkspaceID, t.UploadID, "encoding pdf content", &t.ProcessorID, &t.TaskID, models.UploadLogLevelInfo))
-	return nil
+func (t *extractTextFromImageTask) Do(ctx context.Context) error {
+	t.leb.Publish(events.NewLogEvent(ctx, t.WorkspaceID, t.UploadID, "OCR task is in developmet.", &t.ProcessorID, &t.TaskID, models.UploadLogLevelError))
+	return errors.New("ocr task is in developmet")
 }

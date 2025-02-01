@@ -37,13 +37,10 @@ func (s *ProcessorService) CreateProcessor(ctx context.Context, workspaceID stri
 	processor.Tasks = &models.ProcTaskCanvas{
 		Nodes: []models.ProcTask{
 			{
-				ID:              primitive.NewObjectID().Hex(),
-				Key:             TriggerTaskKey,
-				Type:            "baseNode",
-				Retry:           0,
-				ContinueOnError: true,
-				TimeoutMilSec:   0,
-				Deletable:       false,
+				ID:        primitive.NewObjectID().Hex(),
+				Key:       TriggerTaskKey,
+				Type:      "baseNode",
+				Deletable: false,
 				Data: models.JSON{
 					"label":       "Trigger",
 					"description": "Trigger the processor to start processing the files",

@@ -10,9 +10,6 @@ type ProcTask struct {
 	ID              string  `bson:"id" json:"id" validate:"required"`
 	Key             TaskKey `bson:"key" json:"key" validate:"required"`
 	Type            string  `bson:"type" json:"type" validate:"required"`
-	Retry           uint64  `bson:"retry" json:"retry"`
-	ContinueOnError bool    `bson:"continueOnError" json:"continueOnError"`
-	TimeoutMilSec   uint64  `bson:"timeoutMilSec" json:"timeoutMilSec"`
 	Data            JSON    `bson:"data" json:"data" validate:"required"`
 	Position        JSON    `bson:"position" json:"position"`
 	Measured        JSON    `bson:"measured" json:"measured"`

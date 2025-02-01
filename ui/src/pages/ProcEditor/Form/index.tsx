@@ -1,6 +1,7 @@
 import { Paper } from "@mantine/core";
 import WebhookNodeForm from "./WebhookNodeForm";
 import { useCanvas } from "../../../context/EditorCtx";
+import NoDataForm from "./NoDataForm";
 
 export type NodeFormProps = {
     nodeData: any,
@@ -14,7 +15,7 @@ const getNodeForm = (key: string): any => {
         case 'webhook':
             return WebhookNodeForm
         default:
-            return null
+            return NoDataForm
     }
 }
 
@@ -46,7 +47,7 @@ export const NodeForm = () => {
     if (!Form || !openedNodeId) return (<></>);
 
     return (
-        <Paper h="88vh" p="md">
+        <Paper h="88vh" px="xl" py="sm" withBorder>
             <Form nodeData={nodeData} saveNodeData={saveNodeData} setOpenedNodeId={setOpenedNodeId} />
         </Paper>
     )
