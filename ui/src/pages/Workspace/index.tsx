@@ -1,10 +1,11 @@
-import { Box, Button, Divider, Group, LoadingOverlay, Stack, Text, TextInput } from '@mantine/core';
+import { ActionIcon, Box, Button, Divider, Group, LoadingOverlay, Stack, Text, TextInput } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { useCreateWorkspaceMutation, useGetWorkspaces } from '../../apis/workspace';
 import { ErrorCard } from '../../components/ErrorCard/ErrorCard';
 import { AppLoader } from '../../components/Loader/AppLoader';
 import { useNavigate } from 'react-router-dom';
 import classes from "./Workspace.module.css"
+import { IconChevronRight } from '@tabler/icons-react';
 
 const WorkspaceLandingPage = () => {
     const { isPending, error, workspaces } = useGetWorkspaces();
@@ -48,8 +49,10 @@ const WorkspaceLandingPage = () => {
                         : <Box>
                             <LoadingOverlay visible={isCreating} overlayProps={{ radius: "sm", blur: 1 }} />
                             <form onSubmit={form.onSubmit((values) => handleCreateWorkspace(values))}>
-                                <Stack className={classes.wsForm} align='center' >
-                                    <Text size="xl" fw={700} opacity={0.7}>{workspaces && workspaces.length > 0 ? 'Create a new workspace' : 'Create a new workspace to get started'}</Text>
+                                <Stack className={classes.wsForm} >
+                                    <Text size="xl" fw={700} opacity={0.7} ta='left'>
+                                        {workspaces && workspaces.length > 0 ? 'Create a new workspace' : 'Create a new workspace to get started'}
+                                    </Text>
                                     <TextInput
                                         w="100%"
                                         placeholder="Enter a workspace name"
@@ -66,14 +69,15 @@ const WorkspaceLandingPage = () => {
                                         {workspaces && workspaces.length > 0 && workspaces.map((workspace: any) => (
                                             <Group justify='space-between' key={workspace.id} className={classes.wsItem} pt="lg">
                                                 <Text size="sm" fw="bold" opacity={0.7} >{workspace.name}</Text>
-                                                <Button
-                                                    className={classes.wsBtn}
-                                                    key={workspace.id}
-                                                    variant='outline'
+                                                <ActionIcon
+                                                    mt={8}
+                                                    radius="50%"
+                                                    variant="default"
+                                                    size="lg"
                                                     onClick={() => navigate(`/workspaces/${workspace.id}`)}
                                                 >
-                                                    Open
-                                                </Button>
+                                                    <IconChevronRight color="gray" />
+                                                </ActionIcon>
                                             </Group>
                                         ))}
                                     </Stack>
