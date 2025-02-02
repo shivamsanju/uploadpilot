@@ -1,16 +1,15 @@
 .wsForm {
-    width: 40vw;
+  width: 40vw;
 
-    @media (max-width: 768px) {
-        width: 80vw;
-    }
+  @media (max-width: 768px) {
+    width: 80vw;
+  }
 }
 
-
 .wsBtn {
-    width: 250px;
+  width: 250px;
 
-    @media (max-width: 768px) {
-        width: 100px;
-    }
+  @media (max-width: 768px) {
+    width: 100px;
+  }
 }

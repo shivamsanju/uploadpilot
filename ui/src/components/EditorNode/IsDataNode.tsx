@@ -1,3 +1,3 @@
 export const isDataNode = (key: string) => {
-    return ["webhook"].includes(key);
-}
+  return ["webhook"].includes(key);
+};

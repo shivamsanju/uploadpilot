@@ -6,38 +6,43 @@ import { ErrorCard } from "../../components/ErrorCard/ErrorCard";
 import { RefreshButton } from "../../components/RefreshButton/RefreshButton";
 
 const formatLogs = (logs: any[]) => {
-    let str = ""
-    for (const log of logs) {
-        str += `${log?.timestamp} | [${log?.level?.toUpperCase()}] | ${log?.processorId ? log?.taskId && `(processor: '${log?.processorId}', task: '${log?.taskId}')` : ""} ${log?.message}\n`;
-    }
-    return str
-}
+  let str = "";
+  for (const log of logs) {
+    str += `${log?.timestamp} | [${log?.level?.toUpperCase()}] | ${log?.processorId ? log?.taskId && `(processor: '${log?.processorId}', task: '${log?.taskId}')` : ""} ${log?.message}\n`;
+  }
+  return str;
+};
 type LogsModalProps = {
-    open: boolean
-    onClose: () => void
-    uploadId: string
-    workspaceId: string
-}
-export const LogsModal: React.FC<LogsModalProps> = ({ open, onClose, uploadId, workspaceId }) => {
+  open: boolean;
+  onClose: () => void;
+  uploadId: string;
+  workspaceId: string;
+};
+export const LogsModal: React.FC<LogsModalProps> = ({
+  open,
+  onClose,
+  uploadId,
+  workspaceId,
+}) => {
+  const { isPending, error, data, invalidate } = UseGetUploadLogs(
+    workspaceId,
+    uploadId,
+  );
 
-    const { isPending, error, data, invalidate } = UseGetUploadLogs(workspaceId, uploadId)
-
-
-    return (
-        <Modal
-            opened={open}
-            fullScreen
-            title="Logs"
-            onClose={onClose}
-            size="100%"
-        >
-            {error ? <ErrorCard message={error.message} title={error.name} /> : (
-                <>
-                    <LoadingOverlay visible={isPending} overlayProps={{ radius: 'sm', blur: 1 }} />
-                    <RefreshButton onClick={invalidate} my="sm" />
-                    <CodeHighlight mih={300} code={formatLogs(data || [])} />
-                </>
-            )}
-        </Modal>
-    )
+  return (
+    <Modal opened={open} fullScreen title="Logs" onClose={onClose} size="100%">
+      {error ? (
+        <ErrorCard message={error.message} title={error.name} />
+      ) : (
+        <>
+          <LoadingOverlay
+            visible={isPending}
+            overlayProps={{ radius: "sm", blur: 1 }}
+          />
+          <RefreshButton onClick={invalidate} my="sm" />
+          <CodeHighlight mih={300} code={formatLogs(data || [])} />
+        </>
+      )}
+    </Modal>
+  );
 };

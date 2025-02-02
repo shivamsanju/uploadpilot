@@ -1,5 +1,5 @@
 .switch {
-    & * {
-        cursor: pointer;
-    }
+  & * {
+    cursor: pointer;
+  }
 }

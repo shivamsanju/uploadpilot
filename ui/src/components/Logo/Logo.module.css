@@ -1,7 +1,7 @@
 .heading {
-	text-decoration: none;
+  text-decoration: none;
 }
 
 .subheading {
-	color: lightdark(var(--matine-colors-gray-7), var(--matine-colors-white));
+  color: lightdark(var(--matine-colors-gray-7), var(--matine-colors-white));
 }

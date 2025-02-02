@@ -1,7 +1,5 @@
 const EmptyLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    return (
-        <>{children}</>
-    )
-}
+  return <>{children}</>;
+};
 
-export default EmptyLayout
+export default EmptyLayout;

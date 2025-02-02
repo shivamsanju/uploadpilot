@@ -1,14 +1,14 @@
 .refreshBtn {
-    color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-2));
-    cursor: pointer;
+  color: light-dark(var(--mantine-color-gray-6), var(--mantine-color-dark-2));
+  cursor: pointer;
 }
 
 .refreshBtn:hover {
-    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
-    background: transparent;
+  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+  background: transparent;
 }
 
 .rotate {
-    transform: rotate(180deg);
-    transition: transform 1s ease;
+  transform: rotate(180deg);
+  transition: transform 1s ease;
 }

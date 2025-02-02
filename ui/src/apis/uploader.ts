@@ -3,49 +3,62 @@ import axiosInstance from "../utils/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { UploaderConfig } from "../types/uploader";
 
-
 export const useGetUploaderConfig = (workspaceId: string) => {
-    const queryClient = useQueryClient();
-    const { isPending, error, data: config } = useQuery({
-        queryKey: ['workspace.uploaderConfig', workspaceId],
-        queryFn: () => {
-            if (!workspaceId) {
-                return Promise.reject(new Error('workspaceId is required'));
-            }
-            return axiosInstance
-                .get(`/workspaces/${workspaceId}/config`)
-                .then((res) => res.data)
-        }
+  const queryClient = useQueryClient();
+  const {
+    isPending,
+    error,
+    data: config,
+  } = useQuery({
+    queryKey: ["workspace.uploaderConfig", workspaceId],
+    queryFn: () => {
+      if (!workspaceId) {
+        return Promise.reject(new Error("workspaceId is required"));
+      }
+      return axiosInstance
+        .get(`/workspaces/${workspaceId}/config`)
+        .then((res) => res.data);
+    },
+  });
 
-    })
+  const invalidate = () =>
+    queryClient.invalidateQueries({
+      queryKey: ["workspace.uploaderConfig", workspaceId],
+    });
 
-    const invalidate = () => queryClient.invalidateQueries({ queryKey: ['workspace.uploaderConfig', workspaceId] });
-
-    return { isPending, error, config, invalidate }
-}
+  return { isPending, error, config, invalidate };
+};
 
 export const useUpdateUploaderConfigMutation = () => {
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationKey: ['workspace.uploaderConfig'],
-        mutationFn: ({ workspaceId, config }: { workspaceId: string, config: UploaderConfig }) => {
-            return axiosInstance.put(`/workspaces/${workspaceId}/config`, config).then((res) => res.data)
-        },
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['workspace.uploaderConfig'] });
-            notifications.show({
-                title: "Success",
-                message: "Uploader configuration updated successfully",
-                color: "green",
-            });
-        },
-        onError: () => {
-            notifications.show({
-                title: "Error",
-                message: "Failed to update uploader configuration",
-                color: "red",
-            });
-        },
-    })
+  return useMutation({
+    mutationKey: ["workspace.uploaderConfig"],
+    mutationFn: ({
+      workspaceId,
+      config,
+    }: {
+      workspaceId: string;
+      config: UploaderConfig;
+    }) => {
+      return axiosInstance
+        .put(`/workspaces/${workspaceId}/config`, config)
+        .then((res) => res.data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["workspace.uploaderConfig"] });
+      notifications.show({
+        title: "Success",
+        message: "Uploader configuration updated successfully",
+        color: "green",
+      });
+    },
+    onError: () => {
+      notifications.show({
+        title: "Error",
+        message: "Failed to update uploader configuration",
+        color: "red",
+      });
+    },
+  });
 };

@@ -19,7 +19,15 @@ export const Logo: React.FC<Props> = ({ height, width, enableOnClick }) => {
         style={{ textDecoration: "none" }}
       >
         {/* {colorScheme === "dark" ? <Image src={DarkLogo} alt="logo" h={height} w={width} /> : <Image src={LightLogo} alt="logo" h={height} w={width} />} */}
-        {colorScheme === "dark" ? <Text style={{ cursor: "pointer" }} size="xl" c="white"><b>Upload</b>Pilot</Text> : <Text size="xl" c="black"><b>Upload</b>Pilot</Text>}
+        {colorScheme === "dark" ? (
+          <Text style={{ cursor: "pointer" }} size="xl" c="white">
+            <b>Upload</b>Pilot
+          </Text>
+        ) : (
+          <Text size="xl" c="black">
+            <b>Upload</b>Pilot
+          </Text>
+        )}
       </Link>
     </Flex>
   );

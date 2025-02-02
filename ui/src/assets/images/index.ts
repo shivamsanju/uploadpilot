@@ -6,4 +6,12 @@ import BlogsIcon from "./blogs-icon.svg";
 import CelebrateIcon from "./celebrate-icon.svg";
 import ErrorIcon from "./error-icon.png";
 
-export { SeparatorLine, ArrowRight, SignOutIcon, GuideIcon, BlogsIcon, CelebrateIcon, ErrorIcon };
+export {
+  SeparatorLine,
+  ArrowRight,
+  SignOutIcon,
+  GuideIcon,
+  BlogsIcon,
+  CelebrateIcon,
+  ErrorIcon,
+};

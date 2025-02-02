@@ -1,48 +1,48 @@
 .wrapper {
-    height: 100vh;
-    overflow: auto;
-    background-size: cover;
-    background-image: url('../../assets/images/authbg.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    display: flex;
-    justify-content: flex-end;
+  height: 100vh;
+  overflow: auto;
+  background-size: cover;
+  background-image: url("../../assets/images/authbg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: flex-end;
 
-    @media (max-width: 768px) {
-        background-image: none;
-        background-color: white;
-        width: 100%;
-    }
+  @media (max-width: 768px) {
+    background-image: none;
+    background-color: white;
+    width: 100%;
+  }
 }
 
 .body {
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
 
-    @media (max-width: 768px) {
-        box-shadow: none;
-        width: 100%;
-    }
+  @media (max-width: 768px) {
+    box-shadow: none;
+    width: 100%;
+  }
 
-    margin-bottom: 50px;
+  margin-bottom: 50px;
 }
 
-
 .form {
-    border-right: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-7));
-    height: 100vh;
-    width: 30vw;
-    padding-top: 80px;
+  border-right: 1px solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-7));
+  height: 100vh;
+  width: 30vw;
+  padding-top: 80px;
 
-    @media (max-width: 768px) {
-        width: 100vw;
-    }
+  @media (max-width: 768px) {
+    width: 100vw;
+  }
 }
 
 .title {
-    color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
-    font-family:
-        Greycliff CF,
-        var(--mantine-font-family);
+  color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+  font-family:
+    Greycliff CF,
+    var(--mantine-font-family);
 }

@@ -25,7 +25,7 @@ const AuthPage = () => {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalContent, setModalContent] = useState<"terms" | "privacy">(
-    "terms"
+    "terms",
   );
   const navigate = useNavigate();
 

@@ -80,7 +80,7 @@ const UploadList = ({ setTotalRecords }: any) => {
         setModalVariant("logs");
       }
     },
-    [uploads]
+    [uploads],
   );
 
   const handleViewMetadata = useCallback(
@@ -92,7 +92,7 @@ const UploadList = ({ setTotalRecords }: any) => {
         setModalVariant("metadata");
       }
     },
-    [uploads]
+    [uploads],
   );
 
   const handleRefresh = () => {
