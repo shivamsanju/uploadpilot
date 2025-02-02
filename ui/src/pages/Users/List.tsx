@@ -40,7 +40,7 @@ const WorkspaceUsersList = ({
   const [initialValues, setInitialValues] = useState(null);
   const { workspaceId } = useParams();
   const { isPending, error, users, isFetching } = useGetUsersInWorkspace(
-    workspaceId || "",
+    workspaceId || ""
   );
   const { mutateAsync, isPending: removePending } =
     useRemoveUserFromWorkspaceMutation();
@@ -62,7 +62,7 @@ const WorkspaceUsersList = ({
         console.error(error);
       }
     },
-    [workspaceId, mutateAsync],
+    [workspaceId, mutateAsync]
   );
 
   const handleViewEdit = useCallback(
@@ -71,7 +71,7 @@ const WorkspaceUsersList = ({
       setInitialValues(item);
       setOpened(true);
     },
-    [setMode, setInitialValues, setOpened],
+    [setMode, setInitialValues, setOpened]
   );
 
   const columns: DataTableColumn[] = useMemo(
@@ -160,7 +160,7 @@ const WorkspaceUsersList = ({
         ),
       },
     ],
-    [handleRemoveUser, handleViewEdit, width],
+    [handleRemoveUser, handleViewEdit, width]
   );
 
   if (error) {
@@ -170,7 +170,7 @@ const WorkspaceUsersList = ({
   return (
     <Box mr="md">
       <LoadingOverlay
-        visible={removePending}
+        visible={removePending || isPending || isFetching}
         overlayProps={{ radius: "sm", blur: 1 }}
       />
       <UploadPilotDataTable
@@ -197,8 +197,8 @@ const WorkspaceUsersList = ({
           mode === "edit"
             ? "Edit User"
             : mode === "view"
-              ? "User Details"
-              : "Add User"
+            ? "User Details"
+            : "Add User"
         }
         closeOnClickOutside={false}
         size="lg"

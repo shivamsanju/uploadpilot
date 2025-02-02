@@ -50,7 +50,7 @@ const ProcessorList = ({
   const [initialValues, setInitialValues] = useState(null);
   const { workspaceId } = useParams();
   const { isPending, error, processors, isFetching } = useGetProcessors(
-    workspaceId || "",
+    workspaceId || ""
   );
   const { mutateAsync, isPending: isDeleting } = useDeleteProcessorMutation();
   const { mutateAsync: enableDisableProcessor, isPending: isEnabling } =
@@ -79,7 +79,7 @@ const ProcessorList = ({
         console.error(error);
       }
     },
-    [workspaceId, mutateAsync],
+    [workspaceId, mutateAsync]
   );
 
   const handleEnableDisableProcessor = useCallback(
@@ -104,7 +104,7 @@ const ProcessorList = ({
         console.error(error);
       }
     },
-    [workspaceId, enableDisableProcessor],
+    [workspaceId, enableDisableProcessor]
   );
 
   const handleViewEdit = useCallback(
@@ -113,7 +113,7 @@ const ProcessorList = ({
       setMode(mode);
       setOpened(true);
     },
-    [setOpened, setMode, setInitialValues],
+    [setOpened, setMode, setInitialValues]
   );
 
   const columns: DataTableColumn[] = useMemo(
@@ -258,7 +258,7 @@ const ProcessorList = ({
                   disabled={!item?.enabled}
                   onClick={() =>
                     navigate(
-                      `/workspaces/${workspaceId}/processors/${item?.id}`,
+                      `/workspaces/${workspaceId}/processors/${item?.id}`
                     )
                   }
                 >
@@ -299,7 +299,7 @@ const ProcessorList = ({
       width,
       navigate,
       workspaceId,
-    ],
+    ]
   );
 
   if (error) {
@@ -309,7 +309,7 @@ const ProcessorList = ({
   return (
     <Box mr="md">
       <LoadingOverlay
-        visible={isDeleting || isEnabling}
+        visible={isDeleting || isEnabling || isPending || isFetching}
         overlayProps={{ radius: "sm", blur: 1 }}
       />
       <UploadPilotDataTable
@@ -339,8 +339,8 @@ const ProcessorList = ({
             {mode === "edit"
               ? "Edit Processor"
               : mode === "view"
-                ? "View Details"
-                : "Create Processor"}
+              ? "View Details"
+              : "Create Processor"}
           </Title>
         }
         closeOnClickOutside={false}
