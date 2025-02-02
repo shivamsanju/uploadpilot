@@ -16,7 +16,6 @@ import {
   Badge,
   Box,
   Group,
-  LoadingOverlay,
   Menu,
   Modal,
   Pill,
@@ -37,6 +36,7 @@ import {
 import AddProcessorForm from "./Add";
 import { timeAgo } from "../../utils/datetime";
 import { useViewportSize } from "@mantine/hooks";
+import { ErrorLoadingWrapper } from "../../components/ErrorLoadingWrapper";
 
 const ProcessorList = ({
   opened,
@@ -307,54 +307,55 @@ const ProcessorList = ({
   }
 
   return (
-    <Box mr="md">
-      <LoadingOverlay
-        visible={isDeleting || isEnabling || isPending || isFetching}
-        overlayProps={{ radius: "sm", blur: 2 }}
-      />
-      <UploadPilotDataTable
-        minHeight={700}
-        showSearch={false}
-        columns={columns}
-        records={processors}
-        verticalSpacing="md"
-        horizontalSpacing="md"
-        noHeader={true}
-        noRecordsText="No processors. Create a processor by clicking the plus icon on top right to get started."
-        noRecordsIcon={<IconRouteOff size={100} />}
-        highlightOnHover
-      />
-      <Modal
-        padding="xl"
-        transitionProps={{ transition: "pop" }}
-        opened={opened}
-        onClose={() => {
-          setOpened(false);
-          setInitialValues(null);
-          setMode("add");
-        }}
-        title={
-          <Title order={5} opacity={0.7}>
-            {mode === "edit"
-              ? "Edit Processor"
-              : mode === "view"
-              ? "View Details"
-              : "Create Processor"}
-          </Title>
-        }
-        closeOnClickOutside={false}
-        size="lg"
-      >
-        <AddProcessorForm
-          mode={mode}
-          setOpened={setOpened}
-          workspaceId={workspaceId || ""}
-          initialValues={initialValues}
-          setInitialValues={setInitialValues}
-          setMode={setMode}
+    <ErrorLoadingWrapper
+      error={error}
+      isPending={isDeleting || isEnabling || isPending || isFetching}
+    >
+      <Box mr="md">
+        <UploadPilotDataTable
+          minHeight={700}
+          showSearch={false}
+          columns={columns}
+          records={processors}
+          verticalSpacing="md"
+          horizontalSpacing="md"
+          noHeader={true}
+          noRecordsText="No processors. Create a processor by clicking the plus icon on top right to get started."
+          noRecordsIcon={<IconRouteOff size={100} />}
+          highlightOnHover
         />
-      </Modal>
-    </Box>
+        <Modal
+          padding="xl"
+          transitionProps={{ transition: "pop" }}
+          opened={opened}
+          onClose={() => {
+            setOpened(false);
+            setInitialValues(null);
+            setMode("add");
+          }}
+          title={
+            <Title order={5} opacity={0.7}>
+              {mode === "edit"
+                ? "Edit Processor"
+                : mode === "view"
+                ? "View Details"
+                : "Create Processor"}
+            </Title>
+          }
+          closeOnClickOutside={false}
+          size="lg"
+        >
+          <AddProcessorForm
+            mode={mode}
+            setOpened={setOpened}
+            workspaceId={workspaceId || ""}
+            initialValues={initialValues}
+            setInitialValues={setInitialValues}
+            setMode={setMode}
+          />
+        </Modal>
+      </Box>
+    </ErrorLoadingWrapper>
   );
 };
 

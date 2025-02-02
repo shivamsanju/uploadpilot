@@ -12,7 +12,6 @@ import {
   Paper,
   TextInput,
   Tooltip,
-  LoadingOverlay,
   SelectProps,
 } from "@mantine/core";
 import { UploaderConfig } from "../../types/uploader";
@@ -74,7 +73,7 @@ const renderSelectOption: SelectProps["renderOption"] = ({
 const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
   const { workspaceId } = useParams();
   const { isPending, error, allowedSources } = useGetAllAllowedSources(
-    workspaceId || "",
+    workspaceId || ""
   );
   const { mutateAsync, isPending: isPendingMutation } =
     useUpdateUploaderConfigMutation();
@@ -129,13 +128,14 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
   };
 
   return (
-    <ErrorLoadingWrapper error={error} isPending={isPending}>
+    <ErrorLoadingWrapper
+      error={error}
+      isPending={isPending || isPendingMutation}
+    >
       <form
         onSubmit={form.onSubmit(handleEditAndSaveButton)}
         onReset={handleResetButton}
       >
-        <LoadingOverlay visible={isPendingMutation} />
-        {/* <Title order={5} opacity={0.7} mb="sm" mt="md">Basic Validations</Title> */}
         <Paper withBorder p="sm" mb={50}>
           <SimpleGrid cols={{ base: 1, xl: 2 }}>
             <Stack p="md">

@@ -2,7 +2,6 @@ import { useForm } from "@mantine/form";
 import {
   Button,
   Group,
-  LoadingOverlay,
   MultiSelect,
   SelectProps,
   Stack,
@@ -15,6 +14,7 @@ import {
   useCreateProcessorMutation,
   useUpdateProcessorMutation,
 } from "../../../apis/processors";
+import { ErrorLoadingWrapper } from "../../../components/ErrorLoadingWrapper";
 
 const iconProps = {
   stroke: 1.5,
@@ -114,39 +114,37 @@ const AddWebhookForm: React.FC<Props> = ({
   };
 
   return (
-    <form onSubmit={form.onSubmit(handleAdd)}>
-      <LoadingOverlay
-        visible={isCreating || isUpdating}
-        overlayProps={{ radius: "sm", blur: 1 }}
-      />
-      <Stack gap="xl">
-        <TextInput
-          withAsterisk
-          label="Name"
-          description="Name of the processor"
-          type="name"
-          placeholder="Enter a name"
-          {...form.getInputProps("name")}
-          disabled={mode === "view"}
-        />
-        <MultiSelect
-          searchable
-          leftSection={<IconClockBolt size={16} />}
-          label="Trigger"
-          description="File type to trigger the processor"
-          placeholder="Select file type"
-          data={MIME_TYPES}
-          {...form.getInputProps("triggers")}
-          renderOption={renderSelectOption}
-          disabled={mode === "view"}
-        />
-      </Stack>
-      {mode !== "view" && (
-        <Group justify="flex-end" mt={50}>
-          <Button type="submit">{mode === "edit" ? "Save" : "Create"}</Button>
-        </Group>
-      )}
-    </form>
+    <ErrorLoadingWrapper isPending={isCreating || isUpdating} error={null}>
+      <form onSubmit={form.onSubmit(handleAdd)}>
+        <Stack gap="xl">
+          <TextInput
+            withAsterisk
+            label="Name"
+            description="Name of the processor"
+            type="name"
+            placeholder="Enter a name"
+            {...form.getInputProps("name")}
+            disabled={mode === "view"}
+          />
+          <MultiSelect
+            searchable
+            leftSection={<IconClockBolt size={16} />}
+            label="Trigger"
+            description="File type to trigger the processor"
+            placeholder="Select file type"
+            data={MIME_TYPES}
+            {...form.getInputProps("triggers")}
+            renderOption={renderSelectOption}
+            disabled={mode === "view"}
+          />
+        </Stack>
+        {mode !== "view" && (
+          <Group justify="flex-end" mt={50}>
+            <Button type="submit">{mode === "edit" ? "Save" : "Create"}</Button>
+          </Group>
+        )}
+      </form>
+    </ErrorLoadingWrapper>
   );
 };
 

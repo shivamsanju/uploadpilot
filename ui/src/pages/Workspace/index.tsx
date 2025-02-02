@@ -3,7 +3,6 @@ import {
   Box,
   Divider,
   Group,
-  LoadingOverlay,
   Paper,
   Stack,
   Text,
@@ -14,11 +13,10 @@ import {
   useCreateWorkspaceMutation,
   useGetWorkspaces,
 } from "../../apis/workspace";
-import { ErrorCard } from "../../components/ErrorCard/ErrorCard";
-import { AppLoader } from "../../components/Loader/AppLoader";
 import { useNavigate } from "react-router-dom";
 import classes from "./Workspace.module.css";
 import { IconCategory, IconChevronsRight } from "@tabler/icons-react";
+import { ErrorLoadingWrapper } from "../../components/ErrorLoadingWrapper";
 
 const WorkspaceLandingPage = () => {
   const { isPending, error, workspaces } = useGetWorkspaces();
@@ -53,17 +51,9 @@ const WorkspaceLandingPage = () => {
   };
 
   return (
-    <Group justify="center" mb="50">
-      {error ? (
-        <ErrorCard title="Error" message={error.message} h="55vh" />
-      ) : isPending ? (
-        <AppLoader h="55vh" />
-      ) : (
+    <ErrorLoadingWrapper error={error} isPending={isPending || isCreating}>
+      <Group justify="center" mb="50">
         <Box mt={30}>
-          <LoadingOverlay
-            visible={isCreating}
-            overlayProps={{ radius: "sm", blur: 1 }}
-          />
           <form
             onSubmit={form.onSubmit((values) => handleCreateWorkspace(values))}
           >
@@ -120,8 +110,8 @@ const WorkspaceLandingPage = () => {
             </>
           )}
         </Box>
-      )}
-    </Group>
+      </Group>
+    </ErrorLoadingWrapper>
   );
 };
 

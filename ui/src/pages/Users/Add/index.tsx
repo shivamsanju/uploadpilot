@@ -3,15 +3,9 @@ import {
   useAddUserToWorkspaceMutation,
   useEditUserInWorkspaceMutation,
 } from "../../../apis/workspace";
-import {
-  Button,
-  Group,
-  LoadingOverlay,
-  Select,
-  Stack,
-  TextInput,
-} from "@mantine/core";
+import { Button, Group, Select, Stack, TextInput } from "@mantine/core";
 import { IconAt, IconLockAccess } from "@tabler/icons-react";
+import { ErrorLoadingWrapper } from "../../../components/ErrorLoadingWrapper";
 
 const ROLES = ["Owner", "Contributor", "Viewer"];
 
@@ -86,41 +80,39 @@ const AddUserForm: React.FC<Props> = ({
   };
 
   return (
-    <form onSubmit={form.onSubmit(mode === "edit" ? handleEdit : handleAdd)}>
-      <LoadingOverlay
-        visible={isPending}
-        overlayProps={{ radius: "sm", blur: 1 }}
-      />
-      <Stack gap="xl">
-        <TextInput
-          leftSection={<IconAt size={16} />}
-          withAsterisk
-          label="Email"
-          description="Email address of the user"
-          placeholder="Email"
-          disabled={mode === "edit" || mode === "view"}
-          {...form.getInputProps("email")}
-        />
-        <Select
-          withAsterisk
-          leftSection={<IconLockAccess size={16} />}
-          label="Role"
-          description="Role to be assigned to the user"
-          placeholder="Role"
-          data={ROLES}
-          disabled={mode === "view"}
-          {...form.getInputProps("role")}
-        />
-      </Stack>
-      {mode !== "view" && (
-        <Group justify="flex-end" mt={50}>
-          <Button type="submit">
-            {mode === "edit" && "Save"}
-            {mode === "add" && "Add"}
-          </Button>
-        </Group>
-      )}
-    </form>
+    <ErrorLoadingWrapper error={null} isPending={isPending}>
+      <form onSubmit={form.onSubmit(mode === "edit" ? handleEdit : handleAdd)}>
+        <Stack gap="xl">
+          <TextInput
+            leftSection={<IconAt size={16} />}
+            withAsterisk
+            label="Email"
+            description="Email address of the user"
+            placeholder="Email"
+            disabled={mode === "edit" || mode === "view"}
+            {...form.getInputProps("email")}
+          />
+          <Select
+            withAsterisk
+            leftSection={<IconLockAccess size={16} />}
+            label="Role"
+            description="Role to be assigned to the user"
+            placeholder="Role"
+            data={ROLES}
+            disabled={mode === "view"}
+            {...form.getInputProps("role")}
+          />
+        </Stack>
+        {mode !== "view" && (
+          <Group justify="flex-end" mt={50}>
+            <Button type="submit">
+              {mode === "edit" && "Save"}
+              {mode === "add" && "Add"}
+            </Button>
+          </Group>
+        )}
+      </form>
+    </ErrorLoadingWrapper>
   );
 };
 

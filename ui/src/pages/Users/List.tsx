@@ -4,7 +4,6 @@ import {
   Avatar,
   Box,
   Group,
-  LoadingOverlay,
   Menu,
   Modal,
   Text,
@@ -21,6 +20,7 @@ import { ErrorCard } from "../../components/ErrorCard/ErrorCard";
 import { showNotification } from "@mantine/notifications";
 import AddUserForm from "./Add";
 import { useViewportSize } from "@mantine/hooks";
+import { ErrorLoadingWrapper } from "../../components/ErrorLoadingWrapper";
 
 const getRandomAvatar = () => {
   const randomIndex = Math.floor(Math.random() * 5) + 1;
@@ -168,50 +168,51 @@ const WorkspaceUsersList = ({
   }
 
   return (
-    <Box mr="md">
-      <LoadingOverlay
-        visible={removePending || isPending || isFetching}
-        overlayProps={{ radius: "sm", blur: 2 }}
-      />
-      <UploadPilotDataTable
-        minHeight={500}
-        showSearch={false}
-        columns={columns}
-        records={users}
-        verticalSpacing="md"
-        horizontalSpacing="md"
-        noHeader={true}
-        noRecordsText="No users found"
-      />
-      <Modal
-        padding="xl"
-        transitionProps={{ transition: "pop" }}
-        opened={opened}
-        onClose={() => {
-          setOpened(false);
-          setMode("add");
-          setInitialValues(null);
-        }}
-        title={
-          mode === "edit"
-            ? "Edit User"
-            : mode === "view"
-            ? "User Details"
-            : "Add User"
-        }
-        closeOnClickOutside={false}
-        size="lg"
-      >
-        <AddUserForm
-          mode={mode}
-          setOpened={setOpened}
-          workspaceId={workspaceId || ""}
-          initialValues={initialValues}
-          setInitialValues={setInitialValues}
-          setMode={setMode}
+    <ErrorLoadingWrapper
+      error={error}
+      isPending={removePending || isPending || isFetching}
+    >
+      <Box mr="md">
+        <UploadPilotDataTable
+          minHeight={500}
+          showSearch={false}
+          columns={columns}
+          records={users}
+          verticalSpacing="md"
+          horizontalSpacing="md"
+          noHeader={true}
+          noRecordsText="No users found"
         />
-      </Modal>
-    </Box>
+        <Modal
+          padding="xl"
+          transitionProps={{ transition: "pop" }}
+          opened={opened}
+          onClose={() => {
+            setOpened(false);
+            setMode("add");
+            setInitialValues(null);
+          }}
+          title={
+            mode === "edit"
+              ? "Edit User"
+              : mode === "view"
+              ? "User Details"
+              : "Add User"
+          }
+          closeOnClickOutside={false}
+          size="lg"
+        >
+          <AddUserForm
+            mode={mode}
+            setOpened={setOpened}
+            workspaceId={workspaceId || ""}
+            initialValues={initialValues}
+            setInitialValues={setInitialValues}
+            setMode={setMode}
+          />
+        </Modal>
+      </Box>
+    </ErrorLoadingWrapper>
   );
 };
 
