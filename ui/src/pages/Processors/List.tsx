@@ -310,11 +310,10 @@ const ProcessorList = ({
     <Box mr="md">
       <LoadingOverlay
         visible={isDeleting || isEnabling || isPending || isFetching}
-        overlayProps={{ radius: "sm", blur: 1 }}
+        overlayProps={{ radius: "sm", blur: 2 }}
       />
       <UploadPilotDataTable
         minHeight={700}
-        fetching={isPending || isFetching || isDeleting || isEnabling}
         showSearch={false}
         columns={columns}
         records={processors}

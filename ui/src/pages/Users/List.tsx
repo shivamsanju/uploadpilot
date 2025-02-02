@@ -171,11 +171,10 @@ const WorkspaceUsersList = ({
     <Box mr="md">
       <LoadingOverlay
         visible={removePending || isPending || isFetching}
-        overlayProps={{ radius: "sm", blur: 1 }}
+        overlayProps={{ radius: "sm", blur: 2 }}
       />
       <UploadPilotDataTable
         minHeight={500}
-        fetching={isPending || removePending || isFetching}
         showSearch={false}
         columns={columns}
         records={users}
