@@ -4,8 +4,8 @@ const nextConfig = {
   webpack(config) {
     config.module.rules.push({
       test: /\.css$/,
-      use: ['style-loader', 'css-loader'],
-      include: path.resolve(__dirname, 'node_modules'),
+      use: ["style-loader", "css-loader"],
+      include: path.resolve(__dirname, "node_modules"),
     });
     return config;
   },
@@ -13,4 +13,3 @@ const nextConfig = {
 
 export default nextConfig;
 // next.config.js
-

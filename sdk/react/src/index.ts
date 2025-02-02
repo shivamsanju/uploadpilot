@@ -1,3 +1,3 @@
 import Uploader from "./components/Uploader";
 
-export { Uploader }
+export { Uploader };
