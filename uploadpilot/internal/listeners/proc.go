@@ -88,7 +88,7 @@ func (l *ProcListener) startSingleProcessor(wg *sync.WaitGroup, event events.Upl
 	}
 
 	fileType := upload.Metadata["filetype"].(string)
-	if !slices.Contains(p.Triggers, fileType) {
+	if len(p.Triggers) > 0 && !slices.Contains(p.Triggers, fileType) {
 		return
 	}
 

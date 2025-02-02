@@ -16,6 +16,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/net/context"
 )
 
@@ -69,7 +70,10 @@ func (h *authHandler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if existingProvider == "" {
-		h.userRepo.Create(r.Context(), mapUser(&user))
+		newUser := mapUser(&user)
+		newUser.TrialStartsAt = primitive.NewDateTimeFromTime(time.Now())
+		newUser.TrialEndsAt = primitive.NewDateTimeFromTime(time.Now().Add(time.Hour * 14 * 24))
+		h.userRepo.Create(r.Context(), newUser)
 	}
 	token, err := auth.GenerateToken(w, &user, TOKEN_EXPIRY_DURATION)
 	if err != nil {
@@ -101,10 +105,12 @@ func (h *authHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
+	trialsExpiresIn := time.Until(cb.TrialEndsAt.Time()).Hours()
 	render.JSON(w, r, &dto.SessionResponse{
-		Name:      cb.Name,
-		Email:     cb.Email,
-		AvatarURL: cb.AvatarURL,
+		Name:           cb.Name,
+		Email:          cb.Email,
+		AvatarURL:      cb.AvatarURL,
+		TrialExpiresIn: int64(trialsExpiresIn),
 	})
 }
 

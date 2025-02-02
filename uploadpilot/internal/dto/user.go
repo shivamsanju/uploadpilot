@@ -7,7 +7,8 @@ type ApiUser struct {
 }
 
 type SessionResponse struct {
-	Name      string `json:"name"`
-	Email     string `json:"email"`
-	AvatarURL string `json:"avatarUrl"`
+	Name           string `json:"name"`
+	Email          string `json:"email"`
+	AvatarURL      string `json:"avatarUrl"`
+	TrialExpiresIn int64  `json:"trialExpiresIn"`
 }

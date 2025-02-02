@@ -1,33 +1,207 @@
 export const MIME_TYPES = [
-    { value: "image/png", label: "PNG Image" },
-    { value: "image/gif", label: "GIF Image" },
-    { value: "image/jpeg", label: "JPEG Image" },
-    { value: "image/svg+xml", label: "SVG Image" },
-    { value: "image/webp", label: "WebP Image" },
-    { value: "image/avif", label: "AVIF Image" },
-    { value: "image/heic", label: "HEIC Image" },
-    { value: "image/heif", label: "HEIF Image" },
-    { value: "video/mp4", label: "MP4 Video" },
-    { value: "video/webm", label: "WebM Video" },
-    { value: "video/quicktime", label: "MOV Video" },
-    { value: "video/x-matroska", label: "MKV Video" },
-    { value: "video/x-msvideo", label: "AVI Video" },
-    { value: "video/x-flv", label: "FLV Video" },
-    { value: "video/3gpp", label: "3GP Video" },
-    { value: "audio/mpeg", label: "MP3 Audio" },
-    { value: "audio/wav", label: "WAV Audio" },
-    { value: "audio/ogg", label: "OGG Audio" },
-    { value: "audio/flac", label: "FLAC Audio" },
-    { value: "application/zip", label: "ZIP Archive" },
-    { value: "application/x-rar", label: "RAR Archive" },
-    { value: "application/x-7z-compressed", label: "7z Archive" },
-    { value: "text/csv", label: "CSV File" },
-    { value: "application/pdf", label: "PDF Document" },
-    { value: "application/msword", label: "Microsoft Word Document (DOC)" },
-    { value: "application/vnd.openxmlformats-officedocument.wordprocessingml.document", label: "Microsoft Word Document (DOCX)" },
-    { value: "application/vnd.ms-excel", label: "Microsoft Excel Spreadsheet (XLS)" },
-    { value: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", label: "Microsoft Excel Spreadsheet (XLSX)" },
-    { value: "application/vnd.ms-powerpoint", label: "Microsoft PowerPoint Presentation (PPT)" },
-    { value: "application/vnd.openxmlformats-officedocument.presentationml.presentation", label: "Microsoft PowerPoint Presentation (PPTX)" },
-    { value: "application/vnd.microsoft.portable-executable", label: "Executable File (EXE)" }
+    {
+        group: "Documents",
+        items: [
+            { label: "PDF Document", value: "application/pdf" },
+            { label: "Rich Text Format (RTF)", value: "application/rtf" },
+            { label: "Plain Text", value: "text/plain" },
+            { label: "OpenDocument Text Document (ODT)", value: "application/vnd.oasis.opendocument.text" },
+            { label: "Microsoft Word Document (DOC)", value: "application/msword" },
+            { label: "Microsoft Word Document (DOCX)", value: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
+            { label: "CSV File", value: "text/csv" },
+            { label: "Microsoft Excel Spreadsheet (XLS)", value: "application/vnd.ms-excel" },
+            { label: "Microsoft Excel Spreadsheet (XLSX)", value: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" },
+            { label: "Microsoft PowerPoint Presentation (PPT)", value: "application/vnd.ms-powerpoint" },
+            { label: "Microsoft PowerPoint Presentation (PPTX)", value: "application/vnd.openxmlformats-officedocument.presentationml.presentation" },
+            { label: "Tab-Separated Values (TSV)", value: "text/tab-separated-values" },
+            { label: "OpenDocument Spreadsheet (ODS)", value: "application/vnd.oasis.opendocument.spreadsheet" },
+            { label: "Apple Numbers Spreadsheet", value: "application/vnd.apple.numbers" },
+            { label: "Apple Keynote Presentation", value: "application/vnd.apple.keynote" },
+            { label: "LaTeX Document", value: "application/x-latex" },
+            { label: "XPS Document", value: "application/vnd.ms-xpsdocument" },
+            { label: "CHM Document", value: "application/vnd.ms-htmlhelp" },
+            { label: "Microsoft Visio Drawing", value: "application/vnd.visio" },
+            { label: "OneNote File", value: "application/onenote" },
+            { label: "Microsoft Publisher Document", value: "application/vnd.ms-office" },
+            { label: "WordPerfect Document", value: "application/wordperfect" },
+            { label: "Textile Markup Language", value: "text/x-textile" },
+            { label: "Outline Processor Markup Language", value: "text/x-opml" },
+            { label: "QuarkXPress Document", value: "application/vnd.quark.quarkxpress" },
+            { label: "OpenDocument Graphics (ODG)", value: "application/vnd.oasis.opendocument.graphics" },
+            { label: "OpenDocument Formula (ODF)", value: "application/vnd.oasis.opendocument.formula" },
+            { label: "OpenDocument Drawing (ODD)", value: "application/vnd.oasis.opendocument.presentation" },
+            { label: "iWorks Pages", value: "application/vnd.apple.iwork.pages" },
+            { label: "iWorks Numbers", value: "application/vnd.apple.iwork.numbers" },
+            { label: "iWorks Keynote", value: "application/vnd.apple.iwork.keynote" },
+            { label: "XML Document", value: "application/xml" },
+            { label: "XHTML Document", value: "application/xhtml+xml" },
+            { label: "BibTeX", value: "application/x-bibtex" },
+            { label: "DokuWiki File", value: "text/x-dokuwiki" },
+            { label: "TEX Document", value: "application/x-tex" },
+            { label: "XUL Document", value: "application/vnd.mozilla.xul+xml" }
+        ]
+    },
+    {
+        group: "Images",
+        items: [
+            { label: "PNG Image", value: "image/png" },
+            { label: "GIF Image", value: "image/gif" },
+            { label: "JPEG Image", value: "image/jpeg" },
+            { label: "SVG Image", value: "image/svg+xml" },
+            { label: "WebP Image", value: "image/webp" },
+            { label: "AVIF Image", value: "image/avif" },
+            { label: "HEIC Image", value: "image/heic" },
+            { label: "HEIF Image", value: "image/heif" },
+            { label: "TIFF Image", value: "image/tiff" },
+            { label: "ICO Image", value: "image/x-icon" },
+            { label: "BMP Image", value: "image/bmp" },
+            { label: "JPEG 2000 Image", value: "image/jp2" },
+            { label: "JPEG XR Image", value: "image/vnd.ms-photo" },
+            { label: "Raw Image", value: "image/x-raw" },
+            { label: "EMF Image", value: "image/emf" },
+            { label: "WMF Image", value: "image/wmf" },
+            { label: "HEVC Image", value: "image/hevc" },
+            { label: "PGF Image", value: "image/pgf" },
+            { label: "Exr Image", value: "image/x-exr" },
+            { label: "JPEG-LS Image", value: "image/jls" },
+            { label: "OpenEXR Image", value: "image/vnd.openexr" },
+            { label: "FITS Image", value: "image/fits" }
+        ]
+    },
+    {
+        group: "Videos",
+        items: [
+            { label: "MP4 Video", value: "video/mp4" },
+            { label: "WebM Video", value: "video/webm" },
+            { label: "MOV Video", value: "video/quicktime" },
+            { label: "MKV Video", value: "video/x-matroska" },
+            { label: "AVI Video", value: "video/x-msvideo" },
+            { label: "FLV Video", value: "video/x-flv" },
+            { label: "3GP Video", value: "video/3gpp" },
+            { label: "M3U Playlist", value: "audio/x-mpegurl" },
+            { label: "ASX Playlist", value: "video/x-ms-asf" },
+            { label: "MPEG Transport Stream (TS)", value: "video/mp2t" },
+            { label: "Flash Video (FLA)", value: "application/x-shockwave-flash" },
+            { label: "AV1 Video", value: "video/av1" },
+            { label: "HEVC Video", value: "video/hevc" },
+            { label: "H.263 Video", value: "video/h263" },
+            { label: "H.264 Video", value: "video/h264" },
+            { label: "ProRes Video", value: "video/x-prores" },
+            { label: "VOB Video", value: "video/dvd" },
+            { label: "MXF Video", value: "video/mxf" },
+            { label: "Ogg Video", value: "video/ogg" },
+            { label: "RM Video", value: "application/vnd.rn-realmedia" },
+            { label: "Cinepak Video", value: "video/cinepak" },
+            { label: "DivX Video", value: "video/divx" },
+            { label: "Theora Video", value: "video/theora" },
+        ]
+    },
+    {
+        group: "Audio",
+        items: [
+            { label: "MP3 Audio", value: "audio/mpeg" },
+            { label: "WAV Audio", value: "audio/wav" },
+            { label: "OGG Audio", value: "audio/ogg" },
+            { label: "FLAC Audio", value: "audio/flac" },
+            { label: "AAC Audio", value: "audio/aac" },
+            { label: "AIFF Audio", value: "audio/aiff" },
+            { label: "WMA Audio", value: "audio/x-ms-wma" },
+            { label: "MIDI Audio", value: "audio/midi" },
+            { label: "ALAC Audio", value: "audio/alac" },
+            { label: "Opus Audio", value: "audio/opus" },
+            { label: "Speex Audio", value: "audio/speex" },
+            { label: "AMR Audio", value: "audio/amr" },
+            { label: "M4A Audio", value: "audio/mp4" },
+            { label: "RealAudio", value: "audio/x-pn-realaudio" },
+            { label: "XM Audio", value: "audio/x-xm" },
+            { label: "S3M Audio", value: "audio/x-s3m" },
+            { label: "IT Audio", value: "audio/x-it" },
+            { label: "MOD Audio", value: "audio/x-mod" },
+            { label: "CDA Audio", value: "audio/x-cda" },
+            { label: "PLS Playlist", value: "audio/x-scpls" },
+            { label: "ASF Audio", value: "audio/x-ms-asf" },
+            { label: "VQF Audio", value: "audio/vqf" },
+            { label: "WavPack Audio", value: "audio/wavpack" }
+        ]
+    },
+    {
+        group: "Archives",
+        items: [
+            { label: "ZIP Archive", value: "application/zip" },
+            { label: "RAR Archive", value: "application/x-rar" },
+            { label: "7z Archive", value: "application/x-7z-compressed" },
+            { label: "TAR Archive", value: "application/x-tar" },
+            { label: "GZIP Archive", value: "application/gzip" },
+            { label: "BZIP2 Archive", value: "application/x-bzip2" },
+            { label: "LZMA Archive", value: "application/x-lzma" },
+            { label: "XZ Archive", value: "application/x-xz" },
+            { label: "CAB Archive", value: "application/vnd.ms-cab-compressed" }
+        ]
+    },
+    {
+        group: "Fonts",
+        items: [
+            { label: "TrueType Font (TTF)", value: "font/ttf" },
+            { label: "OpenType Font (OTF)", value: "font/otf" },
+            { label: "WOFF", value: "font/woff" },
+            { label: "WOFF2", value: "font/woff2" }
+        ]
+    },
+    {
+        group: "eBooks & Digital Documents",
+        items: [
+            { label: "EPUB eBook", value: "application/epub+zip" },
+            { label: "MOBI eBook", value: "application/x-mobipocket-ebook" },
+            { label: "DjVu Document", value: "image/vnd.djvu" },
+            { label: "Comic Book Archive (CBZ)", value: "application/vnd.comicbook+zip" },
+            { label: "Comic Book Archive (CBR)", value: "application/vnd.comicbook-rar" }
+        ]
+    },
+    {
+        group: "Vector & 3D Graphics",
+        items: [
+            { label: "Encapsulated PostScript (EPS)", value: "application/postscript" },
+            { label: "Sketch Design File", value: "application/x-sketch" },
+            { label: "AutoCAD DXF", value: "image/vnd.dxf" },
+            { label: "3D Printing STL", value: "model/stl" },
+            { label: "GLTF (3D Graphics)", value: "model/gltf+json" },
+            { label: "OBJ (3D Object)", value: "model/obj" },
+            { label: "Collada (DAE)", value: "model/vnd.collada+xml" },
+            { label: "STEP (ISO 10303-21)", value: "model/step" },
+            { label: "IGES (3D Model)", value: "model/iges" },
+            { label: "VRML (Virtual Reality Modeling)", value: "model/vrml" },
+            { label: "X3D (3D Graphics)", value: "model/x3d+xml" }
+        ]
+    },
+    {
+        group: "Disk Images",
+        items: [
+            { label: "ISO Image", value: "application/x-iso9660-image" },
+            { label: "IMG Disk Image", value: "application/x-raw-disk-image" },
+            { label: "DMG (Apple Disk Image)", value: "application/x-apple-diskimage" },
+            { label: "QCOW2 (QEMU Disk Image)", value: "application/x-qcow2" },
+            { label: "VHD (Virtual Hard Disk)", value: "application/x-vhd" },
+            { label: "Parallels Disk Image", value: "application/x-parallels-disk" }
+        ]
+    },
+    {
+        group: "Virtualization & Containers",
+        items: [
+            { label: "Docker Image", value: "application/vnd.docker.image.rootfs.diff.tar" },
+            { label: "OVA (Virtual Appliance)", value: "application/x-virtualbox-ova" },
+            { label: "VMDK (VMware Disk)", value: "application/x-vmdk" },
+            { label: "LXC Container Image", value: "application/x-lxc" },
+            { label: "Singularity Image Format (SIF)", value: "application/vnd.sylabs.sif" }
+        ]
+    },
+    {
+        group: "Executables & Scripts",
+        items: [
+            { label: "Executable File (EXE)", value: "application/vnd.microsoft.portable-executable" },
+            { label: "Windows Batch Script", value: "application/x-msdos-program" },
+            { label: "Linux ELF Executable", value: "application/x-executable" },
+            { label: "MacOS Executable", value: "application/x-mach-binary" },
+            { label: "Windows Executable", value: "application/x-ms-dos-executable" },
+        ]
+    }
 ];

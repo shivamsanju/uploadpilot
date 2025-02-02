@@ -13,6 +13,7 @@ import {
     TextInput,
     Tooltip,
     LoadingOverlay,
+    SelectProps,
 } from "@mantine/core";
 import { UploaderConfig } from "../../types/uploader";
 import { useForm } from "@mantine/form";
@@ -21,9 +22,10 @@ import classes from "./Form.module.css";
 import { useParams } from "react-router-dom";
 import { useGetAllAllowedSources } from "../../apis/workspace";
 import { ErrorLoadingWrapper } from "../../components/ErrorLoadingWrapper";
-import { IconDeviceFloppy, IconInfoCircle, IconRestore } from "@tabler/icons-react";
+import { IconCheck, IconDeviceFloppy, IconFile, IconInfoCircle, IconRestore } from "@tabler/icons-react";
 import { useUpdateUploaderConfigMutation } from "../../apis/uploader";
 import { showNotification } from "@mantine/notifications";
+import { MIME_TYPE_ICONS } from "../../utils/fileicons";
 
 const w = "300px";
 const authEndpointTooltip = `
@@ -35,6 +37,27 @@ You can leave this field empty if you don't have a custom authentication endpoin
 
 type NewUploaderConfigProps = {
     config: UploaderConfig;
+};
+
+const iconProps = {
+    stroke: 1.5,
+    opacity: 0.6,
+    size: 14,
+};
+
+const renderSelectOption: SelectProps['renderOption'] = ({ option, checked }) => {
+    let Icon = MIME_TYPE_ICONS[option.value]
+    if (!Icon) {
+        Icon = IconFile
+    }
+    return (
+        <Group flex="1" gap="xs">
+            <Icon />
+            {option.label}
+            {/* <Text c="dimmed" ml="sm">({option.value})</Text> */}
+            {checked && <IconCheck style={{ marginInlineStart: 'auto' }} {...iconProps} />}
+        </Group>
+    )
 };
 
 const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
@@ -130,6 +153,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                                     data={MIME_TYPES}
                                     {...form.getInputProps("allowedFileTypes")}
                                     searchable
+                                    renderOption={renderSelectOption}
                                 // disabled={isPending || type === "view"}
                                 />
                             </Group>
@@ -320,7 +344,6 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                     {(styles) => <div style={styles}>
                         <Group justify="center" gap="md" mt="xl">
                             <Button
-                                size="sm"
                                 variant="default"
                                 c="dimmed"
                                 type="reset"
@@ -329,7 +352,6 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
                                 Reset
                             </Button>
                             <Button
-                                size="sm"
                                 type="submit"
                                 leftSection={<IconDeviceFloppy size={18} />}
                             >

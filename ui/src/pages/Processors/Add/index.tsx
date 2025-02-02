@@ -1,6 +1,6 @@
 import { useForm } from "@mantine/form";
 import { Button, Group, LoadingOverlay, MultiSelect, SelectProps, Stack, TextInput } from "@mantine/core";
-import { IconCheck, IconClockBolt, IconFileUnknown } from "@tabler/icons-react";
+import { IconCheck, IconClockBolt, IconFile } from "@tabler/icons-react";
 import { MIME_TYPES } from "../../../utils/mime";
 import { MIME_TYPE_ICONS } from "../../../utils/fileicons";
 import { useCreateProcessorMutation, useUpdateProcessorMutation } from "../../../apis/processors";
@@ -15,12 +15,13 @@ const iconProps = {
 const renderSelectOption: SelectProps['renderOption'] = ({ option, checked }) => {
     let Icon = MIME_TYPE_ICONS[option.value]
     if (!Icon) {
-        Icon = IconFileUnknown
+        Icon = IconFile
     }
     return (
         <Group flex="1" gap="xs">
             <Icon />
             {option.label}
+            {/* <Text c="dimmed" ml="sm">({option.value})</Text> */}
             {checked && <IconCheck style={{ marginInlineStart: 'auto' }} {...iconProps} />}
         </Group>
     )
@@ -49,7 +50,6 @@ const AddWebhookForm: React.FC<Props> = ({ setInitialValues, setMode, setOpened,
         },
         validate: {
             name: (value) => (value ? null : 'Name is required'),
-            triggers: (value) => (value.length === 0 ? "Please select atleast one file type as a trigger" : null),
         },
     });
 
@@ -102,7 +102,6 @@ const AddWebhookForm: React.FC<Props> = ({ setInitialValues, setMode, setOpened,
                 />
                 <MultiSelect
                     searchable
-                    withAsterisk
                     leftSection={<IconClockBolt size={16} />}
                     label="Trigger"
                     description="File type to trigger the processor"
@@ -111,13 +110,12 @@ const AddWebhookForm: React.FC<Props> = ({ setInitialValues, setMode, setOpened,
                     {...form.getInputProps('triggers')}
                     renderOption={renderSelectOption}
                     disabled={mode === 'view'}
-
                 />
             </Stack>
             {mode !== "view" && (
                 <Group justify="flex-end" mt={50}>
                     <Button type="submit"  >
-                        {mode === 'edit' ? 'Save' : 'Add'}
+                        {mode === 'edit' ? 'Save' : 'Create'}
                     </Button>
                 </Group>
             )}

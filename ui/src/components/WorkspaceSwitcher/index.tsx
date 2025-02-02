@@ -1,5 +1,5 @@
 import { Stack, Title, Button } from '@mantine/core';
-import { IconSwitchHorizontal } from '@tabler/icons-react';
+import { IconSwitch3 } from '@tabler/icons-react';
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetWorkspaces } from '../../apis/workspace';
 
@@ -26,8 +26,8 @@ const WorkspaceSwitcher = () => {
         <Stack align='center' p="md">
             <Title order={4} opacity={0.7} lineClamp={1}>{workspaces.find((w: any) => w?.id === workspaceId)?.name}</Title>
             <Button
-                variant='outline'
-                leftSection={<IconSwitchHorizontal size={20} stroke={1.5} />}
+                variant='subtle'
+                leftSection={<IconSwitch3 stroke={1.5} />}
                 onClick={handleWorkspaceSwitch}
             >
                 Switch Workspace

@@ -44,6 +44,15 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 		RespectForwardedHeaders: true,
 		MaxSize:                 500 * 1024 * 1024,
 		PreUploadCreateCallback: func(hook tusd.HookEvent) (tusd.HTTPResponse, tusd.FileInfoChanges, error) {
+			active, err := h.uploadSvc.VerifySubscription(&hook)
+			if err != nil {
+				infra.Log.Errorf("unable to verify subscription: %s", err)
+				return tusd.HTTPResponse{StatusCode: http.StatusBadRequest}, tusd.FileInfoChanges{}, nil
+			}
+			if !active {
+				return tusd.HTTPResponse{StatusCode: http.StatusForbidden, Body: "subscription is not active"}, tusd.FileInfoChanges{}, nil
+			}
+
 			upload, err := h.uploadSvc.CreateUpload(&hook)
 			if err != nil {
 				infra.Log.Errorf("unable to create upload: %s", err)

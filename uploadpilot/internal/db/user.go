@@ -2,8 +2,10 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/internal/infra"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -78,4 +80,19 @@ func (u *UserRepo) GetProvider(ctx context.Context, email string) (string, error
 		return "", err
 	}
 	return user.Provider, nil
+}
+
+func (u *UserRepo) IsSubscriptionActive(ctx context.Context, email string) (bool, error) {
+	collection := db.Collection(u.collectionName)
+	var user models.User
+	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
+	if err != nil {
+		return false, err
+	}
+	infra.Log.Infof("trial ends at: %s %t", user.TrialEndsAt.Time().String(), user.TrialEndsAt.Time().After(time.Now()))
+	if user.TrialEndsAt.Time().After(time.Now()) {
+		return true, nil
+	}
+	infra.Log.Info("trial expired")
+	return false, nil
 }

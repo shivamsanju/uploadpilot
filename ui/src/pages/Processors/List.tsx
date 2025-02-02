@@ -1,5 +1,5 @@
-import { IconCircleCheck, IconCircleOff, IconDots, IconEye, IconTrash, IconRoute, IconRouteOff, IconEdit, IconChevronRightPipe, IconChevronRight } from '@tabler/icons-react';
-import { ActionIcon, Avatar, Badge, Box, Container, Group, LoadingOverlay, Menu, Modal, Paper, Pill, Text, Title } from '@mantine/core';
+import { IconCircleCheck, IconCircleOff, IconDots, IconEye, IconTrash, IconRoute, IconRouteOff, IconEdit, IconChevronRightPipe } from '@tabler/icons-react';
+import { ActionIcon, Anchor, Avatar, Badge, Box, Group, LoadingOverlay, Menu, Modal, Pill, Text, Title } from '@mantine/core';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useCallback, useMemo, useState } from 'react';
 import { DataTableColumn } from 'mantine-datatable';
@@ -77,9 +77,9 @@ const ProcessorList = ({ opened, setOpened }: { opened: boolean, setOpened: any 
                         {item?.enabled ? <IconRoute /> : <IconRouteOff />}
                     </Avatar>
                     <div>
-                        <Text fz="sm" fw={500}>
+                        <Anchor onClick={() => navigate(`/workspaces/${workspaceId}/processors/${item?.id}`)} fz="sm" fw={500}>
                             {item.name}
-                        </Text>
+                        </Anchor>
                         <Text c="dimmed" fz="xs">
                             Name
                         </Text>
@@ -130,23 +130,21 @@ const ProcessorList = ({ opened, setOpened }: { opened: boolean, setOpened: any 
                 </>
             ),
         },
-        {
-            accessor: 'enabled',
-            title: 'Status',
-            textAlign: 'right',
-            hidden: width < 768,
-            render: (item: any) => (
-                <ActionIcon
-                    mt={8}
-                    radius="50%"
-                    variant="default"
-                    size="sm"
-                    onClick={() => navigate(`/workspaces/${workspaceId}/processors/${item?.id}`)}
-                >
-                    <IconChevronRight color="gray" />
-                </ActionIcon>
-            ),
-        },
+        // {
+        //     accessor: 'goto',
+        //     title: 'goto',
+        //     textAlign: 'right',
+        //     hidden: width < 768,
+        //     render: (item: any) => (
+        //         <ActionIcon
+        //             variant="light"
+        //             size="lg"
+        //             onClick={() => navigate(`/workspaces/${workspaceId}/processors/${item?.id}`)}
+        //         >
+        //             <IconChevronRight />
+        //         </ActionIcon>
+        //     ),
+        // },
         {
             accessor: 'actions',
             title: 'Actions',
@@ -215,27 +213,19 @@ const ProcessorList = ({ opened, setOpened }: { opened: boolean, setOpened: any 
     return (
         <Box mr="md">
             <LoadingOverlay visible={isDeleting || isEnabling} overlayProps={{ radius: "sm", blur: 1 }} />
-            {!isPending && (!processors || processors.length === 0) ? (
-                <Container mt="md">
-                    <Paper p={{ base: "md", md: "xl" }} miw="300" maw="1000" w="40vw" withBorder>
-                        <Title order={4} opacity={0.7} ta="center" mb="lg">Create your first Processor</Title>
-                        <AddProcessorForm mode={mode} setOpened={setOpened} workspaceId={workspaceId || ""} initialValues={initialValues} setInitialValues={setInitialValues} setMode={setMode} />
-                    </Paper>
-                </Container>
-            ) : (
-                <UploadPilotDataTable
-                    minHeight={700}
-                    fetching={isPending}
-                    showSearch={false}
-                    columns={columns}
-                    records={processors}
-                    verticalSpacing="md"
-                    horizontalSpacing="md"
-                    noHeader={true}
-                    noRecordsText="No processors found"
-                />
-            )}
-
+            <UploadPilotDataTable
+                minHeight={700}
+                fetching={isPending}
+                showSearch={false}
+                columns={columns}
+                records={processors}
+                verticalSpacing="md"
+                horizontalSpacing="md"
+                noHeader={true}
+                noRecordsText="No processors. Create a processor by clicking the plus icon on top right to get started."
+                noRecordsIcon={<IconRouteOff size={100} />}
+                highlightOnHover
+            />
             <Modal
                 padding="xl"
                 transitionProps={{ transition: 'pop' }}
@@ -246,7 +236,7 @@ const ProcessorList = ({ opened, setOpened }: { opened: boolean, setOpened: any 
                     setMode('add');
                 }}
                 title={<Title order={5} opacity={0.7}>
-                    {mode === 'edit' ? 'Edit Processor' : mode === 'view' ? 'View Details' : 'Add Processor'}
+                    {mode === 'edit' ? 'Edit Processor' : mode === 'view' ? 'View Details' : 'Create Processor'}
                 </Title>}
                 closeOnClickOutside={false}
                 size="lg"

@@ -2,6 +2,7 @@ package upload
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -21,6 +22,7 @@ import (
 type UploadService struct {
 	upRepo      *db.UploadRepo
 	wsRepo      *db.WorkspaceRepo
+	userRepo    *db.UserRepo
 	logRepo     *db.UploadLogsRepo
 	eventBus    *events.UploadEventBus
 	logEventBus *events.LogEventBus
@@ -30,6 +32,7 @@ func NewUploadService() *UploadService {
 	return &UploadService{
 		upRepo:      db.NewUploadRepo(),
 		wsRepo:      db.NewWorkspaceRepo(),
+		userRepo:    db.NewUserRepo(),
 		logRepo:     db.NewUploadLogsRepo(),
 		eventBus:    events.GetUploadEventBus(),
 		logEventBus: events.GetLogEventBus(),
@@ -53,10 +56,24 @@ func (us *UploadService) GetUploadDetails(ctx context.Context, workspaceID, uplo
 	return us.upRepo.Get(ctx, uploadID)
 }
 
+func (us *UploadService) VerifySubscription(hook *tusd.HookEvent) (bool, error) {
+	workspaceID, err := us.getWorkspaceIDFromTusdEvent(hook)
+	if err != nil {
+		return false, errors.New("invalid workspace id in headers")
+	}
+
+	ws, err := us.wsRepo.Get(hook.Context, workspaceID)
+	if err != nil {
+		return false, err
+	}
+	active, err := us.userRepo.IsSubscriptionActive(hook.Context, ws.CreatedBy)
+	return active, err
+}
+
 func (us *UploadService) CreateUpload(hook *tusd.HookEvent) (*models.Upload, error) {
 	workspaceID, err := us.getWorkspaceIDFromTusdEvent(hook)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("invalid workspace id in headers")
 	}
 
 	// workspace existence is anyways checked here, no need to add extra method call

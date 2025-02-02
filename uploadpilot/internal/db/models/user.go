@@ -34,8 +34,10 @@ type User struct {
 	AvatarURL     string             `bson:"avatarUrl" json:"avatarUrl"`
 	Location      string             `bson:"location" json:"location"`
 	IsUserBanned  bool               `bson:"isUserBanned" json:"isUserBanned"`
-	Workspaces    []UserWorkspace    `bson:"workspaces" json:"workspaces"`
 	BanReason     string             `bson:"banReason" json:"banReason"`
+	TrialStartsAt primitive.DateTime `bson:"trialStartsAt" json:"trialStartsAt"`
+	TrialEndsAt   primitive.DateTime `bson:"trialEndsAt" json:"trialEndsAt"`
+	Workspaces    []UserWorkspace    `bson:"workspaces" json:"workspaces"`
 	CreatedAt     primitive.DateTime `bson:"createdAt" json:"createdAt"`
 	UpdatedAt     primitive.DateTime `bson:"updatedAt" json:"updatedAt"`
 }

@@ -28,7 +28,7 @@ export const myAppTheme = createTheme({
             "#e39500",
             "#cb8400",
             "#b07100"
-        ]
+          ]
     },
     defaultRadius: "md",
     components: {
