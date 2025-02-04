@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/uploadpilot/uploadpilot/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/internal/db/types"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -24,7 +24,7 @@ type BaseTask struct {
 	UploadID    string
 	TmpDir      string
 	TmpDirLock  *sync.Mutex
-	TaskParams  models.JSON
+	TaskParams  types.EncryptedJSONB
 	Input       map[string]interface{}
 	Output      map[string]interface{}
 }

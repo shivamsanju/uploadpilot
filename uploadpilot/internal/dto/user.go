@@ -1,7 +1,7 @@
 package dto
 
-type ApiUser struct {
-	UserID string `json:"userId"`
+type UserContext struct {
+	UserID string `json:"id"`
 	Name   string `json:"name"`
 	Email  string `json:"email"`
 }

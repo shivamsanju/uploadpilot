@@ -28,7 +28,7 @@ import { useViewportSize } from "@mantine/hooks";
 const getCode = (
   workspaceId: string,
   backendEndpoint: string,
-  settingsProps: any,
+  settingsProps: any
 ) => {
   const properties = [
     `workspaceId="${workspaceId}"`,
@@ -134,6 +134,7 @@ const UploaderPreviewPage = () => {
                   metadata={{
                     uploaderEmail: session.email,
                     uploaderName: session.name || "sss",
+                    abc: "test",
                   }}
                   {...settingsProps}
                   note="Test your uploader"

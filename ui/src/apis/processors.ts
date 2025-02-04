@@ -227,16 +227,16 @@ export const useUpdateProcessorTaskMutation = () => {
     mutationFn: ({
       workspaceId,
       processorId,
-      tasks,
+      canvas,
     }: {
       workspaceId: string;
       processorId: string;
-      tasks: any;
+      canvas: any;
     }) => {
       return axiosInstance
         .put(
           `/workspaces/${workspaceId}/processors/${processorId}/tasks`,
-          tasks,
+          canvas,
         )
         .then((res) => res.data);
     },

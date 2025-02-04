@@ -59,9 +59,9 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 				return tusd.HTTPResponse{StatusCode: http.StatusBadRequest}, tusd.FileInfoChanges{}, nil
 			}
 
-			hook.Upload.MetaData["uploadId"] = upload.ID.Hex()
+			hook.Upload.MetaData["uploadId"] = upload.ID
 			return tusd.HTTPResponse{StatusCode: http.StatusOK}, tusd.FileInfoChanges{
-				ID:       upload.ID.Hex(),
+				ID:       upload.ID,
 				MetaData: hook.Upload.MetaData,
 			}, nil
 		},

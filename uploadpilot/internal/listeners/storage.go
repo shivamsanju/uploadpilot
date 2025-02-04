@@ -38,14 +38,14 @@ func (l *StorageListener) Start() {
 	infra.Log.Info("starting upload storage listener...")
 	for event := range l.eventChan {
 		ctx := event.Context
-		uploadID := event.Upload.ID.Hex()
+		uploadID := event.Upload.ID
 
 		// Delete tus info file from S3 (no need to throw an error)
 		go l.cleanUploadInfoFileRoutine(ctx, uploadID)
 
 		url, objectName, err := l.generateUploadURL(ctx, uploadID)
 		if err != nil {
-			l.logEventBus.Publish(events.NewLogEvent(ctx, event.Upload.WorkspaceID.Hex(), uploadID, "Failed to generate a link of the uploaded file", nil, nil, models.UploadLogLevelError))
+			l.logEventBus.Publish(events.NewLogEvent(ctx, event.Upload.WorkspaceID, uploadID, "Failed to generate a link of the uploaded file", nil, nil, models.UploadLogLevelError))
 			infra.Log.Errorf("failed to generate upload url: %s", err.Error())
 			continue
 		}
@@ -56,7 +56,7 @@ func (l *StorageListener) Start() {
 		}
 
 		if err := l.uploadRepo.Patch(ctx, uploadID, patchMap); err != nil {
-			l.logEventBus.Publish(events.NewLogEvent(ctx, event.Upload.WorkspaceID.Hex(), uploadID, "Failed to save the link of the uploaded file", nil, nil, models.UploadLogLevelError))
+			l.logEventBus.Publish(events.NewLogEvent(ctx, event.Upload.WorkspaceID, uploadID, "Failed to save the link of the uploaded file", nil, nil, models.UploadLogLevelError))
 			infra.Log.Errorf("failed to patch upload: %s", err.Error())
 		}
 	}

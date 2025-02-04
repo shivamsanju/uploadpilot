@@ -2,7 +2,6 @@ package proc
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -11,6 +10,7 @@ import (
 	flow "github.com/Azure/go-workflow"
 	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/internal/db/types"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
 	"github.com/uploadpilot/uploadpilot/internal/msg"
 	"github.com/uploadpilot/uploadpilot/internal/proc/tasks"
@@ -79,7 +79,7 @@ func (r *ProcWorkflowRunner) Build(ctx context.Context, workspaceID, processorID
 		if !ok {
 			return fmt.Errorf("failed to get task %s", id)
 		}
-		infra.Log.Infof("task: %s, prevTasks: %s", pt.Key, strings.Join(PrevtasksKeys, ","))
+		infra.Log.Infof("task: %s, prevTasks: %s", pt["key"], strings.Join(PrevtasksKeys, ","))
 
 		build, err := r.buildStepWithDependencies(pt, task, prevTasks, firstTask)
 		if err != nil {
@@ -95,19 +95,18 @@ func (r *ProcWorkflowRunner) Build(ctx context.Context, workspaceID, processorID
 	return nil
 }
 
-func (r *ProcWorkflowRunner) buildStepWithDependencies(pt *models.ProcTask, task tasks.Task, prevTasks []tasks.Task, firstTask *tasks.BaseTask) (*flow.AddStep[tasks.Task], error) {
-	infra.Log.Infof("building step for task: %s, map: %+v", pt.Key, pt)
-	var params *TaskParams
-	tStr := pt.Data.String()
-	if err := json.Unmarshal([]byte(tStr), &params); err != nil {
-		return nil, err
+func (r *ProcWorkflowRunner) buildStepWithDependencies(pt types.JSONB, task tasks.Task, prevTasks []tasks.Task, firstTask *tasks.BaseTask) (*flow.AddStep[tasks.Task], error) {
+	infra.Log.Infof("building step for task: %s, map: %+v", pt["key"], pt)
+	params, ok := pt["data"].(TaskParams)
+	if !ok {
+		return nil, fmt.Errorf("failed to get task params")
 	}
 	step := flow.Step(task).
 		AfterStep(func(ctx context.Context, _ flow.Steper, err error) error {
 			// throw errror only if continue on error is false
 			prevTask := task.GetTask()
 			if err != nil {
-				infra.Log.Errorf(msg.ProcTaskFailed, pt.Key, prevTask.WorkspaceID, prevTask.ProcessorID, prevTask.UploadID, err.Error())
+				infra.Log.Errorf(msg.ProcTaskFailed, pt["key"], prevTask.WorkspaceID, prevTask.ProcessorID, prevTask.UploadID, err.Error())
 				if params.ContinueOnError {
 					return nil
 				}
@@ -118,8 +117,8 @@ func (r *ProcWorkflowRunner) buildStepWithDependencies(pt *models.ProcTask, task
 
 	if len(prevTasks) == 0 {
 		step = step.Input(func(ctx context.Context, t tasks.Task) error {
-			firstTask.TaskID = pt.ID
-			firstTask.TaskParams = pt.Data
+			firstTask.TaskID = pt["id"].(string)
+			firstTask.TaskParams = pt["data"].(types.EncryptedJSONB)
 			t.MakeTask(firstTask)
 			return nil
 		})
@@ -129,8 +128,8 @@ func (r *ProcWorkflowRunner) buildStepWithDependencies(pt *models.ProcTask, task
 			step = step.DependsOn(prevTask).
 				Input(func(ctx context.Context, t tasks.Task) error {
 					inp := prevTask.GetTask()
-					inp.TaskID = pt.ID       // add current task id to input
-					inp.TaskParams = pt.Data // add current task data
+					inp.TaskID = pt["id"].(string)                     // add current task id to input
+					inp.TaskParams = pt["data"].(types.EncryptedJSONB) // add current task data
 					inp.Input = inp.Output
 					t.MakeTask(inp)
 					return nil
@@ -187,25 +186,25 @@ func (r *ProcWorkflowRunner) addCommonSteps(steps []flow.Builder, tsks []flow.St
 	return append(steps, success, failure, cancelled, cleanup)
 }
 
-func (r *ProcWorkflowRunner) getNodesAndEdgesMap(processor *models.Processor) (map[string]tasks.Task, map[string]*models.ProcTask, map[string][]string, error) {
+func (r *ProcWorkflowRunner) getNodesAndEdgesMap(processor *models.Processor) (map[string]tasks.Task, map[string]types.JSONB, map[string][]string, error) {
 	taskfnMap := make(map[string]tasks.Task)
-	taskMap := make(map[string]*models.ProcTask)
+	taskMap := make(map[string]types.JSONB)
 	prevTasks := make(map[string][]string)
 
-	for _, t := range processor.Tasks.Nodes {
-		task, ok := GetTaskFromRegistry(t.Key)
+	for _, t := range processor.Canvas["nodes"].([]types.JSONB) {
+		task, ok := GetTaskFromRegistry(t["key"].(models.TaskKey))
 		if !ok {
-			return nil, nil, nil, fmt.Errorf("unknown task key: %s", t.Key)
+			return nil, nil, nil, fmt.Errorf("unknown task key: %s", t["key"].(string))
 		}
 
-		taskfnMap[t.ID] = task
-		taskMap[t.ID] = &t
+		taskfnMap[t["id"].(string)] = task
+		taskMap[t["id"].(string)] = t
 	}
 
-	for _, t := range processor.Tasks.Nodes {
-		for _, edge := range processor.Tasks.Edges {
-			if edge.Source == t.ID {
-				prevTasks[edge.Target] = append(prevTasks[edge.Target], t.ID)
+	for _, t := range processor.Canvas["nodes"].([]types.JSONB) {
+		for _, edge := range processor.Canvas["edges"].([]types.JSONB) {
+			if edge["source"] == t["id"].(string) {
+				prevTasks[edge["target"].(string)] = append(prevTasks[edge["target"].(string)], t["id"].(string))
 			}
 		}
 	}

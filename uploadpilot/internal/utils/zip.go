@@ -17,10 +17,12 @@ func ZipDirectory(ctx context.Context, sourceDir string, w io.Writer) error {
 	defer a.Close()
 
 	files := make(map[string]os.FileInfo)
-	err = filepath.Walk(sourceDir, func(pathname string, info os.FileInfo, err error) error {
+	if err = filepath.Walk(sourceDir, func(pathname string, info os.FileInfo, err error) error {
 		files[pathname] = info
 		return nil
-	})
+	}); err != nil {
+		return err
+	}
 
 	if err = a.Archive(ctx, files); err != nil {
 		return err

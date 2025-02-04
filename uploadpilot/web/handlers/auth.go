@@ -16,7 +16,6 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/net/context"
 )
 
@@ -36,7 +35,12 @@ func (h *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 	provider := chi.URLParam(r, "provider")
 	r = r.WithContext(context.WithValue(r.Context(), "provider", provider))
 	if user, err := gothic.CompleteUserAuth(w, r); err == nil {
-		token, err := auth.GenerateToken(w, &user, TOKEN_EXPIRY_DURATION)
+		usr, err := h.userRepo.GetByEmail(r.Context(), user.Email)
+		if err != nil {
+			redirectWithError(w, r, fmt.Errorf("failed to get user"))
+			return
+		}
+		token, err := auth.GenerateToken(w, usr, TOKEN_EXPIRY_DURATION)
 		if err != nil {
 			redirectWithError(w, r, err)
 			return
@@ -53,29 +57,28 @@ func (h *authHandler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	r = r.WithContext(context.WithValue(r.Context(), "provider", provider))
 	infra.Log.Infof("handling callback for provider: %s", provider)
 	user, err := gothic.CompleteUserAuth(w, r)
-
 	if err != nil {
 		redirectWithError(w, r, err)
 		return
 	}
-	existingProvider, err := h.userRepo.GetProvider(r.Context(), user.Email)
+
+	usr, err := h.userRepo.GetByEmail(r.Context(), user.Email)
 	if err != nil {
 		redirectWithError(w, r, err)
+		return
+	}
 
-		return
+	infra.Log.Infof("creating new user: %+v", usr)
+
+	if usr == nil || usr.ID == "" {
+		usr = mapUser(&user)
+		if err := h.userRepo.Create(r.Context(), usr); err != nil {
+			redirectWithError(w, r, err)
+			return
+		}
 	}
-	if existingProvider != "" && existingProvider != provider {
-		err := fmt.Errorf("user with email %s already exists with provider %s. please login with the same provider you used earlier", user.Email, existingProvider)
-		redirectWithError(w, r, err)
-		return
-	}
-	if existingProvider == "" {
-		newUser := mapUser(&user)
-		newUser.TrialStartsAt = primitive.NewDateTimeFromTime(time.Now())
-		newUser.TrialEndsAt = primitive.NewDateTimeFromTime(time.Now().Add(time.Hour * 14 * 24))
-		h.userRepo.Create(r.Context(), newUser)
-	}
-	token, err := auth.GenerateToken(w, &user, TOKEN_EXPIRY_DURATION)
+
+	token, err := auth.GenerateToken(w, usr, TOKEN_EXPIRY_DURATION)
 	if err != nil {
 		redirectWithError(w, r, err)
 		return
@@ -99,36 +102,19 @@ func (h *authHandler) LogoutProvider(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *authHandler) GetSession(w http.ResponseWriter, r *http.Request) {
-	userID := r.Context().Value("userId").(string)
+	userID := r.Context().Value("id").(string)
 	cb, err := h.userRepo.GetByUserID(r.Context(), userID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	trialsExpiresIn := time.Until(cb.TrialEndsAt.Time()).Hours()
+	trialsExpiresIn := time.Until(cb.TrialEndsAt).Hours()
 	render.JSON(w, r, &dto.SessionResponse{
-		Name:           cb.Name,
+		Name:           *cb.Name,
 		Email:          cb.Email,
-		AvatarURL:      cb.AvatarURL,
+		AvatarURL:      *cb.AvatarURL,
 		TrialExpiresIn: int64(trialsExpiresIn),
 	})
-}
-
-func mapUser(user *goth.User) *models.User {
-	return &models.User{
-		UserID:        user.UserID,
-		Email:         user.Email,
-		Provider:      user.Provider,
-		Name:          user.Name,
-		FirstName:     user.FirstName,
-		LastName:      user.LastName,
-		NickName:      user.NickName,
-		AvatarURL:     user.AvatarURL,
-		Location:      user.Location,
-		Description:   user.Description,
-		IsUserBanned:  false,
-		EmailVerified: true,
-	}
 }
 
 func getTokenRedirectURI(token string) string {
@@ -142,4 +128,20 @@ func getLogoutRedirectURI() string {
 func redirectWithError(w http.ResponseWriter, r *http.Request, err error) {
 	redirectUri := config.FrontendURI + "/error?error=" + err.Error()
 	http.Redirect(w, r, redirectUri, http.StatusSeeOther)
+}
+
+func mapUser(user *goth.User) *models.User {
+	return &models.User{
+		Email:         user.Email,
+		Provider:      &user.Provider,
+		Name:          &user.Name,
+		FirstName:     &user.FirstName,
+		LastName:      &user.LastName,
+		NickName:      &user.NickName,
+		AvatarURL:     &user.AvatarURL,
+		Location:      &user.Location,
+		Description:   &user.Description,
+		TrialStartsAt: time.Now(),
+		TrialEndsAt:   time.Now().Add(time.Hour * 14 * 24),
+	}
 }

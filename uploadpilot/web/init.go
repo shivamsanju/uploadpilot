@@ -17,7 +17,7 @@ import (
 func Init() (*http.Server, error) {
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
-	router.Use(LoggerMiddleware)
+	// router.Use(LoggerMiddleware)
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.Timeout(60 * time.Second))
 

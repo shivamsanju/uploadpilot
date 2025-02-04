@@ -1,6 +1,7 @@
 package config
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"os"
 	"strconv"
@@ -12,6 +13,11 @@ var (
 	AppName            string
 	WebServerPort      int
 	MongoURI           string
+	PostgresURI        string
+	EncryptionKey      []byte
+	RedisAddr          string
+	RedisUsername      string
+	RedisPassword      string
 	DatabaseName       string
 	FrontendURI        string
 	AllowedOrigins     string
@@ -50,9 +56,17 @@ func Init() error {
 		return fmt.Errorf("invalid WEB_SERVER_PORT: %w", err)
 	}
 
+	key := os.Getenv("ENCRYPTION_KEY")
+	keyBytes := getValidKey(key)
+
 	AppName = os.Getenv("APP_NAME")
 	WebServerPort = port
 	MongoURI = os.Getenv("MONGO_URI")
+	PostgresURI = os.Getenv("POSTGRES_URI")
+	EncryptionKey = keyBytes
+	RedisAddr = os.Getenv("REDIS_HOST")
+	RedisUsername = os.Getenv("REDIS_USER")
+	RedisPassword = os.Getenv("REDIS_PASS")
 	FrontendURI = os.Getenv("FRONTEND_URI")
 	DatabaseName = os.Getenv("APP_NAME") + "db"
 	RootPassword = os.Getenv("ROOT_PASSWORD")
@@ -75,4 +89,11 @@ func Init() error {
 	TusUploadBasePath = SelfEndpoint + "/upload"
 
 	return nil
+}
+
+func getValidKey(encryptionKey string) []byte {
+	// Create a SHA-256 hash of the encryption key to make sure it's 32 bytes
+	hash := sha256.New()
+	hash.Write([]byte(encryptionKey))
+	return hash.Sum(nil) // Returns a 32-byte slice (AES-256)
 }

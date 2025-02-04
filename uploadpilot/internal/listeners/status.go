@@ -51,6 +51,6 @@ func (l *StatusListener) Start() {
 			infra.Log.Warn("skipping unknown event key: %s", event.Key)
 			continue
 		}
-		_ = l.uploadRepo.SetStatus(event.Context, event.Upload.ID.Hex(), status)
+		_ = l.uploadRepo.SetStatus(event.Context, event.Upload.ID, status)
 	}
 }

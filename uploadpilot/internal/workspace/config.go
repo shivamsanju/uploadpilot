@@ -4,16 +4,15 @@ import (
 	"context"
 
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
-	"github.com/uploadpilot/uploadpilot/internal/infra"
 )
 
 var DefaultUploaderConfig = &models.UploaderConfig{
-	AllowedSources:         []models.AllowedSources{models.FileUpload},
-	RequiredMetadataFields: []string{},
+	AllowedSources:         []string{models.FileUpload.String()},
+	RequiredMetadataFields: []string{"filename", "size"},
 }
 
 func (s *WorkspaceService) GetUploaderConfig(ctx context.Context, workspaceID string) (*models.UploaderConfig, error) {
-	config, err := s.wsRepo.GetUploaderConfig(ctx, workspaceID)
+	config, err := s.wsConfigRepo.GetConfig(ctx, workspaceID)
 	if err != nil {
 		return nil, err
 	}
@@ -21,10 +20,8 @@ func (s *WorkspaceService) GetUploaderConfig(ctx context.Context, workspaceID st
 }
 
 func (s *WorkspaceService) SetUploaderConfig(ctx context.Context, workspaceID string, config *models.UploaderConfig) error {
-	if err := infra.Validator.ValidateBody(config); err != nil {
-		return err
-	}
-	err := s.wsRepo.SetUploaderConfig(ctx, workspaceID, config)
+	config.WorkspaceID = workspaceID
+	err := s.wsConfigRepo.SetConfig(ctx, config)
 	if err != nil {
 		return err
 	}

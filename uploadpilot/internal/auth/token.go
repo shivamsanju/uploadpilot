@@ -6,7 +6,7 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/markbates/goth"
+	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/msg"
 )
 
@@ -21,14 +21,18 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-func GenerateToken(w http.ResponseWriter, user *goth.User, expiry time.Duration) (string, error) {
+func GenerateToken(w http.ResponseWriter, user *models.User, expiry time.Duration) (string, error) {
 	if secretKey == nil {
 		return "", errors.New(msg.JWTSecretKeyNotSet)
 	}
+	if user.Name == nil {
+		name := "User"
+		user.Name = &name
+	}
 	claims := &Claims{
-		UserID: user.UserID,
+		UserID: user.ID,
 		Email:  user.Email,
-		Name:   user.Name,
+		Name:   *user.Name,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Local().Add(expiry).Unix(),
 		},

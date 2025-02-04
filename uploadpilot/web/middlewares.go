@@ -85,7 +85,7 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "userId", claims.UserID)
+		ctx := context.WithValue(r.Context(), "id", claims.UserID)
 		ctx = context.WithValue(ctx, "email", claims.Email)
 		ctx = context.WithValue(ctx, "name", claims.Name)
 

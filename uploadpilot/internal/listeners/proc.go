@@ -48,7 +48,7 @@ func (l *ProcListener) Start() {
 
 func (l *ProcListener) startProcessing(event events.UploadEvent) {
 	defer utils.Recover()
-	processors, err := l.pRepo.GetAll(event.Context, event.Upload.WorkspaceID.Hex())
+	processors, err := l.pRepo.GetAll(event.Context, event.Upload.WorkspaceID)
 	if err != nil {
 		infra.Log.Errorf("failed to get processors: %s", err.Error())
 		return
@@ -71,9 +71,9 @@ func (l *ProcListener) startSingleProcessor(wg *sync.WaitGroup, event events.Upl
 	defer utils.Recover()
 	defer wg.Done()
 
-	wID := event.Upload.WorkspaceID.Hex()
-	uID := event.Upload.ID.Hex()
-	pID := processor.ID.Hex()
+	wID := event.Upload.WorkspaceID
+	uID := event.Upload.ID
+	pID := processor.ID
 	ctx := context.Background()
 	upload, err := l.upRepo.Get(ctx, uID)
 	if err != nil {

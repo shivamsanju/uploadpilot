@@ -1,29 +1,29 @@
 package models
 
-import (
-	"go.mongodb.org/mongo-driver/bson/primitive"
-)
-
-type WorkspaceUser struct {
-	UserID string   `bson:"userId" json:"userId" validate:"required"`
-	Role   UserRole `bson:"role" json:"role" validate:"required"`
-}
+import "github.com/uploadpilot/uploadpilot/internal/db/types"
 
 type Workspace struct {
-	ID             primitive.ObjectID `bson:"_id" json:"id"`
-	Name           string             `bson:"name" json:"name" validate:"required,min=2,max=100"`
-	Tags           []string           `bson:"tags" json:"tags"`
-	Users          []WorkspaceUser    `bson:"users" json:"users"`
-	UploaderConfig *UploaderConfig    `bson:"uploaderConfig" json:"uploaderConfig" validate:"required"`
-	CreatedAt      primitive.DateTime `bson:"createdAt" json:"createdAt"`
-	CreatedBy      string             `bson:"createdBy" json:"createdBy"`
-	UpdatedAt      primitive.DateTime `bson:"updatedAt" json:"updatedAt"`
-	UpdatedBy      string             `bson:"updatedBy" json:"updatedBy"`
+	ID          string            `gorm:"column:id;primaryKey;type:uuid;default:uuid_generate_v4()" json:"id"`
+	Name        string            `gorm:"column:name;not null;size:100" json:"name"`
+	Description *string           `gorm:"column:description;size:255" json:"description"`
+	Tags        types.StringArray `gorm:"column:tags;type:text[]" json:"tags"`
+	At
+	By
 }
 
-type WorkspaceUserWithDetails struct {
-	UserID string   `bson:"userId" json:"userId" validate:"required"`
-	Role   UserRole `bson:"role" json:"role" validate:"required"`
-	Name   string   `bson:"name" json:"name"`
-	Email  string   `bson:"email" json:"email"`
+func (Workspace) TableName() string {
+	return "workspaces"
+}
+
+type UserWorkspace struct {
+	UserID      string    `gorm:"column:user_id;type:uuid;primaryKey;index" json:"userId"`
+	WorkspaceID string    `gorm:"column:workspace_id;type:uuid;primaryKey;index" json:"workspaceId"`
+	Role        UserRole  `gorm:"column:role;not null" json:"role"`
+	User        User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"user"`
+	Workspace   Workspace `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE" json:"workspace"`
+	At
+}
+
+func (UserWorkspace) TableName() string {
+	return "user_workspaces"
 }

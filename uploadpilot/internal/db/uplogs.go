@@ -2,52 +2,30 @@ package db
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/uploadpilot/uploadpilot/internal/dto"
-	"github.com/uploadpilot/uploadpilot/internal/msg"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/uploadpilot/uploadpilot/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/internal/utils"
 )
 
 type UploadLogsRepo struct {
-	collectionName string
 }
 
 func NewUploadLogsRepo() *UploadLogsRepo {
-	return &UploadLogsRepo{
-		collectionName: "uploadlogs",
-	}
+	return &UploadLogsRepo{}
 }
 
-func (u *UploadLogsRepo) GetLogs(ctx context.Context, uploadID string) ([]dto.UploadLogNoIDs, error) {
-	id, err := primitive.ObjectIDFromHex(uploadID)
-	if err != nil {
-		return nil, fmt.Errorf(msg.InvalidObjectID, uploadID)
+func (u *UploadLogsRepo) GetLogs(ctx context.Context, uploadID string) ([]models.UploadLog, error) {
+	var logs []models.UploadLog
+	if err := sqlDB.WithContext(ctx).Where("upload_id = ?", uploadID).Find(&logs).Error; err != nil {
+		return nil, utils.DBError(err)
 	}
-
-	collection := db.Collection(u.collectionName)
-	var logs []dto.UploadLogNoIDs
-
-	opts := options.Find().SetSort(bson.D{{Key: "timestamp", Value: 1}}).SetProjection(bson.M{"uploadId": 0, "workspaceId": 0})
-	cursor, err := collection.Find(ctx, bson.M{"uploadId": id}, opts)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := cursor.All(ctx, &logs); err != nil {
-		return nil, err
-	}
-
 	return logs, nil
 }
 
-func (u *UploadLogsRepo) BatchAddLogs(ctx context.Context, logs []interface{}) error {
-	collection := db.Collection(u.collectionName)
-	_, err := collection.InsertMany(context.Background(), logs)
+func (u *UploadLogsRepo) BatchAddLogs(ctx context.Context, logs []*models.UploadLog) error {
+	err := sqlDB.WithContext(ctx).Create(logs).Error
 	if err != nil {
-		return err
+		return utils.DBError(err)
 	}
 	return nil
 }

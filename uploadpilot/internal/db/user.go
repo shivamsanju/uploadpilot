@@ -4,95 +4,83 @@ import (
 	"context"
 	"time"
 
+	"github.com/uploadpilot/uploadpilot/internal/cache"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/uploadpilot/uploadpilot/internal/utils"
 )
 
 type UserRepo struct {
-	collectionName string
 }
 
 func NewUserRepo() *UserRepo {
-	return &UserRepo{
-		collectionName: "users",
-	}
+	return &UserRepo{}
 }
 
-func (u *UserRepo) Create(ctx context.Context, user *models.User) (*models.User, error) {
-	collection := db.Collection(u.collectionName)
-	user.ID = primitive.NewObjectID()
-	user.Workspaces = make([]models.UserWorkspace, 0)
-	result, err := collection.InsertOne(ctx, user)
-	if err != nil {
-		return nil, err
+func (u *UserRepo) Create(ctx context.Context, user *models.User) error {
+	dbMutateFn := func(user *models.User) error {
+		return sqlDB.WithContext(ctx).Create(user).Error
 	}
-	user.ID = result.InsertedID.(primitive.ObjectID)
-	return user, nil
+	cl := cache.NewClient[*models.User](0)
+	if err := cl.Mutate(ctx, UserIDKey(user.ID), []string{UserEmailKey(user.Email)}, user, dbMutateFn, 0); err != nil {
+		return err
+	}
+
+	infra.Log.Infof("created user: %+v", user)
+	return nil
 }
 
 func (u *UserRepo) GetByUserID(ctx context.Context, userID string) (*models.User, error) {
-	collection := db.Collection(u.collectionName)
+	dbFetch := func(user *models.User) error {
+		if err := sqlDB.WithContext(ctx).Where("id = ?", userID).First(user).Error; err != nil {
+			return utils.DBError(err)
+		}
+		return nil
+	}
+
 	var user models.User
-	err := collection.FindOne(ctx, bson.M{"userId": userID}).Decode(&user)
-	if err != nil {
+	cl := cache.NewClient[*models.User](0)
+	if err := cl.Query(ctx, UserIDKey(userID), &user, dbFetch); err != nil {
 		return nil, err
 	}
+
 	return &user, nil
 }
 
 func (u *UserRepo) GetByEmail(ctx context.Context, email string) (*models.User, error) {
-	collection := db.Collection(u.collectionName)
+	dbFetch := func(user *models.User) error {
+		//check type of user
+
+		if err := sqlDB.WithContext(ctx).Where("email = ?", email).First(user).Error; err != nil {
+			if err.Error() == "record not found" {
+				return nil
+			}
+			return utils.DBError(err)
+		}
+		return nil
+	}
+
 	var user models.User
-	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
-	if err != nil {
+	cl := cache.NewClient[*models.User](0)
+	if err := cl.Query(ctx, UserEmailKey(email), &user, dbFetch); err != nil {
 		return nil, err
 	}
+	infra.Log.Infof("found user: %+v", user)
 	return &user, nil
 }
 
-func (u *UserRepo) EmailExists(ctx context.Context, email string) (bool, error) {
-	collection := db.Collection(u.collectionName)
+func (u *UserRepo) IsSubscriptionActive(ctx context.Context, userID string) (bool, error) {
 	var user models.User
-	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return false, nil
-		}
-		return false, err
+	if err := sqlDB.WithContext(ctx).Where("id = ?", userID).First(&user).Error; err != nil {
+		return false, utils.DBError(err)
 	}
-	return true, nil
+	return user.TrialEndsAt.After(time.Now()), nil
 }
 
-func (u *UserRepo) GetProvider(ctx context.Context, email string) (string, error) {
-	collection := db.Collection(u.collectionName)
-	var user struct {
-		Provider string `bson:"provider"`
-	}
-	err := collection.FindOne(ctx, bson.M{"email": email}, options.FindOne().SetProjection(bson.M{"provider": 1})).Decode(&user)
-	if err != nil {
-		if err == mongo.ErrNoDocuments {
-			return "", nil
-		}
-		return "", err
-	}
-	return user.Provider, nil
+func UserIDKey(userID string) string {
+	return "user:" + userID
 }
 
-func (u *UserRepo) IsSubscriptionActive(ctx context.Context, email string) (bool, error) {
-	collection := db.Collection(u.collectionName)
-	var user models.User
-	err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user)
-	if err != nil {
-		return false, err
-	}
-	infra.Log.Infof("trial ends at: %s %t", user.TrialEndsAt.Time().String(), user.TrialEndsAt.Time().After(time.Now()))
-	if user.TrialEndsAt.Time().After(time.Now()) {
-		return true, nil
-	}
-	infra.Log.Info("trial expired")
-	return false, nil
+func UserEmailKey(email string) string {
+	return "user:" + email
 }

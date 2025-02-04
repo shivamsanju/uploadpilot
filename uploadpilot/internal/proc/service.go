@@ -3,11 +3,13 @@ package proc
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/internal/db/types"
 	"github.com/uploadpilot/uploadpilot/internal/dto"
+	"github.com/uploadpilot/uploadpilot/internal/utils"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ProcessorService struct {
@@ -21,57 +23,76 @@ func NewProcessorService() *ProcessorService {
 }
 
 func (s *ProcessorService) GetAllProcessorsInWorkspace(ctx context.Context, workspaceID string) ([]models.Processor, error) {
-	return s.wsRepo.GetAll(ctx, workspaceID)
+	processors, err := s.wsRepo.GetAll(ctx, workspaceID)
+	if err != nil {
+		return nil, err
+	}
+	return processors, nil
 }
 
 func (s *ProcessorService) GetProcessor(ctx context.Context, processorID string) (*models.Processor, error) {
-	return s.wsRepo.Get(ctx, processorID)
+	processor, err := s.wsRepo.Get(ctx, processorID)
+	if err != nil {
+		return nil, err
+	}
+	return processor, nil
 }
 
 func (s *ProcessorService) CreateProcessor(ctx context.Context, workspaceID string, processor *models.Processor) error {
-	wsObjID, err := primitive.ObjectIDFromHex(workspaceID)
+	user, err := utils.GetUserDetailsFromContext(ctx)
 	if err != nil {
 		return err
 	}
-	processor.WorkspaceID = wsObjID
-	processor.Tasks = &models.ProcTaskCanvas{
-		Nodes: []models.ProcTask{
-			{
-				ID:        primitive.NewObjectID().Hex(),
-				Key:       TriggerTaskKey,
-				Type:      "baseNode",
-				Deletable: false,
-				Data: models.JSON{
-					"label":       "Trigger",
-					"description": "Trigger the processor to start processing the files",
-				},
-				Position: models.JSON{
-					"x": 0,
-					"y": 0,
-				},
-				Measured: models.JSON{},
+
+	processor.CreatedBy = user.UserID
+	processor.UpdatedBy = user.UserID
+	processor.WorkspaceID = workspaceID
+	processor.Canvas = types.JSONB{
+		"nodes": []types.JSONB{{
+			"id":        uuid.NewString(),
+			"key":       TriggerTaskKey,
+			"type":      "baseNode",
+			"deletable": false,
+			"data": types.EncryptedJSONB{
+				"label":       "Trigger",
+				"description": "Trigger the processor to start processing the files",
 			},
-		},
-		Edges: []models.ProcTaskEdge{},
+			"position": types.JSONB{
+				"x": 0,
+				"y": 0,
+			},
+			"measured": types.JSONB{},
+		}},
+		"edges": []types.JSONB{},
 	}
 	return s.wsRepo.Create(ctx, processor)
 }
 
-func (s *ProcessorService) UpdateTasks(ctx context.Context, processorID string, tasks *models.ProcTaskCanvas) error {
+func (s *ProcessorService) UpdateTasks(ctx context.Context, processorID string, tasks *types.JSONB) error {
 	patch := bson.M{"tasks": tasks}
 	return s.wsRepo.Patch(ctx, processorID, patch)
 }
 
-func (s *ProcessorService) DeleteProcessor(ctx context.Context, processorID string) error {
+func (s *ProcessorService) DeleteProcessor(ctx context.Context, workspaceID, processorID string) error {
 	return s.wsRepo.Delete(ctx, processorID)
 }
 
-func (s *ProcessorService) EnableDisableProcessor(ctx context.Context, processorID string, enabled bool) error {
-	patch := bson.M{"enabled": enabled}
+func (s *ProcessorService) EnableDisableProcessor(ctx context.Context, workspaceID, processorID string, enabled bool) error {
+	user, err := utils.GetUserDetailsFromContext(ctx)
+	if err != nil {
+		return err
+	}
+	patch := map[string]interface{}{"enabled": enabled}
+	patch["updated_by"] = user.UserID
 	return s.wsRepo.Patch(ctx, processorID, patch)
 }
 
-func (s *ProcessorService) EditNameAndTrigger(ctx context.Context, processorID string, update *dto.EditProcRequest) error {
-	patch := bson.M{"name": update.Name, "triggers": update.Triggers}
+func (s *ProcessorService) EditNameAndTrigger(ctx context.Context, workspaceID, processorID string, update *dto.EditProcRequest) error {
+	user, err := utils.GetUserDetailsFromContext(ctx)
+	if err != nil {
+		return err
+	}
+	patch := map[string]interface{}{"name": update.Name, "triggers": update.Triggers}
+	patch["updated_by"] = user.UserID
 	return s.wsRepo.Patch(ctx, processorID, patch)
 }

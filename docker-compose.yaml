@@ -1,25 +1,34 @@
-version: '3.8'
+version: "3.8"
 
 services:
-  companion:
-    image: companion
+  redis:
+    image: redis
     ports:
-      - "8080:8080"
-    networks:
-      - app-network
+      - "6379:6379"
+    volumes:
+      - redis-data:/tmp/redis-data
 
-  ui:
-    image: ui
-    ports:
-      - "3000:80"
-    networks:
-      - app-network
+volumes:
+  redis-data:
 
-  uploadpilot:
-    image: uploadpilot
-    networks:
-      - app-network
+  # companion:
+  #   image: companion
+  #   ports:
+  #     - "8080:8080"
+  #   networks:
+  #     - app-network
 
-networks:
-  app-network:
-    driver: bridge
+  # ui:
+  #   image: ui
+  #   ports:
+  #     - "3000:80"
+  #   networks:
+  #     - app-network
+
+  # uploadpilot:
+  #   image: uploadpilot
+  #   networks:
+  #     - app-network
+# networks:
+#   app-network:
+#     driver: bridge

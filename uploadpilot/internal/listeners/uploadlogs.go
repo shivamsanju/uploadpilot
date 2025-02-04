@@ -10,13 +10,12 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/events"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UploadLogsListener struct {
 	eventChan      chan *events.LogEvent
 	uploadLogsRepo *db.UploadLogsRepo
-	logBuffer      []interface{}
+	logBuffer      []*models.UploadLog
 	flushInterval  time.Duration
 	bufferSize     int
 	mu             sync.Mutex
@@ -31,7 +30,7 @@ func NewUploadLogsListener(flushInterval time.Duration, bufferSize int) *UploadL
 	return &UploadLogsListener{
 		eventChan:      eventChan,
 		uploadLogsRepo: db.NewUploadLogsRepo(),
-		logBuffer:      make([]interface{}, bufferSize),
+		logBuffer:      make([]*models.UploadLog, 0),
 		flushInterval:  flushInterval,
 		bufferSize:     bufferSize,
 		mu:             sync.Mutex{},
@@ -47,40 +46,22 @@ func (l *UploadLogsListener) Start() {
 	for event := range l.eventChan {
 		infra.Log.Infof("processing log event %s", event.UploadID)
 
-		uploadID, err := primitive.ObjectIDFromHex(event.UploadID)
-		if err != nil {
-			infra.Log.Errorf("invalid upload id in log: %s", err.Error())
-			continue
-		}
-
-		workspaceID, err := primitive.ObjectIDFromHex(event.WorkspaceID)
-		if err != nil {
-			infra.Log.Errorf("invalid workspace id in log: %s", err.Error())
-			continue
-		}
-
 		l.mu.Lock()
 
 		log := &models.UploadLog{
-			ID:          primitive.NewObjectID(),
-			WorkspaceID: workspaceID,
-			UploadID:    uploadID,
+			WorkspaceID: event.WorkspaceID,
+			UploadID:    event.UploadID,
 			Message:     event.Message,
 			Level:       event.Level,
-			Timestamp:   primitive.NewDateTimeFromTime(time.Now()),
+			Timestamp:   time.Now(),
 		}
 
 		if event.ProcessorID != nil {
-			pID, err := primitive.ObjectIDFromHex(*event.ProcessorID)
-			if err != nil {
-				infra.Log.Errorf("invalid processor id in log: %s", err.Error())
-				continue
-			}
-			log.ProcessorID = pID
+			log.ProcessorID = event.ProcessorID
 		}
 
 		if event.TaskID != nil {
-			log.TaskID = *event.TaskID
+			log.TaskID = event.TaskID
 		}
 
 		l.logBuffer = append(l.logBuffer, log)
@@ -89,6 +70,7 @@ func (l *UploadLogsListener) Start() {
 			l.uploadLogsRepo.BatchAddLogs(context.Background(), l.logBuffer)
 			l.logBuffer = nil
 		}
+
 		l.mu.Unlock()
 	}
 }

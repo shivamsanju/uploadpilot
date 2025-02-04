@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/uploadpilot/uploadpilot/internal/auth"
+	"github.com/uploadpilot/uploadpilot/internal/cache"
 	"github.com/uploadpilot/uploadpilot/internal/config"
 	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
@@ -69,6 +70,11 @@ func initServices() (*http.Server, error) {
 	// Initialize infra.
 	if err := infra.Init(); err != nil {
 		return nil, wrapError("infra initialization failed", err)
+	}
+
+	// Initialize cache.
+	if err := cache.Init(); err != nil {
+		return nil, wrapError("cache initialization failed", err)
 	}
 
 	// Initialize database.

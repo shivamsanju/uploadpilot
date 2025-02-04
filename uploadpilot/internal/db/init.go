@@ -1,37 +1,41 @@
 package db
 
 import (
-	"context"
 	"time"
 
 	"github.com/uploadpilot/uploadpilot/internal/config"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 var (
-	db *mongo.Database
+	sqlDB *gorm.DB
 )
 
 func Init() error {
-	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
-	opts := options.Client().ApplyURI(config.MongoURI).SetServerAPIOptions(serverAPI)
+	db, err := gorm.Open(postgres.Open(config.PostgresURI), &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Error),
+	})
 
-	client, err := mongo.Connect(context.TODO(), opts)
 	if err != nil {
-		infra.Log.Error("failed to connect to mongodb!")
 		return err
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	err = client.Ping(ctx, nil)
+	sqlDB = db
+
+	_db, err := db.DB()
 	if err != nil {
-		infra.Log.Error("failed to connect to mongodb!")
 		return err
 	}
-	db = client.Database(config.DatabaseName)
-	infra.Log.Info("successfully connected to mongodb!")
+
+	_db.SetMaxOpenConns(25)                  // Maximum open connections
+	_db.SetMaxIdleConns(10)                  // Maximum idle connections
+	_db.SetConnMaxLifetime(30 * time.Minute) // Reuse connections for 30 min
+	_db.SetConnMaxIdleTime(5 * time.Minute)  // Idle connections max time
+
+	infra.Log.Info("successfully connected to postgres!")
+
 	return nil
 }

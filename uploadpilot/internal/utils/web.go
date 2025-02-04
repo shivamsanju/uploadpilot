@@ -15,25 +15,25 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/msg"
 )
 
-func GetSkipLimitSearchParams(r *http.Request) (skip int64, limit int64, search string, err error) {
+func GetSkipLimitSearchParams(r *http.Request) (skip int, limit int, search string, err error) {
 	query := r.URL.Query()
 	s := query.Get("skip")
 	l := query.Get("limit")
 	search = query.Get("search")
 
-	skip, err = strconv.ParseInt(s, 10, 64)
+	skip, err = strconv.Atoi(s)
 	if err != nil {
 		return
 	}
-	limit, err = strconv.ParseInt(l, 10, 64)
+	limit, err = strconv.Atoi(l)
 	if err != nil {
 		return
 	}
 	return
 }
 
-func GetUserDetailsFromContext(ctx context.Context) (*dto.ApiUser, error) {
-	userID, ok1 := ctx.Value("userId").(string)
+func GetUserDetailsFromContext(ctx context.Context) (*dto.UserContext, error) {
+	userID, ok1 := ctx.Value("id").(string)
 	name, ok2 := ctx.Value("name").(string)
 	email, ok3 := ctx.Value("email").(string)
 
@@ -41,7 +41,8 @@ func GetUserDetailsFromContext(ctx context.Context) (*dto.ApiUser, error) {
 		return nil, errors.New(msg.FailedToGetUserFromContext)
 	}
 
-	return &dto.ApiUser{
+	infra.Log.Infof("user details: %+v", dto.UserContext{UserID: userID, Name: name, Email: email})
+	return &dto.UserContext{
 		UserID: userID,
 		Name:   name,
 		Email:  email,

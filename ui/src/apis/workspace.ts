@@ -21,7 +21,7 @@ export const useCreateWorkspaceMutation = () => {
   return useMutation({
     mutationKey: ["workspaces"],
     mutationFn: (name: string) =>
-      axiosInstance.post("/workspaces", { name }).then((res) => res.data),
+      axiosInstance.post("/workspaces", { name, tags: ["default"] }).then((res) => res.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["workspaces"] });
       notifications.show({

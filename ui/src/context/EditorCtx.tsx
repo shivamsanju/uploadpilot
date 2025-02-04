@@ -88,7 +88,7 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({
   ] = useDisclosure();
   const { isPending, error, processor, invalidate } = useGetProcessor(
     workspaceId as string,
-    processorId as string,
+    processorId as string
   );
   const { mutateAsync, isPending: isUpdating } =
     useUpdateProcessorTaskMutation();
@@ -110,22 +110,20 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({
         .id((node: any) => node.id)
         .parentId(
           (node: any) =>
-            edges.find((edge: any) => edge.target === node.id)?.source,
+            edges.find((edge: any) => edge.target === node.id)?.source
         );
       const root = hierarchy(nodes);
       const layout = g.nodeSize([width * 2, height * 5])(root);
 
       return {
-        nodes: layout
-          .descendants()
-          .map((node: any) => ({
-            ...nodes.find((n: any) => n.id === node.id),
-            position: { x: node.x, y: node.y },
-          })),
+        nodes: layout.descendants().map((node: any) => ({
+          ...nodes.find((n: any) => n.id === node.id),
+          position: { x: node.x, y: node.y },
+        })),
         edges,
       };
     },
-    [g],
+    [g]
   );
 
   const onNodesChange = (changes: any) => {
@@ -141,7 +139,7 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({
       await mutateAsync({
         processorId: processorId!,
         workspaceId: workspaceId!,
-        tasks: {
+        canvas: {
           nodes,
           edges,
         },
@@ -164,7 +162,7 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({
           const connectedEdges = getConnectedEdges([node], edges);
 
           const remainingEdges = acc.filter(
-            (edge: any) => !connectedEdges.includes(edge),
+            (edge: any) => !connectedEdges.includes(edge)
           );
 
           const createdEdges = incomers.flatMap(({ id: source }) =>
@@ -173,21 +171,21 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({
               deletable: false,
               source,
               target,
-            })),
+            }))
           );
 
           return [...remainingEdges, ...createdEdges];
-        }, edges),
+        }, edges)
       );
     },
-    [nodes, edges],
+    [nodes, edges]
   );
 
   const onSelectNewNode = useCallback(
     (item: any, type: string) => {
       const node = nodes.find((n: any) => n.id === connectionStateNodeId);
       const numEdges = edges.filter(
-        (e: any) => e.source === connectionStateNodeId,
+        (e: any) => e.source === connectionStateNodeId
       ).length;
       if (!node) return;
 
@@ -217,11 +215,11 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({
           source: connectionStateNodeId,
           target: id,
           deletable: false,
-        }),
+        })
       );
       setconnectionStateNodeId(null);
     },
-    [connectionStateNodeId, nodes, edges],
+    [connectionStateNodeId, nodes, edges]
   );
 
   const onConnectEnd = useCallback((fromNodeId: any) => {
@@ -229,9 +227,9 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   useEffect(() => {
-    if (processor && processor.tasks) {
-      setNodes(processor.tasks.nodes);
-      setEdges(processor.tasks.edges);
+    if (processor && processor.canvas) {
+      setNodes(processor.canvas.nodes);
+      setEdges(processor.canvas.edges);
     }
   }, [processor]);
 

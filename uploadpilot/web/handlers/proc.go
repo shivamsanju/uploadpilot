@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/internal/db/types"
 	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/proc"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
@@ -42,14 +43,6 @@ func (h *processorHandler) GetProcessorDetailsByID(w http.ResponseWriter, r *htt
 		return
 	}
 
-	// p := struct {
-	// 	*models.Processor
-	// 	time int64
-	// }{
-	// 	Processor: processor,
-	// 	time:      time.Now().Unix(),
-	// }
-
 	render.JSON(w, r, processor)
 }
 
@@ -72,6 +65,7 @@ func (h *processorHandler) CreateProcessor(w http.ResponseWriter, r *http.Reques
 
 func (h *processorHandler) UpdateProcessor(w http.ResponseWriter, r *http.Request) {
 	processorID := chi.URLParam(r, "processorId")
+	workspaceID := chi.URLParam(r, "workspaceId")
 
 	processor := &dto.EditProcRequest{}
 	if err := render.DecodeJSON(r.Body, processor); err != nil {
@@ -79,7 +73,7 @@ func (h *processorHandler) UpdateProcessor(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err := h.processorSvc.EditNameAndTrigger(r.Context(), processorID, processor)
+	err := h.processorSvc.EditNameAndTrigger(r.Context(), workspaceID, processorID, processor)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -90,8 +84,9 @@ func (h *processorHandler) UpdateProcessor(w http.ResponseWriter, r *http.Reques
 
 func (h *processorHandler) DeleteProcessor(w http.ResponseWriter, r *http.Request) {
 	processorID := chi.URLParam(r, "processorId")
+	workspaceID := chi.URLParam(r, "workspaceId")
 
-	if err := h.processorSvc.DeleteProcessor(r.Context(), processorID); err != nil {
+	if err := h.processorSvc.DeleteProcessor(r.Context(), workspaceID, processorID); err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
@@ -102,13 +97,13 @@ func (h *processorHandler) DeleteProcessor(w http.ResponseWriter, r *http.Reques
 func (h *processorHandler) UpdateTasks(w http.ResponseWriter, r *http.Request) {
 	processorID := chi.URLParam(r, "processorId")
 
-	tasks := &models.ProcTaskCanvas{}
-	if err := render.DecodeJSON(r.Body, tasks); err != nil {
+	canvas := &types.JSONB{}
+	if err := render.DecodeJSON(r.Body, canvas); err != nil {
 		utils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	if err := h.processorSvc.UpdateTasks(r.Context(), processorID, tasks); err != nil {
+	if err := h.processorSvc.UpdateTasks(r.Context(), processorID, canvas); err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
@@ -118,8 +113,9 @@ func (h *processorHandler) UpdateTasks(w http.ResponseWriter, r *http.Request) {
 
 func (h *processorHandler) EnableProcessor(w http.ResponseWriter, r *http.Request) {
 	processorID := chi.URLParam(r, "processorId")
+	workspaceID := chi.URLParam(r, "workspaceId")
 
-	err := h.processorSvc.EnableDisableProcessor(r.Context(), processorID, true)
+	err := h.processorSvc.EnableDisableProcessor(r.Context(), workspaceID, processorID, true)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -130,8 +126,9 @@ func (h *processorHandler) EnableProcessor(w http.ResponseWriter, r *http.Reques
 
 func (h *processorHandler) DisableProcessor(w http.ResponseWriter, r *http.Request) {
 	processorID := chi.URLParam(r, "processorId")
+	workspaceID := chi.URLParam(r, "workspaceId")
 
-	err := h.processorSvc.EnableDisableProcessor(r.Context(), processorID, false)
+	err := h.processorSvc.EnableDisableProcessor(r.Context(), workspaceID, processorID, false)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return

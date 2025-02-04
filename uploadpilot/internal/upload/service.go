@@ -5,41 +5,40 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/mitchellh/mapstructure"
 	tusd "github.com/tus/tusd/v2/pkg/handler"
 	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
-	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/events"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
 	"github.com/uploadpilot/uploadpilot/internal/msg"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UploadService struct {
-	upRepo      *db.UploadRepo
-	wsRepo      *db.WorkspaceRepo
-	userRepo    *db.UserRepo
-	logRepo     *db.UploadLogsRepo
-	eventBus    *events.UploadEventBus
-	logEventBus *events.LogEventBus
+	upRepo       *db.UploadRepo
+	wsRepo       *db.WorkspaceRepo
+	wsConfigRepo *db.WorkspaceConfigRepo
+	userRepo     *db.UserRepo
+	logRepo      *db.UploadLogsRepo
+	eventBus     *events.UploadEventBus
+	logEventBus  *events.LogEventBus
 }
 
 func NewUploadService() *UploadService {
 	return &UploadService{
-		upRepo:      db.NewUploadRepo(),
-		wsRepo:      db.NewWorkspaceRepo(),
-		userRepo:    db.NewUserRepo(),
-		logRepo:     db.NewUploadLogsRepo(),
-		eventBus:    events.GetUploadEventBus(),
-		logEventBus: events.GetLogEventBus(),
+		upRepo:       db.NewUploadRepo(),
+		wsRepo:       db.NewWorkspaceRepo(),
+		wsConfigRepo: db.NewWorkspaceConfigRepo(),
+		userRepo:     db.NewUserRepo(),
+		logRepo:      db.NewUploadLogsRepo(),
+		eventBus:     events.GetUploadEventBus(),
+		logEventBus:  events.GetLogEventBus(),
 	}
 }
 
-func (us *UploadService) GetAllUploads(ctx context.Context, workspaceID string, skip int64, limit int64, search string) ([]models.Upload, int64, error) {
+func (us *UploadService) GetAllUploads(ctx context.Context, workspaceID string, skip int, limit int, search string) ([]models.Upload, int64, error) {
 	if strings.HasPrefix(search, "{") {
 		searchParams, err := utils.ExtractKeyValuePairs(search)
 		if err != nil {
@@ -82,15 +81,12 @@ func (us *UploadService) CreateUpload(hook *tusd.HookEvent) (*models.Upload, err
 		return nil, err
 	}
 
-	// beyond this point, an upload attempt will be logged
-	now := primitive.NewDateTimeFromTime(time.Now())
 	upload := &models.Upload{
-		ID:        primitive.NewObjectID(),
-		Size:      hook.Upload.Size,
-		Status:    models.UploadStatusInProgress,
-		StartedAt: now,
+		Size:   hook.Upload.Size,
+		Status: models.UploadStatusInProgress,
 	}
-	us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, upload.ID.Hex(), "upload started", nil, nil, models.UploadLogLevelInfo))
+	upload.Metadata["uploadId"] = upload.ID
+	us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, upload.ID, "upload started", nil, nil, models.UploadLogLevelInfo))
 
 	logErrorAndUpdateUpload := func(err error) error {
 		if repoErr := us.upRepo.Create(hook.Context, workspaceID, upload); repoErr != nil {
@@ -99,7 +95,7 @@ func (us *UploadService) CreateUpload(hook *tusd.HookEvent) (*models.Upload, err
 		}
 
 		us.eventBus.Publish(events.NewUploadEvent(hook.Context, events.EventUploadFailed, upload, "", err))
-		us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, upload.ID.Hex(), "upload failed: "+err.Error(), nil, nil, models.UploadLogLevelError))
+		us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, upload.ID, "upload failed: "+err.Error(), nil, nil, models.UploadLogLevelError))
 
 		return err
 	}
@@ -110,15 +106,15 @@ func (us *UploadService) CreateUpload(hook *tusd.HookEvent) (*models.Upload, err
 	}
 	upload.Metadata = metadata
 
-	if err := us.ValidateUploadSizeLimits(hook, workspaceID, upload.ID.Hex(), config); err != nil {
+	if err := us.ValidateUploadSizeLimits(hook, workspaceID, upload.ID, config); err != nil {
 		return nil, logErrorAndUpdateUpload(err)
 	}
 
-	if err := us.ValidateUploadFileType(hook, workspaceID, upload.ID.Hex(), config); err != nil {
+	if err := us.ValidateUploadFileType(hook, workspaceID, upload.ID, config); err != nil {
 		return nil, logErrorAndUpdateUpload(err)
 	}
 
-	if err := us.AuthenticateUpload(hook, workspaceID, upload.ID.Hex(), config); err != nil {
+	if err := us.AuthenticateUpload(hook, workspaceID, upload.ID, config); err != nil {
 		return nil, logErrorAndUpdateUpload(fmt.Errorf(msg.UploadAuthenticationFailed, err))
 	}
 
@@ -138,11 +134,11 @@ func (us *UploadService) FinishUpload(ctx context.Context, uploadID string) erro
 	}
 	infra.Log.Infof("upload completed: %s", uploadID)
 	us.eventBus.Publish(events.NewUploadEvent(ctx, events.EventUploadComplete, upload, "", nil))
-	us.logEventBus.Publish(events.NewLogEvent(ctx, upload.WorkspaceID.Hex(), upload.ID.Hex(), "upload completed", nil, nil, models.UploadLogLevelInfo))
+	us.logEventBus.Publish(events.NewLogEvent(ctx, upload.WorkspaceID, upload.ID, "upload completed", nil, nil, models.UploadLogLevelInfo))
 	return nil
 }
 
-func (us *UploadService) GetLogs(ctx context.Context, uploadID string) ([]dto.UploadLogNoIDs, error) {
+func (us *UploadService) GetLogs(ctx context.Context, uploadID string) ([]models.UploadLog, error) {
 	logs, err := us.logRepo.GetLogs(ctx, uploadID)
 	if err != nil {
 		return nil, err
@@ -156,7 +152,7 @@ func (us *UploadService) getUploaderConfig(hook *tusd.HookEvent) (*models.Upload
 		return nil, err
 	}
 
-	config, err := us.wsRepo.GetUploaderConfig(hook.Context, workspaceID)
+	config, err := us.wsConfigRepo.GetConfig(hook.Context, workspaceID)
 	if err != nil {
 		return nil, fmt.Errorf(msg.WorkspaceNotFound, workspaceID)
 	}

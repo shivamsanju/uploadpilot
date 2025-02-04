@@ -1,6 +1,24 @@
 package models
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"time"
+
+	"github.com/uploadpilot/uploadpilot/internal/db/types"
+)
+
+type Upload struct {
+	ID             string       `gorm:"column:id;primaryKey;default:uuid_generate_v4();type:uuid" json:"id"`
+	WorkspaceID    string       `gorm:"column:workspace_id;type:uuid;not null" json:"workspaceId"`
+	Status         UploadStatus `gorm:"column:status;not null" json:"status"`
+	Metadata       types.JSONB  `gorm:"column:metadata;type:jsonb" json:"metadata"`
+	StoredFileName string       `gorm:"column:stored_file_name;not null" json:"storedFileName"`
+	Size           int64        `gorm:"column:size;not null" json:"size"`
+	URL            string       `gorm:"column:url" json:"url"`
+	ProcessedURL   string       `gorm:"column:processed_url" json:"processedUrl"`
+	StartedAt      time.Time    `gorm:"column:started_at;default:now()" json:"startedAt"`
+	FinishedAt     time.Time    `gorm:"column:finished_at" json:"finishedAt"`
+	Workspace      Workspace    `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE" json:"workspace"`
+}
 
 type UploadStatus string
 
@@ -17,19 +35,6 @@ const (
 	UploadStatusProcessingCancelled UploadStatus = "Processing Cancelled"
 	UploadStatusDeleted             UploadStatus = "Deleted"
 )
-
-type Upload struct {
-	ID             primitive.ObjectID     `bson:"_id" json:"id"`
-	WorkspaceID    primitive.ObjectID     `bson:"workspaceId" json:"workspaceId" validate:"required"`
-	Status         UploadStatus           `bson:"status" json:"status" validate:"required"`
-	Metadata       map[string]interface{} `bson:"metadata" json:"metadata"`
-	StoredFileName string                 `bson:"storedFileName" json:"storedFileName" validate:"required"`
-	Size           int64                  `bson:"size" json:"size" validate:"required"`
-	URL            string                 `bson:"url" json:"url"`
-	ProcesedURL    string                 `bson:"processedUrl" json:"processedUrl"`
-	StartedAt      primitive.DateTime     `bson:"startedAt" json:"startedAt"`
-	FinishedAt     primitive.DateTime     `bson:"finishedAt" json:"finishedAt"`
-}
 
 var UploadTerminalStates = []UploadStatus{
 	UploadStatusSkipped,

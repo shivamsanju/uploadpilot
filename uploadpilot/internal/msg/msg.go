@@ -14,12 +14,12 @@ var (
 	WorkspaceNotFound            = "workspace %s not found"
 	UserAlreadyExistsInWorkspace = "user %s already exists in workspace"
 	UnknownRole                  = "unknown role: %s"
-	LastOwnerCannotBeRemoved     = "atleast one owner must remain in the workspace"
-	LastOwnerRoleCannotBeChanged = "last owner role cannot be changed"
+	OwnerCannotBeRemoved         = "owner cannot be removed"
+	OwnerRoleCannotBeChanged     = "owner role cannot be changed"
 	UserNotFound                 = "user %s not found"
 
 	// DB
-	InvalidObjectID = "invalid object id: %s"
+	InvalidID = "invalid object id: %s"
 
 	// Upload
 	UploadNotFound              = "upload %s not found"

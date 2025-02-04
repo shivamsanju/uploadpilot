@@ -6,26 +6,50 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/dto"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/uploadpilot/uploadpilot/internal/utils"
 )
 
 type WorkspaceService struct {
-	wsRepo   *db.WorkspaceRepo
-	userRepo *db.UserRepo
+	wsRepo       *db.WorkspaceRepo
+	wsConfigRepo *db.WorkspaceConfigRepo
+	wsUserRepo   *db.WorkspaceUserRepo
+	userRepo     *db.UserRepo
 }
 
 func NewWorkspaceService() *WorkspaceService {
 	return &WorkspaceService{
-		wsRepo:   db.NewWorkspaceRepo(),
-		userRepo: db.NewUserRepo(),
+		wsRepo:       db.NewWorkspaceRepo(),
+		wsConfigRepo: db.NewWorkspaceConfigRepo(),
+		wsUserRepo:   db.NewWorkspaceUserRepo(),
+		userRepo:     db.NewUserRepo(),
 	}
 }
 
-func (s *WorkspaceService) CreateWorkspace(ctx context.Context, workspace *models.Workspace) error {
-	workspace.UploaderConfig = DefaultUploaderConfig
-	workspace.ID = primitive.NewObjectID()
+func (s *WorkspaceService) GetWorkspaces(ctx context.Context, userID string) ([]dto.WorkspaceNameID, error) {
+	workspaces, err := s.wsRepo.GetAll(ctx, userID)
+	if err != nil {
+		return nil, err
+	}
+	return workspaces, nil
+}
 
-	_, err := s.wsRepo.Create(ctx, workspace)
+func (s *WorkspaceService) CreateWorkspace(ctx context.Context, workspace *models.Workspace) error {
+
+	user, err := utils.GetUserDetailsFromContext(ctx)
+	if err != nil {
+		return err
+	}
+
+	workspace.CreatedBy = user.UserID
+	workspace.UpdatedBy = user.UserID
+
+	uw := &models.UserWorkspace{
+		UserID:      user.UserID,
+		WorkspaceID: workspace.ID,
+		Role:        models.UserRoleOwner,
+	}
+
+	err = s.wsRepo.Create(ctx, workspace, uw, DefaultUploaderConfig)
 	return err
 }
 
@@ -35,12 +59,4 @@ func (s *WorkspaceService) GetWorkspaceDetails(ctx context.Context, workspaceID 
 		return nil, err
 	}
 	return ws, nil
-}
-
-func (s *WorkspaceService) GetUserWorkspaces(ctx context.Context, userID string) ([]dto.WorkspaceNameID, error) {
-	workspaces, err := s.wsRepo.GetAll(ctx, userID)
-	if err != nil {
-		return nil, err
-	}
-	return workspaces, nil
 }

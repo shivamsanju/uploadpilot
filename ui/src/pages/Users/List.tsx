@@ -4,6 +4,7 @@ import {
   Avatar,
   Box,
   Group,
+  LoadingOverlay,
   Menu,
   Modal,
   Text,
@@ -20,7 +21,6 @@ import { ErrorCard } from "../../components/ErrorCard/ErrorCard";
 import { showNotification } from "@mantine/notifications";
 import AddUserForm from "./Add";
 import { useViewportSize } from "@mantine/hooks";
-import { ErrorLoadingWrapper } from "../../components/ErrorLoadingWrapper";
 
 const getRandomAvatar = () => {
   const randomIndex = Math.floor(Math.random() * 5) + 1;
@@ -142,12 +142,14 @@ const WorkspaceUsersList = ({
                   <Text>View</Text>
                 </Menu.Item>
                 <Menu.Item
+                  disabled={item.role === "Owner"}
                   leftSection={<IconEdit size={16} stroke={1.5} />}
                   onClick={() => handleViewEdit(item, "edit")}
                 >
                   <Text>Edit role</Text>
                 </Menu.Item>
                 <Menu.Item
+                  disabled={item.role === "Owner"}
                   leftSection={<IconTrash size={16} stroke={1.5} />}
                   color="red"
                   onClick={() => handleRemoveUser(item.userId)}
@@ -168,51 +170,51 @@ const WorkspaceUsersList = ({
   }
 
   return (
-    <ErrorLoadingWrapper
-      error={error}
-      isPending={removePending || isPending || isFetching}
-    >
-      <Box mr="md">
-        <UploadPilotDataTable
-          minHeight={500}
-          showSearch={false}
-          columns={columns}
-          records={users}
-          verticalSpacing="md"
-          horizontalSpacing="md"
-          noHeader={true}
-          noRecordsText="No users found"
+    <Box mr="md">
+      <LoadingOverlay
+        visible={removePending || isFetching || isPending}
+        overlayProps={{ backgroundOpacity: 0 }}
+        zIndex={1000}
+      />
+      <UploadPilotDataTable
+        minHeight={500}
+        showSearch={false}
+        columns={columns}
+        records={users}
+        verticalSpacing="md"
+        horizontalSpacing="md"
+        noHeader={true}
+        noRecordsText="No users found"
+      />
+      <Modal
+        padding="xl"
+        transitionProps={{ transition: "pop" }}
+        opened={opened}
+        onClose={() => {
+          setOpened(false);
+          setMode("add");
+          setInitialValues(null);
+        }}
+        title={
+          mode === "edit"
+            ? "Edit User"
+            : mode === "view"
+            ? "User Details"
+            : "Add User"
+        }
+        closeOnClickOutside={false}
+        size="lg"
+      >
+        <AddUserForm
+          mode={mode}
+          setOpened={setOpened}
+          workspaceId={workspaceId || ""}
+          initialValues={initialValues}
+          setInitialValues={setInitialValues}
+          setMode={setMode}
         />
-        <Modal
-          padding="xl"
-          transitionProps={{ transition: "pop" }}
-          opened={opened}
-          onClose={() => {
-            setOpened(false);
-            setMode("add");
-            setInitialValues(null);
-          }}
-          title={
-            mode === "edit"
-              ? "Edit User"
-              : mode === "view"
-              ? "User Details"
-              : "Add User"
-          }
-          closeOnClickOutside={false}
-          size="lg"
-        >
-          <AddUserForm
-            mode={mode}
-            setOpened={setOpened}
-            workspaceId={workspaceId || ""}
-            initialValues={initialValues}
-            setInitialValues={setInitialValues}
-            setMode={setMode}
-          />
-        </Modal>
-      </Box>
-    </ErrorLoadingWrapper>
+      </Modal>
+    </Box>
   );
 };
 

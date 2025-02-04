@@ -13,16 +13,16 @@ import (
 
 func (us *UploadService) ValidateUploadSizeLimits(hook *tusd.HookEvent, workspaceID, uploadID string, config *models.UploaderConfig) error {
 
-	if config.MaxFileSize > 0 && hook.Upload.Size > int64(config.MaxFileSize) {
+	if *config.MaxFileSize > 0 && hook.Upload.Size > int64(*config.MaxFileSize) {
 		return fmt.Errorf(msg.MaxFileSizeExceeded, hook.Upload.Size, config.MaxFileSize)
 	}
 
-	if config.MinFileSize > 0 && hook.Upload.Size < int64(config.MinFileSize) {
+	if *config.MinFileSize > 0 && hook.Upload.Size < int64(*config.MinFileSize) {
 		return fmt.Errorf(msg.MinFileSizeNotMet, hook.Upload.Size, config.MinFileSize)
 	}
 
 	maxFileSize := fmt.Sprintf("%d", config.MaxFileSize)
-	if config.MaxFileSize == 0 {
+	if *config.MaxFileSize == 0 {
 		maxFileSize = "no_limit"
 	}
 	mesg := fmt.Sprintf("upload size: %d is within allowed range: %d to %s", hook.Upload.Size, config.MinFileSize, maxFileSize)
@@ -47,11 +47,11 @@ func (us *UploadService) ValidateUploadFileType(hook *tusd.HookEvent, workspaceI
 }
 
 func (us *UploadService) AuthenticateUpload(hook *tusd.HookEvent, workspaceID, uploadID string, config *models.UploaderConfig) error {
-	if len(config.AuthEndpoint) == 0 {
+	if config.AuthEndpoint == nil {
 		return nil
 	}
 
-	req, err := http.NewRequestWithContext(hook.Context, "GET", config.AuthEndpoint, nil)
+	req, err := http.NewRequestWithContext(hook.Context, "GET", *config.AuthEndpoint, nil)
 	if err != nil {
 		return err
 	}
@@ -75,7 +75,7 @@ func (us *UploadService) AuthenticateUpload(hook *tusd.HookEvent, workspaceID, u
 		return errors.New(resp.Status)
 	}
 
-	mesg := fmt.Sprintf("upload is authenticated by auth endpoint: %s", config.AuthEndpoint)
+	mesg := fmt.Sprintf("upload is authenticated by auth endpoint: %s", *config.AuthEndpoint)
 	us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, uploadID, mesg, nil, nil, models.UploadLogLevelInfo))
 	return nil
 }

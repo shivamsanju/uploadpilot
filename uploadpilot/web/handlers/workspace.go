@@ -38,11 +38,12 @@ func (h *workspaceHandler) CreateWorkspace(w http.ResponseWriter, r *http.Reques
 
 func (h *workspaceHandler) GetWorkspacesForUser(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUserDetailsFromContext(r.Context())
+
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	workspaces, err := h.workspaceSvc.GetUserWorkspaces(r.Context(), user.UserID)
+	workspaces, err := h.workspaceSvc.GetWorkspaces(r.Context(), user.UserID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
