@@ -13,7 +13,7 @@ import {
 } from "@mantine/core";
 import { IconAt, IconLockAccess } from "@tabler/icons-react";
 
-const ROLES = ["Owner", "Contributor", "Viewer"];
+const ROLES = ["Contributor", "Viewer"];
 
 type Props = {
   setOpened: React.Dispatch<React.SetStateAction<boolean>>;

@@ -35,7 +35,7 @@ func (s *WorkspaceService) AddUserToWorkspace(ctx context.Context, workspaceID s
 		WorkspaceID: workspaceID,
 		Role:        addReq.Role,
 	}
-	_, err = s.wsUserRepo.AddUserToWorkspace(ctx, uw)
+	err = s.wsUserRepo.AddUserToWorkspace(ctx, uw)
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (s *WorkspaceService) RemoveUserFromWorkspace(ctx context.Context, workspac
 	if isLastOwner {
 		return errors.New(msg.OwnerCannotBeRemoved)
 	}
-	_, err = s.wsUserRepo.RemoveUserFromWorkspace(ctx, workspaceID, userID)
+	err = s.wsUserRepo.RemoveUserFromWorkspace(ctx, workspaceID, userID)
 	if err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func (s *WorkspaceService) ChangeUserRoleInWorkspace(ctx context.Context, worksp
 		Role:        role,
 	}
 
-	_, err = s.wsUserRepo.UpdateUserInWorkspace(ctx, uw)
+	err = s.wsUserRepo.UpdateUserInWorkspace(ctx, uw)
 	if err != nil {
 		return err
 	}

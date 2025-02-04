@@ -228,15 +228,17 @@ export const useUpdateProcessorTaskMutation = () => {
       workspaceId,
       processorId,
       canvas,
+      data
     }: {
       workspaceId: string;
       processorId: string;
       canvas: any;
+      data: any;
     }) => {
       return axiosInstance
         .put(
           `/workspaces/${workspaceId}/processors/${processorId}/tasks`,
-          canvas,
+          {canvas, data},
         )
         .then((res) => res.data);
     },

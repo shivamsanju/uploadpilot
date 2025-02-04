@@ -11,7 +11,7 @@ import { useMantineColorScheme, useMantineTheme } from "@mantine/core";
 import { BaseNode } from "../../components/EditorNode/BaseNode";
 import { BlockSearch } from "../../components/BlockSearch";
 import "@xyflow/react/dist/style.css";
-import { useCanvas } from "../../context/EditorCtx";
+import { useCanvas } from "../../context/ProcEditorContext";
 import { NodeForm } from "./Form";
 
 export const ProcessorCanvas = () => {
@@ -30,7 +30,6 @@ export const ProcessorCanvas = () => {
     closeBlocksModal,
   } = useCanvas();
 
-  console.log(nodes, edges);
   return (
     <div
       style={{ width: "100%", height: "92vh" }}

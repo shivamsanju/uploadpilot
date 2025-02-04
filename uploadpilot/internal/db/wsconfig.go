@@ -16,7 +16,7 @@ func NewWorkspaceConfigRepo() *WorkspaceConfigRepo {
 
 // Config methods
 func (wr *WorkspaceConfigRepo) GetConfig(ctx context.Context, workspaceID string) (*models.UploaderConfig, error) {
-	key := WorkSpaceConfigKey(workspaceID)
+	key := WorkspaceConfigKey(workspaceID)
 	dbFetchFn := func(config *models.UploaderConfig) error {
 		return sqlDB.WithContext(ctx).Where("workspace_id = ?", workspaceID).
 			First(config).Error
@@ -30,7 +30,7 @@ func (wr *WorkspaceConfigRepo) GetConfig(ctx context.Context, workspaceID string
 }
 
 func (wr *WorkspaceConfigRepo) SetConfig(ctx context.Context, config *models.UploaderConfig) error {
-	key := WorkSpaceConfigKey(config.WorkspaceID)
+	key := WorkspaceConfigKey(config.WorkspaceID)
 
 	dbMutateFn := func(config *models.UploaderConfig) error {
 		return sqlDB.WithContext(ctx).Save(config).Error
@@ -39,6 +39,6 @@ func (wr *WorkspaceConfigRepo) SetConfig(ctx context.Context, config *models.Upl
 	return cl.Mutate(ctx, key, []string{}, config, dbMutateFn, 0)
 }
 
-func WorkSpaceConfigKey(workspaceID string) string {
+func WorkspaceConfigKey(workspaceID string) string {
 	return "workspace:" + workspaceID + ":config"
 }

@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 
 	"github.com/redis/go-redis/v9"
@@ -14,15 +15,20 @@ var (
 )
 
 func Init() error {
-	rc := redis.NewClient(&redis.Options{
+	opt := &redis.Options{
 		Addr:         config.RedisAddr,
 		Password:     config.RedisPassword,
 		Username:     config.RedisUsername,
 		DB:           0,
 		PoolSize:     20, // Maximum number of connections in the pool
 		MinIdleConns: 5,  // Minimum idle connections
-		// TLSConfig:    &tls.Config{},
-	})
+	}
+
+	if config.RedisTLS {
+		opt.TLSConfig = &tls.Config{}
+	}
+
+	rc := redis.NewClient(opt)
 
 	if rc == nil || rc.Options() == nil {
 		return fmt.Errorf("failed to create redis client")
@@ -33,7 +39,6 @@ func Init() error {
 	if res == nil {
 		return fmt.Errorf("failed to ping redis")
 	}
-	infra.Log.Infof("result: %+v", res)
 
 	p, err := res.Result()
 

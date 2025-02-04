@@ -4,8 +4,8 @@ import (
 	"context"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/uploadpilot/uploadpilot/internal/db/types"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type TaskKey string
@@ -31,7 +31,7 @@ type BaseTask struct {
 
 func NewBaseTask(workspaceID, processorID, uploadID, tmpDir, inputObjId string) *BaseTask {
 	return &BaseTask{
-		RunID:       primitive.NewObjectID().Hex(),
+		RunID:       uuid.New().String(),
 		WorkspaceID: workspaceID,
 		ProcessorID: processorID,
 		UploadID:    uploadID,

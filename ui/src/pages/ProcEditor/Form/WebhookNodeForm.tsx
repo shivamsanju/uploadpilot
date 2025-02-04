@@ -9,12 +9,7 @@ import {
   TextInput,
   UnstyledButton,
 } from "@mantine/core";
-import {
-  IconDeviceFloppy,
-  IconHttpPost,
-  IconLock,
-  IconX,
-} from "@tabler/icons-react";
+import { IconDeviceFloppy, IconHttpPost, IconLock } from "@tabler/icons-react";
 import { useState } from "react";
 import { CodeHighlight } from "@mantine/code-highlight";
 import { NodeFormProps } from ".";
@@ -37,7 +32,6 @@ curl -X POST ${url || "https://example.com/webhook"} \\
 const WebhookNodeForm: React.FC<NodeFormProps> = ({
   nodeData,
   saveNodeData,
-  setOpenedNodeId,
 }) => {
   const [openSampleReq, setOpenSampleReq] = useState(false);
 
@@ -57,16 +51,6 @@ const WebhookNodeForm: React.FC<NodeFormProps> = ({
     <form onSubmit={form.onSubmit(saveNodeData)}>
       <Stack justify="space-between" h="85vh">
         <ScrollArea scrollbarSize={6}>
-          <Group justify="space-between" align="center" mb="lg">
-            <Text size="lg" fw={500}>
-              Webhook
-            </Text>
-            <IconX
-              size={18}
-              onClick={() => setOpenedNodeId("")}
-              cursor="pointer"
-            />
-          </Group>
           <Stack gap="lg" pr="lg">
             <TextInput
               leftSection={<IconHttpPost size={16} color="#E0A526" />}

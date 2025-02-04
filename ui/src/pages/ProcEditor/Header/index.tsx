@@ -2,7 +2,7 @@ import { Group, Title, Text, ActionIcon, Box, Tooltip } from "@mantine/core";
 import { IconChevronLeft } from "@tabler/icons-react";
 import { useNavigate } from "react-router-dom";
 import UserButton from "../../../components/UserMenu";
-import { useCanvas } from "../../../context/EditorCtx";
+import { useCanvas } from "../../../context/ProcEditorContext";
 
 export const ProcEditorHeader = () => {
   const navigate = useNavigate();

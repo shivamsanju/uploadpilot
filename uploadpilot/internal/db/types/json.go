@@ -6,7 +6,6 @@ import (
 	"errors"
 
 	"github.com/uploadpilot/uploadpilot/internal/config"
-	"github.com/uploadpilot/uploadpilot/internal/infra"
 	"github.com/uploadpilot/uploadpilot/internal/kms"
 )
 
@@ -17,7 +16,6 @@ func (a JSONB) Value() (driver.Value, error) {
 }
 
 func (a *JSONB) Scan(value interface{}) error {
-	infra.Log.Infof("scanning JSONB... value: %+v", value)
 	b, ok := value.([]byte)
 	if !ok {
 		return errors.New("type assertion to []byte failed")
@@ -64,6 +62,6 @@ func (b *EncryptedJSONB) Scan(value interface{}) error {
 }
 
 func (j *EncryptedJSONB) String() string {
-	data, _ := json.MarshalIndent(j, "", "  ") // Pretty print
+	data, _ := json.MarshalIndent(j, "", "  ")
 	return string(data)
 }

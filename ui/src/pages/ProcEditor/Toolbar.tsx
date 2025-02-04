@@ -1,6 +1,6 @@
 import { Button, Group } from "@mantine/core";
 import { useReactFlow } from "@xyflow/react";
-import { useCanvas } from "../../context/EditorCtx";
+import { useCanvas } from "../../context/ProcEditorContext";
 
 export const Toolbar = () => {
   const {

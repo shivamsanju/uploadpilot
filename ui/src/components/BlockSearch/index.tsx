@@ -12,7 +12,7 @@ import { useState, useRef, useEffect } from "react";
 import { useGetAllProcBlocks } from "../../apis/processors";
 import { useParams } from "react-router-dom";
 import classes from "./BlockSearch.module.css";
-import { useCanvas } from "../../context/EditorCtx";
+import { useCanvas } from "../../context/ProcEditorContext";
 
 export const BlockSearch = ({
   opened,
@@ -35,7 +35,7 @@ export const BlockSearch = ({
     const filteredBlocks = blocks.filter(
       (c: any) =>
         c.key.toLowerCase().includes(searchText.toLowerCase()) ||
-        c.description.toLowerCase().includes(searchText.toLowerCase()),
+        c.description.toLowerCase().includes(searchText.toLowerCase())
     );
 
     setFiltered(filteredBlocks);
@@ -97,7 +97,9 @@ export const BlockSearch = ({
               ref={(el) => (itemRefs.current[index] = el)}
               wrap="nowrap"
               p="sm"
-              className={`${classes.block} ${index === focusedIndex ? classes.focused : ""}`}
+              className={`${classes.block} ${
+                index === focusedIndex ? classes.focused : ""
+              }`}
               tabIndex={0}
               onClick={() => handleSelect(item)}
             >

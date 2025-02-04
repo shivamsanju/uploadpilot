@@ -18,6 +18,7 @@ var (
 	RedisAddr          string
 	RedisUsername      string
 	RedisPassword      string
+	RedisTLS           bool
 	DatabaseName       string
 	FrontendURI        string
 	AllowedOrigins     string
@@ -67,6 +68,7 @@ func Init() error {
 	RedisAddr = os.Getenv("REDIS_HOST")
 	RedisUsername = os.Getenv("REDIS_USER")
 	RedisPassword = os.Getenv("REDIS_PASS")
+	RedisTLS = os.Getenv("REDIS_TLS") == "true"
 	FrontendURI = os.Getenv("FRONTEND_URI")
 	DatabaseName = os.Getenv("APP_NAME") + "db"
 	RootPassword = os.Getenv("ROOT_PASSWORD")

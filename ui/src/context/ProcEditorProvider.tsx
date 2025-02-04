@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { useState, useEffect, useCallback, ReactNode } from "react";
 import {
   applyNodeChanges,
   applyEdgeChanges,
@@ -22,65 +16,11 @@ import { v4 as uuid } from "uuid";
 import { useDisclosure } from "@mantine/hooks";
 import { stratify, tree } from "d3-hierarchy";
 import { isDataNode } from "../components/EditorNode/IsDataNode";
-type ProcEditorContextType = {
-  workspaceId: string | undefined;
-  processorId: string | undefined;
-  processor: any;
-  isPending: boolean;
-  isUpdating: boolean;
-  error: Error | null;
-  nodes: any[];
-  edges: any[];
-  openedNodeId: string;
-  onNodesChange: (changes: any) => void;
-  onEdgesChange: (changes: any) => void;
-  onNodesDelete: (nodes: any) => void;
-  setNodes: (nodes: any) => void;
-  setEdges: (edges: any) => void;
-  handleSave: () => Promise<void>;
-  handleDiscard: () => Promise<void>;
-  setOpenedNodeId: (id: string) => void;
-  connectionStateNodeId: any;
-  setconnectionStateNodeId: (connectionStateNodeId: any) => void;
-  onSelectNewNode: (item: any, type: string) => void;
-  onConnectEnd: (fromId: any) => void;
-  openedBlocksModal: boolean;
-  openBlocksModal: () => void;
-  closeBlocksModal: () => void;
-  getLayoutedElements: (nodes: any[], edges: any[], options: any) => any;
-};
+import { ProcEditorContext } from "./ProcEditorContext";
 
-export const ProcEditorContext = createContext<ProcEditorContextType>({
-  nodes: [],
-  edges: [],
-  workspaceId: undefined,
-  processorId: undefined,
-  processor: {},
-  isPending: false,
-  isUpdating: false,
-  error: null,
-  openedNodeId: "",
-  onNodesChange: (changes: any) => {},
-  onEdgesChange: (changes: any) => {},
-  onNodesDelete: (nodes: any) => {},
-  setNodes: (nodes: any) => {},
-  setEdges: (edges: any) => {},
-  handleSave: async () => {},
-  handleDiscard: async () => {},
-  setOpenedNodeId: (id: string) => {},
-  connectionStateNodeId: null,
-  setconnectionStateNodeId: () => {},
-  onConnectEnd: (fromId) => {},
-  onSelectNewNode: (item, type) => {},
-  openedBlocksModal: false,
-  openBlocksModal: () => {},
-  closeBlocksModal: () => {},
-  getLayoutedElements: (nodes, edges, options) => {},
-});
+type Props = { children: ReactNode };
 
-export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const ProcEditorProvider: React.FC<Props> = ({ children }) => {
   const { workspaceId, processorId } = useParams();
   const [
     openedBlocksModal,
@@ -95,23 +35,25 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const [nodes, setNodes] = useState<any[]>([]);
   const [edges, setEdges] = useState<any[]>([]);
+  const [nodesData, setNodesData] = useState<any>({});
   const [openedNodeId, setOpenedNodeId] = useState("");
   const [connectionStateNodeId, setconnectionStateNodeId] = useState<any>(null);
   const g = tree();
 
   const getLayoutedElements = useCallback(
     (nodes: any, edges: any, options: any) => {
-      if (nodes.length === 0) return { nodes, edges };
-      if (!document) return { nodes, edges };
+      if (nodes.length === 0 || !document) return { nodes, edges };
       const { width, height }: any = document
         .querySelector(`[data-id="${nodes[0].id}"]`)
         ?.getBoundingClientRect();
+
       const hierarchy = stratify()
         .id((node: any) => node.id)
         .parentId(
           (node: any) =>
             edges.find((edge: any) => edge.target === node.id)?.source
         );
+
       const root = hierarchy(nodes);
       const layout = g.nodeSize([width * 2, height * 5])(root);
 
@@ -127,11 +69,11 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const onNodesChange = (changes: any) => {
-    setNodes((prevNodes) => applyNodeChanges(changes, prevNodes));
+    setNodes((prev) => applyNodeChanges(changes, prev));
   };
 
   const onEdgesChange = (changes: any) => {
-    setEdges((prevEdges) => applyEdgeChanges(changes, prevEdges));
+    setEdges((prev) => applyEdgeChanges(changes, prev));
   };
 
   const handleSave = async () => {
@@ -139,10 +81,8 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({
       await mutateAsync({
         processorId: processorId!,
         workspaceId: workspaceId!,
-        canvas: {
-          nodes,
-          edges,
-        },
+        canvas: { nodes, edges },
+        data: nodesData,
       });
     } catch (error) {
       console.log(error);
@@ -190,26 +130,23 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!node) return;
 
       const id = uuid();
-
-      const newNode: any = {
-        id: id,
+      const newNode = {
+        id,
         type,
         position: {
-          x: node?.position?.x + 350 * numEdges,
-          y: node?.position?.y + 200,
+          x: node.position.x + 350 * numEdges,
+          y: node.position.y + 200,
         },
         key: item?.key,
         retry: 0,
         continueOnError: false,
         timeoutMilSec: 1000000,
-        data: {
-          ...item,
-          isComplete: isDataNode(item?.key) ? false : true,
-        },
+        data: { ...item, isComplete: isDataNode(item?.key) ? false : true },
         deletable: true,
       };
-      setNodes((nds: any[]) => nds.concat(newNode));
-      setEdges((eds: any[]) =>
+
+      setNodes((nds) => nds.concat(newNode));
+      setEdges((eds) =>
         eds.concat({
           id: uuid(),
           source: connectionStateNodeId,
@@ -227,21 +164,23 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   useEffect(() => {
-    if (processor && processor.canvas) {
+    if (processor?.canvas) {
       setNodes(processor.canvas.nodes);
       setEdges(processor.canvas.edges);
+      setNodesData(processor?.data || {});
     }
   }, [processor]);
 
   return (
     <ProcEditorContext.Provider
       value={{
-        nodes: nodes,
+        nodes,
         edges: edges.map((e: any) => ({
           ...e,
           type: ConnectionLineType.SmoothStep,
           animated: true,
         })),
+        nodesData,
         workspaceId,
         processorId,
         processor,
@@ -258,6 +197,7 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({
         onNodesDelete,
         setNodes,
         setEdges,
+        setNodesData,
         handleSave,
         handleDiscard,
         setOpenedNodeId,
@@ -271,5 +211,3 @@ export const ProcEditorProvider: React.FC<{ children: React.ReactNode }> = ({
     </ProcEditorContext.Provider>
   );
 };
-
-export const useCanvas = () => useContext(ProcEditorContext);

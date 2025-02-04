@@ -9,7 +9,6 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/db/types"
 	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
-	"go.mongodb.org/mongo-driver/bson"
 )
 
 type ProcessorService struct {
@@ -68,13 +67,16 @@ func (s *ProcessorService) CreateProcessor(ctx context.Context, workspaceID stri
 	return s.wsRepo.Create(ctx, processor)
 }
 
-func (s *ProcessorService) UpdateTasks(ctx context.Context, processorID string, tasks *types.JSONB) error {
-	patch := bson.M{"tasks": tasks}
-	return s.wsRepo.Patch(ctx, processorID, patch)
+func (s *ProcessorService) UpdateTasks(ctx context.Context, workspaceID, processorID string, patch *dto.UpdateProcTaskRequest) error {
+	up := map[string]interface{}{
+		"canvas": patch.Canvas,
+		"data":   patch.Data,
+	}
+	return s.wsRepo.Patch(ctx, workspaceID, processorID, up)
 }
 
 func (s *ProcessorService) DeleteProcessor(ctx context.Context, workspaceID, processorID string) error {
-	return s.wsRepo.Delete(ctx, processorID)
+	return s.wsRepo.Delete(ctx, workspaceID, processorID)
 }
 
 func (s *ProcessorService) EnableDisableProcessor(ctx context.Context, workspaceID, processorID string, enabled bool) error {
@@ -84,7 +86,7 @@ func (s *ProcessorService) EnableDisableProcessor(ctx context.Context, workspace
 	}
 	patch := map[string]interface{}{"enabled": enabled}
 	patch["updated_by"] = user.UserID
-	return s.wsRepo.Patch(ctx, processorID, patch)
+	return s.wsRepo.Patch(ctx, workspaceID, processorID, patch)
 }
 
 func (s *ProcessorService) EditNameAndTrigger(ctx context.Context, workspaceID, processorID string, update *dto.EditProcRequest) error {
@@ -94,5 +96,5 @@ func (s *ProcessorService) EditNameAndTrigger(ctx context.Context, workspaceID, 
 	}
 	patch := map[string]interface{}{"name": update.Name, "triggers": update.Triggers}
 	patch["updated_by"] = user.UserID
-	return s.wsRepo.Patch(ctx, processorID, patch)
+	return s.wsRepo.Patch(ctx, workspaceID, processorID, patch)
 }

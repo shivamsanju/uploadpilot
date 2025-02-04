@@ -26,7 +26,7 @@ func (wr *WorkspaceRepo) GetAll(ctx context.Context, userID string) ([]dto.Works
 			Select("id, name").
 			Joins("JOIN user_workspaces uw ON workspaces.id = uw.workspace_id").
 			Where("uw.user_id = ?", userID).
-			Order("workspaces.updated_at ASC").
+			Order("workspaces.updated_at desc").
 			Find(workspaces).Error
 	}
 
@@ -99,8 +99,8 @@ func (wr *WorkspaceRepo) Delete(ctx context.Context, workspaceID string) error {
 	key := WorkspaceKey(workspaceID)
 	invKeys := []string{
 		UserWorkspacesKey(workspaceID),
-		WorkSpaceConfigKey(workspaceID),
-		WorkSpaceUsersKey(workspaceID),
+		WorkspaceConfigKey(workspaceID),
+		WorkspaceUsersKey(workspaceID),
 	}
 	for _, user := range users {
 		invKeys = append(invKeys, UserWorkspacesKey(user.ID))

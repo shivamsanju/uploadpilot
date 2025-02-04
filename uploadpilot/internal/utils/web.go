@@ -41,7 +41,6 @@ func GetUserDetailsFromContext(ctx context.Context) (*dto.UserContext, error) {
 		return nil, errors.New(msg.FailedToGetUserFromContext)
 	}
 
-	infra.Log.Infof("user details: %+v", dto.UserContext{UserID: userID, Name: name, Email: email})
 	return &dto.UserContext{
 		UserID: userID,
 		Name:   name,

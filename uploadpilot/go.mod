@@ -21,7 +21,6 @@ require (
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/saracen/fastzip v0.1.11
 	github.com/tus/tusd/v2 v2.6.0
-	go.mongodb.org/mongo-driver v1.17.2
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.33.0
 	gorm.io/driver/postgres v1.5.11

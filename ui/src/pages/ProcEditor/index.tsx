@@ -5,7 +5,7 @@ import { ProcessorCanvas } from "./Canvas";
 import classes from "./Processor.module.css";
 import { ProcEditorHeader } from "./Header";
 import { ReactFlowProvider } from "@xyflow/react";
-import { ProcEditorProvider } from "../../context/EditorCtx";
+import { ProcEditorProvider } from "../../context/ProcEditorProvider";
 import { Toolbar } from "./Toolbar";
 
 const ProcessorPage = () => {

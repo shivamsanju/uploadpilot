@@ -6,7 +6,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
-	"github.com/uploadpilot/uploadpilot/internal/db/types"
 	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/proc"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
@@ -96,14 +95,15 @@ func (h *processorHandler) DeleteProcessor(w http.ResponseWriter, r *http.Reques
 
 func (h *processorHandler) UpdateTasks(w http.ResponseWriter, r *http.Request) {
 	processorID := chi.URLParam(r, "processorId")
+	workspaceID := chi.URLParam(r, "workspaceId")
 
-	canvas := &types.JSONB{}
-	if err := render.DecodeJSON(r.Body, canvas); err != nil {
+	patch := &dto.UpdateProcTaskRequest{}
+	if err := render.DecodeJSON(r.Body, patch); err != nil {
 		utils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	if err := h.processorSvc.UpdateTasks(r.Context(), processorID, canvas); err != nil {
+	if err := h.processorSvc.UpdateTasks(r.Context(), workspaceID, processorID, patch); err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}

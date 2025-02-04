@@ -19,6 +19,6 @@ type EditUserRole struct {
 }
 
 type WorkspaceNameID struct {
-	Name string `bson:"name" json:"name" validate:"required"`
-	ID   string `bson:"_id" json:"id" validate:"required"`
+	Name string `json:"name" validate:"required"`
+	ID   string `json:"id" validate:"required"`
 }

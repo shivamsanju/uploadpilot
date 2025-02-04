@@ -9,6 +9,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
+	"github.com/uploadpilot/uploadpilot/internal/utils"
 )
 
 type Client[T any] struct {
@@ -28,7 +29,7 @@ func (r *Client[T]) Mutate(ctx context.Context, key string, dependentKeys []stri
 	}
 
 	r.Set(ctx, key, value, ttl)
-	r.Invalidate(ctx, dependentKeys...)
+	Invalidate(ctx, dependentKeys...)
 
 	return nil
 }
@@ -52,14 +53,12 @@ func (r *Client[T]) Query(ctx context.Context, key string, result T, dbFetchFn f
 
 	if err != nil {
 		if err == redis.Nil {
-			infra.Log.Infof("cache miss: %s", key)
+			// infra.Log.Infof("cache miss: %s", key)
 		}
-		infra.Log.Infof(("Before fetch ws: %+v"), result)
 		err := dbFetchFn(result)
 		if err != nil {
-			return err
+			return utils.DBError(err)
 		}
-		infra.Log.Infof(("After fetch ws: %+v"), result)
 		r.Set(ctx, key, result, 0)
 		return nil
 	}
@@ -68,9 +67,9 @@ func (r *Client[T]) Query(ctx context.Context, key string, result T, dbFetchFn f
 	return err
 }
 
-func (r *Client[T]) Invalidate(ctx context.Context, keys ...string) error {
+func Invalidate(ctx context.Context, keys ...string) error {
 	for _, key := range keys {
-		err := r.client.Del(ctx, key).Err()
+		err := redisClient.Del(ctx, key).Err()
 		if err != nil {
 			infra.Log.Errorf("failed to invalidate cache: %s", err.Error())
 			return errors.New("there was an issue processing your request. please try again later")
