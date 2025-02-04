@@ -1,0 +1,80 @@
+.container, .stars {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #141414;
+}
+
+.stars {
+    background-image: 
+      radial-gradient(2px 2px at 20px 30px, #eee, rgba(0,0,0,0)),
+      radial-gradient(2px 2px at 40px 70px, #fff, rgba(0,0,0,0)),
+      radial-gradient(2px 2px at 50px 160px, #ddd, rgba(0,0,0,0)),
+      radial-gradient(2px 2px at 90px 40px, #fff, rgba(0,0,0,0)),
+      radial-gradient(2px 2px at 130px 80px, #fff, rgba(0,0,0,0)),
+      radial-gradient(2px 2px at 160px 120px, #ddd, rgba(0,0,0,0));
+    background-repeat: repeat;
+    background-size: 200px 200px;
+    animation: zoom 5s infinite;
+    opacity: 0;
+  }
+
+.line1,
+.line2,
+.line3,
+.line4,
+.line5,
+.line6,
+.line7,
+.line8,
+.line9,
+.line10,
+.line11,
+.line12 {
+    position: absolute;
+    height: 1px;
+    background: var(--mantine-color-dark-5);
+    animation: lineH 5s infinite linear;
+    padding: 1px;
+}
+
+.line1 { left: 0; top: 10vh; animation-delay: 5s; }
+.line2 { left: 0; top: 20vh; animation-delay: 0.5s; }
+.line3 { left: 0; top: 30vh; animation-delay: 2s; }
+.line4 { right: 0; top: 40vh; animation-delay: 1s; }
+.line5 { left: 0; top: 50vh; animation-delay: 4s; }
+.line6 { right: 0; top: 60vh; animation-delay: 1s; }
+.line7 { right: 0; top: 70vh; animation-delay: 0s; }
+.line8 { left: 0; top: 80vh; animation-delay: 1.5s; }
+.line9 { left: 0; top: 90vh; animation-delay: 2s; }
+
+@keyframes lineH {
+    0% {
+        width: 0%;
+    }
+    100% {
+        width: 95%;
+        opacity: 0;
+    }
+}
+
+
+@keyframes zoom {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+      animation-timing-function: ease-in;
+    } 
+    85% {
+      opacity: 1;
+      transform: scale(2.8);
+      animation-timing-function: linear;
+    }
+    100% {
+      opacity: 0;
+      transform: scale(3.5);
+    }
+  }

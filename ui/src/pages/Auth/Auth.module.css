@@ -4,28 +4,25 @@
   justify-content: center; /* Center horizontally */
   align-items: center; /* Center vertically */
   overflow: auto;
-  background-size: cover;
-  background-image: url("../../assets/images/authbg.png");
-  background-position: center;
-  background-repeat: no-repeat;
+  background: #141414;
+
 
   @media (max-width: 768px) {
-    background-image: none;
-    background-color: white;
     width: 100%;
   }
 }
 
 .form {
-  border-right: 1px solid
-    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-7));
+  z-index: 2;
+  background: #141414;
+  border: 1px solid #212121;
   height: auto;
   width: 30vw;
   padding: 40px;
-  padding-bottom: 100px;
-  background-color: white;
+  padding-top: 10vh;
+  padding-bottom: 15vh;
   border-radius: 10px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 0px 30px rgba(0, 0, 0, 0.1);
 
   @media (max-width: 768px) {
     width: 100vw;
@@ -35,4 +32,8 @@
     box-shadow: none;
     padding: 70px 20px;
   }
+}
+
+.form *{
+  opacity: 1;
 }

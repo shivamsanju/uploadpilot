@@ -12,7 +12,6 @@ import (
 var (
 	AppName            string
 	WebServerPort      int
-	MongoURI           string
 	PostgresURI        string
 	EncryptionKey      []byte
 	RedisAddr          string
@@ -62,7 +61,6 @@ func Init() error {
 
 	AppName = os.Getenv("APP_NAME")
 	WebServerPort = port
-	MongoURI = os.Getenv("MONGO_URI")
 	PostgresURI = os.Getenv("POSTGRES_URI")
 	EncryptionKey = keyBytes
 	RedisAddr = os.Getenv("REDIS_HOST")

@@ -1,14 +1,14 @@
 import {
   Button,
   Image,
-  Box,
   Stack,
   Text,
   Modal,
   Anchor,
   MantineProvider,
   ScrollArea,
-  Transition,
+  Box,
+  Title,
 } from "@mantine/core";
 import classes from "./Auth.module.css";
 import { getApiDomain } from "../../utils/config";
@@ -21,6 +21,7 @@ import GoogleIcon from "../../assets/icons/google.svg";
 import GithubIcon from "../../assets/icons/github.svg";
 import PrivacyPolicy from "../../components/Policy/PrivacyPolicy";
 import TermsOfService from "../../components/Policy/TermsOfService";
+import { Lines } from "../../components/Lines";
 
 const AuthPage = () => {
   const [loading, setLoading] = useState(true);
@@ -57,71 +58,61 @@ const AuthPage = () => {
 
   return (
     <div className={classes.wrapper}>
+      <Lines />
       <TokenCatcher />
-      <Transition
-        mounted={!loading}
-        transition="fade-up"
-        duration={500}
-        timingFunction="ease"
-      >
-        {(styles) => (
-          <Box
-            className={classes.form}
-            p="70"
-            bg="white"
-            pt="lg"
-            w={{ base: "100vw", sm: 600 }}
-          >
-            <Stack gap="xs" mb="60">
-              <Logo2 enableOnClick={false} />
-            </Stack>
-            <Stack mt="xl">
-              <Text size="xs" ta="center" c="dimmed">
-                By continuing, you agree to our{" "}
-                <Anchor
-                  onClick={() => openModal("terms")}
-                  size="sm"
-                  color="blue"
-                  style={{ cursor: "pointer" }}
-                >
-                  Terms of Service
-                </Anchor>{" "}
-                and acknowledge you have read our{" "}
-                <Anchor
-                  onClick={() => openModal("privacy")}
-                  size="sm"
-                  color="blue"
-                  style={{ cursor: "pointer" }}
-                >
-                  Privacy Policy
-                </Anchor>
-              </Text>
-              <Button
-                variant="outline"
-                leftSection={<Image src={GoogleIcon} width={20} height={20} />}
-                onClick={() => handleLogin("google")}
-                size="sm"
-              >
-                Google
-              </Button>
-              <Text ta="center" c="dimmed">
-                or
-              </Text>
-              <Button
-                variant="outline"
-                leftSection={<Image src={GithubIcon} width={25} height={25} />}
-                onClick={() => handleLogin("github")}
-                size="sm"
-              >
-                Github
-              </Button>
-            </Stack>
-          </Box>
-        )}
-      </Transition>
-
-      {/* Modal for Terms of Service or Privacy Policy */}
       <MantineProvider forceColorScheme="dark">
+        <Box w={{ base: "100vw", sm: 600 }} className={classes.form}>
+          <Title order={1} c="dimmed" ta="center" mb="30">
+            Welcome to
+          </Title>
+          <Stack gap="xs" mb="60">
+            <Logo2 enableOnClick={false} />
+          </Stack>
+
+          <Stack mt="xl">
+            <Text size="xs" ta="center" c="dimmed">
+              By continuing, you agree to our{" "}
+              <Anchor
+                onClick={() => openModal("terms")}
+                size="sm"
+                style={{ cursor: "pointer" }}
+              >
+                Terms of Service
+              </Anchor>{" "}
+              and acknowledge you have read our{" "}
+              <Anchor
+                onClick={() => openModal("privacy")}
+                size="sm"
+                style={{ cursor: "pointer" }}
+              >
+                Privacy Policy
+              </Anchor>
+            </Text>
+            <Button
+              c="dark"
+              variant="white"
+              leftSection={<Image src={GoogleIcon} width={20} height={20} />}
+              onClick={() => handleLogin("google")}
+              size="sm"
+            >
+              Google
+            </Button>
+            <Text ta="center" c="dimmed">
+              or
+            </Text>
+            <Button
+              c="dark"
+              variant="white"
+              leftSection={<Image src={GithubIcon} width={25} height={25} />}
+              onClick={() => handleLogin("github")}
+              size="sm"
+            >
+              Github
+            </Button>
+          </Stack>
+        </Box>
+
+        {/* Modal for Terms of Service or Privacy Policy */}
         <Modal
           opened={modalOpen}
           onClose={closeModal}
