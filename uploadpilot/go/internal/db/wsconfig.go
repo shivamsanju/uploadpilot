@@ -42,3 +42,14 @@ func (wr *WorkspaceConfigRepo) SetConfig(ctx context.Context, config *models.Upl
 func WorkspaceConfigKey(workspaceID string) string {
 	return "workspace:" + workspaceID + ":config"
 }
+
+// A no cache method for uploader
+func GetUploaderConfig(ctx context.Context, workspaceID string) (*models.UploaderConfig, error) {
+	var config models.UploaderConfig
+	err := sqlDB.WithContext(ctx).Omit("Workspace").Where("workspace_id = ?", workspaceID).
+		First(&config).Error
+	if err != nil {
+		return nil, err
+	}
+	return &config, nil
+}

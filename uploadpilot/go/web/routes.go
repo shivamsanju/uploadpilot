@@ -92,6 +92,7 @@ func UploaderRoutes() *chi.Mux {
 	th := handlers.NewTusdHandler()
 
 	router.Mount("/upload", http.StripPrefix("/upload", th.GetTusHandler()))
+	router.Get("/health", th.GetHealth)
 	router.Get("/config/{workspaceId}", th.GetUploaderConfig)
 
 	return router

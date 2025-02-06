@@ -2,17 +2,15 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import session from 'express-session'
 import companion from '@uppy/companion'
-import { config } from "./config.js"
+import { getConfig } from "./config.js"
 
+const config = getConfig()
 const app = express()
 
 // Companion requires body-parser and express-session middleware.
 // You can add it like this if you use those throughout your app.
-//
 // If you are using something else in your app, you can add these
 // middlewares in the same subpath as Companion instead.
-// console.log(config.mandatory.uploadPilotUrl)
-// app.use("/api", proxy(config.mandatory.uploadPilotUrl))
 
 app.use(bodyParser.json())
 app.use(session({ secret: config.mandatory.companionSecret }))
@@ -56,7 +54,7 @@ const options = {
         protocol: config.optional.companionProtocol || 'http',
         path: '/remote',
         oauthDomain: config.optional.oauthDomain,
-        validHosts: ["localhost:8081"] || [],
+        validHosts: config.optional.validHosts || ["localhost:8082"],
     },
     filePath: config.mandatory.companionDataDir || '/tmp',
     sendSelfEndpoint: config.optional.selfEndpoint || 'localhost:3020',
@@ -67,13 +65,19 @@ const options = {
     streamingUpload: config.optional.streamingUpload,
     allowLocalUrls: config.optional.allowLocalUrls,
     maxFileSize: config.optional.maxFileSize || 100000000,
+    chunkSize: config.optional.chunkSize || 10000000,
     periodicPingUrls: config.optional.periodicPingUrls || [],
     periodicPingInterval: config.optional.periodicPingInterval || 60000,
     periodicPingStaticPayload: JSON.parse(config.optional.periodicPingStaticPayload || '{"static": "payload"}'),
     corsOrigins: config.optional.companionClientOrigins || true,
 };
 
+console.log(options)
 const { app: companionApp } = companion.app(options)
+
+app.get("/health", (req, res) => {
+    res.send("OK")
+})
 
 app.use("/remote", companionApp)
 

@@ -11,12 +11,13 @@ COPY go.mod go.sum ./
 RUN go mod tidy
 
 # Copy the rest of the application files
-COPY . .
+COPY ./go .
 
 # Build the Go application (binary output)
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /app/server /app/cmd/main.go
 
-# Stage 2: Create the final image with only the binary
+
+######################### STAGE 2 #########################
 FROM alpine:latest
 
 # Set the working directory

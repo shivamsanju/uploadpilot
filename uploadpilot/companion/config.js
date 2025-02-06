@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 
 // Load environment variables from .env file
-dotenv.config();
+dotenv.config({ path: '.env.comp' });
 
 const config = {
     mandatory: {
@@ -14,8 +14,8 @@ const config = {
         companionProtocol: process.env.COMPANION_PROTOCOL || 'http',
         companionPort: process.env.COMPANION_PORT || 8082,
         companionPath: process.env.COMPANION_PATH || '',
-        companionHideWelcome: process.env.COMPANION_HIDE_WELCOME === 'false',
-        companionHideMetrics: process.env.COMPANION_HIDE_METRICS === 'false',
+        companionHideWelcome: process.env.COMPANION_HIDE_WELCOME === 'true',
+        companionHideMetrics: process.env.COMPANION_HIDE_METRICS === 'true',
         companionLoggerProcessName: process.env.COMPANION_LOGGER_PROCESS_NAME || 'companion',
         companionImplicitPath: process.env.COMPANION_IMPLICIT_PATH || '',
         // companionClientOrigins: process.env.COMPANION_CLIENT_ORIGINS?.split(',') || [],
@@ -62,6 +62,7 @@ const config = {
                 prefix: process.env.COMPANION_AWS_PREFIX || '',
             },
         },
+        preauthSecret: process.env.COMPANION_PREAUTH_SECRET || '',
         oauthDomain: process.env.COMPANION_OAUTH_DOMAIN || [],
         validHosts: process.env.COMPANION_VALID_HOSTS?.split(',') || [],
         selfEndpoint: process.env.COMPANION_SELF_ENDPOINT || '',
@@ -74,8 +75,18 @@ const config = {
         periodicPingInterval: parseInt(process.env.COMPANION_PERIODIC_PING_INTERVAL || '0', 10),
         periodicPingStaticPayload: process.env.COMPANION_PERIODIC_PING_STATIC_JSON_PAYLOAD || null,
         redisExpressSessionPrefix: process.env.COMPANION_REDIS_EXPRESS_SESSION_PREFIX || 'sess:',
-        preauthSecret: process.env.COMPANION_PREAUTH_SECRET || '',
     },
 };
 
-export { config };
+export const getConfig = () => {
+    if (!config.mandatory.companionSecret) {
+        throw new Error('COMPANION_SECRET is not set');
+    }
+    if (!config.mandatory.companionDomain) {
+        throw new Error('COMPANION_DOMAIN is not set');
+    }
+    if (!config.mandatory.companionDataDir) {
+        throw new Error('COMPANION_DATADIR is not set');
+    }
+    return config;
+};

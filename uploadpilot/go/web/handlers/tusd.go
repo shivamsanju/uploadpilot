@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -94,4 +95,14 @@ func (h *tusdHandler) GetUploaderConfig(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	render.JSON(w, r, uploaderConfig)
+}
+
+func (h *tusdHandler) GetHealth(w http.ResponseWriter, r *http.Request) {
+	resp, err := http.Get(config.CompanionEndpoint + "/health")
+	if err != nil || resp.StatusCode != http.StatusOK {
+		utils.HandleHttpError(w, r, http.StatusServiceUnavailable, errors.New("companion is not healthy"))
+		return
+	}
+
+	render.JSON(w, r, "OK")
 }
