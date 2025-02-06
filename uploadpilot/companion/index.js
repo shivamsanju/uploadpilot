@@ -38,7 +38,12 @@ const options = {
             key: config.optional.integrations.onedrive.key,
             secret: config.optional.integrations.onedrive.secret,
         },
+        googlephotos: {
+            key: config.optional.integrations.google.key,
+            secret: config.optional.integrations.google.secret,
+        }
     },
+    enableGooglePickerEndpoint: config.optional.enableGooglePickerEndpoint,
     s3: {
         getKey: (req, filename, metadata) => `${crypto.randomUUID()}-${filename}`,
         key: config.optional.integrations.s3.key,

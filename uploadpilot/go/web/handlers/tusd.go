@@ -9,6 +9,7 @@ import (
 	tusd "github.com/tus/tusd/v2/pkg/handler"
 	"github.com/tus/tusd/v2/pkg/s3store"
 	"github.com/uploadpilot/uploadpilot/internal/config"
+	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/upload"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
 	"github.com/uploadpilot/uploadpilot/internal/workspace"
@@ -96,7 +97,11 @@ func (h *tusdHandler) GetUploaderConfig(w http.ResponseWriter, r *http.Request) 
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	render.JSON(w, r, uploaderConfig)
+	cfg := dto.UploaderConfig{
+		UploaderConfig: *uploaderConfig,
+		ChunkSize:      config.TusChunkSize,
+	}
+	render.JSON(w, r, cfg)
 }
 
 func (h *tusdHandler) GetHealth(w http.ResponseWriter, r *http.Request) {

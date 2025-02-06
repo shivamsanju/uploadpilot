@@ -1,6 +1,8 @@
 package dto
 
-import "github.com/uploadpilot/uploadpilot/internal/db/models"
+import (
+	"github.com/uploadpilot/uploadpilot/internal/db/models"
+)
 
 type WorkspaceUser struct {
 	ID    string `json:"userId"`
@@ -21,4 +23,9 @@ type EditUserRole struct {
 type WorkspaceNameID struct {
 	Name string `json:"name" validate:"required"`
 	ID   string `json:"id" validate:"required"`
+}
+
+type UploaderConfig struct {
+	models.UploaderConfig
+	ChunkSize int64 `json:"chunkSize"`
 }

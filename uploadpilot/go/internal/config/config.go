@@ -10,35 +10,38 @@ import (
 )
 
 var (
-	AppName            string
-	WebServerPort      int
-	UploaderServerPort int
-	PostgresURI        string
-	EncryptionKey      []byte
-	RedisAddr          string
-	RedisUsername      string
-	RedisPassword      string
-	RedisTLS           bool
-	DatabaseName       string
-	FrontendURI        string
-	AllowedOrigins     string
-	RootPassword       string
-	CompanionEndpoint  string
-	UploadEndpoint     string
-	JWTSecretKey       string
-	GoogleClientID     string
-	GoogleClientSecret string
-	GoogleCallbackURL  string
-	GithubClientID     string
-	GithubClientSecret string
-	GithubCallbackURL  string
-	TusUploadBasePath  string
-	TusUploadDir       string
-	S3AccessKey        string
-	S3SecretKey        string
-	S3BucketName       string
-	S3Region           string
-	TusMaxFileSize     int64
+	AppName             string
+	WebServerPort       int
+	UploaderServerPort  int
+	PostgresURI         string
+	EncryptionKey       []byte
+	RedisAddr           string
+	RedisUsername       string
+	RedisPassword       string
+	RedisTLS            bool
+	DatabaseName        string
+	FrontendURI         string
+	AllowedOrigins      string
+	RootPassword        string
+	CompanionEndpoint   string
+	UploadEndpoint      string
+	JWTSecretKey        string
+	GoogleClientID      string
+	GoogleClientSecret  string
+	GoogleCallbackURL   string
+	GithubClientID      string
+	GithubClientSecret  string
+	GithubCallbackURL   string
+	TusUploadBasePath   string
+	TusUploadDir        string
+	S3AccessKey         string
+	S3SecretKey         string
+	S3BucketName        string
+	S3Region            string
+	TusMaxFileSize      int64
+	TusChunkSize        int64
+	TusDisableTerminate bool
+	TusDisableDownload  bool
 )
 
 func Init() error {
@@ -96,17 +99,30 @@ func Init() error {
 	S3Region = os.Getenv("S3_REGION")
 	AllowedOrigins = os.Getenv("ALLOWED_ORIGINS")
 
+	// TUS Config
 	maxSize := os.Getenv("TUS_MAX_FILE_SIZE")
 	if maxSize == "" {
-		maxSize = "1048576000"
+		maxSize = "1048576000" // 1GB
 	}
 	TusMaxFileSize, err = strconv.ParseInt(maxSize, 10, 64)
 	if err != nil {
 		return fmt.Errorf("invalid TUS_MAX_FILE_SIZE: %w", err)
 	}
-
-	TusUploadDir = "/tmp"
+	chunkSize := os.Getenv("TUS_CHUNK_SIZE")
+	if chunkSize == "" {
+		chunkSize = "10485760" // 10MB
+	}
+	TusChunkSize, err = strconv.ParseInt(chunkSize, 10, 64)
+	if err != nil {
+		return fmt.Errorf("invalid TUS_CHUNK_SIZE: %w", err)
+	}
+	TusUploadDir = os.Getenv("TUS_UPLOAD_DIR")
+	if TusUploadDir == "" {
+		TusUploadDir = "/tmp"
+	}
 	TusUploadBasePath = UploadEndpoint + "/upload"
+	TusDisableDownload = os.Getenv("TUS_DISABLE_DOWNLOAD") == "true"
+	TusDisableTerminate = os.Getenv("TUS_DISABLE_TERMINATION") == "true"
 
 	return nil
 }

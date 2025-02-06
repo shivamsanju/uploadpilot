@@ -68,8 +68,6 @@ func (h *authHandler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	infra.Log.Infof("creating new user: %+v", usr)
-
 	if usr == nil || usr.ID == "" {
 		usr = mapUser(&user)
 		if err := h.userRepo.Create(r.Context(), usr); err != nil {

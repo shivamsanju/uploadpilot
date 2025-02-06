@@ -103,7 +103,7 @@ const Uploader: React.FC<UploaderProps> = ({
         uppy.use(Tus, {
           endpoint: `${uploadEndpoint}/upload`,
           retryDelays: [0, 1000, 3000, 5000],
-          chunkSize: 5 * 1024 * 1024, // 5MB
+          chunkSize: config.chunkSize || 10485760, // 10 MB
           removeFingerprintOnSuccess: true,
           headers: {
             workspaceId: workspaceId,

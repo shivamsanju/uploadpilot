@@ -76,6 +76,7 @@ const config = {
                 prefix: process.env.COMPANION_AWS_PREFIX || '',
             },
         },
+        enableGooglePickerEndpoint: true,
         preauthSecret: process.env.COMPANION_PREAUTH_SECRET || '',
         oauthDomain: process.env.COMPANION_OAUTH_DOMAIN || [],
         validHosts: process.env.COMPANION_VALID_HOSTS?.split(',') || [],
