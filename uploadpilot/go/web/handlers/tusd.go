@@ -43,9 +43,11 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 	// Create a new tusd handler
 	infra.Log.Infof("initializing tusd handler with upload base path: %s", config.TusUploadBasePath)
 	tusdHandler, err := tusd.NewHandler(tusd.Config{
-		BasePath:      config.TusUploadBasePath,
-		StoreComposer: composer,
-		MaxSize:       500 * 1024 * 1024,
+		BasePath:           config.TusUploadBasePath,
+		StoreComposer:      composer,
+		MaxSize:            config.TusMaxFileSize,
+		DisableDownload:    true,
+		DisableTermination: true,
 		PreUploadCreateCallback: func(hook tusd.HookEvent) (tusd.HTTPResponse, tusd.FileInfoChanges, error) {
 			active, err := h.uploadSvc.VerifySubscription(&hook)
 			if err != nil {

@@ -52,6 +52,7 @@ func InitUploader() (*http.Server, error) {
 		r.Mount("/", UploaderRoutes())
 	})
 
+	infra.Log.Infof("Starting server on port %d", config.UploaderServerPort)
 	srv := &http.Server{
 		Handler: router,
 		Addr:    fmt.Sprintf(":%d", config.UploaderServerPort),

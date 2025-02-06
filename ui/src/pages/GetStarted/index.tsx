@@ -24,6 +24,7 @@ import { useGetSession } from "../../apis/user";
 import Settings from "./Settings";
 import { useSettingsProps } from "./SettingsProps";
 import { useViewportSize } from "@mantine/hooks";
+import "uppy-react/dist/style.css";
 
 const getCode = (
   workspaceId: string,

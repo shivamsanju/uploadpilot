@@ -68,7 +68,6 @@ const Uploader: React.FC<UploaderProps> = ({
     fetch(`${uploadEndpoint}/config/${workspaceId}`)
       .then((response) => response.json())
       .then((config) => {
-        console.log({ config });
         const uppy = new Uppy({
           id: workspaceId,
           autoProceed: autoProceed,
@@ -103,6 +102,9 @@ const Uploader: React.FC<UploaderProps> = ({
         });
         uppy.use(Tus, {
           endpoint: `${uploadEndpoint}/upload`,
+          retryDelays: [0, 1000, 3000, 5000],
+          chunkSize: 5 * 1024 * 1024, // 5MB
+          removeFingerprintOnSuccess: true,
           headers: {
             workspaceId: workspaceId,
             ...headers,

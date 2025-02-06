@@ -72,7 +72,6 @@ const options = {
     corsOrigins: config.optional.companionClientOrigins || true,
 };
 
-console.log(options)
 const { app: companionApp } = companion.app(options)
 
 app.get("/health", (req, res) => {

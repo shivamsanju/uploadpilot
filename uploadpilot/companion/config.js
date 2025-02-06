@@ -1,7 +1,21 @@
 import dotenv from 'dotenv';
+import fs from 'fs';
 
 // Load environment variables from .env file
 dotenv.config({ path: '.env.comp' });
+
+const mkdirp = (dir) => {
+    try {
+        fs.mkdirSync(dir);
+    } catch (err) {
+        if (err.code !== 'EEXIST') {
+            throw err;
+        }
+    }
+};
+
+
+
 
 const config = {
     mandatory: {
@@ -78,6 +92,8 @@ const config = {
     },
 };
 
+
+
 export const getConfig = () => {
     if (!config.mandatory.companionSecret) {
         throw new Error('COMPANION_SECRET is not set');
@@ -88,5 +104,6 @@ export const getConfig = () => {
     if (!config.mandatory.companionDataDir) {
         throw new Error('COMPANION_DATADIR is not set');
     }
+    mkdirp(config.mandatory.companionDataDir);
     return config;
 };

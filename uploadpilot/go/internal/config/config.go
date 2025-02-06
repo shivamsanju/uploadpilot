@@ -38,6 +38,7 @@ var (
 	S3SecretKey        string
 	S3BucketName       string
 	S3Region           string
+	TusMaxFileSize     int64
 )
 
 func Init() error {
@@ -95,7 +96,16 @@ func Init() error {
 	S3Region = os.Getenv("S3_REGION")
 	AllowedOrigins = os.Getenv("ALLOWED_ORIGINS")
 
-	TusUploadDir = "./tmp"
+	maxSize := os.Getenv("TUS_MAX_FILE_SIZE")
+	if maxSize == "" {
+		maxSize = "1048576000"
+	}
+	TusMaxFileSize, err = strconv.ParseInt(maxSize, 10, 64)
+	if err != nil {
+		return fmt.Errorf("invalid TUS_MAX_FILE_SIZE: %w", err)
+	}
+
+	TusUploadDir = "/tmp"
 	TusUploadBasePath = UploadEndpoint + "/upload"
 
 	return nil
