@@ -47,7 +47,7 @@ func (us *UploadService) ValidateUploadFileType(hook *tusd.HookEvent, workspaceI
 }
 
 func (us *UploadService) AuthenticateUpload(hook *tusd.HookEvent, workspaceID, uploadID string, config *models.UploaderConfig) error {
-	if config.AuthEndpoint == nil {
+	if config.AuthEndpoint == nil || *config.AuthEndpoint == "" {
 		return nil
 	}
 

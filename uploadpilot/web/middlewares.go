@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/uploadpilot/uploadpilot/internal/auth"
 	"github.com/uploadpilot/uploadpilot/internal/config"
+	"github.com/uploadpilot/uploadpilot/internal/dto"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
 	"github.com/uploadpilot/uploadpilot/internal/utils"
 )
@@ -85,9 +86,9 @@ func AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "id", claims.UserID)
-		ctx = context.WithValue(ctx, "email", claims.Email)
-		ctx = context.WithValue(ctx, "name", claims.Name)
+		ctx := context.WithValue(r.Context(), dto.UserIDContextKey, claims.UserID)
+		ctx = context.WithValue(ctx, dto.EmailContextKey, claims.Email)
+		ctx = context.WithValue(ctx, dto.NameContextKey, claims.Name)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})

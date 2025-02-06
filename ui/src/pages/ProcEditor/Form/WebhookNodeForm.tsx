@@ -49,7 +49,7 @@ const WebhookNodeForm: React.FC<NodeFormProps> = ({
 
   return (
     <form onSubmit={form.onSubmit(saveNodeData)}>
-      <Stack justify="space-between" h="85vh">
+      <Stack justify="space-between" h="70vh">
         <ScrollArea scrollbarSize={6}>
           <Stack gap="lg" pr="lg">
             <TextInput

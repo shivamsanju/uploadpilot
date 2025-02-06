@@ -19,7 +19,7 @@ import { CodeHighlight, CodeHighlightTabs } from "@mantine/code-highlight";
 import "@mantine/code-highlight/styles.css";
 import { useParams } from "react-router-dom";
 import { AppLoader } from "../../components/Loader/AppLoader";
-import { getApiDomain } from "../../utils/config";
+import { getUploadApiDomain } from "../../utils/config";
 import { useGetSession } from "../../apis/user";
 import Settings from "./Settings";
 import { useSettingsProps } from "./SettingsProps";
@@ -69,7 +69,7 @@ export default UploaderComponent
   return code.replace(/[\r\n]+/g, "\n").trim();
 };
 
-const backendEndpoint = getApiDomain();
+const uploadEndpoint = getUploadApiDomain();
 
 const UploaderPreviewPage = () => {
   const settingsProps = useSettingsProps();
@@ -77,7 +77,7 @@ const UploaderPreviewPage = () => {
   const { workspaceId } = useParams();
   const { isPending: isUserPending, session } = useGetSession();
   const { colorScheme } = useMantineColorScheme();
-  const code = getCode(workspaceId as string, backendEndpoint, settingsProps);
+  const code = getCode(workspaceId as string, uploadEndpoint, settingsProps);
 
   if (!workspaceId || isUserPending) {
     return <AppLoader h="50vh" />;
@@ -129,12 +129,11 @@ const UploaderPreviewPage = () => {
                 }}
               >
                 <Uploader
-                  backendEndpoint={backendEndpoint}
+                  uploadEndpoint={uploadEndpoint}
                   workspaceId={workspaceId}
                   metadata={{
                     uploaderEmail: session.email,
-                    uploaderName: session.name || "sss",
-                    abc: "test",
+                    uploaderName: session.name || "Unknown",
                   }}
                   {...settingsProps}
                   note="Test your uploader"

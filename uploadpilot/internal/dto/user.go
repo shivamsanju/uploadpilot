@@ -12,3 +12,11 @@ type SessionResponse struct {
 	AvatarURL      string `json:"avatarUrl"`
 	TrialExpiresIn int64  `json:"trialExpiresIn"`
 }
+
+type ContextKey string
+
+const (
+	UserIDContextKey ContextKey = "id"
+	EmailContextKey  ContextKey = "email"
+	NameContextKey   ContextKey = "name"
+)

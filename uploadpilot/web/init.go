@@ -21,13 +21,6 @@ func Init() (*http.Server, error) {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.Timeout(60 * time.Second))
 
-	// Add companion proxy
-	companionHandler, err := getCompanionProxyHandler(config.CompanionEndpoint, config.SelfEndpoint)
-	if err != nil {
-		return nil, err
-	}
-	router.Mount("/remote", companionHandler)
-
 	// Mount the uploadpilot web routes
 	router.Group(func(r chi.Router) {
 		r.Mount("/", Routes())
@@ -41,7 +34,33 @@ func Init() (*http.Server, error) {
 	return srv, nil
 }
 
-func getCompanionProxyHandler(companionEndpoint, selfEndpoint string) (http.Handler, error) {
+func InitUploader() (*http.Server, error) {
+	router := chi.NewRouter()
+	router.Use(middleware.RequestID)
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.Timeout(60 * time.Second))
+
+	// Add companion proxy
+	companionHandler, err := getCompanionProxyHandler(config.CompanionEndpoint, config.UploadEndpoint)
+	if err != nil {
+		return nil, err
+	}
+	router.Mount("/remote", companionHandler)
+
+	// Mount the uploadpilot web routes
+	router.Group(func(r chi.Router) {
+		r.Mount("/", UploaderRoutes())
+	})
+
+	srv := &http.Server{
+		Handler: router,
+		Addr:    fmt.Sprintf(":%d", config.UploaderServerPort),
+	}
+
+	return srv, nil
+}
+
+func getCompanionProxyHandler(companionEndpoint, uploadEndpoint string) (http.Handler, error) {
 	targetURL, err := url.Parse(companionEndpoint)
 	if err != nil {
 		infra.Log.Errorf("Failed to parse target URL: %v", err)
@@ -52,11 +71,12 @@ func getCompanionProxyHandler(companionEndpoint, selfEndpoint string) (http.Hand
 
 	proxy.ModifyResponse = func(resp *http.Response) error {
 		if strings.Contains(resp.Header.Get("Location"), companionEndpoint) {
-			resp.Header.Set("Location", strings.Replace(resp.Header.Get("Location"), companionEndpoint, selfEndpoint, 1))
+			resp.Header.Set("Location", strings.Replace(resp.Header.Get("Location"), companionEndpoint, uploadEndpoint, 1))
 		}
 		if strings.Contains(resp.Header.Get("Location"), url.QueryEscape(companionEndpoint)) {
-			resp.Header.Set("Location", strings.Replace(resp.Header.Get("Location"), url.QueryEscape(companionEndpoint), url.QueryEscape(selfEndpoint), 1))
+			resp.Header.Set("Location", strings.Replace(resp.Header.Get("Location"), url.QueryEscape(companionEndpoint), url.QueryEscape(uploadEndpoint), 1))
 		}
+		infra.Log.Infof("modified response: %s", resp.Header.Get("Location"))
 		return nil
 	}
 

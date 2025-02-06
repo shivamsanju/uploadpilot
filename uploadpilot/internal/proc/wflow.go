@@ -60,12 +60,11 @@ func (r *ProcWorkflowRunner) Build(ctx context.Context, workspaceID, processorID
 
 	tmpDir := os.TempDir() + "/" + processorID + "/" + uploadID
 	os.MkdirAll(tmpDir, os.ModePerm)
-	firstTask := tasks.NewBaseTask(workspaceID, processorID, uploadID, tmpDir, upload.StoredFileName)
+	firstTask := tasks.NewBaseTask(workspaceID, processorID, uploadID, tmpDir, upload.ID)
 
 	steps := make([]flow.Builder, 0, len(taskfnMap))
 	tsks := make([]flow.Steper, 0, len(taskfnMap))
 
-	infra.Log.Infof("ProcTaskMap: %+v", procTaskMap)
 	for id, task := range taskfnMap {
 		depKeys := edges[id]
 		var prevTasks []tasks.Task
@@ -96,11 +95,11 @@ func (r *ProcWorkflowRunner) Build(ctx context.Context, workspaceID, processorID
 }
 
 func (r *ProcWorkflowRunner) buildStepWithDependencies(pt types.JSONB, task tasks.Task, prevTasks []tasks.Task, firstTask *tasks.BaseTask) (*flow.AddStep[tasks.Task], error) {
-	infra.Log.Infof("building step for task: %s, map: %+v", pt["key"], pt)
-	params, ok := pt["data"].(TaskParams)
-	if !ok {
-		return nil, fmt.Errorf("failed to get task params")
-	}
+	taskData := pt["data"].(map[string]interface{})
+
+	infra.Log.Infof("taskData: %+v", taskData)
+	params := r.GetTaskParams(taskData)
+
 	step := flow.Step(task).
 		AfterStep(func(ctx context.Context, _ flow.Steper, err error) error {
 			// throw errror only if continue on error is false
@@ -118,7 +117,7 @@ func (r *ProcWorkflowRunner) buildStepWithDependencies(pt types.JSONB, task task
 	if len(prevTasks) == 0 {
 		step = step.Input(func(ctx context.Context, t tasks.Task) error {
 			firstTask.TaskID = pt["id"].(string)
-			firstTask.TaskParams = pt["data"].(types.EncryptedJSONB)
+			firstTask.TaskData = taskData
 			t.MakeTask(firstTask)
 			return nil
 		})
@@ -128,8 +127,8 @@ func (r *ProcWorkflowRunner) buildStepWithDependencies(pt types.JSONB, task task
 			step = step.DependsOn(prevTask).
 				Input(func(ctx context.Context, t tasks.Task) error {
 					inp := prevTask.GetTask()
-					inp.TaskID = pt["id"].(string)                     // add current task id to input
-					inp.TaskParams = pt["data"].(types.EncryptedJSONB) // add current task data
+					inp.TaskID = pt["id"].(string)
+					inp.TaskData = taskData
 					inp.Input = inp.Output
 					t.MakeTask(inp)
 					return nil
@@ -191,18 +190,30 @@ func (r *ProcWorkflowRunner) getNodesAndEdgesMap(processor *models.Processor) (m
 	taskMap := make(map[string]types.JSONB)
 	prevTasks := make(map[string][]string)
 
-	for _, t := range processor.Canvas["nodes"].([]types.JSONB) {
-		task, ok := GetTaskFromRegistry(t["key"].(models.TaskKey))
+	for _, node := range processor.Canvas["nodes"].([]interface{}) {
+		node := node.(map[string]interface{})
+		task, ok := GetTaskFromRegistry(models.TaskKey(node["key"].(string)))
 		if !ok {
-			return nil, nil, nil, fmt.Errorf("unknown task key: %s", t["key"].(string))
+			return nil, nil, nil, fmt.Errorf("unknown task key: %s", node["key"].(string))
+		}
+		taskData, ok := processor.Data[node["id"].(string)]
+		if ok {
+			td := taskData.(map[string]interface{})
+			nd := node["data"].(map[string]interface{})
+			for key, value := range td {
+				nd[key] = value
+			}
+			node["data"] = nd
 		}
 
-		taskfnMap[t["id"].(string)] = task
-		taskMap[t["id"].(string)] = t
+		taskfnMap[node["id"].(string)] = task
+		taskMap[node["id"].(string)] = node
 	}
 
-	for _, t := range processor.Canvas["nodes"].([]types.JSONB) {
-		for _, edge := range processor.Canvas["edges"].([]types.JSONB) {
+	for _, t := range processor.Canvas["nodes"].([]interface{}) {
+		for _, edge := range processor.Canvas["edges"].([]interface{}) {
+			edge := edge.(map[string]interface{})
+			t := t.(map[string]interface{})
 			if edge["source"] == t["id"].(string) {
 				prevTasks[edge["target"].(string)] = append(prevTasks[edge["target"].(string)], t["id"].(string))
 			}
@@ -212,8 +223,35 @@ func (r *ProcWorkflowRunner) getNodesAndEdgesMap(processor *models.Processor) (m
 	return taskfnMap, taskMap, prevTasks, nil
 }
 
+func (r *ProcWorkflowRunner) GetTaskParams(taskData map[string]interface{}) *TaskParams {
+	params := &TaskParams{}
+
+	ce, ok := taskData["continueOnError"]
+	if !ok {
+		params.ContinueOnError = false
+	} else {
+		params.ContinueOnError = ce.(bool)
+	}
+
+	tms, ok := taskData["timeoutMilSec"]
+	if !ok {
+		params.TimeoutMilSec = 0
+	} else {
+		params.TimeoutMilSec = uint64(tms.(uint64))
+	}
+
+	retry, ok := taskData["retry"]
+	if !ok {
+		params.Retry = 0
+	} else {
+		params.Retry = uint64(retry.(uint64))
+	}
+
+	return params
+}
+
 type TaskParams struct {
-	ContinueOnError bool   `json:"continueOnError" validate:"required"`
-	TimeoutMilSec   uint64 `json:"timeoutMilSec" validate:"required"`
-	Retry           uint64 `json:"retry" validate:"required"`
+	ContinueOnError bool
+	TimeoutMilSec   uint64
+	Retry           uint64
 }

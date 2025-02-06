@@ -18,7 +18,7 @@ func NewWorkspaceConfigRepo() *WorkspaceConfigRepo {
 func (wr *WorkspaceConfigRepo) GetConfig(ctx context.Context, workspaceID string) (*models.UploaderConfig, error) {
 	key := WorkspaceConfigKey(workspaceID)
 	dbFetchFn := func(config *models.UploaderConfig) error {
-		return sqlDB.WithContext(ctx).Where("workspace_id = ?", workspaceID).
+		return sqlDB.WithContext(ctx).Omit("Workspace").Where("workspace_id = ?", workspaceID).
 			First(config).Error
 	}
 	var config models.UploaderConfig

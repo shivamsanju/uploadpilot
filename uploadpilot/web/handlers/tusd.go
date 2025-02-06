@@ -3,10 +3,13 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/render"
 	tusd "github.com/tus/tusd/v2/pkg/handler"
 	"github.com/tus/tusd/v2/pkg/s3store"
 	"github.com/uploadpilot/uploadpilot/internal/config"
 	"github.com/uploadpilot/uploadpilot/internal/upload"
+	"github.com/uploadpilot/uploadpilot/internal/utils"
 	"github.com/uploadpilot/uploadpilot/internal/workspace"
 
 	"github.com/uploadpilot/uploadpilot/internal/infra"
@@ -39,10 +42,9 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 	// Create a new tusd handler
 	infra.Log.Infof("initializing tusd handler with upload base path: %s", config.TusUploadBasePath)
 	tusdHandler, err := tusd.NewHandler(tusd.Config{
-		BasePath:                config.TusUploadBasePath,
-		StoreComposer:           composer,
-		RespectForwardedHeaders: true,
-		MaxSize:                 500 * 1024 * 1024,
+		BasePath:      config.TusUploadBasePath,
+		StoreComposer: composer,
+		MaxSize:       500 * 1024 * 1024,
 		PreUploadCreateCallback: func(hook tusd.HookEvent) (tusd.HTTPResponse, tusd.FileInfoChanges, error) {
 			active, err := h.uploadSvc.VerifySubscription(&hook)
 			if err != nil {
@@ -59,7 +61,7 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 				return tusd.HTTPResponse{StatusCode: http.StatusBadRequest}, tusd.FileInfoChanges{}, nil
 			}
 
-			hook.Upload.MetaData["uploadId"] = upload.ID
+			hook.Upload.MetaData["upload_id"] = upload.ID
 			return tusd.HTTPResponse{StatusCode: http.StatusOK}, tusd.FileInfoChanges{
 				ID:       upload.ID,
 				MetaData: hook.Upload.MetaData,
@@ -67,7 +69,7 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 		},
 
 		PreFinishResponseCallback: func(hook tusd.HookEvent) (tusd.HTTPResponse, error) {
-			uploadID := hook.Upload.MetaData["uploadId"]
+			uploadID := hook.Upload.MetaData["upload_id"]
 			if err := h.uploadSvc.FinishUpload(hook.Context, uploadID); err != nil {
 				infra.Log.Errorf("unable to finish upload: %s", err)
 				return tusd.HTTPResponse{StatusCode: http.StatusBadRequest}, nil
@@ -82,4 +84,14 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 		panic(err)
 	}
 	return tusdHandler
+}
+
+func (h *tusdHandler) GetUploaderConfig(w http.ResponseWriter, r *http.Request) {
+	workspaceID := chi.URLParam(r, "workspaceId")
+	uploaderConfig, err := h.workspaceSvc.GetUploaderConfig(r.Context(), workspaceID)
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	render.JSON(w, r, uploaderConfig)
 }

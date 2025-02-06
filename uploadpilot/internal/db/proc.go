@@ -17,7 +17,7 @@ func NewProcessorRepo() *ProcessorRepo {
 
 func (i *ProcessorRepo) GetAll(ctx context.Context, workspaceID string) ([]models.Processor, error) {
 	dbFetchFn := func(processors *[]models.Processor) error {
-		return sqlDB.WithContext(ctx).Where("workspace_id = ?", workspaceID).Order("updated_at desc").Find(processors).Error
+		return sqlDB.WithContext(ctx).Where("workspace_id = ?", workspaceID).Order("enabled desc, updated_at desc").Find(processors).Error
 	}
 
 	var processors []models.Processor

@@ -51,8 +51,8 @@ func (l *StorageListener) Start() {
 		}
 
 		patchMap := map[string]interface{}{
-			"url":            url,
-			"storedFileName": objectName,
+			"url":              url,
+			"stored_file_name": objectName,
 		}
 
 		if err := l.uploadRepo.Patch(ctx, uploadID, patchMap); err != nil {
@@ -66,9 +66,6 @@ func (l *StorageListener) cleanUploadInfoFileRoutine(ctx context.Context, upload
 	defer utils.Recover()
 
 	objectFileName := uploadID
-	if len(objectFileName) > 32 {
-		objectFileName = objectFileName[:32]
-	}
 
 	infoFileName := objectFileName + ".info"
 
@@ -78,9 +75,7 @@ func (l *StorageListener) cleanUploadInfoFileRoutine(ctx context.Context, upload
 func (l *StorageListener) generateUploadURL(ctx context.Context, uploadID string) (string, string, error) {
 	objectFileName := uploadID
 
-	if len(objectFileName) > 32 {
-		objectFileName = objectFileName[:32]
-	}
+	infra.Log.Infof("objectFileName will be: %s", objectFileName)
 
 	url, err := s3.NewPresignClient(infra.S3Client).PresignGetObject(
 		ctx,

@@ -63,7 +63,7 @@ func (i *UploadRepo) GetAllFilterByMetadata(ctx context.Context, workspaceID str
 
 func (i *UploadRepo) Get(ctx context.Context, uploadID string) (*models.Upload, error) {
 	var upload models.Upload
-	if err := sqlDB.WithContext(ctx).First(&upload, "id = ?", upload).Error; err != nil {
+	if err := sqlDB.WithContext(ctx).First(&upload, "id = ?", uploadID).Error; err != nil {
 		return nil, utils.DBError(err)
 	}
 	return &upload, nil
@@ -115,7 +115,7 @@ func (i *UploadRepo) Patch(ctx context.Context, uploadID string, patchMap map[st
 			delete(patchMap, key)
 		}
 
-		if !slices.Contains([]string{"url", "processedUrl", "storedFileName"}, key) {
+		if !slices.Contains([]string{"url", "processed_url", "stored_file_name"}, key) {
 			return fmt.Errorf("unsupported patch key: %s", key)
 		}
 

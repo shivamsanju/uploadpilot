@@ -5,7 +5,6 @@ import (
 	"sync"
 
 	"github.com/google/uuid"
-	"github.com/uploadpilot/uploadpilot/internal/db/types"
 )
 
 type TaskKey string
@@ -24,7 +23,7 @@ type BaseTask struct {
 	UploadID    string
 	TmpDir      string
 	TmpDirLock  *sync.Mutex
-	TaskParams  types.EncryptedJSONB
+	TaskData    map[string]interface{}
 	Input       map[string]interface{}
 	Output      map[string]interface{}
 }
@@ -49,7 +48,7 @@ func (t *BaseTask) MakeTask(data *BaseTask) {
 	t.UploadID = data.UploadID
 	t.TmpDir = data.TmpDir
 	t.TmpDirLock = data.TmpDirLock
-	t.TaskParams = data.TaskParams
+	t.TaskData = data.TaskData
 	t.Input = data.Input
 	t.Output = data.Output
 }

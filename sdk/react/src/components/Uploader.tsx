@@ -21,7 +21,7 @@ import "@uppy/image-editor/dist/style.css";
 
 type UploaderProps = {
   workspaceId: string;
-  backendEndpoint: string;
+  uploadEndpoint: string;
   height: number;
   width: number;
   theme: "auto" | "light" | "dark";
@@ -43,7 +43,7 @@ type UploaderProps = {
 
 const Uploader: React.FC<UploaderProps> = ({
   workspaceId,
-  backendEndpoint,
+  uploadEndpoint,
   height,
   width,
   theme,
@@ -65,9 +65,10 @@ const Uploader: React.FC<UploaderProps> = ({
 
   useEffect(() => {
     if (!workspaceId) return;
-    fetch(`${backendEndpoint}/workspaces/${workspaceId}/config`)
+    fetch(`${uploadEndpoint}/config/${workspaceId}`)
       .then((response) => response.json())
       .then((config) => {
+        console.log({ config });
         const uppy = new Uppy({
           id: workspaceId,
           autoProceed: autoProceed,
@@ -93,17 +94,15 @@ const Uploader: React.FC<UploaderProps> = ({
         uppy.use(Progress);
         uppy.use(StatusBar);
         uppy.use(RemoteSources, {
-          companionUrl: `${backendEndpoint}/remote`,
+          companionUrl: `${uploadEndpoint}/remote`,
           sources: config.allowedSources.filter(
             (e: string) =>
-              !["FileUpload", "Audio", "Webcamera", "ScreenCapture"].includes(
-                e,
-              ),
+              !["FileUpload", "Audio", "Webcamera", "ScreenCapture"].includes(e)
           ),
-          companionAllowedHosts: [backendEndpoint],
+          companionAllowedHosts: [uploadEndpoint],
         });
         uppy.use(Tus, {
-          endpoint: `${backendEndpoint}/upload`,
+          endpoint: `${uploadEndpoint}/upload`,
           headers: {
             workspaceId: workspaceId,
             ...headers,
@@ -119,29 +118,29 @@ const Uploader: React.FC<UploaderProps> = ({
         if (metadata) uppy.setMeta(metadata);
         setUppy(uppy);
       });
-  }, [workspaceId, backendEndpoint]);
+  }, [workspaceId, uploadEndpoint]);
 
-  return (
-    uppy && (
-      <Dashboard
-        uppy={uppy}
-        height={height}
-        width={width}
-        theme={theme}
-        hideUploadButton={hideUploadButton}
-        hideCancelButton={hideCancelButton}
-        hideRetryButton={hideRetryButton}
-        hidePauseResumeButton={hidePauseResumeButton}
-        hideProgressAfterFinish={hideProgressAfterFinish}
-        note={note}
-        singleFileFullScreen={singleFileFullScreen}
-        showSelectedFiles={showSelectedFiles}
-        showRemoveButtonAfterComplete={showSelectedFiles}
-        showProgressDetails={showProgress}
-        disableStatusBar={!showStatusBar}
-        proudlyDisplayPoweredByUppy={false}
-      />
-    )
+  return uppy ? (
+    <Dashboard
+      uppy={uppy}
+      height={height}
+      width={width}
+      theme={theme}
+      hideUploadButton={hideUploadButton}
+      hideCancelButton={hideCancelButton}
+      hideRetryButton={hideRetryButton}
+      hidePauseResumeButton={hidePauseResumeButton}
+      hideProgressAfterFinish={hideProgressAfterFinish}
+      note={note}
+      singleFileFullScreen={singleFileFullScreen}
+      showSelectedFiles={showSelectedFiles}
+      showRemoveButtonAfterComplete={showSelectedFiles}
+      showProgressDetails={showProgress}
+      disableStatusBar={!showStatusBar}
+      proudlyDisplayPoweredByUppy={false}
+    />
+  ) : (
+    <></>
   );
 };
 

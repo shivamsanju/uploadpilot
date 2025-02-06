@@ -33,9 +33,9 @@ func GetSkipLimitSearchParams(r *http.Request) (skip int, limit int, search stri
 }
 
 func GetUserDetailsFromContext(ctx context.Context) (*dto.UserContext, error) {
-	userID, ok1 := ctx.Value("id").(string)
-	name, ok2 := ctx.Value("name").(string)
-	email, ok3 := ctx.Value("email").(string)
+	userID, ok1 := ctx.Value(dto.UserIDContextKey).(string)
+	name, ok2 := ctx.Value(dto.NameContextKey).(string)
+	email, ok3 := ctx.Value(dto.EmailContextKey).(string)
 
 	if !ok1 || !ok2 || !ok3 {
 		return nil, errors.New(msg.FailedToGetUserFromContext)

@@ -61,11 +61,7 @@ func (us *UploadService) VerifySubscription(hook *tusd.HookEvent) (bool, error) 
 		return false, errors.New("invalid workspace id in headers")
 	}
 
-	ws, err := us.wsRepo.Get(hook.Context, workspaceID)
-	if err != nil {
-		return false, err
-	}
-	active, err := us.userRepo.IsSubscriptionActive(hook.Context, ws.CreatedBy)
+	active, err := us.wsRepo.IsSubscriptionActive(hook.Context, workspaceID)
 	return active, err
 }
 
@@ -81,48 +77,52 @@ func (us *UploadService) CreateUpload(hook *tusd.HookEvent) (*models.Upload, err
 		return nil, err
 	}
 
+	id := utils.GenerateUUID()
 	upload := &models.Upload{
-		Size:   hook.Upload.Size,
-		Status: models.UploadStatusInProgress,
+		ID:          id,
+		Size:        hook.Upload.Size,
+		Status:      models.UploadStatusInProgress,
+		WorkspaceID: workspaceID,
+		Metadata:    map[string]interface{}{},
 	}
-	upload.Metadata["uploadId"] = upload.ID
-	us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, upload.ID, "upload started", nil, nil, models.UploadLogLevelInfo))
 
-	logErrorAndUpdateUpload := func(err error) error {
-		if repoErr := us.upRepo.Create(hook.Context, workspaceID, upload); repoErr != nil {
-			infra.Log.Errorf("unable to create upload: %s", repoErr)
-			return repoErr
-		}
-
+	logUploadError := func(err error) error {
 		us.eventBus.Publish(events.NewUploadEvent(hook.Context, events.EventUploadFailed, upload, "", err))
 		us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, upload.ID, "upload failed: "+err.Error(), nil, nil, models.UploadLogLevelError))
-
 		return err
 	}
 
 	metadata, err := us.extractMetadataFromTusdEvent(hook)
 	if err != nil {
-		return nil, logErrorAndUpdateUpload(err)
+		upload.Status = models.UploadStatusFailed
+		if err := us.upRepo.Create(hook.Context, workspaceID, upload); err != nil {
+			infra.Log.Errorf("unable to create upload: %s", err)
+			return nil, err
+		}
+		logUploadError(err)
+		return nil, err
 	}
+
+	metadata["upload_id"] = id
 	upload.Metadata = metadata
-
-	if err := us.ValidateUploadSizeLimits(hook, workspaceID, upload.ID, config); err != nil {
-		return nil, logErrorAndUpdateUpload(err)
-	}
-
-	if err := us.ValidateUploadFileType(hook, workspaceID, upload.ID, config); err != nil {
-		return nil, logErrorAndUpdateUpload(err)
-	}
-
-	if err := us.AuthenticateUpload(hook, workspaceID, upload.ID, config); err != nil {
-		return nil, logErrorAndUpdateUpload(fmt.Errorf(msg.UploadAuthenticationFailed, err))
-	}
-
 	if err := us.upRepo.Create(hook.Context, workspaceID, upload); err != nil {
 		infra.Log.Errorf("unable to create upload: %s", err)
 		return nil, err
 	}
+	us.logEventBus.Publish(events.NewLogEvent(hook.Context, workspaceID, upload.ID, "upload started", nil, nil, models.UploadLogLevelInfo))
 	us.eventBus.Publish(events.NewUploadEvent(hook.Context, events.EventUploadStarted, upload, "", nil))
+
+	if err := us.ValidateUploadSizeLimits(hook, workspaceID, upload.ID, config); err != nil {
+		return nil, logUploadError(err)
+	}
+
+	if err := us.ValidateUploadFileType(hook, workspaceID, upload.ID, config); err != nil {
+		return nil, logUploadError(err)
+	}
+
+	if err := us.AuthenticateUpload(hook, workspaceID, upload.ID, config); err != nil {
+		return nil, logUploadError(fmt.Errorf(msg.UploadAuthenticationFailed, err))
+	}
 
 	return upload, nil
 }

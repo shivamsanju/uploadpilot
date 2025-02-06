@@ -9,25 +9,16 @@ import (
 
 func Routes() *chi.Mux {
 	router := chi.NewRouter()
-	router.Use(AllowAllCorsMiddleware)
+	router.Use(CorsMiddleware)
 
 	// Handlers for uploads
-	ih := handlers.NewTusdHandler()
 	authHandler := handlers.NewAuthHandler()
 	workspaceHandler := handlers.NewWorkspaceHandler()
 	uploadHandler := handlers.NewUploadHandler()
 	procHandler := handlers.NewProcessorsHandler()
 
-	// Public routes
-	router.Group(func(r chi.Router) {
-		r.Mount("/upload", http.StripPrefix("/upload", ih.GetTusHandler()))
-		// Uploader details
-		r.Get("/workspaces/{workspaceId}/config", workspaceHandler.GetUploaderConfig)
-	})
-
 	// Auth routes
 	router.Group(func(r chi.Router) {
-		r.Use(CorsMiddleware)
 		r.Route("/auth", func(r chi.Router) {
 			r.Get("/{provider}/authorize", authHandler.Login)
 			r.Get("/{provider}/callback", authHandler.HandleCallback)
@@ -38,7 +29,6 @@ func Routes() *chi.Mux {
 
 	// Protected routes
 	router.Group(func(r chi.Router) {
-		r.Use(CorsMiddleware)
 		r.Use(AuthMiddleware)
 
 		// Session
@@ -51,6 +41,7 @@ func Routes() *chi.Mux {
 
 			// Single workspace
 			r.Route("/{workspaceId}", func(r chi.Router) {
+				r.Get("/config", workspaceHandler.GetUploaderConfig)
 				r.Put("/config", workspaceHandler.UpdateUploaderConfig)
 				r.Get("/allowedSources", workspaceHandler.GetAllAllowedSources)
 
@@ -90,6 +81,18 @@ func Routes() *chi.Mux {
 			})
 		})
 	})
+
+	return router
+}
+
+func UploaderRoutes() *chi.Mux {
+	router := chi.NewRouter()
+	router.Use(AllowAllCorsMiddleware)
+
+	th := handlers.NewTusdHandler()
+
+	router.Mount("/upload", http.StripPrefix("/upload", th.GetTusHandler()))
+	router.Get("/config/{workspaceId}", th.GetUploaderConfig)
 
 	return router
 }

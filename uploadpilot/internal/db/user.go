@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"time"
 
 	"github.com/uploadpilot/uploadpilot/internal/cache"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
@@ -65,16 +64,7 @@ func (u *UserRepo) GetByEmail(ctx context.Context, email string) (*models.User, 
 	if err := cl.Query(ctx, UserEmailKey(email), &user, dbFetch); err != nil {
 		return nil, err
 	}
-	infra.Log.Infof("found user: %+v", user)
 	return &user, nil
-}
-
-func (u *UserRepo) IsSubscriptionActive(ctx context.Context, userID string) (bool, error) {
-	var user models.User
-	if err := sqlDB.WithContext(ctx).Where("id = ?", userID).First(&user).Error; err != nil {
-		return false, utils.DBError(err)
-	}
-	return user.TrialEndsAt.After(time.Now()), nil
 }
 
 func UserIDKey(userID string) string {

@@ -3,7 +3,6 @@ package notify
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -44,12 +43,10 @@ func (t *webhookTask) Do(ctx context.Context) error {
 	tID := t.TaskID
 	t.leb.Publish(events.NewLogEvent(ctx, wID, uID, "triggering webhook", &pID, &tID, models.UploadLogLevelInfo))
 
-	var webhook *webhookInput
-	tStr := t.TaskParams.String()
-	if err := json.Unmarshal([]byte(tStr), &webhook); err != nil {
-		m := fmt.Sprintf("error unmarshalling json: %s", err.Error())
-		t.leb.Publish(events.NewLogEvent(ctx, wID, uID, m, &pID, &tID, models.UploadLogLevelError))
-		return err
+	infra.Log.Infof("TaskDatasss: %+v", t.TaskData)
+	webhook := &webhookInput{
+		URL:    t.TaskData["url"].(string),
+		Secret: t.TaskData["secret"].(string),
 	}
 
 	inputObjId, ok := t.Input["inputObjId"].(string)

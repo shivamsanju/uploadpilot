@@ -20,11 +20,14 @@ func (t *BaseTask) GetTaskInputDir() string {
 }
 
 func (t *BaseTask) GetFileTypeFromS3(ctx context.Context, objectKey *string) (*string, error) {
+	infra.Log.Infof("objectKey: %s checking type from s3", *objectKey)
 	file, err := infra.S3Client.HeadObject(ctx, &s3.HeadObjectInput{
 		Bucket: &config.S3BucketName,
 		Key:    objectKey,
 	})
 	if err != nil {
+		infra.Log.Infof("objectKey: %s could not check type from s3. error: %s", *objectKey, err.Error())
+
 		return nil, fmt.Errorf("failed to get object from S3: %w", err)
 	}
 
@@ -32,7 +35,7 @@ func (t *BaseTask) GetFileTypeFromS3(ctx context.Context, objectKey *string) (*s
 }
 
 func (t *BaseTask) SaveInputFile(ctx context.Context) error {
-	infra.Log.Infof("inputObjId: %+v", t.Input)
+	infra.Log.Infof("inputObjId: %+v, taskID: %s", t.Input, t.TaskID)
 	inputObjId, ok := t.Input["inputObjId"].(string)
 	if !ok {
 		return fmt.Errorf("input inputObjId is not a string")

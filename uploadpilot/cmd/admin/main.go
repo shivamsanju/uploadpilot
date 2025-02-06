@@ -16,8 +16,6 @@ import (
 	"github.com/uploadpilot/uploadpilot/internal/config"
 	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/infra"
-	"github.com/uploadpilot/uploadpilot/internal/listeners"
-	"github.com/uploadpilot/uploadpilot/internal/proc"
 	"github.com/uploadpilot/uploadpilot/web"
 )
 
@@ -86,12 +84,6 @@ func initServices() (*http.Server, error) {
 	if err := auth.Init(); err != nil {
 		return nil, wrapError("auth initialization failed", err)
 	}
-
-	// Initialize proccessor registry
-	proc.InitProcRegistry()
-
-	// Initialize listeners.
-	listeners.StartListeners()
 
 	// Initialize the web server.
 	srv, err := web.Init()

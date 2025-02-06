@@ -12,6 +12,7 @@ import (
 var (
 	AppName            string
 	WebServerPort      int
+	UploaderServerPort int
 	PostgresURI        string
 	EncryptionKey      []byte
 	RedisAddr          string
@@ -23,7 +24,7 @@ var (
 	AllowedOrigins     string
 	RootPassword       string
 	CompanionEndpoint  string
-	SelfEndpoint       string
+	UploadEndpoint     string
 	JWTSecretKey       string
 	GoogleClientID     string
 	GoogleClientSecret string
@@ -48,19 +49,28 @@ func Init() error {
 
 	portStr := os.Getenv("WEB_SERVER_PORT")
 	if portStr == "" {
-		portStr = "8081"
+		portStr = "8080"
 	}
 
-	port, err := strconv.Atoi(portStr)
+	WebServerPort, err = strconv.Atoi(portStr)
 	if err != nil {
 		return fmt.Errorf("invalid WEB_SERVER_PORT: %w", err)
+	}
+
+	uPortStr := os.Getenv("UPLOADER_SERVER_PORT")
+	if uPortStr == "" {
+		uPortStr = "8081"
+	}
+
+	UploaderServerPort, err = strconv.Atoi(uPortStr)
+	if err != nil {
+		return fmt.Errorf("invalid UPLOADER_SERVER_PORT: %w", err)
 	}
 
 	key := os.Getenv("ENCRYPTION_KEY")
 	keyBytes := getValidKey(key)
 
 	AppName = os.Getenv("APP_NAME")
-	WebServerPort = port
 	PostgresURI = os.Getenv("POSTGRES_URI")
 	EncryptionKey = keyBytes
 	RedisAddr = os.Getenv("REDIS_HOST")
@@ -71,7 +81,7 @@ func Init() error {
 	DatabaseName = os.Getenv("APP_NAME") + "db"
 	RootPassword = os.Getenv("ROOT_PASSWORD")
 	CompanionEndpoint = os.Getenv("COMPANION_ENDPOINT")
-	SelfEndpoint = os.Getenv("SELF_ENDPOINT")
+	UploadEndpoint = os.Getenv("UPLOAD_ENDPOINT")
 	JWTSecretKey = os.Getenv("JWT_SECRET_KEY")
 	GoogleClientID = os.Getenv("GOOGLE_CLIENT_ID")
 	GoogleClientSecret = os.Getenv("GOOGLE_CLIENT_SECRET")
@@ -86,7 +96,7 @@ func Init() error {
 	AllowedOrigins = os.Getenv("ALLOWED_ORIGINS")
 
 	TusUploadDir = "./tmp"
-	TusUploadBasePath = SelfEndpoint + "/upload"
+	TusUploadBasePath = UploadEndpoint + "/upload"
 
 	return nil
 }

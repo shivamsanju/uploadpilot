@@ -16,7 +16,7 @@ type UploaderConfig struct {
 	UseCompression         bool              `gorm:"column:use_compression default:true" json:"useCompression"`
 	UseFaultTolerantMode   bool              `gorm:"column:use_fault_tolerant_mode default:false" json:"useFaultTolerantMode"`
 	AuthEndpoint           *string           `gorm:"column:auth_endpoint" json:"authEndpoint"`
-	Workspace              Workspace         `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE" json:"workspace"`
+	Workspace              Workspace         `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE" json:"-"`
 	At
 }
 

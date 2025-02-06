@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"time"
 
 	"github.com/uploadpilot/uploadpilot/internal/cache"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
@@ -114,6 +115,21 @@ func (wr *WorkspaceRepo) Delete(ctx context.Context, workspaceID string) error {
 	}
 
 	return nil
+}
+
+func (u *WorkspaceRepo) IsSubscriptionActive(ctx context.Context, workspaceID string) (bool, error) {
+	var trialEndsAt time.Time
+
+	if err := sqlDB.WithContext(ctx).
+		Table("workspaces").
+		Joins("JOIN users u ON workspaces.created_by::uuid = u.id").
+		Where("workspaces.id = ?", workspaceID).
+		Select("u.trial_ends_at").
+		Scan(&trialEndsAt).Error; err != nil {
+		return false, utils.DBError(err)
+	}
+
+	return trialEndsAt.After(time.Now()), nil
 }
 
 func UserWorkspacesKey(userID string) string {
