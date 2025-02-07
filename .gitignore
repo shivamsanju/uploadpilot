@@ -44,7 +44,7 @@ Godeps/
 coverage/
 
 # Go environment files
-.env
+uploadpilot/**/*.env
 .envrc
 
 _examples/
