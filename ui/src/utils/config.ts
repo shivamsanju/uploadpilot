@@ -14,6 +14,6 @@ export const getAppName = () => {
 }
 
 export const getUploadApiDomain = () => {
-  const uploadApiUrl = process.env.UPLOAD_BACKEND_URL || `http://localhost:8081`;
+  const uploadApiUrl = process.env.REACT_APP_UPLOAD_BACKEND_URL || `http://localhost:8081`;
   return uploadApiUrl;
 }
