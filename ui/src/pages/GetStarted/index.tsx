@@ -1,13 +1,4 @@
-import {
-  Box,
-  Group,
-  Paper,
-  SimpleGrid,
-  Stack,
-  Text,
-  Timeline,
-  useMantineColorScheme,
-} from "@mantine/core";
+import { Box, Grid, Group, Paper, Stack, Text, Timeline } from "@mantine/core";
 import { Uploader } from "uppy-react";
 import {
   IconBrandNpm,
@@ -82,7 +73,6 @@ const UploaderPreviewPage = () => {
   const { width } = useViewportSize();
   const { workspaceId } = useParams();
   const { isPending: isUserPending, session } = useGetSession();
-  const { colorScheme } = useMantineColorScheme();
   const code = getCode(workspaceId as string, uploadEndpoint, settingsProps);
 
   if (!workspaceId || isUserPending) {
@@ -112,42 +102,48 @@ const UploaderPreviewPage = () => {
 
   return (
     <Stack justify="center" align="center" pt="sm" mb={50} style={style()}>
-      <Timeline active={3} bulletSize={24} lineWidth={2}>
+      <Timeline active={3} bulletSize={24} lineWidth={2} w="70%">
         <Timeline.Item bullet={<IconEditCircle size={12} />} title="Customize">
           <Text opacity={0.7} size="sm" mb="lg">
             Customize your uploader to match your brand and requirements
           </Text>
           <Paper>
-            <SimpleGrid cols={{ sm: 1, xl: 2 }}>
-              <Box p="xl">
-                <Settings {...settingsProps} />
-              </Box>
-              <Group
-                p="30"
-                justify="center"
-                align="center"
-                style={{
-                  overflow: "auto",
-                  backgroundImage:
-                    colorScheme === "light"
-                      ? "radial-gradient(circle,rgb(219, 219, 219) 1px, transparent 1px)"
-                      : "radial-gradient(circle, #3e3e3e 1px, transparent 1px)",
-                  backgroundSize: "10px 10px",
-                }}
-              >
-                <Uploader
-                  uploadEndpoint={uploadEndpoint}
-                  workspaceId={workspaceId}
-                  metadata={{
-                    uploaderEmail: session.email,
-                    uploaderName: session.name || "Unknown",
+            <Grid>
+              <Grid.Col span={12}>
+                <Group
+                  mx="sm"
+                  mt="xs"
+                  p="30"
+                  h="100%"
+                  justify="center"
+                  align="center"
+                  style={{
+                    overflow: "auto",
+                    background:
+                      settingsProps.theme === "light" ? "#ccc" : "#1e1e1e",
+                    backgroundSize: "10px 10px",
+                    borderRadius: "20px",
                   }}
-                  {...settingsProps}
-                  note="Test your uploader"
-                  headers={{ Authorization: "Bearer mysecrettoken" }}
-                />
-              </Group>
-            </SimpleGrid>
+                >
+                  <Uploader
+                    uploadEndpoint={uploadEndpoint}
+                    workspaceId={workspaceId}
+                    metadata={{
+                      uploaderEmail: session.email,
+                      uploaderName: session.name || "Unknown",
+                    }}
+                    {...settingsProps}
+                    note="Test your uploader"
+                    headers={{ Authorization: "Bearer mysecrettoken" }}
+                  />
+                </Group>
+              </Grid.Col>
+              <Grid.Col span={12}>
+                <Box p="xl">
+                  <Settings {...settingsProps} />
+                </Box>
+              </Grid.Col>
+            </Grid>
           </Paper>
         </Timeline.Item>
         <Timeline.Item

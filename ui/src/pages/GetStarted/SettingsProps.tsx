@@ -6,7 +6,7 @@ const _useSettingsProps = () => {
   const { width: screenWidth } = useViewportSize();
 
   const { colorScheme } = useMantineColorScheme();
-  const [height, setHeight] = useState<number>(screenWidth > 600 ? 700 : 500);
+  const [height, setHeight] = useState<number>(screenWidth > 600 ? 400 : 400);
   const [width, setWidth] = useState<number>(
     screenWidth > 600 ? 600 : screenWidth
   );
@@ -34,7 +34,7 @@ const _useSettingsProps = () => {
 
   useEffect(() => {
     setWidth(screenWidth > 600 ? 600 : screenWidth);
-    setHeight(screenWidth > 600 ? 700 : 500);
+    setHeight(screenWidth > 600 ? 400 : 400);
   }, [screenWidth]);
 
   return {

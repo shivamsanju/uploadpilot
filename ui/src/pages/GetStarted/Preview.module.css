@@ -3,3 +3,8 @@
     cursor: pointer;
   }
 }
+
+.inputContainer {
+  display: flex;
+  justify-content: flex-end;
+}

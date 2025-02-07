@@ -1,13 +1,14 @@
 import {
   ColorInput,
-  Group,
   NumberInput,
-  SegmentedControl,
-  Stack,
   Switch,
   Text,
+  SimpleGrid,
+  Grid,
+  SegmentedControl,
 } from "@mantine/core";
 import classes from "./Preview.module.css";
+const w = "150px";
 
 type SettingsProps = {
   height: number;
@@ -52,8 +53,6 @@ type SettingsProps = {
   >;
 };
 
-const w = "300px";
-
 const Settings: React.FC<SettingsProps> = ({
   height,
   setHeight,
@@ -81,285 +80,141 @@ const Settings: React.FC<SettingsProps> = ({
   setHideCancelButton,
   hideRetryButton,
   setHideRetryButton,
-  /* Will implement later - as not to complicate the code 
-    hidePauseResumeButton,
-    setHidePauseResumeButton,
-    hideProgressAfterFinish,
-    setHideProgressAfterFinish,
-    note,
-    setNote,
-    singleFileFullScreen,
-    setSingleFileFullScreen,
-    showSelectedFiles,
-    setShowSelectedFiles,
-    showRemoveButtonAfterComplete,
-    setShowRemoveButtonAfterComplete
-    */
 }) => {
+  const items: any = [
+    {
+      label: "Height",
+      description: "Set the height of the file uploader in px",
+      value: height,
+      setter: setHeight,
+      type: "number",
+    },
+    {
+      label: "Theme",
+      description: "Change the theme",
+      value: theme,
+      setter: setTheme,
+      type: "segmented",
+    },
+    {
+      label: "Width",
+      description: "Set the width of the file uploader in px",
+      value: width,
+      setter: setWidth,
+      type: "number",
+    },
+    {
+      label: "Auto Proceed",
+      description: "Start uploading automatically",
+      value: autoProceed,
+      setter: setAutoProceed,
+      type: "switch",
+    },
+    {
+      label: "Primary Color",
+      description: "Change the primary color of the uploader",
+      value: primaryColor,
+      setter: setPrimaryColor,
+      type: "color",
+    },
+    {
+      label: "Show Status Bar",
+      description: "Toggle to show the status bar",
+      value: showStatusBar,
+      setter: setShowStatusBar,
+      type: "switch",
+    },
+    {
+      label: "Primary Hover Color",
+      description: "Change the color when hovered",
+      value: hoverColor,
+      setter: setHoverColor,
+      type: "color",
+    },
+    {
+      label: "Show Progress Bar",
+      description: "Toggle to show progress",
+      value: showProgress,
+      setter: setShowProgress,
+      type: "switch",
+    },
+    {
+      label: "Primary Text Color",
+      description: "Change the primary text color",
+      value: textColor,
+      setter: setTextColor,
+      type: "color",
+    },
+    {
+      label: "Hide Upload Button",
+      description: "Toggle to hide upload button",
+      value: hideUploadButton,
+      setter: setHideUploadButton,
+      type: "switch",
+    },
+    {
+      label: "Note Text Color",
+      description: "Change the note text color",
+      value: noteColor,
+      setter: setNoteColor,
+      type: "color",
+    },
+    {
+      label: "Hide Cancel Button",
+      description: "Toggle to hide cancel button",
+      value: hideCancelButton,
+      setter: setHideCancelButton,
+      type: "switch",
+    },
+  ];
+
   return (
-    <Stack align="space-between" h="100%" gap="xl">
-      <Group justify="space-between" wrap="nowrap" gap="xl">
-        <div>
-          <Text size="sm">Height</Text>
-          <Text c="dimmed">Set the height of the file uploader in px</Text>
-        </div>
-        <NumberInput
-          w={w}
-          placeholder="Enter height in px"
-          value={height}
-          onChange={(e) => setHeight(Number(e))}
-        />
-      </Group>
-      <Group justify="space-between" wrap="nowrap" gap="xl">
-        <div>
-          <Text size="sm">Width</Text>
-          <Text c="dimmed">Set the width of the file uploader in px</Text>
-        </div>
-        <NumberInput
-          w={w}
-          placeholder="Enter width in px"
-          value={width}
-          onChange={(e) => setWidth(Number(e))}
-        />
-      </Group>
-      {/* Theme */}
-      <Group justify="space-between" wrap="nowrap" gap="xl">
-        <div>
-          <Text size="sm">Choose Theme</Text>
-          <Text c="dimmed">Set the theme of the file uploader</Text>
-        </div>
-        <SegmentedControl
-          w={w}
-          onChange={(value) => setTheme(value as "light" | "dark" | "auto")}
-          value={theme}
-          defaultValue="auto"
-          data={[
-            {
-              value: "auto",
-              label: "Auto",
-            },
-            {
-              value: "dark",
-              label: "Dark",
-            },
-            {
-              value: "light",
-              label: "Light",
-            },
-          ]}
-        />
-      </Group>
-
-      {/* Primary Color */}
-      <Group
-        justify="space-between"
-        className={classes.item}
-        wrap="nowrap"
-        gap="xl"
-      >
-        <div>
-          <Text size="sm">Primary Color</Text>
-          <Text c="dimmed">Change the primary color of the uploader</Text>
-        </div>
-        <ColorInput
-          w={w}
-          className={classes.color}
-          value={primaryColor}
-          onChange={setPrimaryColor}
-        />
-      </Group>
-
-      {/* Primary Hover Color */}
-      <Group
-        justify="space-between"
-        className={classes.item}
-        wrap="nowrap"
-        gap="xl"
-      >
-        <div>
-          <Text size="sm">Primary Hover Color</Text>
-          <Text c="dimmed">
-            Change the color when the primary items are hovered
-          </Text>
-        </div>
-        <ColorInput
-          w={w}
-          className={classes.color}
-          value={hoverColor}
-          onChange={setHoverColor}
-        />
-      </Group>
-
-      {/* Primary Text Color */}
-      <Group
-        justify="space-between"
-        className={classes.item}
-        wrap="nowrap"
-        gap="xl"
-      >
-        <div>
-          <Text size="sm">Primary Text Color</Text>
-          <Text c="dimmed">Change the primary text color</Text>
-        </div>
-        <ColorInput
-          w={w}
-          className={classes.color}
-          value={textColor}
-          onChange={setTextColor}
-        />
-      </Group>
-
-      {/* Note Color */}
-      <Group
-        justify="space-between"
-        className={classes.item}
-        wrap="nowrap"
-        gap="xl"
-      >
-        <div>
-          <Text size="sm">Note Text Color</Text>
-          <Text c="dimmed">Change the color of the note text</Text>
-        </div>
-        <ColorInput
-          w={w}
-          className={classes.color}
-          value={noteColor}
-          onChange={setNoteColor}
-        />
-      </Group>
-
-      {/* Auto Proceed */}
-      <Group justify="space-between" wrap="nowrap" gap="xl">
-        <div>
-          <Group align="center">
-            <Text size="sm">Auto Proceed</Text>
-            <Text c="red" opacity={0.9}>
-              {hideUploadButton &&
-                !autoProceed &&
-                "* (If you hide the upload button, you must enable auto proceed)"}
-            </Text>
-          </Group>
-          <Text c="dimmed">
-            Toggle to start uploading file as soon as it is selected
-          </Text>
-        </div>
-        <Switch
-          className={classes.cusomSwitch}
-          onLabel="ON"
-          offLabel="OFF"
-          checked={autoProceed}
-          onChange={(e) => setAutoProceed(e.target.checked)}
-        />
-      </Group>
-
-      {/* Status Bar */}
-      <Group
-        justify="space-between"
-        className={classes.item}
-        wrap="nowrap"
-        gap="xl"
-      >
-        <div>
-          <Text size="sm">Show status bar</Text>
-          <Text c="dimmed">Toggle to show the status bar in the uploader</Text>
-        </div>
-        <Switch
-          className={classes.cusomSwitch}
-          onLabel="ON"
-          offLabel="OFF"
-          checked={showStatusBar}
-          onChange={(e) => setShowStatusBar(e.target.checked)}
-        />
-      </Group>
-
-      {/* Progress Bar */}
-      <Group
-        justify="space-between"
-        className={classes.item}
-        wrap="nowrap"
-        gap="xl"
-      >
-        <div>
-          <Text size="sm">Show progress bar</Text>
-          <Text c="dimmed">
-            Toggle to show the progress bar in the uploader
-          </Text>
-        </div>
-        <Switch
-          className={classes.cusomSwitch}
-          onLabel="ON"
-          offLabel="OFF"
-          checked={showProgress}
-          onChange={(e) => setShowProgress(e.target.checked)}
-        />
-      </Group>
-
-      {/* Hide Upload Button */}
-      <Group
-        justify="space-between"
-        className={classes.item}
-        wrap="nowrap"
-        gap="xl"
-      >
-        <div>
-          <Text size="sm">Hide upload button</Text>
-          <Text c="dimmed">
-            Toggle to hide the upload button in the uploader
-          </Text>
-        </div>
-        <Switch
-          className={classes.cusomSwitch}
-          onLabel="ON"
-          offLabel="OFF"
-          checked={hideUploadButton}
-          onChange={(e) => setHideUploadButton(e.target.checked)}
-        />
-      </Group>
-
-      {/* Hide Cancel Button */}
-      <Group
-        justify="space-between"
-        className={classes.item}
-        wrap="nowrap"
-        gap="xl"
-      >
-        <div>
-          <Text size="sm">Hide cancel button</Text>
-          <Text c="dimmed">
-            Toggle to hide the cancel button in the uploader
-          </Text>
-        </div>
-        <Switch
-          className={classes.cusomSwitch}
-          onLabel="ON"
-          offLabel="OFF"
-          checked={hideCancelButton}
-          onChange={(e) => setHideCancelButton(e.target.checked)}
-        />
-      </Group>
-
-      {/* Hide Retry Button */}
-      <Group
-        justify="space-between"
-        className={classes.item}
-        wrap="nowrap"
-        gap="xl"
-      >
-        <div>
-          <Text size="sm">Hide retry button</Text>
-          <Text c="dimmed">
-            Toggle to hide the retry button in the uploader
-          </Text>
-        </div>
-        <Switch
-          className={classes.cusomSwitch}
-          onLabel="ON"
-          offLabel="OFF"
-          checked={hideRetryButton}
-          onChange={(e) => setHideRetryButton(e.target.checked)}
-        />
-      </Group>
-    </Stack>
+    <SimpleGrid cols={{ sm: 1, lg: 2 }} spacing="xl">
+      {items.map(
+        ({ label, description, value, setter, type }: any, index: number) => (
+          <Grid key={index}>
+            <Grid.Col span={6}>
+              <Text size="sm">{label}</Text>
+              <Text c="dimmed">{description}</Text>
+            </Grid.Col>
+            <Grid.Col span={6} className={classes.inputContainer}>
+              {type === "number" && (
+                <NumberInput
+                  w={w}
+                  value={value}
+                  onChange={(e) => setter(Number(e))}
+                />
+              )}
+              {type === "color" && (
+                <ColorInput w={w} value={value} onChange={setter} />
+              )}
+              {type === "switch" && (
+                <Switch
+                  className={classes.customSwitch}
+                  checked={value}
+                  onChange={(e) => setter(e.target.checked)}
+                />
+              )}
+              {type === "segmented" && (
+                <SegmentedControl
+                  w={250}
+                  h="34"
+                  size="xs"
+                  withItemsBorders={false}
+                  value={value}
+                  onChange={setter}
+                  data={[
+                    { label: "Auto", value: "auto" },
+                    { label: "Light", value: "light" },
+                    { label: "Dark", value: "dark" },
+                  ]}
+                />
+              )}
+            </Grid.Col>
+          </Grid>
+        )
+      )}
+    </SimpleGrid>
   );
 };
 
