@@ -48,7 +48,7 @@ func (h *tusdHandler) GetTusHandler() http.Handler {
 		StoreComposer:      composer,
 		MaxSize:            config.TusMaxFileSize,
 		DisableDownload:    true,
-		DisableTermination: true,
+		DisableTermination: false,
 		PreUploadCreateCallback: func(hook tusd.HookEvent) (tusd.HTTPResponse, tusd.FileInfoChanges, error) {
 			active, err := h.uploadSvc.VerifySubscription(&hook)
 			if err != nil {

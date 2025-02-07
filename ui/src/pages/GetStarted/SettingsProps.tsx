@@ -1,11 +1,20 @@
 import { useMantineColorScheme } from "@mantine/core";
-import { useState } from "react";
+import { useViewportSize } from "@mantine/hooks";
+import { useEffect, useState } from "react";
 
-export const useSettingsProps = () => {
+const _useSettingsProps = () => {
+  const { width: screenWidth } = useViewportSize();
+
   const { colorScheme } = useMantineColorScheme();
-  const [height, setHeight] = useState<number>(400);
-  const [width, setWidth] = useState<number>(600);
+  const [height, setHeight] = useState<number>(screenWidth > 600 ? 700 : 500);
+  const [width, setWidth] = useState<number>(
+    screenWidth > 600 ? 600 : screenWidth
+  );
   const [theme, setTheme] = useState<"auto" | "light" | "dark">(colorScheme);
+  const [primaryColor, setPrimaryColor] = useState<string | undefined>();
+  const [textColor, setTextColor] = useState<string | undefined>();
+  const [hoverColor, setHoverColor] = useState<string | undefined>();
+  const [noteColor, setNoteColor] = useState<string | undefined>();
   const [showStatusBar, setShowStatusBar] = useState<boolean>(true);
   const [autoProceed, setAutoProceed] = useState<boolean>(false);
   const [showProgress, setShowProgress] = useState<boolean>(true);
@@ -23,6 +32,11 @@ export const useSettingsProps = () => {
   const [showRemoveButtonAfterComplete, setShowRemoveButtonAfterComplete] =
     useState<boolean>(true);
 
+  useEffect(() => {
+    setWidth(screenWidth > 600 ? 600 : screenWidth);
+    setHeight(screenWidth > 600 ? 700 : 500);
+  }, [screenWidth]);
+
   return {
     height,
     setHeight,
@@ -30,6 +44,14 @@ export const useSettingsProps = () => {
     setWidth,
     theme,
     setTheme,
+    primaryColor,
+    setPrimaryColor,
+    textColor,
+    setTextColor,
+    hoverColor,
+    setHoverColor,
+    noteColor,
+    setNoteColor,
     showStatusBar,
     setShowStatusBar,
     autoProceed,
@@ -55,4 +77,10 @@ export const useSettingsProps = () => {
     showRemoveButtonAfterComplete,
     setShowRemoveButtonAfterComplete,
   };
+};
+
+export const useSettingsProps = () => {
+  const x = _useSettingsProps();
+
+  return x;
 };

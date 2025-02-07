@@ -18,6 +18,7 @@ import {
   Switch,
   SegmentedControl,
   Loader,
+  ColorInput,
 } from "@mantine/core";
 
 export const myAppTheme = createTheme({
@@ -79,6 +80,11 @@ export const myAppTheme = createTheme({
       },
     }),
     Input: Input.extend({
+      defaultProps: {
+        size: "xs",
+      },
+    }),
+    ColorInput: ColorInput.extend({
       defaultProps: {
         size: "xs",
       },

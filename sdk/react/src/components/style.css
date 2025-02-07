@@ -1,0 +1,197 @@
+/* ========================== */
+/* 1. Root Variables */
+/* ========================== */
+:root {
+  --uploader-primary-color: #cb8400;
+  --uploader-primary-color-text: #fff;
+  --primary-hover: #b07100;
+  --uploader-primary-color-shadow: #cb84003a;
+  --uploader-font-family: inherit;
+  --uploader-note-color: #999;
+}
+
+/* ========================== */
+/* 2. Theme-Based Colors */
+/* ========================== */
+[data-uppy-theme="dark"] .uppy-Dashboard-AddFiles-title,
+[data-uppy-theme="dark"] .uppy-DashboardTab-name {
+  color: #999 !important;
+}
+
+[data-uppy-theme="light"] .uppy-Dashboard-AddFiles-title,
+[data-uppy-theme="light"] .uppy-DashboardTab-name {
+  color: #454545 !important;
+}
+
+/* ========================== */
+/* 3. Primary Elements */
+/* ========================== */
+.uppy-Dashboard-browse,
+.uppy-DashboardContent-addMore,
+.uppy-ProviderBrowser-userLogout,
+.uppy-DashboardContent-back {
+  color: var(--uploader-primary-color);
+  text-decoration-color: var(--uploader-primary-color);
+}
+
+[data-uppy-theme="dark"] .uppy-Dashboard-browse,
+[data-uppy-theme="dark"] .uppy-DashboardContent-addMore,
+[data-uppy-theme="dark"] .uppy-ProviderBrowser-userLogout,
+[data-uppy-theme="dark"] .uppy-DashboardContent-back {
+  color: var(--uploader-primary-color);
+  text-decoration-color: var(--uploader-primary-color);
+}
+
+.uppy-ProviderBrowser-userLogout:focus,
+.uppy-Dashboard-browse:focus {
+  border-color: var(--uploader-primary-color);
+}
+
+[data-uppy-theme="dark"] .uppy-ProviderBrowser-userLogout:focus,
+[data-uppy-theme="dark"] .uppy-Dashboard-browse:focus {
+  border-color: var(--uploader-primary-color);
+}
+
+.uppy-Dashboard-browse:hover,
+.uppy-DashboardContent-addMore:hover,
+.uppy-ProviderBrowser-userLogout:hover,
+.uppy-DashboardContent-back:hover {
+  color: var(--primary-hover);
+  text-decoration-color: var(--primary-hover);
+}
+
+.uppy-Dashboard-browse:hover {
+  border-color: var(--primary-hover) !important;
+}
+
+.uppy-ProviderBrowserItem--is-checked .uppy-ProviderBrowserItem-checkbox {
+  background-color: var(--uploader-primary-color) !important;
+  border-color: var(--uploader-primary-color) !important;
+}
+
+.uppy-ProviderBrowserItem--is-checked .uppy-ProviderBrowserItem-checkbox:hover {
+  background-color: var(--primary-hover) !important;
+  border-color: var(--primary-hover) !important;
+}
+
+.uppy-ProviderBrowserItem-checkbox:focus {
+  border-color: var(--uploader-primary-color) !important;
+  box-shadow: 0 0 0 3px var(--uploader-primary-color-shadow) !important;
+}
+
+/* ========================== */
+/* 4. Buttons */
+/* ========================== */
+.uppy-c-btn-primary {
+  background-color: var(--uploader-primary-color) !important;
+  color: var(--uploader-primary-color-text) !important;
+  font-weight: 500 !important;
+}
+
+.uppy-StatusBar-actionBtn {
+  background-color: var(--uploader-primary-color) !important;
+  color: var(--uploader-primary-color-text) !important;
+}
+
+.uppy-c-btn-primary:focus,
+.uppy-StatusBar-actionBtn:focus {
+  box-shadow: 0 0 0 3px var(--uploader-primary-color-shadow) !important;
+}
+
+.uppy-c-btn-primary:hover,
+.uppy-StatusBar-actionBtn:hover {
+  background-color: var(--primary-hover) !important;
+  color: var(--uploader-primary-color-text) !important;
+}
+
+/* ========================== */
+/* 5. Dashboard Layout */
+/* ========================== */
+[data-uppy-theme="dark"] .uppy-Dashboard-inner {
+  background-color: #000 !important;
+  box-shadow: 0px 0px 4px rgba(4, 4, 4, 0.7);
+}
+
+.uppy-Dashboard-inner {
+  font-family: var(--uploader-font-family) !important;
+  border-radius: 20px;
+  border: none;
+}
+
+.uppy-DashboardContent-panel {
+  border-radius: 20px !important;
+}
+
+/* ========================== */
+/* 6. Tabs */
+/* ========================== */
+.uppy-DashboardTab {
+  border-color: transparent !important;
+}
+
+.uppy-DashboardTab > button {
+  border-radius: 10px;
+}
+
+[data-uppy-theme="dark"] .uppy-DashboardTab-btn:hover {
+  background-color: #151515 !important;
+}
+
+[data-uppy-theme="dark"] .uppy-DashboardTab-inner {
+  background-color: #161616;
+}
+
+/* ========================== */
+/* 7. Add Files Section */
+/* ========================== */
+[data-uppy-theme="dark"] .uppy-Dashboard-AddFiles {
+  border-color: #202020 !important;
+}
+
+.uppy-Dashboard-AddFiles {
+  container-name: addfiles;
+  container-type: size;
+  border-radius: 20px !important;
+  padding: 5px;
+}
+
+@container addfiles (min-width: 551px) and (min-height: 670px) {
+  [data-uppy-theme="light"] .uppy-Dashboard-AddFiles-title::before {
+    content: url(./addfiles.svg) !important;
+    display: block;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+
+  [data-uppy-theme="dark"] .uppy-Dashboard-AddFiles-title::before {
+    content: url(./addfiles-dark.svg) !important;
+    display: block;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+}
+
+/* ========================== */
+/* 8. Miscellaneous */
+/* ========================== */
+.uppy-Dashboard-note {
+  color: var(--uploader-note-color) !important;
+}
+
+/* ========================== */
+/* 9. Drop Hint */
+/* ========================== */
+
+.uppy-Dashboard-dropFilesHereHint {
+  border-radius: 20px !important;
+}
+
+[data-uppy-theme="dark"] .uppy-Dashboard-dropFilesHereHint {
+  border-color: #eaeaea !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='48' height='48' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M24 1v1C11.85 2 2 11.85 2 24s9.85 22 22 22 22-9.85 22-22S36.15 2 24 2V1zm0 0V0c13.254 0 24 10.746 24 24S37.254 48 24 48 0 37.254 0 24 10.746 0 24 0v1zm7.707 19.293a.999.999 0 1 1-1.414 1.414L25 16.414V34a1 1 0 1 1-2 0V16.414l-5.293 5.293a.999.999 0 1 1-1.414-1.414l7-7a.999.999 0 0 1 1.414 0l7 7z' fill='%23EAEAEA' fill-rule='nonzero'/%3E%3C/svg%3E") !important;
+}
+
+[data-uppy-theme="light"] .uppy-Dashboard-dropFilesHereHint {
+  border-color: #676767 !important;
+  background-image: url("data:image/svg+xml,%3Csvg width='48' height='48' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M24 1v1C11.85 2 2 11.85 2 24s9.85 22 22 22 22-9.85 22-22S36.15 2 24 2V1zm0 0V0c13.254 0 24 10.746 24 24S37.254 48 24 48 0 37.254 0 24 10.746 0 24 0v1zm7.707 19.293a.999.999 0 1 1-1.414 1.414L25 16.414V34a1 1 0 1 1-2 0V16.414l-5.293 5.293a.999.999 0 1 1-1.414-1.414l7-7a.999.999 0 0 1 1.414 0l7 7z' fill='%23676767' fill-rule='nonzero'/%3E%3C/svg%3E") !important;
+}

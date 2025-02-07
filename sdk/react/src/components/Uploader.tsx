@@ -18,6 +18,9 @@ import "@uppy/dashboard/dist/style.css";
 import "@uppy/audio/dist/style.css";
 import "@uppy/screen-capture/dist/style.css";
 import "@uppy/image-editor/dist/style.css";
+import "./style.css";
+
+const isValidHex = (color: string) => /^#([0-9A-Fa-f]{3}){1,2}$/.test(color);
 
 type UploaderProps = {
   workspaceId: string;
@@ -39,6 +42,10 @@ type UploaderProps = {
   showSelectedFiles?: boolean;
   showRemoveButtonAfterComplete?: boolean;
   autoProceed?: boolean;
+  primaryColor?: string;
+  textColor?: string;
+  hoverColor?: string;
+  noteColor?: string;
 };
 
 const Uploader: React.FC<UploaderProps> = ({
@@ -60,6 +67,10 @@ const Uploader: React.FC<UploaderProps> = ({
   singleFileFullScreen = true,
   showSelectedFiles = true,
   autoProceed = false,
+  primaryColor = "#cb8400",
+  textColor = "#fff",
+  hoverColor = "#b07100",
+  noteColor = "#999",
 }) => {
   const [uppy, setUppy] = useState<any>();
 
@@ -121,6 +132,34 @@ const Uploader: React.FC<UploaderProps> = ({
         setUppy(uppy);
       });
   }, [workspaceId, uploadEndpoint]);
+
+  useEffect(() => {
+    if (isValidHex(primaryColor)) {
+      document.documentElement.style.setProperty(
+        "--uploader-primary-color",
+        primaryColor
+      );
+    }
+    if (isValidHex(textColor)) {
+      document.documentElement.style.setProperty(
+        "--uploader-primary-color-text",
+        textColor
+      );
+      document.documentElement.style.setProperty(
+        "--uploader-primary-color-shadow",
+        textColor + "3a"
+      );
+    }
+    if (isValidHex(hoverColor)) {
+      document.documentElement.style.setProperty("--primary-hover", hoverColor);
+    }
+    if (isValidHex(noteColor)) {
+      document.documentElement.style.setProperty(
+        "--uploader-note-color",
+        noteColor
+      );
+    }
+  }, [primaryColor, textColor, hoverColor, noteColor]);
 
   return uppy ? (
     <Dashboard

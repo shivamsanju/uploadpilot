@@ -286,7 +286,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
                 </Text>
               </div>
               <Switch
-                className={classes.switch}
+                className={classes.cusomSwitch}
                 onLabel="ON"
                 offLabel="OFF"
                 checked={form.values.allowPauseAndResume}
@@ -305,7 +305,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
                 </Text>
               </div>
               <Switch
-                className={classes.switch}
+                className={classes.cusomSwitch}
                 onLabel="ON"
                 offLabel="OFF"
                 checked={form.values.enableImageEditing}
@@ -325,7 +325,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
                 </Text>
               </div>
               <Switch
-                className={classes.switch}
+                className={classes.cusomSwitch}
                 onLabel="ON"
                 offLabel="OFF"
                 checked={form.values.useCompression}
@@ -344,7 +344,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
                 </Text>
               </div>
               <Switch
-                className={classes.switch}
+                className={classes.cusomSwitch}
                 onLabel="ON"
                 offLabel="OFF"
                 checked={form.values.useFaultTolerantMode}

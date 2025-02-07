@@ -37,6 +37,11 @@ const getCode = (
     `height={${settingsProps.height}}`,
     `width={${settingsProps.width}}`,
     `theme={${settingsProps.theme}}`,
+    settingsProps.primaryColor &&
+      `primaryColor="${settingsProps.primaryColor}"`,
+    settingsProps.textColor && `textColor="${settingsProps.textColor}"`,
+    settingsProps.hoverColor && `hoverColor="${settingsProps.hoverColor}"`,
+    settingsProps.noteColor && `noteColor="${settingsProps.noteColor}"`,
     `metadata={{"key": "value"}}`,
     `headers={{"key": "value"}}`,
     !settingsProps.showStatusBar && "showStatusBar={false}",
@@ -110,14 +115,15 @@ const UploaderPreviewPage = () => {
       <Timeline active={3} bulletSize={24} lineWidth={2}>
         <Timeline.Item bullet={<IconEditCircle size={12} />} title="Customize">
           <Text opacity={0.7} size="sm" mb="lg">
-            Customize your uploader to match your requirements
+            Customize your uploader to match your brand and requirements
           </Text>
           <Paper>
-            <SimpleGrid cols={{ sm: 1, md: 2 }}>
+            <SimpleGrid cols={{ sm: 1, xl: 2 }}>
               <Box p="xl">
                 <Settings {...settingsProps} />
               </Box>
               <Group
+                p="30"
                 justify="center"
                 align="center"
                 style={{

@@ -1,4 +1,5 @@
 import {
+  ColorInput,
   Group,
   NumberInput,
   SegmentedControl,
@@ -15,6 +16,14 @@ type SettingsProps = {
   setWidth: React.Dispatch<React.SetStateAction<number>>;
   theme: "light" | "dark" | "auto";
   setTheme: React.Dispatch<React.SetStateAction<"light" | "dark" | "auto">>;
+  primaryColor: string | undefined;
+  setPrimaryColor: React.Dispatch<React.SetStateAction<string | undefined>>;
+  textColor: string | undefined;
+  setTextColor: React.Dispatch<React.SetStateAction<string | undefined>>;
+  hoverColor: string | undefined;
+  setHoverColor: React.Dispatch<React.SetStateAction<string | undefined>>;
+  noteColor: string | undefined;
+  setNoteColor: React.Dispatch<React.SetStateAction<string | undefined>>;
   autoProceed: boolean;
   setAutoProceed: React.Dispatch<React.SetStateAction<boolean>>;
   showStatusBar: boolean;
@@ -52,6 +61,14 @@ const Settings: React.FC<SettingsProps> = ({
   setWidth,
   theme,
   setTheme,
+  primaryColor,
+  setPrimaryColor,
+  textColor,
+  setTextColor,
+  hoverColor,
+  setHoverColor,
+  noteColor,
+  setNoteColor,
   autoProceed,
   setAutoProceed,
   showStatusBar,
@@ -115,6 +132,7 @@ const Settings: React.FC<SettingsProps> = ({
           w={w}
           onChange={(value) => setTheme(value as "light" | "dark" | "auto")}
           value={theme}
+          defaultValue="auto"
           data={[
             {
               value: "auto",
@@ -129,6 +147,84 @@ const Settings: React.FC<SettingsProps> = ({
               label: "Light",
             },
           ]}
+        />
+      </Group>
+
+      {/* Primary Color */}
+      <Group
+        justify="space-between"
+        className={classes.item}
+        wrap="nowrap"
+        gap="xl"
+      >
+        <div>
+          <Text size="sm">Primary Color</Text>
+          <Text c="dimmed">Change the primary color of the uploader</Text>
+        </div>
+        <ColorInput
+          w={w}
+          className={classes.color}
+          value={primaryColor}
+          onChange={setPrimaryColor}
+        />
+      </Group>
+
+      {/* Primary Hover Color */}
+      <Group
+        justify="space-between"
+        className={classes.item}
+        wrap="nowrap"
+        gap="xl"
+      >
+        <div>
+          <Text size="sm">Primary Hover Color</Text>
+          <Text c="dimmed">
+            Change the color when the primary items are hovered
+          </Text>
+        </div>
+        <ColorInput
+          w={w}
+          className={classes.color}
+          value={hoverColor}
+          onChange={setHoverColor}
+        />
+      </Group>
+
+      {/* Primary Text Color */}
+      <Group
+        justify="space-between"
+        className={classes.item}
+        wrap="nowrap"
+        gap="xl"
+      >
+        <div>
+          <Text size="sm">Primary Text Color</Text>
+          <Text c="dimmed">Change the primary text color</Text>
+        </div>
+        <ColorInput
+          w={w}
+          className={classes.color}
+          value={textColor}
+          onChange={setTextColor}
+        />
+      </Group>
+
+      {/* Note Color */}
+      <Group
+        justify="space-between"
+        className={classes.item}
+        wrap="nowrap"
+        gap="xl"
+      >
+        <div>
+          <Text size="sm">Note Text Color</Text>
+          <Text c="dimmed">Change the color of the note text</Text>
+        </div>
+        <ColorInput
+          w={w}
+          className={classes.color}
+          value={noteColor}
+          onChange={setNoteColor}
         />
       </Group>
 
@@ -148,7 +244,7 @@ const Settings: React.FC<SettingsProps> = ({
           </Text>
         </div>
         <Switch
-          className={classes.switch}
+          className={classes.cusomSwitch}
           onLabel="ON"
           offLabel="OFF"
           checked={autoProceed}
@@ -168,7 +264,7 @@ const Settings: React.FC<SettingsProps> = ({
           <Text c="dimmed">Toggle to show the status bar in the uploader</Text>
         </div>
         <Switch
-          className={classes.switch}
+          className={classes.cusomSwitch}
           onLabel="ON"
           offLabel="OFF"
           checked={showStatusBar}
@@ -190,7 +286,7 @@ const Settings: React.FC<SettingsProps> = ({
           </Text>
         </div>
         <Switch
-          className={classes.switch}
+          className={classes.cusomSwitch}
           onLabel="ON"
           offLabel="OFF"
           checked={showProgress}
@@ -212,7 +308,7 @@ const Settings: React.FC<SettingsProps> = ({
           </Text>
         </div>
         <Switch
-          className={classes.switch}
+          className={classes.cusomSwitch}
           onLabel="ON"
           offLabel="OFF"
           checked={hideUploadButton}
@@ -234,7 +330,7 @@ const Settings: React.FC<SettingsProps> = ({
           </Text>
         </div>
         <Switch
-          className={classes.switch}
+          className={classes.cusomSwitch}
           onLabel="ON"
           offLabel="OFF"
           checked={hideCancelButton}
@@ -256,7 +352,7 @@ const Settings: React.FC<SettingsProps> = ({
           </Text>
         </div>
         <Switch
-          className={classes.switch}
+          className={classes.cusomSwitch}
           onLabel="ON"
           offLabel="OFF"
           checked={hideRetryButton}
