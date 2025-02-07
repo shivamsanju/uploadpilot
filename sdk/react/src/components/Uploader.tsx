@@ -73,12 +73,18 @@ const Uploader: React.FC<UploaderProps> = ({
   noteColor = "#999",
 }) => {
   const [uppy, setUppy] = useState<any>();
+  const [error, setError] = useState<string>();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!workspaceId) return;
     fetch(`${uploadEndpoint}/config/${workspaceId}`)
       .then((response) => response.json())
       .then((config) => {
+        if (config?.message) {
+          setError(config.message);
+          return;
+        }
         const uppy = new Uppy({
           id: workspaceId,
           autoProceed: autoProceed,
@@ -130,7 +136,9 @@ const Uploader: React.FC<UploaderProps> = ({
         if (config.useFaultTolerantMode) uppy.use(GoldenRetriever);
         if (metadata) uppy.setMeta(metadata);
         setUppy(uppy);
-      });
+      })
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   }, [workspaceId, uploadEndpoint]);
 
   useEffect(() => {
@@ -181,7 +189,17 @@ const Uploader: React.FC<UploaderProps> = ({
       proudlyDisplayPoweredByUppy={false}
     />
   ) : (
-    <></>
+    <div
+      style={{
+        height,
+        width,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      {loading ? <span>Loading...</span> : <span>{error}</span>}
+    </div>
   );
 };
 
