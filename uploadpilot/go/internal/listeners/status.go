@@ -1,6 +1,8 @@
 package listeners
 
 import (
+	"context"
+
 	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
 	"github.com/uploadpilot/uploadpilot/internal/events"
@@ -51,6 +53,7 @@ func (l *StatusListener) Start() {
 			infra.Log.Warn("skipping unknown event key: %s", event.Key)
 			continue
 		}
-		_ = l.uploadRepo.SetStatus(event.Context, event.Upload.ID, status)
+		ctx := context.Background()
+		_ = l.uploadRepo.SetStatus(ctx, event.Upload.ID, status)
 	}
 }

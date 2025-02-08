@@ -37,7 +37,7 @@ func (l *StorageListener) Start() {
 
 	infra.Log.Info("starting upload storage listener...")
 	for event := range l.eventChan {
-		ctx := event.Context
+		ctx := context.Background()
 		uploadID := event.Upload.ID
 
 		// Delete tus info file from S3 (no need to throw an error)
