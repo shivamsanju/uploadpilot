@@ -55,7 +55,7 @@ const options = {
     acl: config.optional.integrations.s3.acl || "private",
   },
   server: {
-    host: config.mandatory.companionDomain?.contains("localhost")
+    host: config.mandatory.companionDomain?.includes("localhost")
       ? `${config.mandatory.companionDomain}:${config.optional.companionPort}`
       : config.mandatory.companionDomain,
     protocol: config.optional.companionProtocol || "http",
