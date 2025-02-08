@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"slices"
 	"sync"
+	"time"
 
 	"github.com/uploadpilot/uploadpilot/internal/db"
 	"github.com/uploadpilot/uploadpilot/internal/db/models"
@@ -74,7 +75,11 @@ func (l *ProcListener) startSingleProcessor(wg *sync.WaitGroup, event events.Upl
 	wID := event.Upload.WorkspaceID
 	uID := event.Upload.ID
 	pID := processor.ID
-	ctx := context.Background()
+
+	// context with timeout of 15 minutes
+	ctx, cancel := context.WithTimeout(event.Context, 15*time.Minute)
+	defer cancel()
+
 	upload, err := l.upRepo.Get(ctx, uID)
 	if err != nil {
 		l.leb.Publish(events.NewLogEvent(ctx, wID, uID, err.Error(), nil, nil, models.UploadLogLevelError))
@@ -93,18 +98,18 @@ func (l *ProcListener) startSingleProcessor(wg *sync.WaitGroup, event events.Upl
 	}
 
 	m := fmt.Sprintf("started processing upload for processor '%s'", processor.Name)
-	l.ueb.Publish(events.NewUploadEvent(event.Context, events.EventUploadProcessing, &event.Upload, "", nil))
-	l.leb.Publish(events.NewLogEvent(event.Context, wID, uID, m, nil, nil, models.UploadLogLevelInfo))
+	l.ueb.Publish(events.NewUploadEvent(ctx, events.EventUploadProcessing, &event.Upload, "", nil))
+	l.leb.Publish(events.NewLogEvent(ctx, wID, uID, m, nil, nil, models.UploadLogLevelInfo))
 
 	r := proc.NewProcWorkflowRunner()
-	if err := r.Build(event.Context, wID, pID, uID); err != nil {
+	if err := r.Build(ctx, wID, pID, uID); err != nil {
 		m := fmt.Sprintf("failed to build workflow for processor %s and upload %s: %s", processor.Name, uID, err.Error())
 		infra.Log.Error(m)
-		l.leb.Publish(events.NewLogEvent(event.Context, wID, uID, m, &pID, nil, models.UploadLogLevelError))
+		l.leb.Publish(events.NewLogEvent(ctx, wID, uID, m, &pID, nil, models.UploadLogLevelError))
 		return
 	}
 
-	if err := r.Run(event.Context); err != nil {
+	if err := r.Run(ctx); err != nil {
 		m := fmt.Sprintf("workflow run failed for processor %s and upload %s", processor.Name, uID)
 		infra.Log.Error(m, err)
 		return
