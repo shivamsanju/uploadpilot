@@ -10,24 +10,22 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 const queryClient = new QueryClient();
 function App() {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <MantineProvider theme={myAppTheme}>
-        <Notifications position="bottom-center" />
-        <QueryClientProvider client={queryClient}>
-          <Router>
-            <Routes>
-              {routes.map((route) => (
-                <Route
-                  key={route.path}
-                  path={route.path}
-                  element={<route.layout>{route.element}</route.layout>}
-                />
-              ))}
-            </Routes>
-          </Router>
-        </QueryClientProvider>
-      </MantineProvider>
-    </html>
+    <MantineProvider theme={myAppTheme}>
+      <Notifications position="bottom-center" />
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <Routes>
+            {routes.map((route) => (
+              <Route
+                key={route.path}
+                path={route.path}
+                element={<route.layout>{route.element}</route.layout>}
+              />
+            ))}
+          </Routes>
+        </Router>
+      </QueryClientProvider>
+    </MantineProvider>
   );
 }
 

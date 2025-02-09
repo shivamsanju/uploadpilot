@@ -11,13 +11,13 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/uploadpilot/uploadpilot/internal/cache"
-	"github.com/uploadpilot/uploadpilot/internal/config"
-	"github.com/uploadpilot/uploadpilot/internal/db"
-	"github.com/uploadpilot/uploadpilot/internal/infra"
-	"github.com/uploadpilot/uploadpilot/internal/listeners"
-	"github.com/uploadpilot/uploadpilot/internal/proc"
-	"github.com/uploadpilot/uploadpilot/web"
+	"github.com/uploadpilot/uploadpilot/common/pkg/cache"
+	"github.com/uploadpilot/uploadpilot/common/pkg/db"
+	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/config"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/listeners"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/proc"
+	"github.com/uploadpilot/uploadpilot/uploader/web"
 )
 
 func main() {

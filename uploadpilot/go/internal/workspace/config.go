@@ -8,7 +8,7 @@ import (
 
 var DefaultUploaderConfig = &models.UploaderConfig{
 	AllowedSources:         []string{models.FileUpload.String()},
-	RequiredMetadataFields: []string{"filename", "size"},
+	RequiredMetadataFields: []string{},
 }
 
 func (s *WorkspaceService) GetUploaderConfig(ctx context.Context, workspaceID string) (*models.UploaderConfig, error) {

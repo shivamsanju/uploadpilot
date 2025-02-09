@@ -45,6 +45,7 @@ coverage/
 
 # Go environment files
 uploadpilot/**/*.env
+uploadpilot/.env.prod
 .envrc
 
 _examples/

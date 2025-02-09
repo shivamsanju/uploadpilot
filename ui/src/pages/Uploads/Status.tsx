@@ -9,8 +9,9 @@ import {
   IconTimeDuration0,
   IconAlertHexagon,
 } from "@tabler/icons-react";
+import React from "react";
 
-const statusConfig: Record<string, { color: string; icon: JSX.Element }> = {
+const statusConfig: Record<string, { color: string; icon: React.ReactNode }> = {
   Started: { color: "blue", icon: <IconTimeDuration0 size={20} /> },
   Skipped: { color: "gray", icon: <IconProgressX size={20} /> },
   "In Progress": { color: "teal", icon: <Loader size={20} /> },

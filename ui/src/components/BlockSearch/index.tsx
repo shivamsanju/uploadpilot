@@ -94,7 +94,9 @@ export const BlockSearch = ({
           filtered.map((item: any, index: number) => (
             <Group
               key={item?.key}
-              ref={(el) => (itemRefs.current[index] = el)}
+              ref={(el) =>
+                (itemRefs.current[index] = el as HTMLDivElement | null) as any
+              }
               wrap="nowrap"
               p="sm"
               className={`${classes.block} ${
