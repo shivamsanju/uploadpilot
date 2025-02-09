@@ -10,7 +10,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/common/pkg/msg"
-	"github.com/uploadpilot/uploadpilot/common/pkg/utils"
+	commonutils "github.com/uploadpilot/uploadpilot/common/pkg/utils"
 )
 
 type RedisConfig struct {
@@ -82,14 +82,14 @@ func (bus *EventBus[T]) Subscribe(consumerGroup string, handler func(msg *T) err
 }
 
 func (bus *EventBus[T]) startWorker(messageChan chan *redis.XMessage, handler func(msg *T) error) {
-	defer utils.Recover()
+	defer commonutils.Recover()
 	for msg := range messageChan {
 		bus.processMessage(handler, msg)
 	}
 }
 
 func (bus *EventBus[T]) listen(messageChan chan *redis.XMessage) {
-	defer utils.Recover()
+	defer commonutils.Recover()
 
 	for {
 		pendingMessages := bus.getPendingMessages()

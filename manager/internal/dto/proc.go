@@ -1,6 +1,6 @@
 package dto
 
-import "github.com/uploadpilot/uploadpilot/manager/internal/db/types"
+import "github.com/uploadpilot/uploadpilot/common/pkg/types"
 
 type EditProcRequest struct {
 	Name     string            `json:"name"`

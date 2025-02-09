@@ -49,3 +49,4 @@ uploadpilot/.env.prod
 .envrc
 
 _examples/
+_uploadpilot/

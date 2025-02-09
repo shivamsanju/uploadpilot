@@ -8,10 +8,10 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/manager/internal/auth"
 	"github.com/uploadpilot/uploadpilot/manager/internal/config"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
-	"github.com/uploadpilot/uploadpilot/manager/internal/infra"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
 )
 

@@ -11,7 +11,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/common/pkg/pubsub"
-	"github.com/uploadpilot/uploadpilot/common/pkg/utils"
+	commonutils "github.com/uploadpilot/uploadpilot/common/pkg/utils"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/config"
 )
 
@@ -36,7 +36,7 @@ func NewUploadLogsListener(flushInterval time.Duration, bufferSize int) *UploadL
 }
 
 func (l *UploadLogsListener) Start() {
-	defer utils.Recover()
+	defer commonutils.Recover()
 	group := "upload-logs-listener"
 	l.logEb.Subscribe(group, l.logHandler)
 	go l.startBatchFlushInterval(l.flushInterval)
@@ -76,7 +76,7 @@ func (l *UploadLogsListener) logHandler(msg *events.UploadLogEventMsg) error {
 
 // startBatchFlush will flush logs every `flushInterval`
 func (l *UploadLogsListener) startBatchFlushInterval(flushInterval time.Duration) {
-	defer utils.Recover()
+	defer commonutils.Recover()
 
 	ticker := time.NewTicker(flushInterval)
 	defer ticker.Stop()

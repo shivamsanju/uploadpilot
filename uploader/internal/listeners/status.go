@@ -10,7 +10,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/common/pkg/pubsub"
-	"github.com/uploadpilot/uploadpilot/common/pkg/utils"
+	commonutils "github.com/uploadpilot/uploadpilot/common/pkg/utils"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/config"
 )
 
@@ -29,7 +29,7 @@ func NewStatusListener() *StatusListener {
 }
 
 func (l *StatusListener) Start() {
-	defer utils.Recover()
+	defer commonutils.Recover()
 	infra.Log.Info("starting upload status listener...")
 	group := "upload-status-listener"
 	l.uploadEb.Subscribe(group, l.statusHandler)

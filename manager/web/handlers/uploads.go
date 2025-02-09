@@ -5,19 +5,19 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/uploadpilot/uploadpilot/manager/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
-	"github.com/uploadpilot/uploadpilot/manager/internal/upload"
+	"github.com/uploadpilot/uploadpilot/manager/internal/svc"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
 )
 
 type uploadHandler struct {
-	uploadSvc upload.UploadService
+	upSvc svc.UploadService
 }
 
 func NewUploadHandler() *uploadHandler {
 	return &uploadHandler{
-		uploadSvc: *upload.NewUploadService(),
+		upSvc: *svc.NewUploadService(),
 	}
 }
 
@@ -30,7 +30,7 @@ func (h *uploadHandler) GetPaginatedUploads(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	uploads, totalRecords, err := h.uploadSvc.GetAllUploads(r.Context(), workspaceID, skip, limit, search)
+	uploads, totalRecords, err := h.upSvc.GetAllUploads(r.Context(), workspaceID, skip, limit, search)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -46,7 +46,7 @@ func (h *uploadHandler) GetUploadDetailsByID(w http.ResponseWriter, r *http.Requ
 	uploadID := chi.URLParam(r, "uploadId")
 	workspaceID := chi.URLParam(r, "workspaceId")
 
-	details, err := h.uploadSvc.GetUploadDetails(r.Context(), workspaceID, uploadID)
+	details, err := h.upSvc.GetUploadDetails(r.Context(), workspaceID, uploadID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -58,7 +58,7 @@ func (h *uploadHandler) GetUploadDetailsByID(w http.ResponseWriter, r *http.Requ
 func (h *uploadHandler) GetUploadLogs(w http.ResponseWriter, r *http.Request) {
 	uploadID := chi.URLParam(r, "uploadId")
 
-	logs, err := h.uploadSvc.GetLogs(r.Context(), uploadID)
+	logs, err := h.upSvc.GetLogs(r.Context(), uploadID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/uploadpilot/uploadpilot/manager/internal/db/models"
-	"github.com/uploadpilot/uploadpilot/manager/internal/msg"
+	"github.com/uploadpilot/uploadpilot/common/pkg/models"
+	"github.com/uploadpilot/uploadpilot/common/pkg/msg"
 )
 
 var (

@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/uploadpilot/uploadpilot/common/pkg/db"
+	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/manager/internal/config"
-	"github.com/uploadpilot/uploadpilot/manager/internal/db"
-	"github.com/uploadpilot/uploadpilot/manager/internal/infra"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -13,7 +13,11 @@ func main() {
 	if err := config.Init(); err != nil {
 		panic(err)
 	}
-	if err := infra.Init(); err != nil {
+	if err := infra.Init(&infra.S3Config{
+		AccessKey: config.S3AccessKey,
+		SecretKey: config.S3SecretKey,
+		Region:    config.S3Region,
+	}); err != nil {
 		panic(err)
 	}
 	sqlDB, err := gorm.Open(postgres.Open(config.PostgresURI), &gorm.Config{

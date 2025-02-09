@@ -11,11 +11,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/uploadpilot/uploadpilot/common/pkg/cache"
+	"github.com/uploadpilot/uploadpilot/common/pkg/db"
+	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
+	"github.com/uploadpilot/uploadpilot/common/pkg/kms"
 	"github.com/uploadpilot/uploadpilot/manager/internal/auth"
-	"github.com/uploadpilot/uploadpilot/manager/internal/cache"
 	"github.com/uploadpilot/uploadpilot/manager/internal/config"
-	"github.com/uploadpilot/uploadpilot/manager/internal/db"
-	"github.com/uploadpilot/uploadpilot/manager/internal/infra"
 	"github.com/uploadpilot/uploadpilot/manager/web"
 )
 
@@ -65,18 +66,27 @@ func initServices() (*http.Server, error) {
 		return nil, wrapError("config initialization failed", err)
 	}
 
+	// Initialize KMS
+	if err := kms.Init(string(config.EncryptionKey)); err != nil {
+		return nil, wrapError("kvm initialization failed", err)
+	}
+
 	// Initialize infra.
-	if err := infra.Init(); err != nil {
+	if err := infra.Init(&infra.S3Config{
+		AccessKey: config.S3AccessKey,
+		SecretKey: config.S3SecretKey,
+		Region:    config.S3Region,
+	}); err != nil {
 		return nil, wrapError("infra initialization failed", err)
 	}
 
 	// Initialize cache.
-	if err := cache.Init(); err != nil {
+	if err := cache.Init(&config.RedisAddr, &config.RedisPassword, &config.RedisUsername, config.RedisTLS); err != nil {
 		return nil, wrapError("cache initialization failed", err)
 	}
 
 	// Initialize database.
-	if err := db.Init(); err != nil {
+	if err := db.Init(config.PostgresURI); err != nil {
 		return nil, wrapError("database initialization failed", err)
 	}
 

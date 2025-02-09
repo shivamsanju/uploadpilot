@@ -1,4 +1,4 @@
-package utils
+package commonutils
 
 import "github.com/uploadpilot/uploadpilot/common/pkg/infra"
 

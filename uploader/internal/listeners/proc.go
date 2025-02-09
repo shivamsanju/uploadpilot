@@ -12,7 +12,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/common/pkg/pubsub"
-	"github.com/uploadpilot/uploadpilot/common/pkg/utils"
+	commonutils "github.com/uploadpilot/uploadpilot/common/pkg/utils"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/config"
 )
 
@@ -44,7 +44,7 @@ func (l *ProcListener) Stop() {
 }
 
 func (l *ProcListener) procHandler(msg *events.UploadEventMsg) error {
-	defer utils.Recover()
+	defer commonutils.Recover()
 	ctx := context.Background()
 	if msg.Status != string(models.UploadStatusComplete) {
 		return nil
@@ -74,7 +74,7 @@ func (l *ProcListener) procHandler(msg *events.UploadEventMsg) error {
 }
 
 func (l *ProcListener) startTaskProcessor(wg *sync.WaitGroup, msg *events.UploadEventMsg, processor *models.Processor) {
-	defer utils.Recover()
+	defer commonutils.Recover()
 	defer wg.Done()
 
 	wID := msg.WorkspaceID

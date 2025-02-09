@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"github.com/uploadpilot/uploadpilot/manager/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 )
 
 type WorkspaceUser struct {

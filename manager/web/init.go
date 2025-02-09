@@ -24,7 +24,7 @@ func Init() (*http.Server, error) {
 
 	srv := &http.Server{
 		Handler: router,
-		Addr:    fmt.Sprintf(":%d", config.WebServerPort),
+		Addr:    fmt.Sprintf(":%d", config.Port),
 	}
 
 	return srv, nil

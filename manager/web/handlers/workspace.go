@@ -5,19 +5,19 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/uploadpilot/uploadpilot/manager/internal/db/models"
+	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/uploadpilot/manager/internal/svc"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
-	"github.com/uploadpilot/uploadpilot/manager/internal/workspace"
 )
 
 type workspaceHandler struct {
-	workspaceSvc *workspace.WorkspaceService
+	wSvc *svc.WorkspaceService
 }
 
 func NewWorkspaceHandler() *workspaceHandler {
 	return &workspaceHandler{
-		workspaceSvc: workspace.NewWorkspaceService(),
+		wSvc: svc.NewWorkspaceService(),
 	}
 }
 
@@ -28,7 +28,7 @@ func (h *workspaceHandler) CreateWorkspace(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	err := h.workspaceSvc.CreateWorkspace(r.Context(), workspace)
+	err := h.wSvc.CreateWorkspace(r.Context(), workspace)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -43,7 +43,7 @@ func (h *workspaceHandler) GetWorkspacesForUser(w http.ResponseWriter, r *http.R
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}
-	workspaces, err := h.workspaceSvc.GetWorkspaces(r.Context(), user.UserID)
+	workspaces, err := h.wSvc.GetWorkspaces(r.Context(), user.UserID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -60,7 +60,7 @@ func (h *workspaceHandler) AddUserToWorkspace(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	err := h.workspaceSvc.AddUserToWorkspace(r.Context(), workspaceID, addRequest)
+	err := h.wSvc.AddUserToWorkspace(r.Context(), workspaceID, addRequest)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -72,7 +72,7 @@ func (h *workspaceHandler) RemoveUserFromWorkspace(w http.ResponseWriter, r *htt
 	workspaceID := chi.URLParam(r, "workspaceId")
 	userID := chi.URLParam(r, "userId")
 
-	err := h.workspaceSvc.RemoveUserFromWorkspace(r.Context(), workspaceID, userID)
+	err := h.wSvc.RemoveUserFromWorkspace(r.Context(), workspaceID, userID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -91,7 +91,7 @@ func (h *workspaceHandler) ChangeUserRoleInWorkspace(w http.ResponseWriter, r *h
 		return
 	}
 
-	err := h.workspaceSvc.ChangeUserRoleInWorkspace(r.Context(), workspaceID, userID, body.Role)
+	err := h.wSvc.ChangeUserRoleInWorkspace(r.Context(), workspaceID, userID, body.Role)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -102,7 +102,7 @@ func (h *workspaceHandler) ChangeUserRoleInWorkspace(w http.ResponseWriter, r *h
 
 func (h *workspaceHandler) GetAllUsersInWorkspace(w http.ResponseWriter, r *http.Request) {
 	workspaceID := chi.URLParam(r, "workspaceId")
-	users, err := h.workspaceSvc.GetWorkspaceUsers(r.Context(), workspaceID)
+	users, err := h.wSvc.GetWorkspaceUsers(r.Context(), workspaceID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -112,7 +112,7 @@ func (h *workspaceHandler) GetAllUsersInWorkspace(w http.ResponseWriter, r *http
 
 func (h *workspaceHandler) GetUploaderConfig(w http.ResponseWriter, r *http.Request) {
 	workspaceID := chi.URLParam(r, "workspaceId")
-	uploaderConfig, err := h.workspaceSvc.GetUploaderConfig(r.Context(), workspaceID)
+	uploaderConfig, err := h.wSvc.GetUploaderConfig(r.Context(), workspaceID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -129,7 +129,7 @@ func (h *workspaceHandler) UpdateUploaderConfig(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err := h.workspaceSvc.SetUploaderConfig(r.Context(), workspaceID, uploaderConfig)
+	err := h.wSvc.SetUploaderConfig(r.Context(), workspaceID, uploaderConfig)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
