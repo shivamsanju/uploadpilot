@@ -4,8 +4,8 @@ import {
   IconDatabase,
   IconRoute,
   IconGauge,
-  IconTransform,
   IconUsers,
+  IconShoppingCartBolt,
 } from "@tabler/icons-react";
 import { ScrollArea } from "@mantine/core";
 import { LinksGroup } from "./NavLinksGroup";
@@ -35,14 +35,14 @@ const NavBar = ({
         link: `/workspaces/${workspaceId}/uploads`,
       },
       {
+        label: "Processors",
+        icon: IconRoute,
+        link: `/workspaces/${workspaceId}/processors`,
+      },
+      {
         label: "Configuration",
         icon: IconAdjustments,
         link: `/workspaces/${workspaceId}/configuration`,
-      },
-      {
-        label: "Processor",
-        icon: IconRoute,
-        link: `/workspaces/${workspaceId}/processors`,
       },
       {
         label: "Users",
@@ -50,8 +50,8 @@ const NavBar = ({
         link: `/workspaces/${workspaceId}/users`,
       },
       {
-        label: "Tools",
-        icon: IconTransform,
+        label: "Marketplace",
+        icon: IconShoppingCartBolt,
         link: `/workspaces/${workspaceId}/tools`,
       },
       {

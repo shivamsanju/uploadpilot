@@ -3,26 +3,26 @@ package svc
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/uploadpilot/uploadpilot/common/pkg/db"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
-	"github.com/uploadpilot/uploadpilot/common/pkg/types"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
 )
 
 type ProcessorService struct {
-	wsRepo *db.ProcessorRepo
+	procRepo *db.ProcessorRepo
+	taskRepo *db.TaskRepo
 }
 
 func NewProcessorService() *ProcessorService {
 	return &ProcessorService{
-		wsRepo: db.NewProcessorRepo(),
+		procRepo: db.NewProcessorRepo(),
+		taskRepo: db.NewTaskRepo(),
 	}
 }
 
 func (s *ProcessorService) GetAllProcessorsInWorkspace(ctx context.Context, workspaceID string) ([]models.Processor, error) {
-	processors, err := s.wsRepo.GetAll(ctx, workspaceID)
+	processors, err := s.procRepo.GetAll(ctx, workspaceID)
 	if err != nil {
 		return nil, err
 	}
@@ -30,7 +30,7 @@ func (s *ProcessorService) GetAllProcessorsInWorkspace(ctx context.Context, work
 }
 
 func (s *ProcessorService) GetProcessor(ctx context.Context, processorID string) (*models.Processor, error) {
-	processor, err := s.wsRepo.Get(ctx, processorID)
+	processor, err := s.procRepo.Get(ctx, processorID)
 	if err != nil {
 		return nil, err
 	}
@@ -46,37 +46,26 @@ func (s *ProcessorService) CreateProcessor(ctx context.Context, workspaceID stri
 	processor.CreatedBy = user.UserID
 	processor.UpdatedBy = user.UserID
 	processor.WorkspaceID = workspaceID
-	processor.Canvas = types.JSONB{
-		"nodes": []types.JSONB{{
-			"id":        uuid.NewString(),
-			"key":       "trigger",
-			"type":      "baseNode",
-			"deletable": false,
-			"data": types.EncryptedJSONB{
-				"label":       "Trigger",
-				"description": "Trigger the processor to start processing the files",
-			},
-			"position": types.JSONB{
-				"x": 0,
-				"y": 0,
-			},
-			"measured": types.JSONB{},
-		}},
-		"edges": []types.JSONB{},
-	}
-	return s.wsRepo.Create(ctx, processor)
+	processor.Tasks = []models.Task{}
+
+	return s.procRepo.Create(ctx, processor)
 }
 
-func (s *ProcessorService) UpdateTasks(ctx context.Context, workspaceID, processorID string, patch *dto.UpdateProcTaskRequest) error {
-	up := map[string]interface{}{
-		"canvas": patch.Canvas,
-		"data":   patch.Data,
+func (s *ProcessorService) GetTasks(ctx context.Context, workspaceID, processorID string) ([]models.Task, error) {
+	tasks, err := s.taskRepo.GetAll(ctx, processorID)
+	if err != nil {
+		return nil, err
 	}
-	return s.wsRepo.Patch(ctx, workspaceID, processorID, up)
+	return tasks, nil
+}
+
+func (s *ProcessorService) SaveTasks(ctx context.Context, workspaceID, processorID string, tasks []models.Task) error {
+	//TODO: Validate tasks
+	return s.taskRepo.SaveTasks(ctx, processorID, tasks)
 }
 
 func (s *ProcessorService) DeleteProcessor(ctx context.Context, workspaceID, processorID string) error {
-	return s.wsRepo.Delete(ctx, workspaceID, processorID)
+	return s.procRepo.Delete(ctx, workspaceID, processorID)
 }
 
 func (s *ProcessorService) EnableDisableProcessor(ctx context.Context, workspaceID, processorID string, enabled bool) error {
@@ -86,7 +75,7 @@ func (s *ProcessorService) EnableDisableProcessor(ctx context.Context, workspace
 	}
 	patch := map[string]interface{}{"enabled": enabled}
 	patch["updated_by"] = user.UserID
-	return s.wsRepo.Patch(ctx, workspaceID, processorID, patch)
+	return s.procRepo.Patch(ctx, workspaceID, processorID, patch)
 }
 
 func (s *ProcessorService) EditNameAndTrigger(ctx context.Context, workspaceID, processorID string, update *dto.EditProcRequest) error {
@@ -96,5 +85,5 @@ func (s *ProcessorService) EditNameAndTrigger(ctx context.Context, workspaceID, 
 	}
 	patch := map[string]interface{}{"name": update.Name, "triggers": update.Triggers}
 	patch["updated_by"] = user.UserID
-	return s.wsRepo.Patch(ctx, workspaceID, processorID, patch)
+	return s.procRepo.Patch(ctx, workspaceID, processorID, patch)
 }

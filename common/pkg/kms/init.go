@@ -5,7 +5,7 @@ import "crypto/sha256"
 var EncryptionKey []byte
 
 func Init(encryptionKey string) error {
-	key, err := getValidKey(encryptionKey)
+	key, err := GetValidKey(encryptionKey)
 	if err != nil {
 		return err
 	}
@@ -13,8 +13,8 @@ func Init(encryptionKey string) error {
 	return nil
 }
 
-// getValidKey Create a SHA-256 hash of the encryption key to make sure it's 32 bytes
-func getValidKey(encryptionKey string) ([]byte, error) {
+// GetValidKey Create a SHA-256 hash of the encryption key to make sure it's 32 bytes
+func GetValidKey(encryptionKey string) ([]byte, error) {
 	hash := sha256.New()
 	_, err := hash.Write([]byte(encryptionKey))
 	if err != nil {

@@ -11,9 +11,8 @@ import UploadsPage from "./pages/uploads/Uploads";
 import ConfigurationPage from "./pages/configuration";
 import WorkspaceUsersPage from "./pages/users";
 import ToolsPage from "./pages/tools";
-import ProcEditorPage from "./pages/taskeditor";
 import ProcessorPage from "./pages/processors";
-import EmptyAuthLayout from "./components/Layout/EmptyAuthLayout";
+import WorkflowBuilderPage from "./pages/wflowbuilder";
 
 type Route = {
   path: string;
@@ -60,8 +59,8 @@ const routes: Route[] = [
   },
   {
     path: "/workspaces/:workspaceId/processors/:processorId",
-    layout: EmptyAuthLayout,
-    element: <ProcEditorPage />,
+    layout: AppLayout,
+    element: <WorkflowBuilderPage />,
   },
   {
     path: "/workspaces/:workspaceId/users",

@@ -55,6 +55,7 @@ END $$;
 		&models.Upload{},
 		&models.Processor{},
 		&models.UploadLog{},
+		&models.Task{},
 	); err != nil {
 		return err
 	}

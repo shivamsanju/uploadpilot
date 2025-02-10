@@ -37,6 +37,7 @@ const UserButton = () => {
   return session.email || session.name ? (
     <Group gap="md" align="center">
       <Button
+        color="#ff6700"
         variant="light"
         radius="sm"
         mr="40"

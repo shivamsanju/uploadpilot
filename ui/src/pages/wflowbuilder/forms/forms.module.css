@@ -1,0 +1,5 @@
+.customSwitch {
+  & * {
+    cursor: pointer;
+  }
+}

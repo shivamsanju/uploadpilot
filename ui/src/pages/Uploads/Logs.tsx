@@ -2,7 +2,7 @@ import { CodeHighlight } from "@mantine/code-highlight";
 import { Modal } from "@mantine/core";
 import React from "react";
 import { UseGetUploadLogs } from "../../apis/upload";
-import { RefreshButton } from "../../components/RefreshButton/RefreshButton";
+import { RefreshButton } from "../../components/Buttons/RefreshButton/RefreshButton";
 import { ErrorLoadingWrapper } from "../../components/ErrorLoadingWrapper";
 
 const formatLogs = (logs: any[]) => {

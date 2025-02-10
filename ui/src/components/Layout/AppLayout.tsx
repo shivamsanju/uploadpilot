@@ -50,8 +50,8 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         <AppShell.Navbar style={{ borderColor: appShellBorderColor }}>
           <NavBar toggle={toggle} />
         </AppShell.Navbar>
-        <AppShell.Main bg={bg} m={0}>
-          <ScrollArea scrollbarSize={6} h="93vh">
+        <AppShell.Main bg={bg} m={0} pr={0}>
+          <ScrollArea scrollbarSize={6} h="93vh" pr="md">
             {children}
           </ScrollArea>
         </AppShell.Main>

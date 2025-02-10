@@ -6,25 +6,27 @@ import routes from "./Routes";
 import { myAppTheme } from "./style/theme";
 import { Notifications } from "@mantine/notifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
+import { ModalsProvider } from "@mantine/modals";
 const queryClient = new QueryClient();
 function App() {
   return (
     <MantineProvider theme={myAppTheme}>
-      <Notifications position="bottom-center" />
-      <QueryClientProvider client={queryClient}>
-        <Router>
-          <Routes>
-            {routes.map((route) => (
-              <Route
-                key={route.path}
-                path={route.path}
-                element={<route.layout>{route.element}</route.layout>}
-              />
-            ))}
-          </Routes>
-        </Router>
-      </QueryClientProvider>
+      <ModalsProvider>
+        <Notifications position="bottom-center" />
+        <QueryClientProvider client={queryClient}>
+          <Router>
+            <Routes>
+              {routes.map((route) => (
+                <Route
+                  key={route.path}
+                  path={route.path}
+                  element={<route.layout>{route.element}</route.layout>}
+                />
+              ))}
+            </Routes>
+          </Router>
+        </QueryClientProvider>
+      </ModalsProvider>
     </MantineProvider>
   );
 }

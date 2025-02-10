@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/joho/godotenv"
+	"github.com/uploadpilot/uploadpilot/common/pkg/kms"
 	"github.com/uploadpilot/uploadpilot/common/pkg/pubsub"
 )
 
@@ -13,13 +14,16 @@ var (
 	// Common
 	Port              int
 	PostgresURI       string
-	EncryptionKey     string
+	EncryptionKey     []byte
+	EncryptionKeyStr  string
 	RedisAddr         string
 	RedisUsername     string
 	RedisPassword     string
 	RedisTLS          bool
 	CompanionEndpoint string
 	UploaderEndpoint  string
+	MomentumEndpoint  string
+	MomentumSecretKey string
 
 	// Tus
 	TusUploadBasePath   string
@@ -55,7 +59,13 @@ func Init() error {
 		return fmt.Errorf("invalid PORT: %w", err)
 	}
 
-	EncryptionKey = os.Getenv("ENCRYPTION_KEY")
+	key := os.Getenv("ENCRYPTION_KEY")
+	keyBytes, err := kms.GetValidKey(key)
+	if err != nil {
+		return fmt.Errorf("invalid ENCRYPTION_KEY: %w", err)
+	}
+	EncryptionKey = keyBytes
+	EncryptionKeyStr = os.Getenv("ENCRYPTION_KEY")
 	PostgresURI = os.Getenv("POSTGRES_URI")
 	RedisAddr = os.Getenv("REDIS_HOST")
 	RedisUsername = os.Getenv("REDIS_USER")
@@ -63,6 +73,8 @@ func Init() error {
 	RedisTLS = os.Getenv("REDIS_TLS") == "true"
 	CompanionEndpoint = os.Getenv("COMPANION_ENDPOINT")
 	UploaderEndpoint = os.Getenv("UPLOADER_ENDPOINT")
+	MomentumEndpoint = os.Getenv("MOMENTUM_ENDPOINT")
+	MomentumSecretKey = os.Getenv("MOMENTUM_SECRET_KEY")
 	S3AccessKey = os.Getenv("S3_ACCESS_KEY")
 	S3SecretKey = os.Getenv("S3_SECRET_KEY")
 	S3BucketName = os.Getenv("S3_BUCKET_NAME")

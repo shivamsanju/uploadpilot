@@ -1,8 +1,6 @@
 package web
 
 import (
-	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -11,7 +9,6 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
-	"github.com/uploadpilot/uploadpilot/common/pkg/msg"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/dto"
 )
 
@@ -30,22 +27,6 @@ func GetSkipLimitSearchParams(r *http.Request) (skip int, limit int, search stri
 		return
 	}
 	return
-}
-
-func GetUserDetailsFromContext(ctx context.Context) (*dto.UserContext, error) {
-	userID, ok1 := ctx.Value(dto.UserIDContextKey).(string)
-	name, ok2 := ctx.Value(dto.NameContextKey).(string)
-	email, ok3 := ctx.Value(dto.EmailContextKey).(string)
-
-	if !ok1 || !ok2 || !ok3 {
-		return nil, errors.New(msg.FailedToGetUserFromContext)
-	}
-
-	return &dto.UserContext{
-		UserID: userID,
-		Name:   name,
-		Email:  email,
-	}, nil
 }
 
 func HandleHttpError(w http.ResponseWriter, r *http.Request, statusCode int, err error) {

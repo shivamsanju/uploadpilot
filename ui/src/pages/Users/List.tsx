@@ -21,6 +21,7 @@ import { ErrorCard } from "../../components/ErrorCard/ErrorCard";
 import { showNotification } from "@mantine/notifications";
 import AddUserForm from "./Add";
 import { useViewportSize } from "@mantine/hooks";
+import { showConfirmationPopup } from "../../components/Popups/ConfirmPopup";
 
 const getRandomAvatar = () => {
   const randomIndex = Math.floor(Math.random() * 5) + 1;
@@ -56,11 +57,16 @@ const WorkspaceUsersList = ({
         return;
       }
 
-      try {
-        await mutateAsync({ workspaceId, userId });
-      } catch (error) {
-        console.error(error);
-      }
+      showConfirmationPopup({
+        message: "Are you sure you want to remove this user from workspace?",
+        onOk: async () => {
+          try {
+            await mutateAsync({ workspaceId, userId });
+          } catch (error) {
+            console.error(error);
+          }
+        },
+      });
     },
     [workspaceId, mutateAsync]
   );

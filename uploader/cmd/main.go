@@ -66,9 +66,9 @@ func initServices() (*http.Server, error) {
 		return nil, wrapError("config initialization failed", err)
 	}
 
-	// Initialize KMS
-	if err := kms.Init(config.EncryptionKey); err != nil {
-		return nil, wrapError("kvm initialization failed", err)
+	// Initialize kms.
+	if err := kms.Init(config.EncryptionKeyStr); err != nil {
+		return nil, wrapError("kms initialization failed", err)
 	}
 
 	// Initialize infra.

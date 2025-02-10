@@ -21,6 +21,75 @@ import {
   ColorInput,
 } from "@mantine/core";
 
+
+type Icolors = readonly [string, string, string, string, string, string, string, string, string, string, ...string[]]
+
+// const magenta: Icolors = [
+//   "#ffe9f6",
+//   "#ffd1e6",
+//   "#faa1c9",
+//   "#f66eab",
+//   "#f24391",
+//   "#f02981",
+//   "#f01879",
+//   "#d60867",
+//   "#c0005c",
+//   "#a9004f"
+// ]
+
+// const yellowOrange: Icolors= [
+//   "#fff8e1",
+//   "#ffefcb",
+//   "#ffdd9a",
+//   "#ffca64",
+//   "#ffba38",
+//   "#ffb01b",
+//   "#ffab09",
+//   "#e39500",
+//   "#cb8400",
+//   "#b07100",
+// ]
+
+// const white: Icolors = [
+//   "#f5f5f5",
+//   "#e7e7e7",
+//   "#cdcdcd",
+//   "#b2b2b2",
+//   "#9a9a9a",
+//   "#8b8b8b",
+//   "#848484",
+//   "#717171",
+//   "#656565",
+//   "#575757"
+// ]
+// const blue: Icolors = [
+//   "#e2f7ff",
+//   "#ceeaff",
+//   "#9fd1fb",
+//   "#6db8f6",
+//   "#43a2f1",
+//   "#2894ef",
+//   "#128eef",
+//   "#007ad6",
+//   "#006dc1",
+//   "#005eab"
+// ]
+
+const lightBlue: Icolors = [
+  "#dffbff",
+  "#caf2ff",
+  "#99e2ff",
+  "#64d2ff",
+  "#3cc4fe",
+  "#23bcfe",
+  "#09b8ff",
+  "#00a1e4",
+  "#008fcd",
+  "#007cb6"
+]
+
+
+
 export const myAppTheme = createTheme({
   primaryColor: "appcolor",
   fontFamily: "Inter",
@@ -33,18 +102,7 @@ export const myAppTheme = createTheme({
       dark: "#F3F5F7",
       light: "#7a7a7b",
     }),
-    appcolor: [
-      "#fff8e1",
-      "#ffefcb",
-      "#ffdd9a",
-      "#ffca64",
-      "#ffba38",
-      "#ffb01b",
-      "#ffab09",
-      "#e39500",
-      "#cb8400",
-      "#b07100",
-    ],
+    appcolor: lightBlue,
   },
   defaultRadius: "md",
   components: {
@@ -133,10 +191,10 @@ export const myAppTheme = createTheme({
     }),
     Paper: Paper.extend({
       defaultProps: {
-        radius: "sm",
+        radius: 0,
         style: {
           borderColor:
-            "light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-8))",
+            "light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-8))",
         },
       },
     }),

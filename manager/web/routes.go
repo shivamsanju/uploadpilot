@@ -73,7 +73,10 @@ func Routes() *chi.Mux {
 						r.Delete("/", procHandler.DeleteProcessor)
 						r.Put("/enable", procHandler.EnableProcessor)
 						r.Put("/disable", procHandler.DisableProcessor)
-						r.Put("/tasks", procHandler.UpdateTasks)
+						r.Route("/tasks", func(r chi.Router) {
+							r.Get("/", procHandler.GetTasks)
+							r.Put("/", procHandler.SaveTasks)
+						})
 					})
 				})
 			})

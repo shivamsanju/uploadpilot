@@ -10,8 +10,3 @@ type EditProcRequest struct {
 type EnableDisableProcessorRequest struct {
 	Enabled bool `json:"enabled"`
 }
-
-type UpdateProcTaskRequest struct {
-	Canvas types.JSONB          `json:"canvas"`
-	Data   types.EncryptedJSONB `json:"data"`
-}

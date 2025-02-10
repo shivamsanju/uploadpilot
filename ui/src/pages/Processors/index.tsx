@@ -1,13 +1,13 @@
 import { ActionIcon, Box, Group, Title } from "@mantine/core";
-import ProcessorsList from "./List";
+import WorkflowsList from "./List";
 import { IconPlus } from "@tabler/icons-react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { AppLoader } from "../../components/Loader/AppLoader";
 
-const WorkspaceProcessorsPage = () => {
+const WorkflowsPage = () => {
   const { workspaceId } = useParams();
-  const [webhookAddModalOpened, setWorkspaceProcessorsOpened] = useState(false);
+  const [workflowAddOpen, setWorkflowAddOpen] = useState(false);
 
   if (!workspaceId) {
     return <AppLoader h="70vh" />;
@@ -29,18 +29,15 @@ const WorkspaceProcessorsPage = () => {
           <ActionIcon
             size="lg"
             variant="outline"
-            onClick={() => setWorkspaceProcessorsOpened(true)}
+            onClick={() => setWorkflowAddOpen(true)}
           >
             <IconPlus />
           </ActionIcon>
         </Box>
       </Group>
-      <ProcessorsList
-        opened={webhookAddModalOpened}
-        setOpened={setWorkspaceProcessorsOpened}
-      />
+      <WorkflowsList opened={workflowAddOpen} setOpened={setWorkflowAddOpen} />
     </Box>
   );
 };
 
-export default WorkspaceProcessorsPage;
+export default WorkflowsPage;

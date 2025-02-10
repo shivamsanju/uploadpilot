@@ -12,6 +12,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/common/pkg/msg"
+	"github.com/uploadpilot/uploadpilot/common/pkg/tasks"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/validations"
 )
 
@@ -84,8 +85,13 @@ func (us *Service) CreateUpload(hook *tusd.HookEvent) (*models.Upload, error) {
 }
 
 func (us *Service) FinishUpload(ctx context.Context, uploadID string) error {
+	tasks.GetAllTasks()
 	upload, err := us.uploadRepo.Get(ctx, uploadID)
 	if err != nil {
+		return err
+	}
+	if err := us.BuildAndTriggerTasks(ctx, upload.WorkspaceID); err != nil {
+		infra.Log.Errorf("failed to build and trigger tasks: %s", err.Error())
 		return err
 	}
 	infra.Log.Infof(msg.UploadComplete + ": " + uploadID)

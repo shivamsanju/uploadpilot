@@ -2,17 +2,14 @@ package models
 
 import "github.com/uploadpilot/uploadpilot/common/pkg/types"
 
-type TaskKey string
-
 type Processor struct {
-	ID          string               `gorm:"column:id;primaryKey;type:uuid;default:uuid_generate_v4()" json:"id"`
-	Name        string               `gorm:"column:name;not null" json:"name"`
-	WorkspaceID string               `gorm:"column:workspace_id;not null;type:uuid" json:"workspaceId"`
-	Triggers    types.StringArray    `gorm:"column:triggers;not null;type:text[]" json:"triggers"`
-	Canvas      types.JSONB          `gorm:"column:canvas;foreignKey:ProcessorID" json:"canvas"`
-	Data        types.EncryptedJSONB `gorm:"column:data;type:text;not null" json:"data"`
-	Enabled     bool                 `gorm:"column:enabled;not null;default:true" json:"enabled"`
-	Workspace   Workspace            `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE" json:"workspace"`
+	ID          string            `gorm:"column:id;primaryKey;type:uuid;default:uuid_generate_v4()" json:"id"`
+	Name        string            `gorm:"column:name;not null" json:"name"`
+	WorkspaceID string            `gorm:"column:workspace_id;not null;type:uuid" json:"workspaceId"`
+	Triggers    types.StringArray `gorm:"column:triggers;not null;type:text[]" json:"triggers"`
+	Tasks       []Task            `gorm:"foreignKey:ProcessorID;constraint:OnDelete:CASCADE" json:"tasks"`
+	Enabled     bool              `gorm:"column:enabled;not null;default:true" json:"enabled"`
+	Workspace   Workspace         `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE" json:"workspace"`
 	At
 	By
 }

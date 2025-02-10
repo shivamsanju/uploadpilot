@@ -11,6 +11,7 @@ import (
 type Service struct {
 	configRepo    *db.WorkspaceConfigRepo
 	uploadRepo    *db.UploadRepo
+	procRepo      *db.ProcessorRepo
 	workspaceRepo *db.WorkspaceRepo
 	logEventBus   *pubsub.EventBus[events.UploadLogEventMsg]
 	uploadEb      *pubsub.EventBus[events.UploadEventMsg]
