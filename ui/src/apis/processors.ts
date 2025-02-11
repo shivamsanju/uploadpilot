@@ -38,7 +38,7 @@ export const useGetProcessor = (workspaceId: string, processorId: string) => {
     queryFn: () => {
       if (!workspaceId || !processorId) {
         return Promise.reject(
-          new Error("workspaceId and processorId are required"),
+          new Error("workspaceId and processorId are required")
         );
       }
       return axiosInstance
@@ -175,7 +175,9 @@ export const useEnableDisableProcessorMutation = () => {
     }) => {
       return axiosInstance
         .put(
-          `/workspaces/${workspaceId}/processors/${processorId}/${enabled ? "enable" : "disable"}`,
+          `/workspaces/${workspaceId}/processors/${processorId}/${
+            enabled ? "enable" : "disable"
+          }`
         )
         .then((res) => res.data);
     },
@@ -190,7 +192,11 @@ export const useEnableDisableProcessorMutation = () => {
     onError: (error: any, { enabled }) => {
       notifications.show({
         title: "Error",
-        message: `Failed to ${enabled ? "enable" : "disable"} Processors. Reason: ${error?.response?.data?.message || error.message}`,
+        message: `Failed to ${
+          enabled ? "enable" : "disable"
+        } Processors. Reason: ${
+          error?.response?.data?.message || error.message
+        }`,
         color: "red",
       });
     },
@@ -219,7 +225,7 @@ export const useGetAllProcBlocks = (workspaceId: string) => {
   return { isPending, error, blocks };
 };
 
-export const useUpdateProcessorTaskMutation = () => {
+export const useUpdateProcessorWorkflowMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -227,33 +233,32 @@ export const useUpdateProcessorTaskMutation = () => {
     mutationFn: ({
       workspaceId,
       processorId,
-      canvas,
-      data
+      workflow,
     }: {
       workspaceId: string;
       processorId: string;
-      canvas: any;
-      data: any;
+      workflow: string;
     }) => {
       return axiosInstance
-        .put(
-          `/workspaces/${workspaceId}/processors/${processorId}/tasks`,
-          {canvas, data},
-        )
+        .put(`/workspaces/${workspaceId}/processors/${processorId}/workflow`, {
+          workflow,
+        })
         .then((res) => res.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["processorDetails"] });
       notifications.show({
         title: "Success",
-        message: "Tasks updated successfully",
+        message: "Workflow updated successfully",
         color: "green",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       notifications.show({
         title: "Error",
-        message: "Failed to update tasks",
+        message: `Failed to update workflow Reason: ${
+          error?.response?.data?.message || error.message
+        }`,
         color: "red",
       });
     },

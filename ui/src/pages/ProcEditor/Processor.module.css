@@ -1,9 +1,0 @@
-.header {
-  height: 8vh;
-  border-bottom: 1px solid
-    light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-7));
-}
-
-.canvas {
-  height: 85vh;
-}

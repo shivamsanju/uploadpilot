@@ -21,7 +21,9 @@ export const useCreateWorkspaceMutation = () => {
   return useMutation({
     mutationKey: ["workspaces"],
     mutationFn: (name: string) =>
-      axiosInstance.post("/workspaces", { name, tags: ["default"] }).then((res) => res.data),
+      axiosInstance
+        .post("/workspaces", { name, tags: ["default"] })
+        .then((res) => res.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["workspaces"] });
       notifications.show({
@@ -109,10 +111,11 @@ export const useAddUserToWorkspaceMutation = () => {
       });
     },
     onError: (error: any) => {
-      console.log(error);
       notifications.show({
         title: "Error",
-        message: `Failed to add user to workspace. Reason: ${error?.response?.data?.message || error.message}`,
+        message: `Failed to add user to workspace. Reason: ${
+          error?.response?.data?.message || error.message
+        }`,
         color: "red",
       });
     },
@@ -185,7 +188,9 @@ export const useEditUserInWorkspaceMutation = () => {
       console.log(error);
       notifications.show({
         title: "Error",
-        message: `Failed to modify user role. Reason: ${error?.response?.data?.message || error.message}`,
+        message: `Failed to modify user role. Reason: ${
+          error?.response?.data?.message || error.message
+        }`,
         color: "red",
       });
     },

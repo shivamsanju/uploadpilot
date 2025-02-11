@@ -66,10 +66,6 @@ const AddWebhookForm: React.FC<Props> = ({
         : {
             name: "",
             triggers: [],
-            tasks: {
-              nodes: [],
-              edges: [],
-            },
             enabled: true,
           },
     validate: {
@@ -100,7 +96,6 @@ const AddWebhookForm: React.FC<Props> = ({
             workspaceId,
             name: values.name,
             triggers: values.triggers,
-            tasks: values.tasks,
             enabled: values.enabled,
             data: {},
           },

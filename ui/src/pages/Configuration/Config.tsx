@@ -8,7 +8,6 @@ import {
   TagsInput,
   SimpleGrid,
   Transition,
-  Button,
   Paper,
   TextInput,
   Tooltip,
@@ -21,18 +20,13 @@ import { MIME_TYPES } from "../../utils/mime";
 import classes from "./Form.module.css";
 import { useParams } from "react-router-dom";
 import { useGetAllAllowedSources } from "../../apis/workspace";
-import {
-  IconCheck,
-  IconDeviceFloppy,
-  IconFile,
-  IconInfoCircle,
-  IconRestore,
-} from "@tabler/icons-react";
+import { IconCheck, IconFile, IconInfoCircle } from "@tabler/icons-react";
 import { useUpdateUploaderConfigMutation } from "../../apis/uploader";
 import { showNotification } from "@mantine/notifications";
 import { MIME_TYPE_ICONS } from "../../utils/fileicons";
+import { DiscardButton } from "../../components/Buttons/DiscardButton";
+import { SaveButton } from "../../components/Buttons/SaveButton";
 
-const w = "300px";
 const authEndpointTooltip = `
 If you have a custom authentication endpoint, enter it here.\n
  We will send a request with all headers you set in uploader to this endpoint for authentication.\n
@@ -141,136 +135,87 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
         <SimpleGrid cols={{ base: 1, xl: 2 }}>
           <Stack p="md">
             {/* Allowed input sources */}
-            <Group justify="space-between" className={classes.item}>
-              <div>
-                <Text size="sm">Allowed input sources *</Text>
-                <Text c="dimmed">Allowed input sources for your uploader</Text>
-              </div>
-              <MultiSelect
-                w={w}
-                data={allowedSources || []}
-                {...form.getInputProps("allowedSources")}
-                disabled={isPending}
-                searchable
-                // disabled={isPending || type === "view"}
-              />
-            </Group>
+            <MultiSelect
+              label="Allowed input sources"
+              description="Allowed input sources for your uploader"
+              data={allowedSources || []}
+              {...form.getInputProps("allowedSources")}
+              disabled={isPending}
+              searchable
+            />
 
             {/* Allowed file types */}
-            <Group justify="space-between" className={classes.item}>
-              <div>
-                <Text size="sm">Allowed file types</Text>
-                <Text c="dimmed">
-                  Select allowed file types for the file uploader
-                </Text>
-              </div>
-              <MultiSelect
-                w={w}
-                data={MIME_TYPES}
-                {...form.getInputProps("allowedFileTypes")}
-                searchable
-                renderOption={renderSelectOption}
-                // disabled={isPending || type === "view"}
-              />
-            </Group>
+            <MultiSelect
+              label="Allowed file types"
+              description="Allowed file types for your uploader"
+              data={MIME_TYPES}
+              {...form.getInputProps("allowedFileTypes")}
+              searchable
+              renderOption={renderSelectOption}
+            />
 
             {/*Auth Endpoint */}
-            <Group justify="space-between" className={classes.item}>
-              <div>
-                <Text size="sm">Auth Endpoint</Text>
+            <TextInput
+              label={
                 <Text c="dimmed">
-                  Enter a auth endpoint{"  "}
+                  Enter a auth endpoint
                   <Tooltip
                     w="300px"
                     multiline
                     transitionProps={{ duration: 200 }}
                     label={authEndpointTooltip}
                   >
-                    <IconInfoCircle size={14} />
+                    <IconInfoCircle
+                      size={14}
+                      style={{ cursor: "pointer", marginLeft: "5px" }}
+                    />
                   </Tooltip>
                 </Text>
-              </div>
-              <TextInput
-                w={w}
-                type="url"
-                {...form.getInputProps("authEndpoint")}
-                // disabled={isPending || type === "view"}
-                min={0}
-              />
-            </Group>
-            <Group justify="space-between" className={classes.item}>
-              <div>
-                <Text size="sm">Required metadata fields</Text>
-                <Text c="dimmed">Separated by commas</Text>
-              </div>
-              <TagsInput
-                w={w}
-                {...form.getInputProps("requiredMetadataFields")}
-                // disabled={isPending || type === "view"}
-                min={0}
-              />
-            </Group>
+              }
+              description="Enter an auth endpoint"
+              type="url"
+              {...form.getInputProps("authEndpoint")}
+              min={0}
+            />
+            <TagsInput
+              label="Required metadata fields"
+              description="Required metadata fields for your uploader"
+              {...form.getInputProps("requiredMetadataFields")}
+              min={0}
+            />
           </Stack>
           <Stack p="md">
             {/* Min file size */}
-            <Group justify="space-between" className={classes.item}>
-              <div>
-                <Text size="sm">Min file size (bytes)</Text>
-                <Text c="dimmed">Enter minimum file size in bytes</Text>
-              </div>
-              <NumberInput
-                w={w}
-                {...form.getInputProps("minFileSize")}
-                // disabled={isPending || type === "view"}
-                min={0}
-              />
-            </Group>
+            <NumberInput
+              label="Min file size"
+              description="Enter minimum file size in bytes"
+              {...form.getInputProps("minFileSize")}
+              min={0}
+            />
 
             {/* Max file size */}
-            <Group justify="space-between" className={classes.item}>
-              <div>
-                <Text size="sm">Max file size (bytes)</Text>
-                <Text c="dimmed">Enter maximum file size in bytes</Text>
-              </div>
-              <NumberInput
-                w={w}
-                {...form.getInputProps("maxFileSize")}
-                // disabled={isPending || type === "view"}
-                min={0}
-              />
-            </Group>
+            <NumberInput
+              label="Max file size"
+              description="Enter maximum file size in bytes"
+              {...form.getInputProps("maxFileSize")}
+              min={0}
+            />
 
             {/* Min number of files */}
-            <Group justify="space-between" className={classes.item}>
-              <div>
-                <Text size="sm">Min number of files</Text>
-                <Text c="dimmed">
-                  Specify the minimum number of files required
-                </Text>
-              </div>
-              <NumberInput
-                w={w}
-                {...form.getInputProps("minNumberOfFiles")}
-                // disabled={isPending || type === "view"}
-                min={0}
-              />
-            </Group>
+            <NumberInput
+              label="Min number of files"
+              description="Specify the minimum number of files required"
+              {...form.getInputProps("minNumberOfFiles")}
+              min={0}
+            />
 
             {/* Max number of files */}
-            <Group justify="space-between" className={classes.item}>
-              <div>
-                <Text size="sm">Max number of files</Text>
-                <Text c="dimmed">
-                  Specify the maximum number of files allowed
-                </Text>
-              </div>
-              <NumberInput
-                w={w}
-                {...form.getInputProps("maxNumberOfFiles")}
-                // disabled={isPending || type === "view"}
-                min={1}
-              />
-            </Group>
+            <NumberInput
+              label="Max number of files"
+              description="Specify the maximum number of files allowed"
+              {...form.getInputProps("maxNumberOfFiles")}
+              min={1}
+            />
           </Stack>
         </SimpleGrid>
       </Paper>
@@ -293,7 +238,6 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
                 onChange={(e) =>
                   form.setFieldValue("allowPauseAndResume", e.target.checked)
                 }
-                // disabled={isPending || type === "view"}
               />
             </Group>
 
@@ -312,7 +256,6 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
                 onChange={(e) =>
                   form.setFieldValue("enableImageEditing", e.target.checked)
                 }
-                // disabled={isPending || type === "view"}
               />
             </Group>
           </Stack>
@@ -332,7 +275,6 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
                 onChange={(e) =>
                   form.setFieldValue("useCompression", e.target.checked)
                 }
-                // disabled={isPending || type === "view"}
               />
             </Group>
 
@@ -351,7 +293,6 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
                 onChange={(e) =>
                   form.setFieldValue("useFaultTolerantMode", e.target.checked)
                 }
-                // disabled={isPending || type === "view"}
               />
             </Group>
           </Stack>
@@ -366,20 +307,8 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
         {(styles) => (
           <div style={styles}>
             <Group justify="center" gap="md" mt="xl">
-              <Button
-                variant="default"
-                c="dimmed"
-                type="reset"
-                leftSection={<IconRestore size={18} />}
-              >
-                Reset
-              </Button>
-              <Button
-                type="submit"
-                leftSection={<IconDeviceFloppy size={18} />}
-              >
-                Save
-              </Button>
+              <DiscardButton type="reset" />
+              <SaveButton type="submit" />
             </Group>
           </div>
         )}

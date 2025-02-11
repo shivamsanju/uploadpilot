@@ -1,0 +1,148 @@
+import React, { useState } from "react";
+import Editor, { Monaco, OnMount } from "@monaco-editor/react";
+
+import {
+  Box,
+  Group,
+  LoadingOverlay,
+  Text,
+  Title,
+  useMantineColorScheme,
+} from "@mantine/core";
+import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
+import { DiscardButton } from "../../../components/Buttons/DiscardButton";
+import { SaveButton } from "../../../components/Buttons/SaveButton";
+import { useUpdateProcessorWorkflowMutation } from "../../../apis/processors";
+import { validateYaml } from "./schema";
+
+type Props = {
+  workspaceId: string;
+  processor: any;
+};
+
+export const WorkflowYamlEditor: React.FC<Props> = ({
+  processor,
+  workspaceId,
+}) => {
+  const err = validateYaml(processor?.workflow || "");
+  const [yamlContent, setYamlContent] = useState<string>(
+    processor?.workflow || ""
+  );
+  const [error, setError] = useState<string | null>(err);
+  const { colorScheme } = useMantineColorScheme();
+  const [editor, setEditor] = React.useState<any>(null);
+
+  const { mutateAsync, isPending } = useUpdateProcessorWorkflowMutation();
+
+  const insertText = () => {
+    const text = `variables:
+    arg1: value1
+    arg2: value2
+    arg3: value3`;
+    if (editor) {
+      const selection = editor.getSelection();
+      const id = { major: 1, minor: 1 };
+      const op = {
+        identifier: id,
+        range: {
+          startLineNumber: selection?.selectionStartLineNumber || 1,
+          startColumn: selection?.selectionStartColumn || 1,
+          endLineNumber: selection?.endLineNumber || 1,
+          endColumn: selection?.endColumn || 1,
+        },
+        text,
+        forceMoveMarkers: true,
+      };
+      editor.executeEdits("my-source", [op]);
+    }
+  };
+
+  const editorMount: OnMount = (editorL) => {
+    setEditor(editorL);
+  };
+
+  const handleEditorDidMount = (monaco: Monaco) => {
+    monaco.editor.defineTheme("myCustomThemeDark", {
+      base: "vs-dark",
+      inherit: true,
+      rules: [{ token: "comment", fontStyle: "italic" }],
+      colors: {
+        "editor.background": "#141414",
+      },
+    });
+  };
+
+  const saveYaml = async () => {
+    try {
+      await mutateAsync({
+        workspaceId,
+        processorId: processor?.id,
+        workflow: yamlContent,
+      });
+    } catch (error: any) {
+      console.error(error?.response?.data?.message || error.message);
+      setError(error?.response?.data?.message || error.message);
+    }
+  };
+
+  return (
+    <Box>
+      <LoadingOverlay
+        visible={isPending}
+        overlayProps={{ backgroundOpacity: 0 }}
+        zIndex={1000}
+      />
+      <Group justify="space-between" align="center" p="xs">
+        <Box>
+          <Title order={4} opacity={0.8}>
+            Steps
+          </Title>
+          <Group
+            align="center"
+            gap={2}
+            c={error ? "red" : "dimmed"}
+            p={0}
+            pt={2}
+          >
+            {error ? (
+              <IconAlertCircle size="12" />
+            ) : (
+              <IconCircleCheck size="12" />
+            )}
+            <Text size="xs">{error || "All good"}</Text>
+          </Group>
+        </Box>
+        <Group gap="md">
+          <DiscardButton onClick={insertText} />
+          <SaveButton onClick={saveYaml} />
+        </Group>
+      </Group>
+
+      <Editor
+        beforeMount={handleEditorDidMount}
+        onMount={editorMount}
+        theme={colorScheme === "dark" ? "myCustomThemeDark" : "vs"}
+        language="yaml"
+        height="70vh"
+        defaultLanguage="yaml"
+        value={yamlContent}
+        onChange={(value: any) => {
+          if (typeof value === "string") {
+            setYamlContent(value);
+            const err = validateYaml(value);
+            setError(err);
+          }
+        }}
+        options={{
+          minimap: { enabled: false },
+          scrollBeyondLastLine: false,
+          renderLineHighlight: "none",
+          padding: {
+            top: 10,
+          },
+          rulers: [],
+        }}
+      />
+    </Box>
+  );
+};

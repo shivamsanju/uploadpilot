@@ -6,12 +6,12 @@ import routes from "./Routes";
 import { myAppTheme } from "./style/theme";
 import { Notifications } from "@mantine/notifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
+import { ModalsProvider } from "@mantine/modals";
 const queryClient = new QueryClient();
 function App() {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <MantineProvider theme={myAppTheme}>
+    <MantineProvider theme={myAppTheme}>
+      <ModalsProvider>
         <Notifications position="bottom-center" />
         <QueryClientProvider client={queryClient}>
           <Router>
@@ -26,8 +26,8 @@ function App() {
             </Routes>
           </Router>
         </QueryClientProvider>
-      </MantineProvider>
-    </html>
+      </ModalsProvider>
+    </MantineProvider>
   );
 }
 
