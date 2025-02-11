@@ -1,7 +1,6 @@
 import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import { AnimatePresence } from "framer-motion";
-import { useWorkflowBuilder } from "../../../context/WflowEditorContext";
-import { TaskItem } from "./TaskItem"; // Import the new TaskItem component
+import { ActivityItem } from "./Activity";
 import { useEffect, useRef } from "react";
 import {
   Box,
@@ -14,36 +13,54 @@ import {
 import { DiscardButton } from "../../../components/Buttons/DiscardButton";
 import { SaveButton } from "../../../components/Buttons/SaveButton";
 import classes from "./editor.module.css";
-import { useGetTasks, useSaveTasksMutation } from "../../../apis/tasks";
 import { showConfirmationPopup } from "../../../components/Popups/ConfirmPopup";
+import { useWorkflowBuilderV2 } from "../../../context/WflowEditorContextV2";
+import { Statement } from "../../../types/workflow";
+import { useUpdateProcessorWorkflowMutation } from "../../../apis/processors";
 
 type Props = {
   workspaceId: string;
   processorId: string;
+  statement: Statement | null;
+  variables: Record<string, string>;
 };
 
 export const WorkflowEditor: React.FC<Props> = ({
   workspaceId,
   processorId,
+  statement,
+  variables: initialVariables,
 }) => {
-  const { tasks, reorderTasks, newTaskId, setTasks } = useWorkflowBuilder();
-  const { tasks: existingTasks, isPending } = useGetTasks(
-    workspaceId,
-    processorId
-  );
-  const { mutateAsync, isPending: isSaving } = useSaveTasksMutation();
+  const {
+    activities,
+    reorderActivity,
+    newActivityId,
+    variables,
+    setActivitiesAndVariables,
+  } = useWorkflowBuilderV2();
+  const { mutateAsync, isPending: isSaving } =
+    useUpdateProcessorWorkflowMutation();
 
   const scrollBotomRef = useRef<HTMLDivElement>(null);
 
-  const saveTasks = async () => {
-    if (!workspaceId || !processorId || !tasks || tasks.length === 0) {
+  const saveActivities = async () => {
+    if (!workspaceId || !processorId) {
       return;
     }
     try {
       await mutateAsync({
         workspaceId,
         processorId,
-        tasks,
+        workflow: {
+          root: {
+            sequence: {
+              elements: activities.map((a) => ({
+                activity: a,
+              })),
+            },
+          },
+          variables,
+        },
       });
     } catch (error) {
       console.error(error);
@@ -51,37 +68,33 @@ export const WorkflowEditor: React.FC<Props> = ({
   };
 
   const discardTasks = () => {
-    if (existingTasks) {
-      showConfirmationPopup({
-        message:
-          "Are you sure you want to discard changes? This action cannot be undone.",
-        onOk: () => {
-          setTasks(existingTasks);
-        },
-      });
-    }
+    showConfirmationPopup({
+      message:
+        "Are you sure you want to discard changes? This action cannot be undone.",
+      onOk: () => {
+        setActivitiesAndVariables(statement, initialVariables);
+      },
+    });
   };
 
   useEffect(() => {
-    if (newTaskId && scrollBotomRef.current) {
+    if (newActivityId && scrollBotomRef.current) {
       scrollBotomRef.current.scrollIntoView({
         behavior: "smooth",
         block: "nearest",
       });
     }
-  }, [newTaskId]);
+  }, [newActivityId]);
 
   useEffect(() => {
-    if (existingTasks) {
-      setTasks(existingTasks);
-    }
+    setActivitiesAndVariables(statement, initialVariables);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [existingTasks]);
+  }, [statement, initialVariables]);
 
   return (
     <Box>
       <LoadingOverlay
-        visible={isPending || isSaving}
+        visible={isSaving}
         overlayProps={{ backgroundOpacity: 0 }}
         zIndex={1000}
       />
@@ -94,7 +107,7 @@ export const WorkflowEditor: React.FC<Props> = ({
         </Box>
         <Group gap="md">
           <DiscardButton onClick={discardTasks} />
-          <SaveButton onClick={saveTasks} />
+          <SaveButton onClick={saveActivities} />
         </Group>
       </Group>
       <ScrollArea
@@ -104,21 +117,21 @@ export const WorkflowEditor: React.FC<Props> = ({
       >
         <DragDropContext
           onDragEnd={({ destination, source }) =>
-            reorderTasks(source.index, destination?.index || 0)
+            reorderActivity(source.index, destination?.index || 0)
           }
         >
           <Droppable droppableId="dnd-list" direction="vertical">
             {(provided) => (
               <div {...provided.droppableProps} ref={provided.innerRef}>
                 <AnimatePresence>
-                  {tasks.map((item, index) => (
+                  {activities.map((item, index) => (
                     <Draggable
                       key={item.id}
                       index={index}
                       draggableId={item.id}
                     >
                       {(provided, snapshot) => (
-                        <TaskItem
+                        <ActivityItem
                           item={item}
                           provided={provided}
                           snapshot={snapshot}

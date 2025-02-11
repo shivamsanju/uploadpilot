@@ -13,14 +13,14 @@ import { useState, useEffect } from "react";
 import { useGetAllProcBlocks } from "../../../apis/processors";
 import { useParams } from "react-router-dom";
 import classes from "./BlockSearch.module.css";
-import { useWorkflowBuilder } from "../../../context/WflowEditorContext";
 import { getBlockIcon } from "../../../utils/blockicon";
+import { useWorkflowBuilderV2 } from "../../../context/WflowEditorContextV2";
 
 export const BlockSearch = ({ processorId }: { processorId: string }) => {
   const { workspaceId } = useParams();
   const { isPending, error, blocks } = useGetAllProcBlocks(workspaceId || "");
   const [filtered, setFiltered] = useState<any[]>(blocks || []);
-  const { addTask } = useWorkflowBuilder();
+  const { addActivity } = useWorkflowBuilderV2();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchText = e.target.value;
@@ -36,18 +36,15 @@ export const BlockSearch = ({ processorId }: { processorId: string }) => {
   };
 
   const handleAddTask = (item: any) => {
-    addTask({
+    addActivity({
       id: crypto.randomUUID(),
-      processorId: processorId,
-      name: item?.label,
       key: item?.key,
       label: item?.label,
-      data: {},
       retries: 0,
-      timeoutMs: 0,
+      timeout: 0,
       continueOnError: false,
-      enabled: true,
-      position: 0,
+      arguments: [],
+      result: "",
     });
   };
 

@@ -2,8 +2,10 @@ package svc
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/uploadpilot/uploadpilot/common/pkg/db"
+	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
@@ -62,6 +64,14 @@ func (s *ProcessorService) GetTasks(ctx context.Context, workspaceID, processorI
 func (s *ProcessorService) SaveTasks(ctx context.Context, workspaceID, processorID string, tasks []models.Task) error {
 	//TODO: Validate tasks
 	return s.taskRepo.SaveTasks(ctx, processorID, tasks)
+}
+
+func (s *ProcessorService) UpdateWorkflow(ctx context.Context, workspaceID, processorID string, workflow *models.Workflow) error {
+	infra.Log.Infof("WFLOW %+v", workflow)
+	if workflow.Root.Activity == nil && workflow.Root.Sequence == nil && workflow.Root.Parallel == nil {
+		return fmt.Errorf("atleast one statement is required")
+	}
+	return s.procRepo.SaveWorkflow(ctx, processorID, workflow)
 }
 
 func (s *ProcessorService) DeleteProcessor(ctx context.Context, workspaceID, processorID string) error {

@@ -3,8 +3,8 @@ import { useParams } from "react-router-dom";
 import { AppLoader } from "../../components/Loader/AppLoader";
 import { useGetProcessor } from "../../apis/processors";
 import { ErrorCard } from "../../components/ErrorCard/ErrorCard";
-import { WorkflowBuilderProvider } from "../../context/WflowEditorContext";
 import { Builder } from "./builder";
+import { WorkflowBuilderProviderV2 } from "../../context/WflowEditorContextV2";
 
 const WorkflowBuilderPage = () => {
   const { workspaceId, processorId } = useParams();
@@ -23,7 +23,7 @@ const WorkflowBuilderPage = () => {
   }
 
   return (
-    <WorkflowBuilderProvider>
+    <WorkflowBuilderProviderV2>
       <Box mb={50}>
         <LoadingOverlay
           visible={isPending}
@@ -35,9 +35,11 @@ const WorkflowBuilderPage = () => {
             Workflow builder for processor {processor?.name}
           </Title>
         </Group>
-        <Builder workspaceId={workspaceId} processorId={processorId} />
+        {processor?.id && (
+          <Builder workspaceId={workspaceId} processorId={processorId} />
+        )}
       </Box>
-    </WorkflowBuilderProvider>
+    </WorkflowBuilderProviderV2>
   );
 };
 

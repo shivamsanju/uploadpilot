@@ -18,7 +18,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/momentum/web"
 )
 
-func main() {
+func mains() {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	wg := &sync.WaitGroup{}
