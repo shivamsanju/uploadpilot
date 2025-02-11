@@ -47,9 +47,9 @@ func Init(redisAddr, redisPassword, redisUsername *string, redisTLS bool) error 
 	}
 
 	// invalidate all
-	if err := redisClient.FlushAll(context.Background()).Err(); err != nil {
-		return err
-	}
+	// if err := redisClient.FlushAll(context.Background()).Err(); err != nil {
+	// 	return err
+	// }
 
 	infra.Log.Info(msg.RedisConnectionSuccess)
 	return nil

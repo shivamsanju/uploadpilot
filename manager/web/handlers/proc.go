@@ -94,24 +94,6 @@ func (h *processorHandler) DeleteProcessor(w http.ResponseWriter, r *http.Reques
 	render.JSON(w, r, true)
 }
 
-func (h *processorHandler) SaveTasks(w http.ResponseWriter, r *http.Request) {
-	processorID := chi.URLParam(r, "processorId")
-	workspaceID := chi.URLParam(r, "workspaceId")
-
-	tasks := []models.Task{}
-	if err := render.DecodeJSON(r.Body, &tasks); err != nil {
-		utils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	if err := h.pSvc.SaveTasks(r.Context(), workspaceID, processorID, tasks); err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-
-	render.JSON(w, r, true)
-}
-
 func (h *processorHandler) UpdateWorkflow(w http.ResponseWriter, r *http.Request) {
 	processorID := chi.URLParam(r, "processorId")
 	workspaceID := chi.URLParam(r, "workspaceId")
@@ -127,19 +109,6 @@ func (h *processorHandler) UpdateWorkflow(w http.ResponseWriter, r *http.Request
 	}
 
 	render.JSON(w, r, true)
-}
-
-func (h *processorHandler) GetTasks(w http.ResponseWriter, r *http.Request) {
-	processorID := chi.URLParam(r, "processorId")
-	workspaceID := chi.URLParam(r, "workspaceId")
-
-	tasks, err := h.pSvc.GetTasks(r.Context(), workspaceID, processorID)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-
-	render.JSON(w, r, tasks)
 }
 
 func (h *processorHandler) EnableProcessor(w http.ResponseWriter, r *http.Request) {

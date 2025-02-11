@@ -1,11 +1,10 @@
 package tasks
 
 import (
-	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	commonutils "github.com/uploadpilot/uploadpilot/common/pkg/utils"
 )
 
-var tasks = map[models.TaskKey]interface{}{
+var tasks = map[string]interface{}{
 	WebhookTask.Key:           WebhookTask,
 	ExtractPDFContentTask.Key: ExtractPDFContentTask,
 }
@@ -18,7 +17,7 @@ func GetAllTasks() []interface{} {
 	return tasksList
 }
 
-func ValidateTaskData(key models.TaskKey, data map[string]interface{}) error {
+func ValidateTaskData(key string, data map[string]interface{}) error {
 	var newTask interface{}
 
 	if err := commonutils.MapStructAndValidate(data, newTask); err != nil {

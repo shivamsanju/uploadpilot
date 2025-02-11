@@ -15,13 +15,11 @@ import (
 
 type ProcessorService struct {
 	procRepo *db.ProcessorRepo
-	taskRepo *db.TaskRepo
 }
 
 func NewProcessorService() *ProcessorService {
 	return &ProcessorService{
 		procRepo: db.NewProcessorRepo(),
-		taskRepo: db.NewTaskRepo(),
 	}
 }
 
@@ -54,18 +52,6 @@ func (s *ProcessorService) CreateProcessor(ctx context.Context, workspaceID stri
 	return s.procRepo.Create(ctx, processor)
 }
 
-func (s *ProcessorService) GetTasks(ctx context.Context, workspaceID, processorID string) ([]models.Task, error) {
-	tasks, err := s.taskRepo.GetAll(ctx, processorID)
-	if err != nil {
-		return nil, err
-	}
-	return tasks, nil
-}
-
-func (s *ProcessorService) SaveTasks(ctx context.Context, workspaceID, processorID string, tasks []models.Task) error {
-	return s.taskRepo.SaveTasks(ctx, processorID, tasks)
-}
-
 func (s *ProcessorService) UpdateWorkflow(ctx context.Context, workspaceID, processorID string, workflow string) error {
 	// TODO: Validate workflow
 	//TODO: Validate tasks
@@ -79,7 +65,7 @@ func (s *ProcessorService) UpdateWorkflow(ctx context.Context, workspaceID, proc
 		return err
 	}
 
-	return s.procRepo.SaveWorkflow(ctx, processorID, workflow)
+	return s.procRepo.SaveWorkflow(ctx, workspaceID, processorID, workflow)
 }
 
 func (s *ProcessorService) DeleteProcessor(ctx context.Context, workspaceID, processorID string) error {

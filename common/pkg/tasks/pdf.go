@@ -1,7 +1,5 @@
 package tasks
 
-import "github.com/uploadpilot/uploadpilot/common/pkg/models"
-
 type ExtractPDFContentTaskData struct {
 	WorkspaceID   string `json:"workspaceID" validate:"required"`
 	UploadID      string `json:"uploadID" validate:"required"`
@@ -10,7 +8,7 @@ type ExtractPDFContentTaskData struct {
 }
 
 var ExtractPDFContentTask = &Task[ExtractPDFContentTaskData]{
-	Key:   models.TaskKey("ExtractPDFContent"),
+	Key:   "ExtractPDFContent",
 	Label: "Extract PDF content",
 	Description: `This task extracts text content from a given PDF file. 
 	Optionally, images can be extracted if the IncludeImages flag is set. 

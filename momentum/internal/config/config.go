@@ -14,6 +14,11 @@ var (
 	PostgresURI   string
 	SecretKey     string
 	EncryptionKey []byte
+
+	// Temporal
+	TemporalNamespace string
+	TemporalHostPort  string
+	TemporalAPIKey    string
 )
 
 func Init() error {
@@ -42,6 +47,11 @@ func Init() error {
 		return fmt.Errorf("invalid ENCRYPTION_KEY: %w", err)
 	}
 	EncryptionKey = keyBytes
+
+	// Temporal
+	TemporalNamespace = os.Getenv("TEMPORAL_NAMESPACE")
+	TemporalHostPort = os.Getenv("TEMPORAL_HOST_PORT")
+	TemporalAPIKey = os.Getenv("TEMPORAL_API_KEY")
 
 	return nil
 }

@@ -1,7 +1,5 @@
 package tasks
 
-import "github.com/uploadpilot/uploadpilot/common/pkg/models"
-
 type WebhookTaskData struct {
 	WorkspaceID string `json:"workspaceID" validate:"required"`
 	UploadID    string `json:"uploadID" validate:"required"`
@@ -11,7 +9,7 @@ type WebhookTaskData struct {
 }
 
 var WebhookTask = &Task[WebhookTaskData]{
-	Key:   models.TaskKey("Webhook"),
+	Key:   "Webhook",
 	Label: "Webhook",
 	Description: `
 Sends a webhook to a target URL. The webhook will be sent

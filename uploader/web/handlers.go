@@ -10,18 +10,21 @@ import (
 	"github.com/tus/tusd/v2/pkg/s3store"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/config"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/dto"
-	"github.com/uploadpilot/uploadpilot/uploader/internal/svc"
+	uploaderconfig "github.com/uploadpilot/uploadpilot/uploader/internal/svc/config"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/svc/upload"
 
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 )
 
 type handler struct {
-	svc *svc.Service
+	uploadSvc upload.UploadService
+	configSvc uploaderconfig.UploaderConfigService
 }
 
 func Newhandler() *handler {
 	return &handler{
-		svc: svc.NewService(),
+		uploadSvc: *upload.NewUploadService(),
+		configSvc: *uploaderconfig.NewUploaderConfigService(),
 	}
 }
 
@@ -39,7 +42,11 @@ func (h *handler) TusHandler() http.Handler {
 	infra.Log.Infof("initializing tusd handler with upload dir: %s", config.TusUploadDir)
 
 	// S3 backend for tusd
-	s3Client, err := infra.NewS3Client(config.S3AccessKey, config.S3SecretKey, config.S3Region)
+	s3Client, err := infra.NewS3Client(&infra.S3Config{
+		AccessKey: config.S3AccessKey,
+		SecretKey: config.S3SecretKey,
+		Region:    config.S3Region,
+	})
 	if err != nil {
 		panic(err)
 	}
@@ -56,7 +63,7 @@ func (h *handler) TusHandler() http.Handler {
 		DisableDownload:    true,
 		DisableTermination: false,
 		PreUploadCreateCallback: func(hook tusd.HookEvent) (tusd.HTTPResponse, tusd.FileInfoChanges, error) {
-			active, err := h.svc.VerifySubscription(&hook)
+			active, err := h.uploadSvc.VerifySubscription(&hook)
 			if err != nil {
 				infra.Log.Errorf("unable to verify subscription: %s", err)
 				return tusd.HTTPResponse{StatusCode: http.StatusBadRequest}, tusd.FileInfoChanges{}, nil
@@ -65,7 +72,7 @@ func (h *handler) TusHandler() http.Handler {
 				return tusd.HTTPResponse{StatusCode: http.StatusForbidden, Body: "subscription is not active"}, tusd.FileInfoChanges{}, nil
 			}
 
-			upload, err := h.svc.CreateUpload(&hook)
+			upload, err := h.uploadSvc.CreateUpload(&hook)
 			if err != nil {
 				infra.Log.Errorf("unable to create upload: %s", err)
 				return tusd.HTTPResponse{StatusCode: http.StatusBadRequest}, tusd.FileInfoChanges{}, nil
@@ -81,7 +88,7 @@ func (h *handler) TusHandler() http.Handler {
 		PreFinishResponseCallback: func(hook tusd.HookEvent) (tusd.HTTPResponse, error) {
 			uploadID := hook.Upload.MetaData["upload_id"]
 			infra.Log.Infof("trying to finish upload: %s", uploadID)
-			if err := h.svc.FinishUpload(hook.Context, uploadID); err != nil {
+			if err := h.uploadSvc.FinishUpload(hook.Context, uploadID); err != nil {
 				infra.Log.Errorf("unable to finish upload: %s", err)
 				return tusd.HTTPResponse{StatusCode: http.StatusBadRequest}, nil
 			}
@@ -99,7 +106,7 @@ func (h *handler) TusHandler() http.Handler {
 
 func (h *handler) GetUploaderConfig(w http.ResponseWriter, r *http.Request) {
 	workspaceID := chi.URLParam(r, "workspaceId")
-	uploaderConfig, err := h.svc.GetUploaderConfig(r.Context(), workspaceID)
+	uploaderConfig, err := h.configSvc.GetUploaderConfig(r.Context(), workspaceID)
 	if err != nil {
 		HandleHttpError(w, r, http.StatusBadRequest, err)
 		return

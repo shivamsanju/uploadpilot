@@ -72,11 +72,18 @@ func initServices() (*http.Server, error) {
 	}
 
 	// Initialize infra.
-	if err := infra.Init(&infra.S3Config{
+	s3Config := &infra.S3Config{
 		AccessKey: config.S3AccessKey,
 		SecretKey: config.S3SecretKey,
 		Region:    config.S3Region,
-	}); err != nil {
+	}
+
+	temporalConfig := &infra.TemporalConfig{
+		Namespace: config.TemporalNamespace,
+		HostPort:  config.TemporalHostPort,
+		APIKey:    config.TemporalAPIKey,
+	}
+	if err := infra.Init(s3Config, temporalConfig); err != nil {
 		return nil, wrapError("infra initialization failed", err)
 	}
 

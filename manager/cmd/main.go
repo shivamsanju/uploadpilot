@@ -76,7 +76,7 @@ func initServices() (*http.Server, error) {
 		AccessKey: config.S3AccessKey,
 		SecretKey: config.S3SecretKey,
 		Region:    config.S3Region,
-	}); err != nil {
+	}, nil); err != nil {
 		return nil, wrapError("infra initialization failed", err)
 	}
 

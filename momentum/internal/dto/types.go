@@ -1,4 +1,4 @@
-package types
+package dto
 
 type TestEvent struct {
 	Name string `json:"name"`

@@ -41,6 +41,11 @@ var (
 
 	//Event Bus
 	EventBusRedisConfig *pubsub.RedisConfig
+
+	// Temporal
+	TemporalNamespace string
+	TemporalHostPort  string
+	TemporalAPIKey    string
 )
 
 func Init() error {
@@ -117,6 +122,11 @@ func Init() error {
 		Password: &ebRedisPassword,
 		TLS:      ebRedisTls,
 	}
+
+	// Temporal
+	TemporalNamespace = os.Getenv("TEMPORAL_NAMESPACE")
+	TemporalHostPort = os.Getenv("TEMPORAL_HOST_PORT")
+	TemporalAPIKey = os.Getenv("TEMPORAL_API_KEY")
 
 	return nil
 }

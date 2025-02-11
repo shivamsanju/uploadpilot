@@ -2,32 +2,38 @@ package infra
 
 import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"go.temporal.io/sdk/client"
 	"go.uber.org/zap"
 )
 
 var (
-	Log      *zap.SugaredLogger
-	S3Client *s3.Client
+	Log            *zap.SugaredLogger
+	S3Client       *s3.Client
+	TemporalClient client.Client
 )
 
-type S3Config struct {
-	AccessKey string
-	SecretKey string
-	Region    string
-}
-
-func Init(s3Config *S3Config) error {
+func Init(s3Config *S3Config, temporalConfig *TemporalConfig) error {
 	log, err := NewLogger()
 	if err != nil {
 		return err
 	}
 	Log = log
 
-	c, err := NewS3Client(s3Config.AccessKey, s3Config.SecretKey, s3Config.Region)
-	if err != nil {
-		return err
+	if s3Config != nil {
+		c, err := NewS3Client(s3Config)
+		if err != nil {
+			return err
+		}
+		S3Client = c
 	}
-	S3Client = c
+
+	if temporalConfig != nil {
+		tc, err := NewTemporalClient(temporalConfig)
+		if err != nil {
+			return err
+		}
+		TemporalClient = tc
+	}
 
 	return nil
 }

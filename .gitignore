@@ -50,3 +50,4 @@ uploadpilot/.env.prod
 
 _examples/
 _uploadpilot/
+**/.env

@@ -8,16 +8,22 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 )
 
-func NewS3Client(accessKey, secretKey, region string) (*s3.Client, error) {
+type S3Config struct {
+	AccessKey string
+	SecretKey string
+	Region    string
+}
+
+func NewS3Client(cfg *S3Config) (*s3.Client, error) {
 	ctx := context.Background()
 	creds := credentials.NewStaticCredentialsProvider(
-		accessKey,
-		secretKey,
+		cfg.AccessKey,
+		cfg.SecretKey,
 		"",
 	)
 
 	awscfg, err := awsconfig.LoadDefaultConfig(ctx,
-		awsconfig.WithRegion(region),
+		awsconfig.WithRegion(cfg.Region),
 		awsconfig.WithCredentialsProvider(creds),
 	)
 	if err != nil {
