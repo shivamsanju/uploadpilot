@@ -1,38 +1,25 @@
-package main
+package svc
 
 import (
 	"context"
 	"crypto/tls"
-	"flag"
 	"log"
-	"os"
 
 	"github.com/pborman/uuid"
-	"github.com/uploadpilot/uploadpilot/momentum/pkg/dsl"
-	"github.com/uploadpilot/uploadpilot/momentum/pkg/validation"
+	"github.com/uploadpilot/uploadpilot/momentum/internal/dsl"
+	"github.com/uploadpilot/uploadpilot/momentum/internal/dto"
 	"go.temporal.io/sdk/client"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"gopkg.in/yaml.v3"
 )
 
-func main() {
-	var dslConfig string
-	flag.StringVar(&dslConfig, "dslConfig", "pkg/dsl/workflow1.yaml", "dslConfig specify the yaml file for the dsl workflow.")
-	flag.Parse()
+func TriggerWorkflow(ctx context.Context, yamlContent string) (*dto.TriggerWorkflowResp, error) {
+	data := []byte(yamlContent)
 
-	data, err := os.ReadFile(dslConfig)
-	if err != nil {
-		log.Fatalln("failed to load dsl config file", err)
-	}
 	var dslWorkflow dsl.Workflow
 	if err := yaml.Unmarshal(data, &dslWorkflow); err != nil {
 		log.Fatalln("failed to unmarshal dsl config", err)
-	}
-	err = validation.ValidateYamlStructure(dslWorkflow)
-	if err != nil {
-		log.Fatalln("failed to validate dsl config", err)
-		panic(err)
 	}
 
 	// The client is a heavyweight object that should be created once per process.
@@ -73,5 +60,5 @@ func main() {
 		log.Fatalln("Unable to execute workflow", err)
 	}
 	log.Println("Started workflow", "WorkflowID", we.GetID(), "RunID", we.GetRunID())
-
+	return &dto.TriggerWorkflowResp{WorkflowID: we.GetID(), RunID: we.GetRunID()}, nil
 }

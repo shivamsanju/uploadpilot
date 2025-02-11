@@ -27,21 +27,17 @@ func (s *Service) BuildAndTriggerTasks(ctx context.Context, workspaceID string) 
 	}
 
 	for _, processor := range processors {
-		tasks, err := s.BuildTask(ctx, &processor)
-		if err != nil {
-			return err
-		}
-
-		if err := s.TriggerTask(ctx, tasks); err != nil {
+		if err := s.TriggerTask(ctx, processor.Workflow); err != nil {
 			return err
 		}
 	}
 
 	return nil
 }
-func (s *Service) TriggerTask(ctx context.Context, tasks []dto.WorkflowTask) error {
+
+func (s *Service) TriggerTask(ctx context.Context, yaml string) error {
 	body, err := json.Marshal(&dto.TriggerworkflowReq{
-		Tasks: tasks,
+		Workflow: yaml,
 	})
 	if err != nil {
 		return err
@@ -67,9 +63,4 @@ func (s *Service) TriggerTask(ctx context.Context, tasks []dto.WorkflowTask) err
 	}
 
 	return nil
-}
-
-func (s *Service) BuildTask(ctx context.Context, processor *models.Processor) ([]dto.WorkflowTask, error) {
-
-	return nil, nil
 }

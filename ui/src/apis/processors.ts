@@ -1,7 +1,6 @@
 import { notifications } from "@mantine/notifications";
 import axiosInstance from "../utils/axios";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Workflow } from "../types/workflow";
 
 export const useGetProcessors = (workspaceId: string) => {
   const queryClient = useQueryClient();
@@ -234,17 +233,16 @@ export const useUpdateProcessorWorkflowMutation = () => {
     mutationFn: ({
       workspaceId,
       processorId,
-      workflowYaml,
+      workflow,
     }: {
       workspaceId: string;
       processorId: string;
-      workflowYaml: string;
+      workflow: string;
     }) => {
       return axiosInstance
-        .put(
-          `/workspaces/${workspaceId}/processors/${processorId}/workflow`,
-          workflowYaml
-        )
+        .put(`/workspaces/${workspaceId}/processors/${processorId}/workflow`, {
+          workflow,
+        })
         .then((res) => res.data);
     },
     onSuccess: () => {
@@ -255,10 +253,12 @@ export const useUpdateProcessorWorkflowMutation = () => {
         color: "green",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
       notifications.show({
         title: "Error",
-        message: "Failed to update workflow",
+        message: `Failed to update workflow Reason: ${
+          error?.response?.data?.message || error.message
+        }`,
         color: "red",
       });
     },

@@ -82,15 +82,13 @@ func (i *ProcessorRepo) Delete(ctx context.Context, workspaceID, processorID str
 	return nil
 }
 
-func (i *ProcessorRepo) SaveWorkflow(ctx context.Context, processorID string, workflow *models.Workflow) error {
+func (i *ProcessorRepo) SaveWorkflow(ctx context.Context, processorID string, workflow string) error {
 	patch := map[string]interface{}{
-		"statement": workflow.Root,
-		"variables": workflow.Variables,
+		"workflow": workflow,
 	}
 	if err := sqlDB.WithContext(ctx).Model(&models.Processor{}).Where("id = ?", processorID).Updates(patch).Error; err != nil {
 		return dbutils.DBError(err)
 	}
-
 	invKeys := []string{ProcessorKey(processorID)}
 	cache.Invalidate(ctx, invKeys...)
 	return nil

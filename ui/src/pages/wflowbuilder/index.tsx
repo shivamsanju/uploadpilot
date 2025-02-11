@@ -1,10 +1,18 @@
-import { Box, Group, LoadingOverlay, Title } from "@mantine/core";
+import {
+  Box,
+  Group,
+  LoadingOverlay,
+  Paper,
+  ScrollArea,
+  Title,
+} from "@mantine/core";
 import { useParams } from "react-router-dom";
 import { AppLoader } from "../../components/Loader/AppLoader";
 import { useGetProcessor } from "../../apis/processors";
 import { ErrorCard } from "../../components/ErrorCard/ErrorCard";
-import { Builder } from "./builder";
 import { WorkflowBuilderProviderV2 } from "../../context/WflowEditorContextV2";
+import { WorkflowYamlEditor } from "./editor";
+import { BlockSearch } from "./blocksearch";
 
 const WorkflowBuilderPage = () => {
   const { workspaceId, processorId } = useParams();
@@ -35,9 +43,23 @@ const WorkflowBuilderPage = () => {
             Workflow builder for processor {processor?.name}
           </Title>
         </Group>
-        {processor?.id && (
-          <Builder workspaceId={workspaceId} processorId={processorId} />
-        )}
+        <Paper withBorder>
+          <Group justify="center" align="flex-start" gap={0}>
+            <Box w="60%">
+              {processor && (
+                <WorkflowYamlEditor
+                  processor={processor}
+                  workspaceId={workspaceId}
+                />
+              )}
+            </Box>
+            <ScrollArea h="75vh" w="40%" scrollbarSize={6}>
+              <Box m={0} px="md">
+                <BlockSearch processorId={processorId} />
+              </Box>
+            </ScrollArea>
+          </Group>
+        </Paper>
       </Box>
     </WorkflowBuilderProviderV2>
   );

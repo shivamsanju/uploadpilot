@@ -1,100 +1,94 @@
-import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
-import { AnimatePresence } from "framer-motion";
-import { ActivityItem } from "./Activity";
-import { useEffect, useRef } from "react";
+import React, { useState } from "react";
+import Editor, { Monaco, OnMount } from "@monaco-editor/react";
+
 import {
   Box,
   Group,
   LoadingOverlay,
-  ScrollArea,
   Text,
   Title,
+  useMantineColorScheme,
 } from "@mantine/core";
+import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
 import { DiscardButton } from "../../../components/Buttons/DiscardButton";
 import { SaveButton } from "../../../components/Buttons/SaveButton";
-import classes from "./editor.module.css";
-import { showConfirmationPopup } from "../../../components/Popups/ConfirmPopup";
-import { useWorkflowBuilderV2 } from "../../../context/WflowEditorContextV2";
-import { Statement } from "../../../types/workflow";
 import { useUpdateProcessorWorkflowMutation } from "../../../apis/processors";
+import { validateYaml } from "./schema";
 
 type Props = {
   workspaceId: string;
-  processorId: string;
-  statement: Statement | null;
-  variables: Record<string, string>;
+  processor: any;
 };
 
-export const WorkflowEditor: React.FC<Props> = ({
+export const WorkflowYamlEditor: React.FC<Props> = ({
+  processor,
   workspaceId,
-  processorId,
-  statement,
-  variables: initialVariables,
 }) => {
-  const {
-    activities,
-    reorderActivity,
-    newActivityId,
-    variables,
-    setActivitiesAndVariables,
-  } = useWorkflowBuilderV2();
-  const { mutateAsync, isPending: isSaving } =
-    useUpdateProcessorWorkflowMutation();
+  const err = validateYaml(processor?.workflow || "");
+  const [yamlContent, setYamlContent] = useState<string>(
+    processor?.workflow || ""
+  );
+  const [error, setError] = useState<string | null>(err);
+  const { colorScheme } = useMantineColorScheme();
+  const [editor, setEditor] = React.useState<any>(null);
 
-  const scrollBotomRef = useRef<HTMLDivElement>(null);
+  const { mutateAsync, isPending } = useUpdateProcessorWorkflowMutation();
 
-  const saveActivities = async () => {
-    if (!workspaceId || !processorId) {
-      return;
-    }
-    try {
-      await mutateAsync({
-        workspaceId,
-        processorId,
-        workflow: {
-          root: {
-            sequence: {
-              elements: activities.map((a) => ({
-                activity: a,
-              })),
-            },
-          },
-          variables,
+  const insertText = () => {
+    const text = `variables:
+    arg1: value1
+    arg2: value2
+    arg3: value3`;
+    if (editor) {
+      const selection = editor.getSelection();
+      const id = { major: 1, minor: 1 };
+      const op = {
+        identifier: id,
+        range: {
+          startLineNumber: selection?.selectionStartLineNumber || 1,
+          startColumn: selection?.selectionStartColumn || 1,
+          endLineNumber: selection?.endLineNumber || 1,
+          endColumn: selection?.endColumn || 1,
         },
-      });
-    } catch (error) {
-      console.error(error);
+        text,
+        forceMoveMarkers: true,
+      };
+      editor.executeEdits("my-source", [op]);
     }
   };
 
-  const discardTasks = () => {
-    showConfirmationPopup({
-      message:
-        "Are you sure you want to discard changes? This action cannot be undone.",
-      onOk: () => {
-        setActivitiesAndVariables(statement, initialVariables);
+  const editorMount: OnMount = (editorL) => {
+    setEditor(editorL);
+  };
+
+  const handleEditorDidMount = (monaco: Monaco) => {
+    monaco.editor.defineTheme("myCustomThemeDark", {
+      base: "vs-dark",
+      inherit: true,
+      rules: [{ token: "comment", fontStyle: "italic" }],
+      colors: {
+        "editor.background": "#141414",
       },
     });
   };
 
-  useEffect(() => {
-    if (newActivityId && scrollBotomRef.current) {
-      scrollBotomRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "nearest",
+  const saveYaml = async () => {
+    try {
+      await mutateAsync({
+        workspaceId,
+        processorId: processor?.id,
+        workflow: yamlContent,
       });
+    } catch (error: any) {
+      console.error(error?.response?.data?.message || error.message);
+      setError(error?.response?.data?.message || error.message);
     }
-  }, [newActivityId]);
-
-  useEffect(() => {
-    setActivitiesAndVariables(statement, initialVariables);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statement, initialVariables]);
+  };
 
   return (
     <Box>
       <LoadingOverlay
-        visible={isSaving}
+        visible={isPending}
         overlayProps={{ backgroundOpacity: 0 }}
         zIndex={1000}
       />
@@ -103,50 +97,52 @@ export const WorkflowEditor: React.FC<Props> = ({
           <Title order={4} opacity={0.8}>
             Steps
           </Title>
-          <Text c="dimmed">Drag and drop tasks to build your workflow</Text>
+          <Group
+            align="center"
+            gap={2}
+            c={error ? "red" : "dimmed"}
+            p={0}
+            pt={2}
+          >
+            {error ? (
+              <IconAlertCircle size="12" />
+            ) : (
+              <IconCircleCheck size="12" />
+            )}
+            <Text size="xs">{error || "All good"}</Text>
+          </Group>
         </Box>
         <Group gap="md">
-          <DiscardButton onClick={discardTasks} />
-          <SaveButton onClick={saveActivities} />
+          <DiscardButton onClick={insertText} />
+          <SaveButton onClick={saveYaml} />
         </Group>
       </Group>
-      <ScrollArea
-        h="70vh"
-        scrollbarSize={6}
-        className={classes.canvasContainer}
-      >
-        <DragDropContext
-          onDragEnd={({ destination, source }) =>
-            reorderActivity(source.index, destination?.index || 0)
+
+      <Editor
+        beforeMount={handleEditorDidMount}
+        onMount={editorMount}
+        theme={colorScheme === "dark" ? "myCustomThemeDark" : "vs"}
+        language="yaml"
+        height="70vh"
+        defaultLanguage="yaml"
+        value={yamlContent}
+        onChange={(value: any) => {
+          if (typeof value === "string") {
+            setYamlContent(value);
+            const err = validateYaml(value);
+            setError(err);
           }
-        >
-          <Droppable droppableId="dnd-list" direction="vertical">
-            {(provided) => (
-              <div {...provided.droppableProps} ref={provided.innerRef}>
-                <AnimatePresence>
-                  {activities.map((item, index) => (
-                    <Draggable
-                      key={item.id}
-                      index={index}
-                      draggableId={item.id}
-                    >
-                      {(provided, snapshot) => (
-                        <ActivityItem
-                          item={item}
-                          provided={provided}
-                          snapshot={snapshot}
-                        />
-                      )}
-                    </Draggable>
-                  ))}
-                </AnimatePresence>
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
-        <div ref={scrollBotomRef} />
-      </ScrollArea>
+        }}
+        options={{
+          minimap: { enabled: false },
+          scrollBeyondLastLine: false,
+          renderLineHighlight: "none",
+          padding: {
+            top: 10,
+          },
+          rulers: [],
+        }}
+      />
     </Box>
   );
 };

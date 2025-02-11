@@ -5,7 +5,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/common/pkg/tasks"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
@@ -117,15 +116,12 @@ func (h *processorHandler) UpdateWorkflow(w http.ResponseWriter, r *http.Request
 	processorID := chi.URLParam(r, "processorId")
 	workspaceID := chi.URLParam(r, "workspaceId")
 
-	workflow := &models.Workflow{}
+	workflow := &dto.WorkflowUpdate{}
 	if err := render.DecodeJSON(r.Body, workflow); err != nil {
 		utils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
 		return
 	}
-	infra.Log.Infof("BODY %+v", r.Body)
-	infra.Log.Infof("WFLOW %+v", workflow)
-
-	if err := h.pSvc.UpdateWorkflow(r.Context(), workspaceID, processorID, workflow); err != nil {
+	if err := h.pSvc.UpdateWorkflow(r.Context(), workspaceID, processorID, workflow.Workflow); err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
 	}

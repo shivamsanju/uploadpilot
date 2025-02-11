@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"log"
 
-	"github.com/uploadpilot/uploadpilot/momentum/pkg/dsl"
+	"github.com/uploadpilot/uploadpilot/momentum/internal/dsl"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
 	"google.golang.org/grpc"

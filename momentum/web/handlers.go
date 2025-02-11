@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/render"
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/momentum/internal/dto"
+	"github.com/uploadpilot/uploadpilot/momentum/internal/svc"
 	"github.com/uploadpilot/uploadpilot/momentum/internal/utils"
 )
 
@@ -28,6 +29,10 @@ func (h *handler) TriggerWorkflow(w http.ResponseWriter, r *http.Request) {
 	}
 
 	infra.Log.Infof("Triggering workflow: %+v", req)
-
-	render.JSON(w, r, &dto.TriggerworkflowResp{WorkflowID: "test"})
+	resp, err := svc.TriggerWorkflow(r.Context(), req.Workflow)
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusInternalServerError, err)
+		return
+	}
+	render.JSON(w, r, resp)
 }

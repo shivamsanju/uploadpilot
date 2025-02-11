@@ -2,13 +2,15 @@ package svc
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/uploadpilot/uploadpilot/common/pkg/db"
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
+	"github.com/uploadpilot/uploadpilot/common/pkg/validations"
+	"github.com/uploadpilot/uploadpilot/common/pkg/validations/jsonschema"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
+	"gopkg.in/yaml.v3"
 )
 
 type ProcessorService struct {
@@ -48,7 +50,6 @@ func (s *ProcessorService) CreateProcessor(ctx context.Context, workspaceID stri
 	processor.CreatedBy = user.UserID
 	processor.UpdatedBy = user.UserID
 	processor.WorkspaceID = workspaceID
-	processor.Tasks = []models.Task{}
 
 	return s.procRepo.Create(ctx, processor)
 }
@@ -62,15 +63,22 @@ func (s *ProcessorService) GetTasks(ctx context.Context, workspaceID, processorI
 }
 
 func (s *ProcessorService) SaveTasks(ctx context.Context, workspaceID, processorID string, tasks []models.Task) error {
-	//TODO: Validate tasks
 	return s.taskRepo.SaveTasks(ctx, processorID, tasks)
 }
 
-func (s *ProcessorService) UpdateWorkflow(ctx context.Context, workspaceID, processorID string, workflow *models.Workflow) error {
-	infra.Log.Infof("WFLOW %+v", workflow)
-	if workflow.Root.Activity == nil && workflow.Root.Sequence == nil && workflow.Root.Parallel == nil {
-		return fmt.Errorf("atleast one statement is required")
+func (s *ProcessorService) UpdateWorkflow(ctx context.Context, workspaceID, processorID string, workflow string) error {
+	// TODO: Validate workflow
+	//TODO: Validate tasks
+	var json map[string]interface{}
+	if err := yaml.Unmarshal([]byte(workflow), &json); err != nil {
+		infra.Log.Errorf("failed to unmarshal workflow: %s", err.Error())
+		return err
 	}
+
+	if err := validations.ValidateJSONSchema(jsonschema.WorkflowSchema, json); err != nil {
+		return err
+	}
+
 	return s.procRepo.SaveWorkflow(ctx, processorID, workflow)
 }
 

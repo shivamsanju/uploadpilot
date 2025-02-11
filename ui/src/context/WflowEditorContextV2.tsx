@@ -1,30 +1,23 @@
 import React, { createContext, useContext, useReducer, ReactNode } from "react";
-import {
-  ActivityInvocation,
-  EditableProperties,
-  Statement,
-} from "../types/workflow";
 
 type State = {
   variables: Record<string, string>;
-  activities: ActivityInvocation[];
-  selectedActivity: ActivityInvocation | null;
   newActivityId: string | null;
 };
 
 type Action =
   | {
       type: "SET_ACTIVITIES_AND_VARIABLES";
-      statement: Statement | null;
+      statement: any | null;
       variables: Record<string, string>;
     }
   | { type: "REORDER_ACTIVITY"; from: number; to: number }
-  | { type: "ADD_ACTIVITY"; activity: ActivityInvocation }
+  | { type: "ADD_ACTIVITY"; activity: any }
   | { type: "REMOVE_ACTIVITY"; id: string }
   | {
       type: "EDIT_ACTIVITY";
       activityId: string;
-      properties: EditableProperties;
+      properties: any;
     }
   | {
       type: "SET_ACTIVITY_ERRORS";
@@ -37,32 +30,30 @@ type Action =
       id: string;
       variables: Record<string, string>;
     }
-  | { type: "SET_SELECTED_ACTIVITY"; activity: ActivityInvocation | null };
+  | { type: "SET_SELECTED_ACTIVITY"; activity: any | null };
 
 const WorkflowBuilderContextV2 = createContext<{
   state: State;
   dispatch: React.Dispatch<Action>;
 } | null>(null);
 
-const initialState: State = {
+const initialState: any = {
   variables: {},
-  activities: [],
-  selectedActivity: null,
   newActivityId: null,
 };
 
-const workflowReducer = (state: State, action: Action): State => {
+const workflowReducer = (state: any, action: any): State => {
   switch (action.type) {
     case "SET_ACTIVITIES_AND_VARIABLES":
       const activities =
         action?.statement?.sequence?.elements
-          ?.map((s) => s.activity)
-          ?.filter((e) => e !== undefined) || [];
+          ?.map((s: { activity: any }) => s.activity)
+          ?.filter((e: undefined) => e !== undefined) || [];
 
       return {
         ...state,
         variables: action.variables,
-        activities: activities.map((a) => a as ActivityInvocation),
+        activities: activities.map((a: any) => a as any),
       };
     case "REORDER_ACTIVITY":
       const updatedActivities = [...state.activities];
@@ -83,14 +74,14 @@ const workflowReducer = (state: State, action: Action): State => {
       return {
         ...state,
         activities: state.activities.filter(
-          (activity) => activity.id !== action.id
+          (activity: { id: any }) => activity.id !== action.id
         ),
       };
     case "EDIT_ACTIVITY":
       return {
         ...state,
         variables: state.variables || {},
-        activities: state.activities.map((activity) => {
+        activities: state.activities.map((activity: { id: any }) => {
           if (activity.id === action.activityId) {
             return {
               ...activity,
@@ -103,7 +94,7 @@ const workflowReducer = (state: State, action: Action): State => {
     case "SET_ACTIVITY_ERRORS":
       return {
         ...state,
-        activities: state.activities.map((activity) => {
+        activities: state.activities.map((activity: { id: any }) => {
           if (activity.id === action.activityId) {
             return {
               ...activity,
@@ -117,7 +108,7 @@ const workflowReducer = (state: State, action: Action): State => {
     case "EDIT_ACTIVITY_VARIABLES":
       return {
         ...state,
-        activities: state.activities.map((activity) => {
+        activities: state.activities.map((activity: { id: any }) => {
           if (activity.id === action.id) {
             return {
               ...activity,
@@ -162,16 +153,16 @@ export const useWorkflowBuilderV2 = () => {
   const { state, dispatch } = context;
 
   const setActivitiesAndVariables = (
-    statement: Statement | null,
+    statement: any | null,
     variables: Record<string, string>
   ) => dispatch({ type: "SET_ACTIVITIES_AND_VARIABLES", statement, variables });
   const reorderActivity = (from: number, to: number) =>
     dispatch({ type: "REORDER_ACTIVITY", from, to });
-  const addActivity = (activity: ActivityInvocation) =>
+  const addActivity = (activity: any) =>
     dispatch({ type: "ADD_ACTIVITY", activity });
   const removeActivity = (id: string) =>
     dispatch({ type: "REMOVE_ACTIVITY", id });
-  const editActivity = (activityId: string, properties: EditableProperties) =>
+  const editActivity = (activityId: string, properties: any) =>
     dispatch({ type: "EDIT_ACTIVITY", activityId, properties });
   const setActivityErrors = (
     activityId: string,
@@ -182,13 +173,11 @@ export const useWorkflowBuilderV2 = () => {
     id: string,
     variables: Record<string, string>
   ) => dispatch({ type: "EDIT_ACTIVITY_VARIABLES", id, variables });
-  const setSelectedActivity = (activity: ActivityInvocation | null) =>
+  const setSelectedActivity = (activity: any | null) =>
     dispatch({ type: "SET_SELECTED_ACTIVITY", activity });
 
   return {
     variables: state.variables,
-    activities: state.activities,
-    selectedActivity: state.selectedActivity,
     newActivityId: state.newActivityId,
     setActivitiesAndVariables,
     reorderActivity,

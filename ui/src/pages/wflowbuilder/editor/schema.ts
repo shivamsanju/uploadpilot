@@ -1,4 +1,7 @@
-export const schema = {
+import { parse } from "yaml";
+import Ajv, { ErrorObject } from "ajv";
+
+const schema = {
   $schema: "http://json-schema.org/draft-07/schema#",
   type: "object",
   title: "Workflow",
@@ -95,4 +98,24 @@ export const schema = {
       required: ["name", "arguments"],
     },
   },
+};
+
+export const validateYaml = (content: string): string | null => {
+  try {
+    const parsedData = parse(content) as unknown;
+    const ajv = new Ajv();
+    const validate = ajv.compile(schema);
+    const valid = validate(parsedData);
+
+    if (!valid) {
+      return (
+        validate.errors?.map((err: ErrorObject) => err.message).join(", ") ||
+        "Invalid YAML"
+      );
+    } else {
+      return null;
+    }
+  } catch (e) {
+    return (e as Error).message;
+  }
 };

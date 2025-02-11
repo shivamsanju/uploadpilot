@@ -10,3 +10,7 @@ type EditProcRequest struct {
 type EnableDisableProcessorRequest struct {
 	Enabled bool `json:"enabled"`
 }
+
+type WorkflowUpdate struct {
+	Workflow string `json:"workflow"`
+}
