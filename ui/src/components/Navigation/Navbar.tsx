@@ -14,6 +14,12 @@ import { useLocation, useParams } from "react-router-dom";
 import WorkspaceSwitcher from "../WorkspaceSwitcher";
 import { useMemo } from "react";
 
+const isActive = (pathname: string, item: any) => {
+  if (item.label === "Get Started") {
+    return pathname === item.link;
+  }
+  return pathname.includes(item.link);
+};
 const NavBar = ({
   toggle,
 }: {
@@ -63,7 +69,7 @@ const NavBar = ({
       <LinksGroup
         {...item}
         key={item.label}
-        active={pathname === item.link}
+        active={isActive(pathname, item)}
         toggle={toggle}
       />
     ));

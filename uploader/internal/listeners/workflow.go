@@ -9,21 +9,20 @@ import (
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/common/pkg/pubsub"
 	commonutils "github.com/uploadpilot/uploadpilot/common/pkg/utils"
-	"github.com/uploadpilot/uploadpilot/uploader/internal/config"
-	"github.com/uploadpilot/uploadpilot/uploader/internal/svc/proc"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/svc/processor"
 )
 
 type WorkflowListener struct {
 	logEb    *pubsub.EventBus[events.UploadLogEventMsg]
 	uploadEb *pubsub.EventBus[events.UploadEventMsg]
-	procSvc  *proc.ProcessorService
+	procSvc  *processor.Service
 }
 
-func NewWorkflowListener() *WorkflowListener {
+func NewWorkflowListener(procSvc *processor.Service) *WorkflowListener {
 	return &WorkflowListener{
-		procSvc:  proc.NewProcessorService(),
-		uploadEb: events.NewUploadStatusEvent(config.EventBusRedisConfig, uuid.New().String()),
-		logEb:    events.NewUploadLogEventBus(config.EventBusRedisConfig, uuid.New().String()),
+		procSvc:  procSvc,
+		uploadEb: events.NewUploadStatusEvent(infra.RedisClient, uuid.New().String()),
+		logEb:    events.NewUploadLogEventBus(infra.RedisClient, uuid.New().String()),
 	}
 }
 

@@ -3,20 +3,20 @@ package workspace
 import (
 	"context"
 
-	"github.com/uploadpilot/uploadpilot/common/pkg/db"
+	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
 )
 
-type WorkspaceService struct {
-	workspaceRepo *db.WorkspaceRepo
+type Service struct {
+	workspaceRepo *repo.WorkspaceRepo
 }
 
-func NewWorkspaceService() *WorkspaceService {
-	return &WorkspaceService{
-		workspaceRepo: db.NewWorkspaceRepo(),
+func NewWorkspaceService(workspaceRepo *repo.WorkspaceRepo) *Service {
+	return &Service{
+		workspaceRepo: workspaceRepo,
 	}
 }
 
-func (us *WorkspaceService) VerifySubscription(ctx context.Context, workspaceID string) (bool, error) {
+func (us *Service) VerifySubscription(ctx context.Context, workspaceID string) (bool, error) {
 	active, err := us.workspaceRepo.IsSubscriptionActive(ctx, workspaceID)
 	return active, err
 }

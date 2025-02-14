@@ -17,14 +17,14 @@ import (
 )
 
 type handler struct {
-	uploadSvc upload.UploadService
-	configSvc uploaderconfig.UploaderConfigService
+	uploadSvc *upload.Service
+	configSvc *uploaderconfig.Service
 }
 
-func Newhandler() *handler {
+func Newhandler(uploadSvc *upload.Service, configSvc *uploaderconfig.Service) *handler {
 	return &handler{
-		uploadSvc: *upload.NewUploadService(),
-		configSvc: *uploaderconfig.NewUploaderConfigService(),
+		uploadSvc: uploadSvc,
+		configSvc: configSvc,
 	}
 }
 
@@ -38,11 +38,25 @@ func (h *handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, "uploader is healthy")
 }
 
+func (h *handler) GetUploaderConfig(w http.ResponseWriter, r *http.Request) {
+	workspaceID := chi.URLParam(r, "workspaceId")
+	uploaderConfig, err := h.configSvc.GetUploaderConfig(r.Context(), workspaceID)
+	if err != nil {
+		HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	cfg := dto.UploaderConfig{
+		UploaderConfig: *uploaderConfig,
+		ChunkSize:      config.TusChunkSize,
+	}
+	render.JSON(w, r, cfg)
+}
+
 func (h *handler) TusHandler() http.Handler {
 	infra.Log.Infof("initializing tusd handler with upload dir: %s", config.TusUploadDir)
 
 	// S3 backend for tusd
-	s3Client, err := infra.NewS3Client(&infra.S3Config{
+	s3Client, err := infra.NewS3Client(&infra.S3Options{
 		AccessKey: config.S3AccessKey,
 		SecretKey: config.S3SecretKey,
 		Region:    config.S3Region,
@@ -102,18 +116,4 @@ func (h *handler) TusHandler() http.Handler {
 		panic(err)
 	}
 	return tusdHandler
-}
-
-func (h *handler) GetUploaderConfig(w http.ResponseWriter, r *http.Request) {
-	workspaceID := chi.URLParam(r, "workspaceId")
-	uploaderConfig, err := h.configSvc.GetUploaderConfig(r.Context(), workspaceID)
-	if err != nil {
-		HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-	cfg := dto.UploaderConfig{
-		UploaderConfig: *uploaderConfig,
-		ChunkSize:      config.TusChunkSize,
-	}
-	render.JSON(w, r, cfg)
 }

@@ -12,12 +12,12 @@ import (
 )
 
 type uploadHandler struct {
-	upSvc svc.UploadService
+	uploadSvc svc.UploadService
 }
 
-func NewUploadHandler() *uploadHandler {
+func NewUploadHandler(uploadSvc *svc.UploadService) *uploadHandler {
 	return &uploadHandler{
-		upSvc: *svc.NewUploadService(),
+		uploadSvc: *uploadSvc,
 	}
 }
 
@@ -30,7 +30,7 @@ func (h *uploadHandler) GetPaginatedUploads(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	uploads, totalRecords, err := h.upSvc.GetAllUploads(r.Context(), workspaceID, skip, limit, search)
+	uploads, totalRecords, err := h.uploadSvc.GetAllUploads(r.Context(), workspaceID, skip, limit, search)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -46,7 +46,7 @@ func (h *uploadHandler) GetUploadDetailsByID(w http.ResponseWriter, r *http.Requ
 	uploadID := chi.URLParam(r, "uploadId")
 	workspaceID := chi.URLParam(r, "workspaceId")
 
-	details, err := h.upSvc.GetUploadDetails(r.Context(), workspaceID, uploadID)
+	details, err := h.uploadSvc.GetUploadDetails(r.Context(), workspaceID, uploadID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -58,7 +58,7 @@ func (h *uploadHandler) GetUploadDetailsByID(w http.ResponseWriter, r *http.Requ
 func (h *uploadHandler) GetUploadLogs(w http.ResponseWriter, r *http.Request) {
 	uploadID := chi.URLParam(r, "uploadId")
 
-	logs, err := h.upSvc.GetLogs(r.Context(), uploadID)
+	logs, err := h.uploadSvc.GetLogs(r.Context(), uploadID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return

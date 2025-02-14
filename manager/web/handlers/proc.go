@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/common/pkg/tasks"
+	commonutils "github.com/uploadpilot/uploadpilot/common/pkg/utils"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/uploadpilot/manager/internal/svc"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
@@ -16,9 +18,9 @@ type processorHandler struct {
 	pSvc *svc.ProcessorService
 }
 
-func NewProcessorsHandler() *processorHandler {
+func NewProcessorsHandler(pSvc *svc.ProcessorService) *processorHandler {
 	return &processorHandler{
-		pSvc: svc.NewProcessorService(),
+		pSvc: pSvc,
 	}
 }
 
@@ -46,21 +48,18 @@ func (h *processorHandler) GetProcessorDetailsByID(w http.ResponseWriter, r *htt
 	render.JSON(w, r, processor)
 }
 
-func (h *processorHandler) CreateProcessor(w http.ResponseWriter, r *http.Request) {
+func (h *processorHandler) CreateProcessor(w http.ResponseWriter, r *http.Request, body *dto.CreateProcessorRequest) (*string, error) {
 	workspaceID := chi.URLParam(r, "workspaceId")
 
-	processor := &models.Processor{}
-	if err := render.DecodeJSON(r.Body, processor); err != nil {
-		utils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
-		return
+	var processor models.Processor
+	if err := commonutils.ConvertDTOToModel(body, &processor); err != nil {
+		utils.HandleHttpError(w, r, http.StatusUnprocessableEntity, errors.New(http.StatusText(http.StatusUnprocessableEntity)))
+	}
+	if err := h.pSvc.CreateProcessor(r.Context(), workspaceID, &processor); err != nil {
+		return nil, err
 	}
 
-	if err := h.pSvc.CreateProcessor(r.Context(), workspaceID, processor); err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-
-	render.JSON(w, r, processor.ID)
+	return &processor.ID, nil
 }
 
 func (h *processorHandler) UpdateProcessor(w http.ResponseWriter, r *http.Request) {

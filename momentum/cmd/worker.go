@@ -17,11 +17,14 @@ func main() {
 		log.Fatalln("Unable to initialize config.", err)
 	}
 
-	err := infra.Init(nil, &infra.TemporalConfig{
-		Namespace: config.TemporalNamespace,
-		HostPort:  config.TemporalHostPort,
-		APIKey:    config.TemporalAPIKey,
+	err := infra.Init(&infra.InfraOpts{
+		TemporalOpts: &infra.TemporalOptions{
+			Namespace: config.TemporalNamespace,
+			HostPort:  config.TemporalHostPort,
+			APIKey:    config.TemporalAPIKey,
+		},
 	})
+
 	if err != nil {
 		log.Fatalln("Unable to initialize infra.", err)
 		os.Exit(1)

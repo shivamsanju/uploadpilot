@@ -6,32 +6,31 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/uploadpilot/uploadpilot/common/pkg/db"
 	"github.com/uploadpilot/uploadpilot/common/pkg/events"
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/common/pkg/pubsub"
 	commonutils "github.com/uploadpilot/uploadpilot/common/pkg/utils"
-	"github.com/uploadpilot/uploadpilot/uploader/internal/config"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/svc/upload"
 )
 
 type UploadLogsListener struct {
-	logEb          *pubsub.EventBus[events.UploadLogEventMsg]
-	uploadLogsRepo *db.UploadLogsRepo
-	logBuffer      []*models.UploadLog
-	flushInterval  time.Duration
-	bufferSize     int
-	mu             sync.Mutex
+	logEb         *pubsub.EventBus[events.UploadLogEventMsg]
+	uploadSvc     *upload.Service
+	logBuffer     []*models.UploadLog
+	flushInterval time.Duration
+	bufferSize    int
+	mu            sync.Mutex
 }
 
-func NewUploadLogsListener(flushInterval time.Duration, bufferSize int) *UploadLogsListener {
+func NewUploadLogsListener(flushInterval time.Duration, bufferSize int, uploadSvc *upload.Service) *UploadLogsListener {
 	return &UploadLogsListener{
-		logEb:          events.NewUploadLogEventBus(config.EventBusRedisConfig, uuid.New().String()),
-		uploadLogsRepo: db.NewUploadLogsRepo(),
-		logBuffer:      make([]*models.UploadLog, 0),
-		flushInterval:  flushInterval,
-		bufferSize:     bufferSize,
-		mu:             sync.Mutex{},
+		uploadSvc:     uploadSvc,
+		logEb:         events.NewUploadLogEventBus(infra.RedisClient, uuid.New().String()),
+		logBuffer:     make([]*models.UploadLog, 0),
+		flushInterval: flushInterval,
+		bufferSize:    bufferSize,
+		mu:            sync.Mutex{},
 	}
 }
 
@@ -66,7 +65,7 @@ func (l *UploadLogsListener) logHandler(msg *events.UploadLogEventMsg) error {
 	l.logBuffer = append(l.logBuffer, log)
 
 	if len(l.logBuffer) >= l.bufferSize {
-		l.uploadLogsRepo.BatchAddLogs(context.Background(), l.logBuffer)
+		l.uploadSvc.BatchAddLogs(context.Background(), l.logBuffer)
 		l.logBuffer = nil
 	}
 
@@ -85,7 +84,7 @@ func (l *UploadLogsListener) startBatchFlushInterval(flushInterval time.Duration
 		l.mu.Lock()
 		if len(l.logBuffer) > 0 {
 			infra.Log.Info("interval flushing logs...")
-			l.uploadLogsRepo.BatchAddLogs(context.Background(), l.logBuffer)
+			l.uploadSvc.BatchAddLogs(context.Background(), l.logBuffer)
 			l.logBuffer = nil
 		}
 		l.mu.Unlock()

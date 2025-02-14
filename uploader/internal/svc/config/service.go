@@ -3,20 +3,20 @@ package uploaderconfig
 import (
 	"context"
 
-	"github.com/uploadpilot/uploadpilot/common/pkg/db"
+	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 )
 
-type UploaderConfigService struct {
-	configRepo *db.WorkspaceConfigRepo
+type Service struct {
+	configRepo *repo.WorkspaceConfigRepo
 }
 
-func NewUploaderConfigService() *UploaderConfigService {
-	return &UploaderConfigService{
-		configRepo: db.NewWorkspaceConfigRepo(),
+func NewConfigService(configRepo *repo.WorkspaceConfigRepo) *Service {
+	return &Service{
+		configRepo: configRepo,
 	}
 }
-func (s *UploaderConfigService) GetUploaderConfig(ctx context.Context, workspaceID string) (*models.UploaderConfig, error) {
+func (s *Service) GetUploaderConfig(ctx context.Context, workspaceID string) (*models.UploaderConfig, error) {
 	config, err := s.configRepo.GetConfig(ctx, workspaceID)
 	if err != nil {
 		return nil, err

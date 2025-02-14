@@ -11,12 +11,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/uploadpilot/uploadpilot/common/pkg/cache"
 	"github.com/uploadpilot/uploadpilot/common/pkg/db"
+	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
-	"github.com/uploadpilot/uploadpilot/common/pkg/kms"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/config"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/listeners"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/svc"
 	"github.com/uploadpilot/uploadpilot/uploader/web"
 )
 
@@ -66,42 +66,46 @@ func initServices() (*http.Server, error) {
 		return nil, wrapError("config initialization failed", err)
 	}
 
-	// Initialize kms.
-	if err := kms.Init(config.EncryptionKeyStr); err != nil {
-		return nil, wrapError("kms initialization failed", err)
-	}
-
 	// Initialize infra.
-	s3Config := &infra.S3Config{
+	s3Opts := &infra.S3Options{
 		AccessKey: config.S3AccessKey,
 		SecretKey: config.S3SecretKey,
 		Region:    config.S3Region,
 	}
 
-	temporalConfig := &infra.TemporalConfig{
+	temporalOpts := &infra.TemporalOptions{
 		Namespace: config.TemporalNamespace,
 		HostPort:  config.TemporalHostPort,
 		APIKey:    config.TemporalAPIKey,
 	}
-	if err := infra.Init(s3Config, temporalConfig); err != nil {
+
+	if err := infra.Init(&infra.InfraOpts{
+		S3Opts:       s3Opts,
+		TemporalOpts: temporalOpts,
+	}); err != nil {
 		return nil, wrapError("infra initialization failed", err)
 	}
 
-	// Initialize cache.
-	if err := cache.Init(&config.RedisAddr, &config.RedisPassword, &config.RedisUsername, config.RedisTLS); err != nil {
-		return nil, wrapError("cache initialization failed", err)
+	// Initialize database.
+	db, err := db.NewPostgresDB(config.PostgresURI, &db.DBConfig{
+		MaxOpenConn:     10,
+		MaxIdleConn:     5,
+		ConnMaxLifeTime: time.Minute * 30,
+		ConnMaxIdleTime: time.Minute * 5,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("database initialization failed: %w", err)
 	}
 
-	// Initialize database.
-	if err := db.Init(config.PostgresURI); err != nil {
-		return nil, wrapError("database initialization failed", err)
-	}
+	// Initialize the services
+	repos := repo.NewRepositories(db)
+	svcs := svc.NewServices(repos)
 
 	// Initialize listeners.
-	listeners.StartListeners()
+	listeners.StartListeners(svcs)
 
 	// Initialize the uploader web server.
-	srv, err := web.Init()
+	srv, err := web.InitWebserver(svcs)
 	if err != nil {
 		return nil, wrapError("web server initialization failed", err)
 	}

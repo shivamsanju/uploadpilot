@@ -9,7 +9,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/manager/internal/config"
 )
 
-func Init() error {
+func InitSessionStore() error {
 	store := memstore.NewMemStore(
 		[]byte("authkey123"),
 		[]byte("enckey12341234567890123456789012"),

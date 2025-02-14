@@ -3,7 +3,7 @@ package svc
 import (
 	"context"
 
-	"github.com/uploadpilot/uploadpilot/common/pkg/db"
+	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/common/pkg/validations"
@@ -14,12 +14,12 @@ import (
 )
 
 type ProcessorService struct {
-	procRepo *db.ProcessorRepo
+	procRepo *repo.ProcessorRepo
 }
 
-func NewProcessorService() *ProcessorService {
+func NewProcessorService(procRepo *repo.ProcessorRepo) *ProcessorService {
 	return &ProcessorService{
-		procRepo: db.NewProcessorRepo(),
+		procRepo: procRepo,
 	}
 }
 

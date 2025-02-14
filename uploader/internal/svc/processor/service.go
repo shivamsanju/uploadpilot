@@ -1,11 +1,11 @@
-package proc
+package processor
 
 import (
 	"context"
 	"log"
 
 	"github.com/google/uuid"
-	"github.com/uploadpilot/uploadpilot/common/pkg/db"
+	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
 	"github.com/uploadpilot/uploadpilot/common/pkg/dsl"
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
@@ -14,25 +14,25 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type ProcessorService struct {
-	pRepo *db.ProcessorRepo
+type Service struct {
+	processorRepo *repo.ProcessorRepo
 }
 
-func NewProcessorService() *ProcessorService {
-	return &ProcessorService{
-		pRepo: db.NewProcessorRepo(),
+func NewProcessorService(processorRepo *repo.ProcessorRepo) *Service {
+	return &Service{
+		processorRepo: processorRepo,
 	}
 }
 
-func (s *ProcessorService) GetProcessors(ctx context.Context, workspaceID string) ([]models.Processor, error) {
-	processors, err := s.pRepo.GetAll(ctx, workspaceID)
+func (s *Service) GetProcessors(ctx context.Context, workspaceID string) ([]models.Processor, error) {
+	processors, err := s.processorRepo.GetAll(ctx, workspaceID)
 	if err != nil {
 		return nil, err
 	}
 	return processors, nil
 }
 
-func (s *ProcessorService) TriggerWorkflow(ctx context.Context, yamlContent string) (*dto.TriggerWorkflowResp, error) {
+func (s *Service) TriggerWorkflow(ctx context.Context, yamlContent string) (*dto.TriggerWorkflowResp, error) {
 	var dslWorkflow dsl.Workflow
 	if err := yaml.Unmarshal([]byte(yamlContent), &dslWorkflow); err != nil {
 		log.Fatalln("failed to unmarshal dsl config", err)

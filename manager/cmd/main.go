@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net/http"
@@ -11,12 +12,14 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/uploadpilot/uploadpilot/common/pkg/cache"
+	"github.com/redis/go-redis/v9"
 	"github.com/uploadpilot/uploadpilot/common/pkg/db"
+	cacheplugins "github.com/uploadpilot/uploadpilot/common/pkg/db/plugins/cache"
+	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
-	"github.com/uploadpilot/uploadpilot/common/pkg/kms"
 	"github.com/uploadpilot/uploadpilot/manager/internal/auth"
 	"github.com/uploadpilot/uploadpilot/manager/internal/config"
+	"github.com/uploadpilot/uploadpilot/manager/internal/svc"
 	"github.com/uploadpilot/uploadpilot/manager/web"
 )
 
@@ -25,7 +28,7 @@ func main() {
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	wg := &sync.WaitGroup{}
 
-	srv, err := initServices()
+	srv, err := initialize()
 	if err != nil {
 		cleanup()
 	}
@@ -43,7 +46,7 @@ func main() {
 
 		// Attempt to gracefully shut down the server
 		if err := srv.Shutdown(ctx); err != nil {
-			log.Fatal(wrapError("graceful server shutdown failed", err))
+			log.Fatal(fmt.Errorf("graceful server shutdown failed: %w", err))
 			return
 		}
 
@@ -51,54 +54,71 @@ func main() {
 	}(wg)
 
 	// Start the web server.
+	infra.Log.Infof("starting web server on port %d", config.Port)
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatal(wrapError("server initialization failed", err))
+		log.Fatal(fmt.Errorf("server initialization failed: %w", err))
 	}
-
 	wg.Wait()
 	log.Println("server exited")
 
 }
 
-func initServices() (*http.Server, error) {
-	// Initialize configuration.
+func initialize() (*http.Server, error) {
 	if err := config.Init(); err != nil {
-		return nil, wrapError("config initialization failed", err)
+		return nil, fmt.Errorf("config initialization failed: %w", err)
 	}
 
-	// Initialize KMS
-	if err := kms.Init(string(config.EncryptionKey)); err != nil {
-		return nil, wrapError("kvm initialization failed", err)
-	}
-
-	// Initialize infra.
-	if err := infra.Init(&infra.S3Config{
+	// Initialize infra
+	s3Opts := &infra.S3Options{
 		AccessKey: config.S3AccessKey,
 		SecretKey: config.S3SecretKey,
 		Region:    config.S3Region,
-	}, nil); err != nil {
-		return nil, wrapError("infra initialization failed", err)
 	}
 
-	// Initialize cache.
-	if err := cache.Init(&config.RedisAddr, &config.RedisPassword, &config.RedisUsername, config.RedisTLS); err != nil {
-		return nil, wrapError("cache initialization failed", err)
+	redisOpts := &redis.Options{
+		Addr:     config.RedisAddr,
+		Username: config.RedisUsername,
+		Password: config.RedisPassword,
+	}
+	if config.RedisTLS {
+		redisOpts.TLSConfig = &tls.Config{}
 	}
 
-	// Initialize database.
-	if err := db.Init(config.PostgresURI); err != nil {
-		return nil, wrapError("database initialization failed", err)
+	err := infra.Init(&infra.InfraOpts{
+		S3Opts:    s3Opts,
+		RedisOpts: redisOpts,
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("infra initialization failed: %w", err)
 	}
 
-	// Initialize authentication.
-	if err := auth.Init(); err != nil {
-		return nil, wrapError("auth initialization failed", err)
+	// Initialize authentication
+	if err := auth.InitSessionStore(); err != nil {
+		return nil, fmt.Errorf("auth initialization failed: %w", err)
 	}
+
+	// Initialize database
+	db, err := db.NewPostgresDB(config.PostgresURI, &db.DBConfig{
+		MaxOpenConn:     10,
+		MaxIdleConn:     5,
+		ConnMaxLifeTime: time.Minute * 30,
+		ConnMaxIdleTime: time.Minute * 5,
+	})
+	if err != nil {
+		return nil, fmt.Errorf("database initialization failed: %w", err)
+	}
+
+	// Add caching layer
+	rcp := cacheplugins.NewRedisCachesPlugin(infra.RedisClient)
+	db.Orm.Use(rcp)
 
 	// Initialize the web server.
-	srv, err := web.Init()
+	repos := repo.NewRepositories(db)
+	svcs := svc.NewServices(repos)
+	srv, err := web.InitWebServer(svcs)
 	if err != nil {
-		return nil, wrapError("web server initialization failed", err)
+		return nil, fmt.Errorf("web server initialization failed: %w", err)
 	}
 
 	return srv, nil
@@ -108,9 +128,4 @@ func cleanup() {
 	// Perform any cleanup here, e.g., closing database connections, stopping services.
 	// Example: if err := db.Close(); err != nil { return err }
 	log.Println("performing cleanup...")
-}
-
-// wrapError provides better error context.
-func wrapError(context string, err error) error {
-	return fmt.Errorf("%s: %w", context, err)
 }

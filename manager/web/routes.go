@@ -2,18 +2,20 @@ package web
 
 import (
 	"github.com/go-chi/chi/v5"
+	"github.com/uploadpilot/uploadpilot/manager/internal/svc"
+	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
 	"github.com/uploadpilot/uploadpilot/manager/web/handlers"
 )
 
-func Routes() *chi.Mux {
+func Routes(services *svc.Services) *chi.Mux {
 	router := chi.NewRouter()
 	router.Use(CorsMiddleware)
 
 	// Handlers for uploads
-	authHandler := handlers.NewAuthHandler()
-	workspaceHandler := handlers.NewWorkspaceHandler()
-	uploadHandler := handlers.NewUploadHandler()
-	procHandler := handlers.NewProcessorsHandler()
+	authHandler := handlers.NewAuthHandler(services.UserService)
+	workspaceHandler := handlers.NewWorkspaceHandler(services.WorkspaceService)
+	uploadHandler := handlers.NewUploadHandler(services.UploadService)
+	procHandler := handlers.NewProcessorsHandler(services.ProcessorService)
 
 	// Auth routes
 	router.Group(func(r chi.Router) {
@@ -65,7 +67,7 @@ func Routes() *chi.Mux {
 				// processors
 				r.Route("/processors", func(r chi.Router) {
 					r.Get("/", procHandler.GetProcessors)
-					r.Post("/", procHandler.CreateProcessor)
+					r.Post("/", utils.CreateJSONHandlerWithBody(procHandler.CreateProcessor))
 					r.Get("/blocks", procHandler.GetProcBlock)
 					r.Route("/{processorId}", func(r chi.Router) {
 						r.Get("/", procHandler.GetProcessorDetailsByID)

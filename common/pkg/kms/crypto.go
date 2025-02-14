@@ -4,11 +4,24 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
 )
+
+type kms struct {
+	key []byte
+}
+
+func NewKMS(secret string) (*kms, error) {
+	k, err := getValidKey(secret)
+	if err != nil {
+		return nil, err
+	}
+	return &kms{k}, nil
+}
 
 func Encrypt(secret []byte, value string) (string, error) {
 	block, err := aes.NewCipher(secret)
@@ -57,4 +70,13 @@ func Decrypt(secret []byte, value string) (string, error) {
 	stream.XORKeyStream(ciphertext, ciphertext)
 
 	return string(ciphertext), nil
+}
+
+func getValidKey(secret string) ([]byte, error) {
+	hash := sha256.New()
+	_, err := hash.Write([]byte(secret))
+	if err != nil {
+		return nil, err
+	}
+	return hash.Sum(nil), nil
 }

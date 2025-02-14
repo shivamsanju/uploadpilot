@@ -8,9 +8,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/uploadpilot/uploadpilot/manager/internal/config"
+	"github.com/uploadpilot/uploadpilot/manager/internal/svc"
 )
 
-func Init() (*http.Server, error) {
+func InitWebServer(services *svc.Services) (*http.Server, error) {
 	router := chi.NewRouter()
 	router.Use(middleware.RequestID)
 	router.Use(LoggerMiddleware)
@@ -19,7 +20,7 @@ func Init() (*http.Server, error) {
 
 	// Mount the uploadpilot web routes
 	router.Group(func(r chi.Router) {
-		r.Mount("/", Routes())
+		r.Mount("/", Routes(services))
 	})
 
 	srv := &http.Server{

@@ -80,7 +80,6 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
         workflow: yamlContent,
       });
     } catch (error: any) {
-      console.error(error?.response?.data?.message || error.message);
       setError(error?.response?.data?.message || error.message);
     }
   };
@@ -109,7 +108,7 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
             ) : (
               <IconCircleCheck size="12" />
             )}
-            <Text size="xs">{error || "All good"}</Text>
+            <Text size="xs">{error || "Everything looks good"}</Text>
           </Group>
         </Box>
         <Group gap="md">
@@ -119,6 +118,7 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
       </Group>
 
       <Editor
+        loading={false}
         beforeMount={handleEditorDidMount}
         onMount={editorMount}
         theme={colorScheme === "dark" ? "myCustomThemeDark" : "vs"}
@@ -139,6 +139,7 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
           renderLineHighlight: "none",
           padding: {
             top: 10,
+            bottom: 50,
           },
           rulers: [],
         }}

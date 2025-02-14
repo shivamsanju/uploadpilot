@@ -4,7 +4,6 @@ import {
   Avatar,
   Box,
   Group,
-  LoadingOverlay,
   Menu,
   Modal,
   Text,
@@ -22,6 +21,7 @@ import { showNotification } from "@mantine/notifications";
 import AddUserForm from "./Add";
 import { useViewportSize } from "@mantine/hooks";
 import { showConfirmationPopup } from "../../components/Popups/ConfirmPopup";
+import { ContainerOverlay } from "../../components/Overlay";
 
 const getRandomAvatar = () => {
   const randomIndex = Math.floor(Math.random() * 5) + 1;
@@ -40,9 +40,7 @@ const WorkspaceUsersList = ({
 
   const [initialValues, setInitialValues] = useState(null);
   const { workspaceId } = useParams();
-  const { isPending, error, users, isFetching } = useGetUsersInWorkspace(
-    workspaceId || ""
-  );
+  const { isPending, error, users } = useGetUsersInWorkspace(workspaceId || "");
   const { mutateAsync, isPending: removePending } =
     useRemoveUserFromWorkspaceMutation();
 
@@ -177,12 +175,9 @@ const WorkspaceUsersList = ({
 
   return (
     <Box mr="md">
-      <LoadingOverlay
-        visible={removePending || isFetching || isPending}
-        overlayProps={{ backgroundOpacity: 0 }}
-        zIndex={1000}
-      />
+      <ContainerOverlay visible={isPending} />
       <UploadPilotDataTable
+        fetching={removePending}
         minHeight={500}
         showSearch={false}
         columns={columns}

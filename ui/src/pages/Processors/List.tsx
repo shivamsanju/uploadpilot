@@ -16,7 +16,6 @@ import {
   Badge,
   Box,
   Group,
-  LoadingOverlay,
   Menu,
   Modal,
   Pill,
@@ -37,6 +36,7 @@ import {
 import AddProcessorForm from "./Add";
 import { timeAgo } from "../../utils/datetime";
 import { useViewportSize } from "@mantine/hooks";
+import { ContainerOverlay } from "../../components/Overlay";
 
 const ProcessorList = ({
   opened,
@@ -49,9 +49,7 @@ const ProcessorList = ({
   const { width } = useViewportSize();
   const [initialValues, setInitialValues] = useState(null);
   const { workspaceId } = useParams();
-  const { isPending, error, processors, isFetching } = useGetProcessors(
-    workspaceId || ""
-  );
+  const { isPending, error, processors } = useGetProcessors(workspaceId || "");
   const { mutateAsync, isPending: isDeleting } = useDeleteProcessorMutation();
   const { mutateAsync: enableDisableProcessor, isPending: isEnabling } =
     useEnableDisableProcessorMutation();
@@ -308,12 +306,9 @@ const ProcessorList = ({
 
   return (
     <Box mr="md">
-      <LoadingOverlay
-        visible={isDeleting || isEnabling || isPending || isFetching}
-        overlayProps={{ backgroundOpacity: 0 }}
-        zIndex={1000}
-      />
+      <ContainerOverlay visible={isPending} />
       <UploadPilotDataTable
+        fetching={isDeleting || isEnabling}
         minHeight={700}
         showSearch={false}
         columns={columns}

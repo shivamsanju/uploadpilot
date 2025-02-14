@@ -1,11 +1,4 @@
-import {
-  Box,
-  Group,
-  LoadingOverlay,
-  Paper,
-  ScrollArea,
-  Title,
-} from "@mantine/core";
+import { Box, Group, Paper, ScrollArea, Title } from "@mantine/core";
 import { useParams } from "react-router-dom";
 import { AppLoader } from "../../components/Loader/AppLoader";
 import { useGetProcessor } from "../../apis/processors";
@@ -13,6 +6,7 @@ import { ErrorCard } from "../../components/ErrorCard/ErrorCard";
 import { WorkflowBuilderProviderV2 } from "../../context/WflowEditorContextV2";
 import { WorkflowYamlEditor } from "./editor";
 import { BlockSearch } from "./blocksearch";
+import { ContainerOverlay } from "../../components/Overlay";
 
 const WorkflowBuilderPage = () => {
   const { workspaceId, processorId } = useParams();
@@ -33,11 +27,7 @@ const WorkflowBuilderPage = () => {
   return (
     <WorkflowBuilderProviderV2>
       <Box mb={50}>
-        <LoadingOverlay
-          visible={isPending}
-          overlayProps={{ backgroundOpacity: 0 }}
-          zIndex={1000}
-        />
+        <ContainerOverlay visible={isPending} />
         <Group justify="space-between" mb="xl">
           <Title order={3} opacity={0.7}>
             Workflow builder for processor {processor?.name}

@@ -1,16 +1,16 @@
-package db
+package migrate
 
 import (
+	"github.com/uploadpilot/uploadpilot/common/pkg/db"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
-	"gorm.io/gorm"
 )
 
-func Migrate(db *gorm.DB) error {
-	if err := db.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`).Error; err != nil {
+func Migrate(db *db.DB) error {
+	if err := db.Orm.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`).Error; err != nil {
 		return err
 	}
 
-	if err := db.Exec(`
+	if err := db.Orm.Exec(`
 DO $$ 
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'upload_log_level') THEN
@@ -21,7 +21,7 @@ END $$;
 		return err
 	}
 
-	if err := db.Exec(`
+	if err := db.Orm.Exec(`
 	DO $$ 
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'allowed_sources') THEN
@@ -47,7 +47,7 @@ END $$;
 		return err
 	}
 
-	if err := db.AutoMigrate(
+	if err := db.Orm.AutoMigrate(
 		&models.User{},
 		&models.Workspace{},
 		&models.UserWorkspace{},

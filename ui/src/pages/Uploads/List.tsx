@@ -32,6 +32,7 @@ import { useViewportSize } from "@mantine/hooks";
 import { UploadStatus } from "./Status";
 import { LogsModal } from "./Logs";
 import { MetadataModal } from "./Metadata";
+import { ContainerOverlay } from "../../components/Overlay";
 
 const batchSize = 20;
 
@@ -62,7 +63,6 @@ const UploadList = ({ setTotalRecords }: any) => {
     fetchNextPage,
     totalRecords,
     isFetchingNextPage,
-    isFetching,
     invalidate,
     hasNextPage,
   } = useGetUploads({
@@ -80,7 +80,7 @@ const UploadList = ({ setTotalRecords }: any) => {
         setModalVariant("logs");
       }
     },
-    [uploads],
+    [uploads]
   );
 
   const handleViewMetadata = useCallback(
@@ -92,7 +92,7 @@ const UploadList = ({ setTotalRecords }: any) => {
         setModalVariant("metadata");
       }
     },
-    [uploads],
+    [uploads]
   );
 
   const handleRefresh = () => {
@@ -253,6 +253,8 @@ const UploadList = ({ setTotalRecords }: any) => {
 
   return (
     <Box mt="lg">
+      {/* Loading overlay only while pending, not on refetch*/}
+      <ContainerOverlay visible={isPending} />{" "}
       <LogsModal
         open={openModal && modalVariant === "logs"}
         onClose={() => setOpenModal(false)}
@@ -269,7 +271,7 @@ const UploadList = ({ setTotalRecords }: any) => {
           minHeight={500}
           verticalSpacing="lg"
           horizontalSpacing="lg"
-          fetching={isPending || isFetchingNextPage || isFetching}
+          fetching={isFetchingNextPage}
           noHeader={true}
           showSearch={true}
           searchPlaceholder='Search imports by name or status. For metadata search use {key: "regex"}'
@@ -290,10 +292,8 @@ const UploadList = ({ setTotalRecords }: any) => {
             display={hasNextPage ? "block" : "none"}
             leftSection={<IconChevronsDown size={16} />}
             variant="subtle"
-            disabled={
-              isPending || isFetchingNextPage || isFetching || !hasNextPage
-            }
-            loading={isFetchingNextPage || isFetching}
+            disabled={isPending || isFetchingNextPage || !hasNextPage}
+            loading={isFetchingNextPage}
             onClick={() => fetchNextPage({})}
           >
             Load More

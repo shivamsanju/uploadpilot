@@ -5,26 +5,25 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/uploadpilot/uploadpilot/common/pkg/db"
 	"github.com/uploadpilot/uploadpilot/common/pkg/events"
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/common/pkg/pubsub"
 	commonutils "github.com/uploadpilot/uploadpilot/common/pkg/utils"
-	"github.com/uploadpilot/uploadpilot/uploader/internal/config"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/svc/upload"
 )
 
 type StatusListener struct {
-	uploadEb   *pubsub.EventBus[events.UploadEventMsg]
-	logEb      *pubsub.EventBus[events.UploadLogEventMsg]
-	uploadRepo *db.UploadRepo
+	uploadEb  *pubsub.EventBus[events.UploadEventMsg]
+	logEb     *pubsub.EventBus[events.UploadLogEventMsg]
+	uploadSvc *upload.Service
 }
 
-func NewStatusListener() *StatusListener {
+func NewStatusListener(uploadSvc *upload.Service) *StatusListener {
 	return &StatusListener{
-		uploadRepo: db.NewUploadRepo(),
-		logEb:      events.NewUploadLogEventBus(config.EventBusRedisConfig, uuid.New().String()),
-		uploadEb:   events.NewUploadStatusEvent(config.EventBusRedisConfig, uuid.New().String()),
+		uploadSvc: uploadSvc,
+		logEb:     events.NewUploadLogEventBus(infra.RedisClient, uuid.New().String()),
+		uploadEb:  events.NewUploadStatusEvent(infra.RedisClient, uuid.New().String()),
 	}
 }
 
@@ -45,5 +44,5 @@ func (l *StatusListener) statusHandler(msg *events.UploadEventMsg) error {
 		fmt.Sprintf("upload status changed to %s", msg.Status),
 		models.UploadLogLevelInfo,
 	))
-	return l.uploadRepo.SetStatus(ctx, msg.UploadID, models.UploadStatus(msg.Status))
+	return l.uploadSvc.SetStatus(ctx, msg.UploadID, models.UploadStatus(msg.Status))
 }

@@ -8,38 +8,40 @@ import (
 	"github.com/google/uuid"
 	"github.com/mitchellh/mapstructure"
 	tusd "github.com/tus/tusd/v2/pkg/handler"
-	"github.com/uploadpilot/uploadpilot/common/pkg/db"
-	"github.com/uploadpilot/uploadpilot/common/pkg/db/dbutils"
+	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
+	dbutils "github.com/uploadpilot/uploadpilot/common/pkg/db/utils"
 	"github.com/uploadpilot/uploadpilot/common/pkg/events"
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/common/pkg/msg"
 	"github.com/uploadpilot/uploadpilot/common/pkg/pubsub"
-	"github.com/uploadpilot/uploadpilot/uploader/internal/config"
 	uploaderconfig "github.com/uploadpilot/uploadpilot/uploader/internal/svc/config"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/svc/workspace"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/validations"
 )
 
-type UploadService struct {
-	uploadRepo  *db.UploadRepo
-	wsSvc       *workspace.WorkspaceService
-	configSvc   *uploaderconfig.UploaderConfigService
-	logEventBus *pubsub.EventBus[events.UploadLogEventMsg]
-	uploadEb    *pubsub.EventBus[events.UploadEventMsg]
+type Service struct {
+	uploadRepo     *repo.UploadRepo
+	uploadLogsRepo *repo.UploadLogsRepo
+	wsSvc          *workspace.Service
+	configSvc      *uploaderconfig.Service
+	logEventBus    *pubsub.EventBus[events.UploadLogEventMsg]
+	uploadEb       *pubsub.EventBus[events.UploadEventMsg]
 }
 
-func NewUploadService() *UploadService {
-	return &UploadService{
-		uploadRepo:  db.NewUploadRepo(),
-		wsSvc:       workspace.NewWorkspaceService(),
-		configSvc:   uploaderconfig.NewUploaderConfigService(),
-		uploadEb:    events.NewUploadStatusEvent(config.EventBusRedisConfig, uuid.New().String()),
-		logEventBus: events.NewUploadLogEventBus(config.EventBusRedisConfig, uuid.New().String()),
+func NewUploadService(uploadRepo *repo.UploadRepo, uploadLogsRepo *repo.UploadLogsRepo,
+	workspaceRepo *repo.WorkspaceRepo, configRepo *repo.WorkspaceConfigRepo) *Service {
+	return &Service{
+		uploadRepo:     uploadRepo,
+		uploadLogsRepo: uploadLogsRepo,
+		wsSvc:          workspace.NewWorkspaceService(workspaceRepo),
+		configSvc:      uploaderconfig.NewConfigService(configRepo),
+		uploadEb:       events.NewUploadStatusEvent(infra.RedisClient, uuid.New().String()),
+		logEventBus:    events.NewUploadLogEventBus(infra.RedisClient, uuid.New().String()),
 	}
 }
 
-func (us *UploadService) VerifySubscription(hook *tusd.HookEvent) (bool, error) {
+func (us *Service) VerifySubscription(hook *tusd.HookEvent) (bool, error) {
 	workspaceID, err := us.getWorkspaceIDFromTusdEvent(hook)
 	if err != nil {
 		return false, errors.New("invalid workspace id in headers")
@@ -48,7 +50,7 @@ func (us *UploadService) VerifySubscription(hook *tusd.HookEvent) (bool, error) 
 	return active, err
 }
 
-func (us *UploadService) CreateUpload(hook *tusd.HookEvent) (*models.Upload, error) {
+func (us *Service) CreateUpload(hook *tusd.HookEvent) (*models.Upload, error) {
 	workspaceID, err := us.getWorkspaceIDFromTusdEvent(hook)
 	if err != nil {
 		return nil, errors.New("invalid workspace id in headers")
@@ -106,7 +108,7 @@ func (us *UploadService) CreateUpload(hook *tusd.HookEvent) (*models.Upload, err
 	return upload, nil
 }
 
-func (us *UploadService) FinishUpload(ctx context.Context, uploadID string) error {
+func (us *Service) FinishUpload(ctx context.Context, uploadID string) error {
 	upload, err := us.uploadRepo.Get(ctx, uploadID)
 	if err != nil {
 		return err
@@ -117,7 +119,15 @@ func (us *UploadService) FinishUpload(ctx context.Context, uploadID string) erro
 	return nil
 }
 
-func (us *UploadService) getWorkspaceIDFromTusdEvent(hook *tusd.HookEvent) (string, error) {
+func (us *Service) SetStatus(ctx context.Context, uploadID string, status models.UploadStatus) error {
+	return us.uploadRepo.SetStatus(ctx, uploadID, status)
+}
+
+func (us *Service) BatchAddLogs(ctx context.Context, logs []*models.UploadLog) error {
+	return us.uploadLogsRepo.BatchAddLogs(ctx, logs)
+}
+
+func (us *Service) getWorkspaceIDFromTusdEvent(hook *tusd.HookEvent) (string, error) {
 	infra.Log.Infof("Upload Object %+v", hook.Upload)
 
 	headers := hook.HTTPRequest.Header
@@ -129,7 +139,7 @@ func (us *UploadService) getWorkspaceIDFromTusdEvent(hook *tusd.HookEvent) (stri
 	return workspaceID, nil
 }
 
-func (us *UploadService) extractMetadataFromTusdEvent(hook *tusd.HookEvent) (map[string]interface{}, error) {
+func (us *Service) extractMetadataFromTusdEvent(hook *tusd.HookEvent) (map[string]interface{}, error) {
 	var metadata map[string]interface{}
 	err := mapstructure.Decode(hook.Upload.MetaData, &metadata)
 	if err != nil {
@@ -139,7 +149,7 @@ func (us *UploadService) extractMetadataFromTusdEvent(hook *tusd.HookEvent) (map
 	return metadata, nil
 }
 
-func (us *UploadService) processValidation(
+func (us *Service) processValidation(
 	hook *tusd.HookEvent,
 	eventMsg *events.UploadEventMsg,
 	validator func(*tusd.HookEvent, string, string, *models.UploaderConfig) (string, error),

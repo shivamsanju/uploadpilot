@@ -1,21 +1,20 @@
 package config
 
 import (
+	"crypto/tls"
 	"fmt"
 	"os"
 	"strconv"
 
 	"github.com/joho/godotenv"
-	"github.com/uploadpilot/uploadpilot/common/pkg/kms"
-	"github.com/uploadpilot/uploadpilot/common/pkg/pubsub"
+	"github.com/redis/go-redis/v9"
 )
 
 var (
 	// Common
 	Port              int
 	PostgresURI       string
-	EncryptionKey     []byte
-	EncryptionKeyStr  string
+	EncryptionKey     string
 	RedisAddr         string
 	RedisUsername     string
 	RedisPassword     string
@@ -40,7 +39,7 @@ var (
 	S3Region     string
 
 	//Event Bus
-	EventBusRedisConfig *pubsub.RedisConfig
+	EventBusRedisConfig *redis.Options
 
 	// Temporal
 	TemporalNamespace string
@@ -64,13 +63,7 @@ func Init() error {
 		return fmt.Errorf("invalid PORT: %w", err)
 	}
 
-	key := os.Getenv("ENCRYPTION_KEY")
-	keyBytes, err := kms.GetValidKey(key)
-	if err != nil {
-		return fmt.Errorf("invalid ENCRYPTION_KEY: %w", err)
-	}
-	EncryptionKey = keyBytes
-	EncryptionKeyStr = os.Getenv("ENCRYPTION_KEY")
+	EncryptionKey = os.Getenv("ENCRYPTION_KEY")
 	PostgresURI = os.Getenv("POSTGRES_URI")
 	RedisAddr = os.Getenv("REDIS_HOST")
 	RedisUsername = os.Getenv("REDIS_USER")
@@ -116,11 +109,13 @@ func Init() error {
 	ebRedisPassword := os.Getenv("EVENT_BUS_REDIS_PASSWORD")
 	ebRedisTls := os.Getenv("EVENT_BUS_REDIS_TLS") == "true"
 
-	EventBusRedisConfig = &pubsub.RedisConfig{
-		Addr:     &ebRedisAddr,
-		Username: &ebRedisUsername,
-		Password: &ebRedisPassword,
-		TLS:      ebRedisTls,
+	EventBusRedisConfig = &redis.Options{
+		Addr:     ebRedisAddr,
+		Username: ebRedisUsername,
+		Password: ebRedisPassword,
+	}
+	if ebRedisTls {
+		EventBusRedisConfig.TLSConfig = &tls.Config{}
 	}
 
 	// Temporal

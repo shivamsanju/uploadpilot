@@ -2,7 +2,6 @@ package pubsub
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"sync"
 	"time"
@@ -13,13 +12,6 @@ import (
 	commonutils "github.com/uploadpilot/uploadpilot/common/pkg/utils"
 )
 
-type RedisConfig struct {
-	Addr     *string
-	Password *string
-	Username *string
-	TLS      bool
-}
-
 type EventBus[T any] struct {
 	event       string
 	client      *redis.Client
@@ -29,19 +21,7 @@ type EventBus[T any] struct {
 	wg          *sync.WaitGroup
 }
 
-func NewEventBus[T any](event, consumerKey string, c *RedisConfig) *EventBus[T] {
-	opt := &redis.Options{
-		Addr:     *c.Addr,
-		Password: *c.Password,
-		Username: *c.Username,
-	}
-
-	if c.TLS {
-		opt.TLSConfig = &tls.Config{}
-	}
-
-	client := redis.NewClient(opt)
-
+func NewEventBus[T any](event, consumerKey string, client *redis.Client) *EventBus[T] {
 	return &EventBus[T]{
 		event:       event,
 		client:      client,

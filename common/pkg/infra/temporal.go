@@ -10,35 +10,35 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-type TemporalConfig struct {
+type TemporalOptions struct {
 	Namespace string
 	HostPort  string
 	APIKey    string
 }
 
-func NewTemporalClient(cfg *TemporalConfig) (client.Client, error) {
+func NewTemporalClient(opts *TemporalOptions) (client.Client, error) {
 	// The client is a heavyweight object that should be created once per process.
 	c, err := client.Dial(client.Options{
-		Namespace: cfg.Namespace,
-		HostPort:  cfg.HostPort,
+		Namespace: opts.Namespace,
+		HostPort:  opts.HostPort,
 		ConnectionOptions: client.ConnectionOptions{
 			TLS: &tls.Config{},
 			DialOptions: []grpc.DialOption{
 				grpc.WithUnaryInterceptor(
-					func(ctx context.Context, method string, req any, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
+					func(ctx context.Context, method string, req any, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, grpcOpts ...grpc.CallOption) error {
 						return invoker(
-							metadata.AppendToOutgoingContext(ctx, "temporal-namespace", cfg.Namespace),
+							metadata.AppendToOutgoingContext(ctx, "temporal-namespace", opts.Namespace),
 							method,
 							req,
 							reply,
 							cc,
-							opts...,
+							grpcOpts...,
 						)
 					},
 				),
 			},
 		},
-		Credentials: client.NewAPIKeyStaticCredentials(cfg.APIKey),
+		Credentials: client.NewAPIKeyStaticCredentials(opts.APIKey),
 	})
 	if err != nil {
 		log.Fatalln("Unable to create Temporal client.", err)

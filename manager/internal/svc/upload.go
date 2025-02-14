@@ -4,26 +4,27 @@ import (
 	"context"
 	"strings"
 
-	"github.com/uploadpilot/uploadpilot/common/pkg/db"
+	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
 )
 
 type UploadService struct {
-	upRepo       *db.UploadRepo
-	wsRepo       *db.WorkspaceRepo
-	wsConfigRepo *db.WorkspaceConfigRepo
-	userRepo     *db.UserRepo
-	logRepo      *db.UploadLogsRepo
+	upRepo       *repo.UploadRepo
+	wsRepo       *repo.WorkspaceRepo
+	wsConfigRepo *repo.WorkspaceConfigRepo
+	userRepo     *repo.UserRepo
+	logRepo      *repo.UploadLogsRepo
 }
 
-func NewUploadService() *UploadService {
+func NewUploadService(upRepo *repo.UploadRepo, wsRepo *repo.WorkspaceRepo, wsConfigRepo *repo.WorkspaceConfigRepo,
+	userRepo *repo.UserRepo, logRepo *repo.UploadLogsRepo) *UploadService {
 	return &UploadService{
-		upRepo:       db.NewUploadRepo(),
-		wsRepo:       db.NewWorkspaceRepo(),
-		wsConfigRepo: db.NewWorkspaceConfigRepo(),
-		userRepo:     db.NewUserRepo(),
-		logRepo:      db.NewUploadLogsRepo(),
+		upRepo:       upRepo,
+		wsRepo:       wsRepo,
+		wsConfigRepo: wsConfigRepo,
+		userRepo:     userRepo,
+		logRepo:      logRepo,
 	}
 }
 

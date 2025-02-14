@@ -12,7 +12,6 @@ import {
   TextInput,
   Tooltip,
   SelectProps,
-  LoadingOverlay,
 } from "@mantine/core";
 import { UploaderConfig } from "../../types/uploader";
 import { useForm } from "@mantine/form";
@@ -26,6 +25,7 @@ import { showNotification } from "@mantine/notifications";
 import { MIME_TYPE_ICONS } from "../../utils/fileicons";
 import { DiscardButton } from "../../components/Buttons/DiscardButton";
 import { SaveButton } from "../../components/Buttons/SaveButton";
+import { ContainerOverlay } from "../../components/Overlay";
 
 const authEndpointTooltip = `
 If you have a custom authentication endpoint, enter it here.\n
@@ -126,11 +126,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
       onSubmit={form.onSubmit(handleEditAndSaveButton)}
       onReset={handleResetButton}
     >
-      <LoadingOverlay
-        visible={isPending || isPendingMutation}
-        overlayProps={{ backgroundOpacity: 0 }}
-        zIndex={1000}
-      />
+      <ContainerOverlay visible={isPending || isPendingMutation} />
       <Paper withBorder p="sm" mb={50}>
         <SimpleGrid cols={{ base: 1, xl: 2 }}>
           <Stack p="md">

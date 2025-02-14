@@ -1,6 +1,7 @@
 package events
 
 import (
+	"github.com/redis/go-redis/v9"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/common/pkg/pubsub"
 )
@@ -25,7 +26,7 @@ func NewUploadLogEventMessage(workspaceID, uploadID string, processorID, taskID 
 	}
 }
 
-func NewUploadLogEventBus(c *pubsub.RedisConfig, consumerKey string) *pubsub.EventBus[UploadLogEventMsg] {
+func NewUploadLogEventBus(c *redis.Client, consumerKey string) *pubsub.EventBus[UploadLogEventMsg] {
 	event := "ul_upload_log"
 	return pubsub.NewEventBus[UploadLogEventMsg](event, consumerKey, c)
 }

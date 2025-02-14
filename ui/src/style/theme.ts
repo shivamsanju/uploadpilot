@@ -21,8 +21,19 @@ import {
   ColorInput,
 } from "@mantine/core";
 
-
-type Icolors = readonly [string, string, string, string, string, string, string, string, string, string, ...string[]]
+type Icolors = readonly [
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  string,
+  ...string[]
+];
 
 // const magenta: Icolors = [
 //   "#ffe9f6",
@@ -85,10 +96,8 @@ const lightBlue: Icolors = [
   "#09b8ff",
   "#00a1e4",
   "#008fcd",
-  "#007cb6"
-]
-
-
+  "#007cb6",
+];
 
 export const myAppTheme = createTheme({
   primaryColor: "appcolor",
@@ -104,7 +113,7 @@ export const myAppTheme = createTheme({
     }),
     appcolor: lightBlue,
   },
-  defaultRadius: "md",
+  defaultRadius: 2,
   components: {
     TextInput: TextInput.extend({
       defaultProps: {
@@ -155,12 +164,15 @@ export const myAppTheme = createTheme({
     Button: Button.extend({
       defaultProps: {
         size: "xs",
+        radius: 2,
       },
     }),
+
     Badge: Badge.extend({
       defaultProps: {
         size: "xs",
         variant: "light",
+        radius: 2,
       },
     }),
     Switch: Switch.extend({

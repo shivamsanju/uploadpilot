@@ -6,14 +6,13 @@ import (
 	"strconv"
 
 	"github.com/joho/godotenv"
-	"github.com/uploadpilot/uploadpilot/common/pkg/kms"
 )
 
 var (
 	Port          int
 	PostgresURI   string
 	SecretKey     string
-	EncryptionKey []byte
+	EncryptionKey string
 
 	// Temporal
 	TemporalNamespace string
@@ -41,12 +40,7 @@ func Init() error {
 	PostgresURI = os.Getenv("POSTGRES_URI")
 	SecretKey = os.Getenv("SECRET_KEY")
 
-	key := os.Getenv("ENCRYPTION_KEY")
-	keyBytes, err := kms.GetValidKey(key)
-	if err != nil {
-		return fmt.Errorf("invalid ENCRYPTION_KEY: %w", err)
-	}
-	EncryptionKey = keyBytes
+	EncryptionKey = os.Getenv("ENCRYPTION_KEY")
 
 	// Temporal
 	TemporalNamespace = os.Getenv("TEMPORAL_NAMESPACE")

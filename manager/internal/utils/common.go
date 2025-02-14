@@ -8,29 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/render"
-	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/common/pkg/msg"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
 )
-
-func GetSkipLimitSearchParams(r *http.Request) (skip int, limit int, search string, err error) {
-	query := r.URL.Query()
-	s := query.Get("skip")
-	l := query.Get("limit")
-	search = query.Get("search")
-
-	skip, err = strconv.Atoi(s)
-	if err != nil {
-		return
-	}
-	limit, err = strconv.Atoi(l)
-	if err != nil {
-		return
-	}
-	return
-}
 
 func GetUserDetailsFromContext(ctx context.Context) (*dto.UserContext, error) {
 	userID, ok1 := ctx.Value(dto.UserIDContextKey).(string)
@@ -48,17 +28,6 @@ func GetUserDetailsFromContext(ctx context.Context) (*dto.UserContext, error) {
 	}, nil
 }
 
-func HandleHttpError(w http.ResponseWriter, r *http.Request, statusCode int, err error) {
-	reqID := middleware.GetReqID(r.Context())
-	infra.Log.Errorf("request with id [%s] failed: %s", reqID, err.Error())
-	render.Status(r, statusCode)
-	infra.Log.Infof("STATUS: %d", statusCode)
-	render.JSON(w, r, &dto.ErrorResponse{
-		RequestID: reqID,
-		Message:   err.Error(),
-	})
-}
-
 func GetStatusLabel(status int) string {
 	switch {
 	case status >= 100 && status < 300:
@@ -72,6 +41,23 @@ func GetStatusLabel(status int) string {
 	default:
 		return fmt.Sprintf("%d Unknown", status)
 	}
+}
+
+func GetSkipLimitSearchParams(r *http.Request) (skip int, limit int, search string, err error) {
+	query := r.URL.Query()
+	s := query.Get("skip")
+	l := query.Get("limit")
+	search = query.Get("search")
+
+	skip, err = strconv.Atoi(s)
+	if err != nil {
+		return
+	}
+	limit, err = strconv.Atoi(l)
+	if err != nil {
+		return
+	}
+	return
 }
 
 func ExtractKeyValuePairs(search string) (map[string]string, error) {

@@ -12,10 +12,11 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/config"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/svc"
 )
 
-func Init() (*http.Server, error) {
-	h := Newhandler()
+func InitWebserver(services *svc.Services) (*http.Server, error) {
+	h := Newhandler(services.UploadService, services.ConfigService)
 
 	router := chi.NewRouter()
 	router.Use(middleware.Recoverer)

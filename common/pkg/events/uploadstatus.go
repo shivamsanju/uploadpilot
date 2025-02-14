@@ -1,6 +1,9 @@
 package events
 
-import "github.com/uploadpilot/uploadpilot/common/pkg/pubsub"
+import (
+	"github.com/redis/go-redis/v9"
+	"github.com/uploadpilot/uploadpilot/common/pkg/pubsub"
+)
 
 type UploadEventMsg struct {
 	WorkspaceID string
@@ -14,7 +17,7 @@ func NewUploadEventMessage(workspaceID, uploadID, status string, message *string
 	return &UploadEventMsg{WorkspaceID: workspaceID, UploadID: uploadID, Status: status, Message: message, Error: err}
 }
 
-func NewUploadStatusEvent(c *pubsub.RedisConfig, consumerKey string) *pubsub.EventBus[UploadEventMsg] {
+func NewUploadStatusEvent(c *redis.Client, consumerKey string) *pubsub.EventBus[UploadEventMsg] {
 	event := "up_upload_event"
 	return pubsub.NewEventBus[UploadEventMsg](event, consumerKey, c)
 }

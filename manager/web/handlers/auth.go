@@ -9,12 +9,12 @@ import (
 	"github.com/go-chi/render"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
-	"github.com/uploadpilot/uploadpilot/common/pkg/db"
 	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/common/pkg/models"
 	"github.com/uploadpilot/uploadpilot/manager/internal/auth"
 	"github.com/uploadpilot/uploadpilot/manager/internal/config"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/uploadpilot/manager/internal/svc"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
 	"golang.org/x/net/context"
 )
@@ -22,12 +22,12 @@ import (
 var TOKEN_EXPIRY_DURATION = time.Hour * 24 * 30
 
 type authHandler struct {
-	userRepo *db.UserRepo
+	userSvc *svc.UserService
 }
 
-func NewAuthHandler() *authHandler {
+func NewAuthHandler(userSvc *svc.UserService) *authHandler {
 	return &authHandler{
-		userRepo: db.NewUserRepo(),
+		userSvc: userSvc,
 	}
 }
 
@@ -35,7 +35,7 @@ func (h *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 	provider := chi.URLParam(r, "provider")
 	r = r.WithContext(context.WithValue(r.Context(), "provider", provider))
 	if user, err := gothic.CompleteUserAuth(w, r); err == nil {
-		usr, err := h.userRepo.GetByEmail(r.Context(), user.Email)
+		usr, err := h.userSvc.GetUserByEmail(r.Context(), user.Email)
 		if err != nil {
 			redirectWithError(w, r, fmt.Errorf("failed to get user"))
 			return
@@ -62,7 +62,7 @@ func (h *authHandler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	usr, err := h.userRepo.GetByEmail(r.Context(), user.Email)
+	usr, err := h.userSvc.GetUserByEmail(r.Context(), user.Email)
 	if err != nil {
 		redirectWithError(w, r, err)
 		return
@@ -70,7 +70,7 @@ func (h *authHandler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 
 	if usr == nil || usr.ID == "" {
 		usr = mapUser(&user)
-		if err := h.userRepo.Create(r.Context(), usr); err != nil {
+		if err := h.userSvc.CreateUser(r.Context(), usr); err != nil {
 			redirectWithError(w, r, err)
 			return
 		}
@@ -101,7 +101,7 @@ func (h *authHandler) LogoutProvider(w http.ResponseWriter, r *http.Request) {
 
 func (h *authHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 	userID := r.Context().Value(dto.UserIDContextKey).(string)
-	cb, err := h.userRepo.GetByUserID(r.Context(), userID)
+	cb, err := h.userSvc.GetUserDetails(r.Context(), userID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
