@@ -2,8 +2,6 @@ module github.com/uploadpilot/uploadpilot/momentum
 
 go 1.23.2
 
-replace github.com/uploadpilot/uploadpilot/common v0.0.0 => ../common
-
 replace github.com/uploadpilot/uploadpilot/go-core/pubsub v0.0.0 => ../go-core/pubsub
 
 replace github.com/uploadpilot/uploadpilot/go-core/dsl v0.0.0 => ../go-core/dsl

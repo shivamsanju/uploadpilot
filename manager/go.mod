@@ -8,8 +8,6 @@ replace github.com/uploadpilot/uploadpilot/go-core/common v0.0.0 => ../go-core/c
 
 replace github.com/uploadpilot/uploadpilot/go-core/dsl v0.0.0 => ../go-core/dsl
 
-replace github.com/uploadpilot/uploadpilot/common v0.0.0 => ../common
-
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.29.6
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.59
@@ -22,7 +20,6 @@ require (
 	github.com/markbates/goth v1.80.0
 	github.com/quasoft/memstore v0.0.0-20191010062613-2bce066d2b0b
 	github.com/redis/go-redis/v9 v9.7.0
-	github.com/uploadpilot/uploadpilot/common v0.0.0
 	github.com/uploadpilot/uploadpilot/go-core/common v0.0.0
 	github.com/uploadpilot/uploadpilot/go-core/db v0.0.0
 	github.com/uploadpilot/uploadpilot/go-core/dsl v0.0.0

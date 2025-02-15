@@ -10,8 +10,6 @@ replace github.com/uploadpilot/uploadpilot/go-core/dsl v0.0.0 => ../go-core/dsl
 
 replace github.com/uploadpilot/uploadpilot/go-core/common v0.0.0 => ../go-core/common
 
-replace github.com/uploadpilot/uploadpilot/common v0.0.0 => ../common
-
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.29.6
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.59
