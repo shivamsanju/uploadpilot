@@ -8,6 +8,7 @@ func NewLogger() (*zap.SugaredLogger, error) {
 		return nil, err
 	}
 	defer logger.Sync()
+	zap.ReplaceGlobals(logger)
 	sugar := logger.Sugar()
 	return sugar, nil
 

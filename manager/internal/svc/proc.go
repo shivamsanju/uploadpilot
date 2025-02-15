@@ -3,6 +3,7 @@ package svc
 import (
 	"context"
 
+	"github.com/uploadpilot/uploadpilot/go-core/common/tasks"
 	"github.com/uploadpilot/uploadpilot/go-core/common/validator"
 	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
 	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
@@ -90,4 +91,12 @@ func (s *ProcessorService) EditNameAndTrigger(ctx context.Context, workspaceID, 
 	patch := map[string]interface{}{"name": update.Name, "triggers": update.Triggers}
 	patch["updated_by"] = user.UserID
 	return s.procRepo.Patch(ctx, workspaceID, processorID, patch)
+}
+
+func (s *ProcessorService) GetAllTasks(ctx context.Context) []tasks.Task {
+	var tsks []tasks.Task
+	for _, task := range tasks.TaskCatalog {
+		tsks = append(tsks, *task)
+	}
+	return tsks
 }

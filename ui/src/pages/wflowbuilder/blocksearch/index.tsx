@@ -10,19 +10,23 @@ import {
   Button,
 } from "@mantine/core";
 import { useState, useEffect } from "react";
-import { useGetAllProcessingBlocks } from "../../../apis/processors";
+import { useGetAllProcessingTasks } from "../../../apis/processors";
 import { useParams } from "react-router-dom";
 import classes from "./BlockSearch.module.css";
 import { getBlockIcon } from "../../../utils/blockicon";
-import { useWorkflowBuilderV2 } from "../../../context/WflowEditorContextV2";
 
-export const BlockSearch = ({ processorId }: { processorId: string }) => {
+export const BlockSearch = ({
+  processorId,
+  editor,
+}: {
+  processorId: string;
+  editor: any;
+}) => {
   const { workspaceId } = useParams();
-  const { isPending, error, blocks } = useGetAllProcessingBlocks(
+  const { isPending, error, blocks } = useGetAllProcessingTasks(
     workspaceId || ""
   );
   const [filtered, setFiltered] = useState<any[]>(blocks || []);
-  const { addActivity } = useWorkflowBuilderV2();
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const searchText = e.target.value;
@@ -38,16 +42,41 @@ export const BlockSearch = ({ processorId }: { processorId: string }) => {
   };
 
   const handleAddTask = (item: any) => {
-    addActivity({
-      id: crypto.randomUUID(),
-      key: item?.key,
-      label: item?.label,
-      retries: 0,
-      timeout: 0,
-      continueOnError: false,
-      arguments: [],
-      result: "",
-    });
+    if (!item || !editor) return;
+    // Get base indentation from the current line
+
+    const model = editor.getModel();
+    const selection = editor.getSelection();
+    const position = selection.getStartPosition();
+    const lineContent = model.getLineContent(position.lineNumber);
+    const baseIndentation = lineContent.match(/^\s*/)[0];
+
+    // Multiline text to insert
+    const text = [
+      `- activity:`,
+      `\tname: ${item.name}`,
+      `\targuments:`,
+      `\t\t- input: ${item.name}_input`,
+      `\tresult: ${item.name}_result`,
+      ``,
+    ]
+      .map((line, index) => (index === 0 ? line : baseIndentation + line)) // preserve indentation for all lines except the first one
+      .join("\n");
+
+    const id = { major: 1, minor: 1 };
+    const op = {
+      identifier: id,
+      range: {
+        startLineNumber: selection?.selectionStartLineNumber || 1,
+        startColumn: selection?.selectionStartColumn || 1,
+        endLineNumber: selection?.endLineNumber || 1,
+        endColumn: selection?.endColumn || 1,
+      },
+      text,
+      forceMoveMarkers: true,
+    };
+    editor.executeEdits("my-source", [op]);
+    editor.focus();
   };
 
   useEffect(() => {
@@ -94,11 +123,11 @@ export const BlockSearch = ({ processorId }: { processorId: string }) => {
             >
               <Group flex={1}>
                 <ThemeIcon variant="default" size={80} c="dimmed">
-                  {getBlockIcon(item?.key, 50)}
+                  {getBlockIcon(item?.name, 50)}
                 </ThemeIcon>
                 <Box w="70%">
                   <Text size="sm" mb={5}>
-                    {item?.label}
+                    {item?.displayName}
                   </Text>
                   <Text opacity={0.7} size="xs" lineClamp={3}>
                     {item?.description}

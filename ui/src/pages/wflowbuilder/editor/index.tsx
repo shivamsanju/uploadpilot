@@ -14,15 +14,20 @@ import { DiscardButton } from "../../../components/Buttons/DiscardButton";
 import { SaveButton } from "../../../components/Buttons/SaveButton";
 import { useUpdateProcessorWorkflowMutation } from "../../../apis/processors";
 import { validateYaml } from "./schema";
+import { showConfirmationPopup } from "../../../components/Popups/ConfirmPopup";
 
 type Props = {
   workspaceId: string;
   processor: any;
+  editor: any;
+  setEditor: any;
 };
 
 export const WorkflowYamlEditor: React.FC<Props> = ({
   processor,
   workspaceId,
+  setEditor,
+  editor,
 }) => {
   const err = validateYaml(processor?.workflow || "");
   const [yamlContent, setYamlContent] = useState<string>(
@@ -30,32 +35,8 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
   );
   const [error, setError] = useState<string | null>(err);
   const { colorScheme } = useMantineColorScheme();
-  const [editor, setEditor] = React.useState<any>(null);
 
   const { mutateAsync, isPending } = useUpdateProcessorWorkflowMutation();
-
-  const insertText = () => {
-    const text = `variables:
-    arg1: value1
-    arg2: value2
-    arg3: value3`;
-    if (editor) {
-      const selection = editor.getSelection();
-      const id = { major: 1, minor: 1 };
-      const op = {
-        identifier: id,
-        range: {
-          startLineNumber: selection?.selectionStartLineNumber || 1,
-          startColumn: selection?.selectionStartColumn || 1,
-          endLineNumber: selection?.endLineNumber || 1,
-          endColumn: selection?.endColumn || 1,
-        },
-        text,
-        forceMoveMarkers: true,
-      };
-      editor.executeEdits("my-source", [op]);
-    }
-  };
 
   const editorMount: OnMount = (editorL) => {
     setEditor(editorL);
@@ -84,6 +65,16 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
     }
   };
 
+  const discardChanges = () => {
+    showConfirmationPopup({
+      message:
+        "Are you sure you want to discard the changes? this is irreversible.",
+      onOk: () => {
+        setYamlContent(processor?.workflow || "");
+      },
+    });
+  };
+
   return (
     <Box>
       <LoadingOverlay
@@ -92,7 +83,7 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
         zIndex={1000}
       />
       <Group justify="space-between" align="center" p="xs">
-        <Box>
+        <Box w="60%">
           <Title order={4} opacity={0.8}>
             Steps
           </Title>
@@ -112,7 +103,7 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
           </Group>
         </Box>
         <Group gap="md">
-          <DiscardButton onClick={insertText} />
+          <DiscardButton onClick={discardChanges} />
           <SaveButton onClick={saveYaml} />
         </Group>
       </Group>

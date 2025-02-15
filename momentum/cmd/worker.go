@@ -33,7 +33,9 @@ func main() {
 
 	w := worker.New(infra.TemporalClient, "dsl", worker.Options{})
 	w.RegisterWorkflow(dsl.SimpleDSLWorkflow)
-	w.RegisterActivity(&activities.SampleActivities{})
+
+	// Register all activities
+	activities.RegisterActivities(w)
 
 	err = w.Run(worker.InterruptCh())
 	if err != nil {

@@ -10,16 +10,16 @@ import (
 )
 
 func ValidateUploadSizeLimits(hook *tusd.HookEvent, workspaceID, uploadID string, config *models.UploaderConfig) (string, error) {
-	if *config.MaxFileSize > 0 && hook.Upload.Size > int64(*config.MaxFileSize) {
+	if config.MaxFileSize != nil && *config.MaxFileSize > 0 && hook.Upload.Size > int64(*config.MaxFileSize) {
 		return "", fmt.Errorf(msg.MaxFileSizeExceeded, hook.Upload.Size, config.MaxFileSize)
 	}
 
-	if *config.MinFileSize > 0 && hook.Upload.Size < int64(*config.MinFileSize) {
+	if config.MinFileSize != nil && *config.MinFileSize > 0 && hook.Upload.Size < int64(*config.MinFileSize) {
 		return "", fmt.Errorf(msg.MinFileSizeNotMet, hook.Upload.Size, config.MinFileSize)
 	}
 
 	maxFileSize := fmt.Sprintf("%d", config.MaxFileSize)
-	if *config.MaxFileSize == 0 {
+	if config.MaxFileSize != nil && *config.MaxFileSize == 0 {
 		maxFileSize = "infinity"
 	}
 

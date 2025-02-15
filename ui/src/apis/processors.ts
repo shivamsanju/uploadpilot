@@ -205,7 +205,7 @@ export const useEnableDisableProcessorMutation = () => {
 
 // Editor related
 
-export const useGetAllProcessingBlocks = (workspaceId: string) => {
+export const useGetAllProcessingTasks = (workspaceId: string) => {
   const {
     isPending,
     error,
@@ -217,7 +217,7 @@ export const useGetAllProcessingBlocks = (workspaceId: string) => {
         return Promise.reject(new Error("workspaceId is required"));
       }
       return axiosInstance
-        .get(`/workspaces/${workspaceId}/processors/blocks`)
+        .get(`/workspaces/${workspaceId}/processors/tasks`)
         .then((res) => res.data);
     },
   });
