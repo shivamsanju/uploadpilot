@@ -1,7 +1,7 @@
 package tasks
 
 import (
-	commonutils "github.com/uploadpilot/uploadpilot/common/pkg/utils"
+	commonutils "github.com/uploadpilot/uploadpilot/go-core/common/utils"
 )
 
 var tasks = map[string]interface{}{

@@ -13,12 +13,12 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/uploadpilot/uploadpilot/common/pkg/db"
-	cacheplugins "github.com/uploadpilot/uploadpilot/common/pkg/db/plugins/cache"
-	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
-	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/driver"
+	cacheplugins "github.com/uploadpilot/uploadpilot/go-core/db/pkg/plugins/cache"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
 	"github.com/uploadpilot/uploadpilot/manager/internal/auth"
 	"github.com/uploadpilot/uploadpilot/manager/internal/config"
+	"github.com/uploadpilot/uploadpilot/manager/internal/infra"
 	"github.com/uploadpilot/uploadpilot/manager/internal/svc"
 	"github.com/uploadpilot/uploadpilot/manager/web"
 )
@@ -54,7 +54,7 @@ func main() {
 	}(wg)
 
 	// Start the web server.
-	infra.Log.Infof("starting web server on port %d", config.Port)
+	log.Printf("starting web server on port %d\n", config.Port)
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatal(fmt.Errorf("server initialization failed: %w", err))
 	}
@@ -99,7 +99,7 @@ func initialize() (*http.Server, error) {
 	}
 
 	// Initialize database
-	db, err := db.NewPostgresDB(config.PostgresURI, &db.DBConfig{
+	pgDriver, err := driver.NewPostgresDriver(config.PostgresURI, &driver.DBConfig{
 		MaxOpenConn:     10,
 		MaxIdleConn:     5,
 		ConnMaxLifeTime: time.Minute * 30,
@@ -111,10 +111,10 @@ func initialize() (*http.Server, error) {
 
 	// Add caching layer
 	rcp := cacheplugins.NewRedisCachesPlugin(infra.RedisClient)
-	db.Orm.Use(rcp)
+	pgDriver.Orm.Use(rcp)
 
 	// Initialize the web server.
-	repos := repo.NewRepositories(db)
+	repos := repo.NewRepositories(pgDriver)
 	svcs := svc.NewServices(repos)
 	srv, err := web.InitWebServer(svcs)
 	if err != nil {

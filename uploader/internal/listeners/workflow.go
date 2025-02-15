@@ -4,33 +4,34 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/uploadpilot/uploadpilot/common/pkg/events"
-	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
-	"github.com/uploadpilot/uploadpilot/common/pkg/models"
-	"github.com/uploadpilot/uploadpilot/common/pkg/pubsub"
-	commonutils "github.com/uploadpilot/uploadpilot/common/pkg/utils"
+	commonutils "github.com/uploadpilot/uploadpilot/go-core/common/utils"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/uploadpilot/go-core/pubsub/pkg/events"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/infra"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/svc/processor"
 )
 
 type WorkflowListener struct {
-	logEb    *pubsub.EventBus[events.UploadLogEventMsg]
-	uploadEb *pubsub.EventBus[events.UploadEventMsg]
-	procSvc  *processor.Service
+	uploadEvent    *events.UploadStatusEvent
+	uploadLogEvent *events.UploadLogEvent
+	procSvc        *processor.Service
 }
 
 func NewWorkflowListener(procSvc *processor.Service) *WorkflowListener {
 	return &WorkflowListener{
-		procSvc:  procSvc,
-		uploadEb: events.NewUploadStatusEvent(infra.RedisClient, uuid.New().String()),
-		logEb:    events.NewUploadLogEventBus(infra.RedisClient, uuid.New().String()),
+		procSvc:        procSvc,
+		uploadEvent:    events.NewUploadStatusEvent(infra.RedisClient),
+		uploadLogEvent: events.NewUploadLogEvent(infra.RedisClient),
 	}
 }
 
 func (l *WorkflowListener) Start() {
 	defer commonutils.Recover()
 	infra.Log.Info("starting upload Workflow listener...")
-	group := "upload-workflow-listener"
-	l.uploadEb.Subscribe(group, l.WorkflowTriggerHandler)
+
+	consumerGroup := "upload-workflow-listener"
+	consumerKey := uuid.NewString()
+	l.uploadEvent.Subscribe(consumerGroup, consumerKey, l.WorkflowTriggerHandler)
 }
 
 func (l *WorkflowListener) WorkflowTriggerHandler(msg *events.UploadEventMsg) error {
@@ -42,7 +43,7 @@ func (l *WorkflowListener) WorkflowTriggerHandler(msg *events.UploadEventMsg) er
 		}
 		for _, processor := range processors {
 			l.procSvc.TriggerWorkflow(ctx, processor.Workflow)
-			l.logEb.Publish(events.NewUploadLogEventMessage(msg.WorkspaceID, msg.UploadID, &processor.ID, nil, "workflow triggered", models.UploadLogLevelInfo))
+			l.uploadLogEvent.Publish(msg.WorkspaceID, msg.UploadID, &processor.ID, nil, "workflow triggered", string(models.UploadLogLevelInfo))
 		}
 	}
 

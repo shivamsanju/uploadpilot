@@ -10,7 +10,7 @@ import {
   Button,
 } from "@mantine/core";
 import { useState, useEffect } from "react";
-import { useGetAllProcBlocks } from "../../../apis/processors";
+import { useGetAllProcessingBlocks } from "../../../apis/processors";
 import { useParams } from "react-router-dom";
 import classes from "./BlockSearch.module.css";
 import { getBlockIcon } from "../../../utils/blockicon";
@@ -18,7 +18,9 @@ import { useWorkflowBuilderV2 } from "../../../context/WflowEditorContextV2";
 
 export const BlockSearch = ({ processorId }: { processorId: string }) => {
   const { workspaceId } = useParams();
-  const { isPending, error, blocks } = useGetAllProcBlocks(workspaceId || "");
+  const { isPending, error, blocks } = useGetAllProcessingBlocks(
+    workspaceId || ""
+  );
   const [filtered, setFiltered] = useState<any[]>(blocks || []);
   const { addActivity } = useWorkflowBuilderV2();
 

@@ -11,10 +11,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/uploadpilot/uploadpilot/common/pkg/db"
-	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
-	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
+	"github.com/redis/go-redis/v9"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/driver"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/config"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/infra"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/listeners"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/svc"
 	"github.com/uploadpilot/uploadpilot/uploader/web"
@@ -79,15 +80,22 @@ func initServices() (*http.Server, error) {
 		APIKey:    config.TemporalAPIKey,
 	}
 
+	redisOpts := &redis.Options{
+		Addr:     config.RedisAddr,
+		Username: config.RedisUsername,
+		Password: config.RedisPassword,
+	}
+
 	if err := infra.Init(&infra.InfraOpts{
 		S3Opts:       s3Opts,
 		TemporalOpts: temporalOpts,
+		RedisOpts:    redisOpts,
 	}); err != nil {
 		return nil, wrapError("infra initialization failed", err)
 	}
 
 	// Initialize database.
-	db, err := db.NewPostgresDB(config.PostgresURI, &db.DBConfig{
+	pgDriver, err := driver.NewPostgresDriver(config.PostgresURI, &driver.DBConfig{
 		MaxOpenConn:     10,
 		MaxIdleConn:     5,
 		ConnMaxLifeTime: time.Minute * 30,
@@ -98,7 +106,7 @@ func initServices() (*http.Server, error) {
 	}
 
 	// Initialize the services
-	repos := repo.NewRepositories(db)
+	repos := repo.NewRepositories(pgDriver)
 	svcs := svc.NewServices(repos)
 
 	// Initialize listeners.

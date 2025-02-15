@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
-	"github.com/uploadpilot/uploadpilot/common/pkg/models"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
 )
 

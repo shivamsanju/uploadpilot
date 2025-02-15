@@ -6,38 +6,40 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/uploadpilot/uploadpilot/common/pkg/events"
-	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
-	"github.com/uploadpilot/uploadpilot/common/pkg/models"
-	"github.com/uploadpilot/uploadpilot/common/pkg/pubsub"
-	commonutils "github.com/uploadpilot/uploadpilot/common/pkg/utils"
+	commonutils "github.com/uploadpilot/uploadpilot/go-core/common/utils"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/uploadpilot/go-core/pubsub/pkg/events"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/infra"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/svc/upload"
 )
 
 type UploadLogsListener struct {
-	logEb         *pubsub.EventBus[events.UploadLogEventMsg]
-	uploadSvc     *upload.Service
-	logBuffer     []*models.UploadLog
-	flushInterval time.Duration
-	bufferSize    int
-	mu            sync.Mutex
+	uploadLogEvent *events.UploadLogEvent
+	uploadSvc      *upload.Service
+	logBuffer      []*models.UploadLog
+	flushInterval  time.Duration
+	bufferSize     int
+	mu             sync.Mutex
 }
 
 func NewUploadLogsListener(flushInterval time.Duration, bufferSize int, uploadSvc *upload.Service) *UploadLogsListener {
 	return &UploadLogsListener{
-		uploadSvc:     uploadSvc,
-		logEb:         events.NewUploadLogEventBus(infra.RedisClient, uuid.New().String()),
-		logBuffer:     make([]*models.UploadLog, 0),
-		flushInterval: flushInterval,
-		bufferSize:    bufferSize,
-		mu:            sync.Mutex{},
+		uploadSvc:      uploadSvc,
+		uploadLogEvent: events.NewUploadLogEvent(infra.RedisClient),
+		logBuffer:      make([]*models.UploadLog, 0),
+		flushInterval:  flushInterval,
+		bufferSize:     bufferSize,
+		mu:             sync.Mutex{},
 	}
 }
 
 func (l *UploadLogsListener) Start() {
 	defer commonutils.Recover()
-	group := "upload-logs-listener"
-	l.logEb.Subscribe(group, l.logHandler)
+
+	consumerGroup := "upload-logs-listener"
+	consumerKey := uuid.NewString()
+	l.uploadLogEvent.Subscribe(consumerGroup, consumerKey, l.logHandler)
+
 	go l.startBatchFlushInterval(l.flushInterval)
 }
 
@@ -50,7 +52,7 @@ func (l *UploadLogsListener) logHandler(msg *events.UploadLogEventMsg) error {
 		WorkspaceID: msg.WorkspaceID,
 		UploadID:    msg.UploadID,
 		Message:     msg.Message,
-		Level:       msg.Level,
+		Level:       models.UploadLogLevel(msg.Level),
 		Timestamp:   time.Now(),
 	}
 

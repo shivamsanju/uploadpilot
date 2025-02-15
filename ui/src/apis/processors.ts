@@ -205,7 +205,7 @@ export const useEnableDisableProcessorMutation = () => {
 
 // Editor related
 
-export const useGetAllProcBlocks = (workspaceId: string) => {
+export const useGetAllProcessingBlocks = (workspaceId: string) => {
   const {
     isPending,
     error,

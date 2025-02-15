@@ -6,8 +6,8 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
-	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/dto"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/infra"
 )
 
 func HandleHttpError(w http.ResponseWriter, r *http.Request, statusCode int, err error) {

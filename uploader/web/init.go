@@ -10,8 +10,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/config"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/infra"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/svc"
 )
 

@@ -1,6 +1,6 @@
 package svc
 
-import "github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
+import "github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
 
 type Services struct {
 	WorkspaceService *WorkspaceService

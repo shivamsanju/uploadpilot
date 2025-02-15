@@ -5,11 +5,11 @@ import (
 	"log"
 
 	"github.com/google/uuid"
-	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
-	"github.com/uploadpilot/uploadpilot/common/pkg/dsl"
-	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
-	"github.com/uploadpilot/uploadpilot/common/pkg/models"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
+	"github.com/uploadpilot/uploadpilot/go-core/dsl"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/dto"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/infra"
 	"go.temporal.io/sdk/client"
 	"gopkg.in/yaml.v3"
 )

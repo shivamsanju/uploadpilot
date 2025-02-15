@@ -5,16 +5,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/mitchellh/mapstructure"
 	tusd "github.com/tus/tusd/v2/pkg/handler"
-	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
-	dbutils "github.com/uploadpilot/uploadpilot/common/pkg/db/utils"
-	"github.com/uploadpilot/uploadpilot/common/pkg/events"
-	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
-	"github.com/uploadpilot/uploadpilot/common/pkg/models"
-	"github.com/uploadpilot/uploadpilot/common/pkg/msg"
-	"github.com/uploadpilot/uploadpilot/common/pkg/pubsub"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
+	dbutils "github.com/uploadpilot/uploadpilot/go-core/db/pkg/utils"
+	"github.com/uploadpilot/uploadpilot/go-core/pubsub/pkg/events"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/infra"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/msg"
 	uploaderconfig "github.com/uploadpilot/uploadpilot/uploader/internal/svc/config"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/svc/workspace"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/validations"
@@ -25,8 +23,8 @@ type Service struct {
 	uploadLogsRepo *repo.UploadLogsRepo
 	wsSvc          *workspace.Service
 	configSvc      *uploaderconfig.Service
-	logEventBus    *pubsub.EventBus[events.UploadLogEventMsg]
-	uploadEb       *pubsub.EventBus[events.UploadEventMsg]
+	uploadEvent    *events.UploadStatusEvent
+	uploadLogEvent *events.UploadLogEvent
 }
 
 func NewUploadService(uploadRepo *repo.UploadRepo, uploadLogsRepo *repo.UploadLogsRepo,
@@ -36,8 +34,8 @@ func NewUploadService(uploadRepo *repo.UploadRepo, uploadLogsRepo *repo.UploadLo
 		uploadLogsRepo: uploadLogsRepo,
 		wsSvc:          workspace.NewWorkspaceService(workspaceRepo),
 		configSvc:      uploaderconfig.NewConfigService(configRepo),
-		uploadEb:       events.NewUploadStatusEvent(infra.RedisClient, uuid.New().String()),
-		logEventBus:    events.NewUploadLogEventBus(infra.RedisClient, uuid.New().String()),
+		uploadEvent:    events.NewUploadStatusEvent(infra.RedisClient),
+		uploadLogEvent: events.NewUploadLogEvent(infra.RedisClient),
 	}
 }
 
@@ -71,8 +69,6 @@ func (us *Service) CreateUpload(hook *tusd.HookEvent) (*models.Upload, error) {
 		Metadata:    map[string]interface{}{},
 	}
 
-	eventMsg := events.NewUploadEventMessage(workspaceID, upload.ID, string(models.UploadStatusInProgress), nil, nil)
-
 	metadata, err := us.extractMetadataFromTusdEvent(hook)
 	if err != nil {
 		upload.Status = models.UploadStatusFailed
@@ -80,8 +76,7 @@ func (us *Service) CreateUpload(hook *tusd.HookEvent) (*models.Upload, error) {
 			infra.Log.Errorf(msg.FailedToCreateUpload, err.Error())
 			return nil, err
 		}
-		eventMsg.Status = string(models.UploadStatusFailed)
-		us.uploadEb.Publish(eventMsg)
+		us.uploadEvent.Publish(workspaceID, upload.ID, string(models.UploadStatusFailed), nil, nil)
 		return nil, err
 	}
 
@@ -91,7 +86,7 @@ func (us *Service) CreateUpload(hook *tusd.HookEvent) (*models.Upload, error) {
 		infra.Log.Errorf("unable to create upload: %s", err)
 		return nil, err
 	}
-	us.uploadEb.Publish(eventMsg)
+	us.uploadEvent.Publish(workspaceID, upload.ID, string(models.UploadStatusInProgress), nil, nil)
 
 	validators := []func(*tusd.HookEvent, string, string, *models.UploaderConfig) (string, error){
 		validations.ValidateUploadSizeLimits,
@@ -100,9 +95,14 @@ func (us *Service) CreateUpload(hook *tusd.HookEvent) (*models.Upload, error) {
 	}
 
 	for _, validator := range validators {
-		if err := us.processValidation(hook, eventMsg, validator, config); err != nil {
+		message, err := validator(hook, workspaceID, upload.ID, config)
+		if err != nil {
+			us.uploadLogEvent.Publish(workspaceID, upload.ID, nil, nil, message, string(models.UploadLogLevelError))
+			us.uploadEvent.Publish(workspaceID, upload.ID, string(models.UploadStatusFailed), nil, nil)
 			return nil, err
 		}
+		us.uploadLogEvent.Publish(workspaceID, upload.ID, nil, nil, message, string(models.UploadLogLevelInfo))
+
 	}
 
 	return upload, nil
@@ -114,8 +114,7 @@ func (us *Service) FinishUpload(ctx context.Context, uploadID string) error {
 		return err
 	}
 	infra.Log.Infof(msg.UploadComplete + ": " + uploadID)
-	eventMsg := events.NewUploadEventMessage(upload.WorkspaceID, upload.ID, string(models.UploadStatusComplete), nil, nil)
-	us.uploadEb.Publish(eventMsg)
+	us.uploadEvent.Publish(upload.WorkspaceID, upload.ID, string(models.UploadStatusComplete), nil, nil)
 	return nil
 }
 
@@ -147,22 +146,4 @@ func (us *Service) extractMetadataFromTusdEvent(hook *tusd.HookEvent) (map[strin
 		return metadata, err
 	}
 	return metadata, nil
-}
-
-func (us *Service) processValidation(
-	hook *tusd.HookEvent,
-	eventMsg *events.UploadEventMsg,
-	validator func(*tusd.HookEvent, string, string, *models.UploaderConfig) (string, error),
-	config *models.UploaderConfig,
-) error {
-	success, err := validator(hook, eventMsg.WorkspaceID, eventMsg.UploadID, config)
-	if err != nil {
-		eventMsg.Status = string(models.UploadStatusFailed)
-		us.uploadEb.Publish(eventMsg)
-		return err
-	}
-	us.logEventBus.Publish(events.NewUploadLogEventMessage(
-		eventMsg.WorkspaceID, eventMsg.UploadID, nil, nil, success, models.UploadLogLevelInfo,
-	))
-	return nil
 }

@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/uploadpilot/uploadpilot/common/pkg/msg"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/uploadpilot/manager/internal/msg"
 )
 
 func GetUserDetailsFromContext(ctx context.Context) (*dto.UserContext, error) {

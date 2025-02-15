@@ -6,9 +6,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/uploadpilot/uploadpilot/common/pkg/models"
-	"github.com/uploadpilot/uploadpilot/common/pkg/tasks"
-	commonutils "github.com/uploadpilot/uploadpilot/common/pkg/utils"
+	commonutils "github.com/uploadpilot/uploadpilot/go-core/common/utils"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/uploadpilot/manager/internal/svc"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
@@ -136,6 +135,6 @@ func (h *processorHandler) DisableProcessor(w http.ResponseWriter, r *http.Reque
 	render.JSON(w, r, true)
 }
 
-func (h *processorHandler) GetProcBlock(w http.ResponseWriter, r *http.Request) {
-	render.JSON(w, r, tasks.GetAllTasks())
+func (h *processorHandler) GetAllProcessingBlocks(w http.ResponseWriter, r *http.Request) {
+	render.JSON(w, r, []interface{}{})
 }

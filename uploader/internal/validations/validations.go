@@ -5,8 +5,8 @@ import (
 	"net/http"
 
 	tusd "github.com/tus/tusd/v2/pkg/handler"
-	"github.com/uploadpilot/uploadpilot/common/pkg/models"
-	"github.com/uploadpilot/uploadpilot/common/pkg/msg"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/msg"
 )
 
 func ValidateUploadSizeLimits(hook *tusd.HookEvent, workspaceID, uploadID string, config *models.UploaderConfig) (string, error) {

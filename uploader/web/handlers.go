@@ -13,7 +13,7 @@ import (
 	uploaderconfig "github.com/uploadpilot/uploadpilot/uploader/internal/svc/config"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/svc/upload"
 
-	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
+	"github.com/uploadpilot/uploadpilot/uploader/internal/infra"
 )
 
 type handler struct {

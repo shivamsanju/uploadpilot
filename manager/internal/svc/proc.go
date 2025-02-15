@@ -3,12 +3,12 @@ package svc
 import (
 	"context"
 
-	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
-	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
-	"github.com/uploadpilot/uploadpilot/common/pkg/models"
-	"github.com/uploadpilot/uploadpilot/common/pkg/validations"
-	"github.com/uploadpilot/uploadpilot/common/pkg/validations/jsonschema"
+	"github.com/uploadpilot/uploadpilot/go-core/common/validator"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
+	"github.com/uploadpilot/uploadpilot/go-core/dsl"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/uploadpilot/manager/internal/infra"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
 	"gopkg.in/yaml.v3"
 )
@@ -61,7 +61,7 @@ func (s *ProcessorService) UpdateWorkflow(ctx context.Context, workspaceID, proc
 		return err
 	}
 
-	if err := validations.ValidateJSONSchema(jsonschema.WorkflowSchema, json); err != nil {
+	if err := validator.ValidateJSONSchema(dsl.DSLSchema, json); err != nil {
 		return err
 	}
 

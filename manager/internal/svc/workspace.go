@@ -5,11 +5,11 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
-	"github.com/uploadpilot/uploadpilot/common/pkg/infra"
-	"github.com/uploadpilot/uploadpilot/common/pkg/models"
-	"github.com/uploadpilot/uploadpilot/common/pkg/msg"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/uploadpilot/manager/internal/infra"
+	"github.com/uploadpilot/uploadpilot/manager/internal/msg"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
 )
 

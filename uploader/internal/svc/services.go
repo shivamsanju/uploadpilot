@@ -1,7 +1,7 @@
 package svc
 
 import (
-	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
 	uploaderconfig "github.com/uploadpilot/uploadpilot/uploader/internal/svc/config"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/svc/processor"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/svc/upload"

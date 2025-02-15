@@ -68,7 +68,7 @@ func Routes(services *svc.Services) *chi.Mux {
 				r.Route("/processors", func(r chi.Router) {
 					r.Get("/", procHandler.GetProcessors)
 					r.Post("/", utils.CreateJSONHandlerWithBody(procHandler.CreateProcessor))
-					r.Get("/blocks", procHandler.GetProcBlock)
+					r.Get("/blocks", procHandler.GetAllProcessingBlocks)
 					r.Route("/{processorId}", func(r chi.Router) {
 						r.Get("/", procHandler.GetProcessorDetailsByID)
 						r.Put("/", procHandler.UpdateProcessor)

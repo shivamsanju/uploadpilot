@@ -1,6 +1,6 @@
 package dto
 
-import "github.com/uploadpilot/uploadpilot/common/pkg/models"
+import "github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
 
 type UploaderConfig struct {
 	models.UploaderConfig

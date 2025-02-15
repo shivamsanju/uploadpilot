@@ -3,7 +3,7 @@ package workspace
 import (
 	"context"
 
-	"github.com/uploadpilot/uploadpilot/common/pkg/db/repo"
+	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
 )
 
 type Service struct {
