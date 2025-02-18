@@ -20,16 +20,20 @@ const DSLSchema = `{
 	"definitions": {
 	  "Statement": {
 		"type": "object",
-		"description": "A building block of the workflow, which can be an activity, sequence, or parallel execution.",
+		"description": "A building block of the workflow, which can be an activity, sequence, parallel execution, condition, or loop.",
 		"properties": {
 		  "activity": { "$ref": "#/definitions/ActivityInvocation" },
 		  "sequence": { "$ref": "#/definitions/Sequence" },
-		  "parallel": { "$ref": "#/definitions/Parallel" }
+		  "parallel": { "$ref": "#/definitions/Parallel" },
+		  "condition": { "$ref": "#/definitions/Condition" },
+		  "loop": { "$ref": "#/definitions/Loop" }
 		},
 		"oneOf": [
 		  { "required": ["activity"] },
 		  { "required": ["sequence"] },
-		  { "required": ["parallel"] }
+		  { "required": ["parallel"] },
+		  { "required": ["condition"] },
+		  { "required": ["loop"] }
 		]
 	  },
 	  "Sequence": {
@@ -54,6 +58,44 @@ const DSLSchema = `{
 		},
 		"required": ["branches"]
 	  },
+	  "Condition": {
+		"type": "object",
+		"description": "Defines a conditional execution block.",
+		"properties": {
+		  "variable": {
+			"type": "string",
+			"description": "The variable to check."
+		  },
+		  "value": {
+			"type": "string",
+			"description": "The expected value to satisfy the condition."
+		  },
+		  "then": { "$ref": "#/definitions/Statement" },
+		  "else": { "$ref": "#/definitions/Statement" }
+		},
+		"required": ["variable", "value", "then", "else"]
+	  },
+	  "Loop": {
+		"type": "object",
+		"description": "Defines a loop execution block.",
+		"properties": {
+		  "breakvariable": {
+			"type": "string",
+			"description": "The variable to check for breaking the loop."
+		  },
+		  "breakvalue": {
+			"type": "string",
+			"description": "The expected value to break the loop."
+		  },
+		  "iterations": {
+			"type": "integer",
+			"minimum": 1,
+			"description": "Number of iterations to run."
+		  },
+		  "body": { "$ref": "#/definitions/Statement" }
+		},
+		"required": ["iterations", "body"]
+	  },
 	  "ActivityInvocation": {
 		"type": "object",
 		"description": "Defines an activity invocation with arguments and execution properties.",
@@ -61,10 +103,6 @@ const DSLSchema = `{
 		  "name": {
 			"type": "string",
 			"description": "The name of the activity to invoke."
-		  },
-		  "label": {
-			"type": "string",
-			"description": "A label for the activity."
 		  },
 		  "arguments": {
 			"type": "array",
@@ -74,20 +112,6 @@ const DSLSchema = `{
 		  "result": {
 			"type": "string",
 			"description": "The name of the variable where the result will be stored."
-		  },
-		  "retries": {
-			"type": "integer",
-			"minimum": 0,
-			"description": "Number of retry attempts allowed."
-		  },
-		  "timeoutMs": {
-			"type": "integer",
-			"minimum": 0,
-			"description": "Timeout for the activity in milliseconds."
-		  },
-		  "continueOnError": {
-			"type": "boolean",
-			"description": "Specifies if execution should continue even after an error."
 		  }
 		},
 		"required": ["name", "arguments"]

@@ -3,42 +3,57 @@ package dsl
 import (
 	"time"
 
+	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 )
 
 type (
-	// Workflow is the type used to express the workflow definition. Variables are a map of valuables. Variables can be
-	// used as input to Activity.
 	Workflow struct {
-		Variables map[string]string
-		Root      Statement
+		Variables map[string]string `json:"variables" yaml:"variables"`
+		Root      Statement         `json:"root" yaml:"root"`
 	}
 
-	// Statement is the building block of dsl workflow. A Statement can be a simple ActivityInvocation or it
-	// could be a Sequence or Parallel.
 	Statement struct {
-		Activity *ActivityInvocation
-		Sequence *Sequence
-		Parallel *Parallel
+		Activity  *ActivityInvocation `json:"activity,omitempty" yaml:"activity,omitempty"`
+		Sequence  *Sequence           `json:"sequence,omitempty" yaml:"sequence,omitempty"`
+		Parallel  *Parallel           `json:"parallel,omitempty" yaml:"parallel,omitempty"`
+		Condition *Condition          `json:"condition,omitempty" yaml:"condition,omitempty"`
+		Loop      *Loop               `json:"loop,omitempty" yaml:"loop,omitempty"`
 	}
 
-	// Sequence consist of a collection of Statements that runs in sequential.
 	Sequence struct {
-		Elements []*Statement
+		Elements []*Statement `json:"elements" yaml:"elements"`
 	}
 
-	// Parallel can be a collection of Statements that runs in parallel.
 	Parallel struct {
-		Branches []*Statement
+		Branches []*Statement `json:"branches" yaml:"branches"`
 	}
 
-	// ActivityInvocation is used to express invoking an Activity. The Arguments defined expected arguments as input to
-	// the Activity, the result specify the name of variable that it will store the result as which can then be used as
-	// arguments to subsequent ActivityInvocation.
+	Condition struct {
+		Variable string     `json:"variable" yaml:"variable"`
+		Value    string     `json:"value" yaml:"value"`
+		Then     *Statement `json:"then,omitempty" yaml:"then,omitempty"`
+		Else     *Statement `json:"else,omitempty" yaml:"else,omitempty"`
+	}
+
+	Loop struct {
+		Iterations    int        `json:"iterations" yaml:"iterations"`
+		Body          *Statement `json:"body" yaml:"body"`
+		BreakVariable string     `json:"breakVariable" yaml:"breakVariable"`
+		BreakValue    string     `json:"breakValue" yaml:"breakValue"`
+	}
+
 	ActivityInvocation struct {
-		Name      string
-		Arguments []string
-		Result    string
+		Name                          string   `json:"name" yaml:"name"`
+		Arguments                     []string `json:"arguments" yaml:"arguments"`
+		Result                        string   `json:"result" yaml:"result"`
+		ScheduleToCloseTimeoutSeconds int64    `json:"scheduleToCloseTimeoutSeconds" yaml:"scheduleToCloseTimeoutSeconds"`
+		ScheduleToStartTimeoutSeconds int64    `json:"scheduleToStartTimeoutSeconds" yaml:"scheduleToStartTimeoutSeconds"`
+		StartToCloseTimeoutSeconds    int64    `json:"startToCloseTimeoutSeconds" yaml:"startToCloseTimeoutSeconds"`
+		MaxRetries                    int32    `json:"maxRetries" yaml:"maxRetries"`
+		RetryBackoffCoefficient       float64  `json:"retryBackoffCoefficient" yaml:"retryBackoffCoefficient"`
+		RetryMaxIntervalSeconds       int64    `json:"retryMaxIntervalSeconds" yaml:"retryMaxIntervalSeconds"`
+		RetryInitialIntervalSeconds   int64    `json:"retryInitialIntervalSeconds" yaml:"retryInitialIntervalSeconds"`
 	}
 
 	executable interface {
@@ -46,18 +61,12 @@ type (
 	}
 )
 
-// SimpleDSLWorkflow workflow definition
 func SimpleDSLWorkflow(ctx workflow.Context, dslWorkflow Workflow) ([]byte, error) {
 	bindings := make(map[string]string)
-	//workflowcheck:ignore Only iterates for building another map
 	for k, v := range dslWorkflow.Variables {
 		bindings[k] = v
 	}
 
-	ao := workflow.ActivityOptions{
-		StartToCloseTimeout: 10 * time.Second,
-	}
-	ctx = workflow.WithActivityOptions(ctx, ao)
 	logger := workflow.GetLogger(ctx)
 
 	err := dslWorkflow.Root.execute(ctx, bindings)
@@ -72,29 +81,63 @@ func SimpleDSLWorkflow(ctx workflow.Context, dslWorkflow Workflow) ([]byte, erro
 
 func (b *Statement) execute(ctx workflow.Context, bindings map[string]string) error {
 	if b.Parallel != nil {
-		err := b.Parallel.execute(ctx, bindings)
-		if err != nil {
-			return err
-		}
+		return b.Parallel.execute(ctx, bindings)
 	}
 	if b.Sequence != nil {
-		err := b.Sequence.execute(ctx, bindings)
-		if err != nil {
-			return err
-		}
+		return b.Sequence.execute(ctx, bindings)
 	}
 	if b.Activity != nil {
-		err := b.Activity.execute(ctx, bindings)
-		if err != nil {
-			return err
+		return b.Activity.execute(ctx, bindings)
+	}
+	if b.Condition != nil {
+		return b.Condition.execute(ctx, bindings)
+	}
+	if b.Loop != nil {
+		return b.Loop.execute(ctx, bindings)
+	}
+	return nil
+}
+
+func (c *Condition) execute(ctx workflow.Context, bindings map[string]string) error {
+	if bindings[c.Variable] == c.Value {
+		if c.Then != nil {
+			return c.Then.execute(ctx, bindings)
+		}
+	} else {
+		if c.Else != nil {
+			return c.Else.execute(ctx, bindings)
 		}
 	}
 	return nil
 }
 
-func (a ActivityInvocation) execute(ctx workflow.Context, bindings map[string]string) error {
+func (l *Loop) execute(ctx workflow.Context, bindings map[string]string) error {
+	for i := 0; i < l.Iterations; i++ {
+		if err := l.Body.execute(ctx, bindings); err != nil {
+			return err
+		}
+		if bindings[l.BreakVariable] == l.BreakValue {
+			break
+		}
+	}
+	return nil
+}
+
+func (a *ActivityInvocation) execute(ctx workflow.Context, bindings map[string]string) error {
 	inputParam := makeInput(a.Arguments, bindings)
 	var result string
+
+	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
+		StartToCloseTimeout:    time.Duration(a.StartToCloseTimeoutSeconds) * time.Second,
+		ScheduleToCloseTimeout: time.Duration(a.ScheduleToCloseTimeoutSeconds) * time.Second,
+		ScheduleToStartTimeout: time.Duration(a.ScheduleToStartTimeoutSeconds) * time.Second,
+		RetryPolicy: &temporal.RetryPolicy{
+			InitialInterval:    time.Duration(a.RetryInitialIntervalSeconds) * time.Second,
+			BackoffCoefficient: a.RetryBackoffCoefficient,
+			MaximumInterval:    time.Duration(a.RetryMaxIntervalSeconds) * time.Second,
+			MaximumAttempts:    a.MaxRetries,
+		},
+	})
 	err := workflow.ExecuteActivity(ctx, a.Name, inputParam).Get(ctx, &result)
 	if err != nil {
 		return err
@@ -105,33 +148,24 @@ func (a ActivityInvocation) execute(ctx workflow.Context, bindings map[string]st
 	return nil
 }
 
-func (s Sequence) execute(ctx workflow.Context, bindings map[string]string) error {
-	for _, a := range s.Elements {
-		err := a.execute(ctx, bindings)
-		if err != nil {
+func (s *Sequence) execute(ctx workflow.Context, bindings map[string]string) error {
+	for _, stmt := range s.Elements {
+		if err := stmt.execute(ctx, bindings); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (p Parallel) execute(ctx workflow.Context, bindings map[string]string) error {
-	//
-	// You can use the context passed in to activity as a way to cancel the activity like standard GO way.
-	// Cancelling a parent context will cancel all the derived contexts as well.
-	//
-
-	// In the parallel block, we want to execute all of them in parallel and wait for all of them.
-	// if one activity fails then we want to cancel all the rest of them as well.
+func (p *Parallel) execute(ctx workflow.Context, bindings map[string]string) error {
 	childCtx, cancelHandler := workflow.WithCancel(ctx)
 	selector := workflow.NewSelector(ctx)
 	var activityErr error
-	for _, s := range p.Branches {
-		f := executeAsync(s, childCtx, bindings)
+
+	for _, stmt := range p.Branches {
+		f := executeAsync(stmt, childCtx, bindings)
 		selector.AddFuture(f, func(f workflow.Future) {
-			err := f.Get(ctx, nil)
-			if err != nil {
-				// cancel all pending activities
+			if err := f.Get(ctx, nil); err != nil {
 				cancelHandler()
 				activityErr = err
 			}
@@ -139,12 +173,11 @@ func (p Parallel) execute(ctx workflow.Context, bindings map[string]string) erro
 	}
 
 	for i := 0; i < len(p.Branches); i++ {
-		selector.Select(ctx) // this will wait for one branch
+		selector.Select(ctx)
 		if activityErr != nil {
 			return activityErr
 		}
 	}
-
 	return nil
 }
 

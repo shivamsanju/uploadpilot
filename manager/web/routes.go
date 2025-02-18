@@ -76,6 +76,8 @@ func Routes(services *svc.Services) *chi.Mux {
 						r.Put("/enable", procHandler.EnableProcessor)
 						r.Put("/disable", procHandler.DisableProcessor)
 						r.Put("/workflow", procHandler.UpdateWorkflow)
+						r.Get("/runs", utils.CreateJSONHandler(procHandler.GetWorkflowRuns))
+						r.Get("/logs", utils.CreateJSONHandler(procHandler.GetWorkflowLogs))
 					})
 				})
 			})

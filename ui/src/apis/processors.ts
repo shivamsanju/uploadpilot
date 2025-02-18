@@ -264,3 +264,71 @@ export const useUpdateProcessorWorkflowMutation = () => {
     },
   });
 };
+
+export const useGetProcessorRuns = (
+  workspaceId: string,
+  processorId: string
+) => {
+  const queryClient = useQueryClient();
+  const {
+    isPending,
+    error,
+    isFetching,
+    data: runs,
+  } = useQuery({
+    queryKey: ["processorRuns", workspaceId, processorId],
+    queryFn: () => {
+      if (!workspaceId || !processorId) {
+        return Promise.reject(
+          new Error("workspaceId and processorId is required")
+        );
+      }
+      return axiosInstance
+        .get(`/workspaces/${workspaceId}/processors/${processorId}/runs`)
+        .then((res) => res.data);
+    },
+  });
+
+  const invalidate = () =>
+    queryClient.invalidateQueries({
+      queryKey: ["processorRuns", workspaceId, processorId],
+    });
+
+  return { isPending, error, runs, invalidate, isFetching };
+};
+
+export const useGetProcessorRunLogs = (
+  workspaceId: string,
+  processorId: string,
+  workflowId: string,
+  runId: string
+) => {
+  const queryClient = useQueryClient();
+  const {
+    isPending,
+    error,
+    isFetching,
+    data: logs,
+  } = useQuery({
+    queryKey: ["processorRuns", workspaceId, processorId, workflowId, runId],
+    queryFn: () => {
+      if (!workspaceId || !processorId) {
+        return Promise.reject(
+          new Error("workspaceId and processorId is required")
+        );
+      }
+      return axiosInstance
+        .get(
+          `/workspaces/${workspaceId}/processors/${processorId}/logs?workflowId=${workflowId}&runId=${runId}`
+        )
+        .then((res) => res.data);
+    },
+  });
+
+  const invalidate = () =>
+    queryClient.invalidateQueries({
+      queryKey: ["processorRuns", workspaceId, processorId, workflowId, runId],
+    });
+
+  return { isPending, error, logs, invalidate, isFetching };
+};

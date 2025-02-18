@@ -13,3 +13,15 @@
     width: 100px;
   }
 }
+
+.wsItemAdd {
+  height: 65px;
+  cursor: pointer;
+  border-style: dashed;
+}
+
+.wsItem {
+  height: 65px;
+  width: 80%;
+  margin-top: 20px;
+}

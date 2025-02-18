@@ -12,7 +12,7 @@ function App() {
   return (
     <MantineProvider theme={myAppTheme}>
       <ModalsProvider>
-        <Notifications position="bottom-center" />
+        <Notifications position="bottom-right" transitionDuration={500} />
         <QueryClientProvider client={queryClient}>
           <Router>
             <Routes>

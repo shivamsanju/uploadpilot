@@ -28,7 +28,7 @@ func (r *UploadRepo) GetAll(ctx context.Context, workspaceID string, skip, limit
 	query := r.db.Orm.WithContext(ctx).Model(&models.Upload{}).Where("workspace_id = ?", workspaceID)
 
 	if search != "" {
-		query = query.Where("name LIKE ? OR status LIKE ? OR stored_file_name LIKE ?", "%"+search+"%", "%"+search+"%", "%"+search+"%")
+		query = query.Where("status LIKE ? OR stored_file_name LIKE ?", "%"+search+"%", "%"+search+"%")
 	}
 
 	if err := query.Count(&totalRecords).Error; err != nil {

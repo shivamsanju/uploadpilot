@@ -2,14 +2,13 @@ package main
 
 import (
 	"log"
-	"os"
 
 	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/driver"
 	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/migrate"
 )
 
 func main() {
-	dbUri := os.Getenv("POSTGRES_URI")
+	dbUri := "postgresql://postgres.wjxdjummbehatmlfrqoa:sanjushivam@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres"
 	pgDriver, err := driver.NewPostgresDriver(dbUri, &driver.DBConfig{})
 	if err != nil {
 		panic(err)

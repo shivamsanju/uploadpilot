@@ -31,6 +31,11 @@ var (
 	S3SecretKey        string
 	S3BucketName       string
 	S3Region           string
+
+	// Temporal
+	TemporalNamespace string
+	TemporalHostPort  string
+	TemporalAPIKey    string
 )
 
 func Init() error {
@@ -76,6 +81,10 @@ func Init() error {
 	S3BucketName = os.Getenv("S3_BUCKET_NAME")
 	S3Region = os.Getenv("S3_REGION")
 	AllowedOrigins = os.Getenv("ALLOWED_ORIGINS")
+	// Temporal
+	TemporalNamespace = os.Getenv("TEMPORAL_NAMESPACE")
+	TemporalHostPort = os.Getenv("TEMPORAL_HOST_PORT")
+	TemporalAPIKey = os.Getenv("TEMPORAL_API_KEY")
 
 	return nil
 }

@@ -42,7 +42,7 @@ func (l *WorkflowListener) WorkflowTriggerHandler(msg *events.UploadEventMsg) er
 			return err
 		}
 		for _, processor := range processors {
-			l.procSvc.TriggerWorkflow(ctx, processor.Workflow)
+			l.procSvc.TriggerWorkflow(ctx, msg.WorkspaceID, &processor)
 			l.uploadLogEvent.Publish(msg.WorkspaceID, msg.UploadID, &processor.ID, nil, "workflow triggered", string(models.UploadLogLevelInfo))
 		}
 	}

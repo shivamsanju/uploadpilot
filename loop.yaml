@@ -1,0 +1,19 @@
+variables:
+  pdfLink: zyx
+  successUrl: http://localhost:3000/success
+  errorUrl: http://localhost:3000/failure
+
+
+root:
+  sequence:
+    elements:
+      - loop:
+          breakvariable: pdfExtractResult
+          breakvalue: "Extracted content successfully"
+          iterations: 10
+          body:
+            activity:
+              name: ExtractPDFContent
+              arguments:
+                - pdfLink
+              result: pdfExtractResult

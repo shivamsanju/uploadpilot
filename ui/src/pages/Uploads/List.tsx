@@ -7,7 +7,6 @@ import {
   Group,
   ActionIcon,
   Text,
-  Avatar,
 } from "@mantine/core";
 import {
   IconDots,
@@ -103,26 +102,17 @@ const UploadList = ({ setTotalRecords }: any) => {
   const colDefs: DataTableColumn[] = useMemo(() => {
     return [
       {
-        title: "",
-        accessor: "id",
-        hidden: width < 768,
-        render: (params: any) => (
-          <Avatar size={40} radius={40} variant="light">
-            {getFileIcon(params?.metadata?.filetype, 20)}
-          </Avatar>
-        ),
-      },
-      {
         title: "Name",
         accessor: "metadata.filename",
         elipsis: true,
         render: (params: any) => (
-          <>
+          <Group align="center" gap="sm">
+            {getFileIcon(params?.metadata?.filetype, 20)}
             <Text fz="sm">{params?.metadata?.filename}</Text>
-            <Text fz="xs" c="dimmed">
+            {/* <Text fz="xs" c="dimmed">
               Filename
-            </Text>
-          </>
+            </Text> */}
+          </Group>
         ),
       },
       {
@@ -133,9 +123,9 @@ const UploadList = ({ setTotalRecords }: any) => {
         render: (params: any) => (
           <>
             <Text fz="sm">{params?.metadata?.filetype}</Text>
-            <Text fz="xs" c="dimmed">
+            {/* <Text fz="xs" c="dimmed">
               Mime Type
-            </Text>
+            </Text> */}
           </>
         ),
       },
@@ -147,9 +137,9 @@ const UploadList = ({ setTotalRecords }: any) => {
         render: (params: any) => (
           <>
             <Text fz="sm">{formatBytes(Number(params?.size))}</Text>
-            <Text fz="xs" c="dimmed">
+            {/* <Text fz="xs" c="dimmed">
               Size
-            </Text>
+            </Text> */}
           </>
         ),
       },
@@ -164,9 +154,9 @@ const UploadList = ({ setTotalRecords }: any) => {
               {params?.finishedAt &&
                 timeAgo.format(new Date(params?.finishedAt))}
             </Text>
-            <Text fz="xs" c="dimmed">
+            {/* <Text fz="xs" c="dimmed">
               Uploaded
-            </Text>
+            </Text> */}
           </>
         ),
       },
@@ -175,18 +165,16 @@ const UploadList = ({ setTotalRecords }: any) => {
         accessor: "status",
         textAlign: "center",
         render: (params: any) => (
-          <>
+          <Group align="center" gap="sm" justify="center">
             <UploadStatus status={params?.status} />
-            <Text fz="xs" c="dimmed">
-              {params?.status}
-            </Text>
-          </>
+            {params?.status}
+          </Group>
         ),
       },
       {
         title: "Actions",
         accessor: "actions",
-        textAlign: "center",
+        textAlign: "right",
         render: (params: any) => (
           <Group gap={0} justify="flex-end">
             <Menu
@@ -269,10 +257,9 @@ const UploadList = ({ setTotalRecords }: any) => {
       <Box mr="md">
         <UploadPilotDataTable
           minHeight={500}
-          verticalSpacing="lg"
+          verticalSpacing="sm"
           horizontalSpacing="lg"
-          fetching={isFetchingNextPage}
-          noHeader={true}
+          noHeader={false}
           showSearch={true}
           searchPlaceholder='Search imports by name or status. For metadata search use {key: "regex"}'
           showExport={true}

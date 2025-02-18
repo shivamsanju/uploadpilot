@@ -13,6 +13,7 @@ import WorkspaceUsersPage from "./pages/users";
 import ToolsPage from "./pages/tools";
 import ProcessorPage from "./pages/processors";
 import WorkflowBuilderPage from "./pages/wflowbuilder";
+import WorkflowRunsPage from "./pages/workflowruns";
 
 type Route = {
   path: string;
@@ -61,6 +62,11 @@ const routes: Route[] = [
     path: "/workspaces/:workspaceId/processors/:processorId",
     layout: AppLayout,
     element: <WorkflowBuilderPage />,
+  },
+  {
+    path: "/workspaces/:workspaceId/processors/:processorId/runs",
+    layout: AppLayout,
+    element: <WorkflowRunsPage />,
   },
   {
     path: "/workspaces/:workspaceId/users",

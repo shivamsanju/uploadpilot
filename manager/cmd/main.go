@@ -80,13 +80,20 @@ func initialize() (*http.Server, error) {
 		Username: config.RedisUsername,
 		Password: config.RedisPassword,
 	}
+
+	temporalOpts := &infra.TemporalOptions{
+		Namespace: config.TemporalNamespace,
+		HostPort:  config.TemporalHostPort,
+		APIKey:    config.TemporalAPIKey,
+	}
 	if config.RedisTLS {
 		redisOpts.TLSConfig = &tls.Config{}
 	}
 
 	err := infra.Init(&infra.InfraOpts{
-		S3Opts:    s3Opts,
-		RedisOpts: redisOpts,
+		S3Opts:       s3Opts,
+		RedisOpts:    redisOpts,
+		TemporalOpts: temporalOpts,
 	})
 
 	if err != nil {

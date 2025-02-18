@@ -2,17 +2,16 @@ import {
   IconCircleCheck,
   IconCircleOff,
   IconDots,
-  IconEye,
   IconTrash,
   IconRoute,
   IconRouteOff,
   IconEdit,
-  IconChevronRightPipe,
+  IconTools,
+  IconStopwatch,
 } from "@tabler/icons-react";
 import {
   ActionIcon,
   Anchor,
-  Avatar,
   Badge,
   Box,
   Group,
@@ -20,6 +19,7 @@ import {
   Modal,
   Pill,
   Text,
+  ThemeIcon,
   Title,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
@@ -121,14 +121,18 @@ const ProcessorList = ({
         title: "Name",
         render: (item: any) => (
           <Group gap="sm">
-            <Avatar
-              size={40}
-              radius={40}
+            <ThemeIcon
+              size={20}
+              radius={20}
               variant="light"
               color={item?.enabled ? "appcolor" : "gray"}
             >
-              {item?.enabled ? <IconRoute /> : <IconRouteOff />}
-            </Avatar>
+              {item?.enabled ? (
+                <IconRoute size={16} />
+              ) : (
+                <IconRouteOff size={16} />
+              )}
+            </ThemeIcon>
             <div>
               <Anchor
                 onClick={() =>
@@ -139,9 +143,9 @@ const ProcessorList = ({
               >
                 {item.name}
               </Anchor>
-              <Text c="dimmed" fz="xs">
+              {/* <Text c="dimmed" fz="xs">
                 Name
-              </Text>
+              </Text> */}
             </div>
           </Group>
         ),
@@ -149,6 +153,7 @@ const ProcessorList = ({
       {
         accessor: "triggers",
         title: "Triggers",
+        textAlign: "center",
         hidden: width < 768,
         render: (item: any) => (
           <div>
@@ -172,30 +177,32 @@ const ProcessorList = ({
                 "No Triggers"
               )}
             </Text>
-            <Text c="dimmed" fz="xs">
+            {/* <Text c="dimmed" fz="xs">
               Triggers
-            </Text>
+            </Text> */}
           </div>
         ),
       },
       {
-        title: "updated At",
+        title: "Updated At",
         accessor: "updatedAt",
+        textAlign: "center",
         hidden: width < 768,
         render: (params: any) => (
           <>
             <Text fz="sm">
               {params?.updatedAt && timeAgo.format(new Date(params?.updatedAt))}
             </Text>
-            <Text fz="xs" c="dimmed">
+            {/* <Text fz="xs" c="dimmed">
               Last Updated
-            </Text>
+            </Text> */}
           </>
         ),
       },
       {
         accessor: "enabled",
         title: "Status",
+        textAlign: "center",
         hidden: width < 768,
         render: (item: any) => (
           <>
@@ -223,6 +230,7 @@ const ProcessorList = ({
       {
         accessor: "actions",
         title: "Actions",
+        textAlign: "right",
         render: (item: any) => (
           <Group gap={0} justify="flex-end">
             <Menu
@@ -238,11 +246,15 @@ const ProcessorList = ({
               </Menu.Target>
               <Menu.Dropdown>
                 <Menu.Item
-                  leftSection={<IconEye size={16} stroke={1.5} />}
+                  leftSection={<IconStopwatch size={16} stroke={1.5} />}
                   disabled={!item?.enabled}
-                  onClick={() => handleViewEdit(item, "view")}
+                  onClick={() =>
+                    navigate(
+                      `/workspaces/${workspaceId}/processors/${item?.id}/runs`
+                    )
+                  }
                 >
-                  <Text>View</Text>
+                  <Text>View Runs</Text>
                 </Menu.Item>
                 <Menu.Item
                   leftSection={<IconEdit size={16} stroke={1.5} />}
@@ -252,7 +264,7 @@ const ProcessorList = ({
                   <Text>Edit</Text>
                 </Menu.Item>
                 <Menu.Item
-                  leftSection={<IconChevronRightPipe size={16} stroke={1.5} />}
+                  leftSection={<IconTools size={16} stroke={1.5} />}
                   disabled={!item?.enabled}
                   onClick={() =>
                     navigate(
@@ -260,7 +272,7 @@ const ProcessorList = ({
                     )
                   }
                 >
-                  <Text>Canvas</Text>
+                  <Text>Workflow</Text>
                 </Menu.Item>
                 <Menu.Item
                   leftSection={
@@ -270,7 +282,6 @@ const ProcessorList = ({
                       <IconCircleCheck size={16} stroke={1.5} />
                     )
                   }
-                  color={item?.enabled ? "red" : "green"}
                   onClick={() =>
                     handleEnableDisableProcessor(item.id, !item?.enabled)
                   }
@@ -310,12 +321,12 @@ const ProcessorList = ({
       <UploadPilotDataTable
         fetching={isDeleting || isEnabling}
         minHeight={700}
-        showSearch={false}
+        // showSearch={true}
         columns={columns}
         records={processors}
-        verticalSpacing="md"
+        verticalSpacing="sm"
         horizontalSpacing="md"
-        noHeader={true}
+        noHeader={false}
         noRecordsText="No processors. Create a processor by clicking the plus icon on top right to get started."
         noRecordsIcon={<IconRouteOff size={100} />}
         highlightOnHover

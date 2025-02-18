@@ -138,3 +138,14 @@ func (h *processorHandler) DisableProcessor(w http.ResponseWriter, r *http.Reque
 func (h *processorHandler) GetAllTasks(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, h.pSvc.GetAllTasks(r.Context()))
 }
+
+func (h *processorHandler) GetWorkflowRuns(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+	processorID := chi.URLParam(r, "processorId")
+	return h.pSvc.GetWorkflowRuns(r.Context(), processorID)
+}
+
+func (h *processorHandler) GetWorkflowLogs(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+	workflowID := r.URL.Query().Get("workflowId")
+	runID := r.URL.Query().Get("runId")
+	return h.pSvc.GetWorkflowHistory(r.Context(), workflowID, runID)
+}

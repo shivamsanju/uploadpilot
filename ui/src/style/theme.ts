@@ -206,7 +206,7 @@ export const myAppTheme = createTheme({
         radius: 0,
         style: {
           borderColor:
-            "light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-8))",
+            "light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-6))",
         },
       },
     }),

@@ -3,6 +3,7 @@ package processor
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
@@ -11,6 +12,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/uploader/internal/dto"
 	"github.com/uploadpilot/uploadpilot/uploader/internal/infra"
 	"go.temporal.io/sdk/client"
+	"go.temporal.io/sdk/temporal"
 	"gopkg.in/yaml.v3"
 )
 
@@ -32,15 +34,26 @@ func (s *Service) GetProcessors(ctx context.Context, workspaceID string) ([]mode
 	return processors, nil
 }
 
-func (s *Service) TriggerWorkflow(ctx context.Context, yamlContent string) (*dto.TriggerWorkflowResp, error) {
+func (s *Service) TriggerWorkflow(ctx context.Context, workspaceID string, processor *models.Processor) (*dto.TriggerWorkflowResp, error) {
 	var dslWorkflow dsl.Workflow
-	if err := yaml.Unmarshal([]byte(yamlContent), &dslWorkflow); err != nil {
+	if err := yaml.Unmarshal([]byte(processor.Workflow), &dslWorkflow); err != nil {
 		log.Fatalln("failed to unmarshal dsl config", err)
 	}
 
 	workflowOptions := client.StartWorkflowOptions{
 		ID:        uuid.New().String(),
 		TaskQueue: "dsl",
+		TypedSearchAttributes: temporal.NewSearchAttributes(
+			temporal.NewSearchAttributeKeyKeyword("processorId").ValueSet(processor.ID),
+		),
+		RetryPolicy: &temporal.RetryPolicy{
+			MaximumAttempts:    processor.MaxRetries,
+			InitialInterval:    time.Duration(processor.RetryInitialIntervalS) * time.Second,
+			BackoffCoefficient: processor.RetryBackoffCoefficient,
+			MaximumInterval:    time.Duration(processor.RetryMaxIntervalS) * time.Second,
+		},
+		WorkflowExecutionTimeout: time.Duration(processor.WorkflowRunTimeoutS) * time.Second,
+		WorkflowRunTimeout:       time.Duration(processor.WorkflowExecutionTimeoutS) * time.Second,
 	}
 
 	we, err := infra.TemporalClient.ExecuteWorkflow(context.Background(), workflowOptions, dsl.SimpleDSLWorkflow, dslWorkflow)

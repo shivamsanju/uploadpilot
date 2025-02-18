@@ -5,18 +5,21 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/redis/go-redis/v9"
+	"go.temporal.io/sdk/client"
 	"go.uber.org/zap"
 )
 
 var (
-	Log         *zap.SugaredLogger
-	S3Client    *s3.Client
-	RedisClient *redis.Client
+	Log            *zap.SugaredLogger
+	S3Client       *s3.Client
+	RedisClient    *redis.Client
+	TemporalClient client.Client
 )
 
 type InfraOpts struct {
-	S3Opts    *S3Options
-	RedisOpts *redis.Options
+	S3Opts       *S3Options
+	RedisOpts    *redis.Options
+	TemporalOpts *TemporalOptions
 }
 
 func Init(opts *InfraOpts) error {
@@ -45,6 +48,16 @@ func Init(opts *InfraOpts) error {
 		RedisClient = rc
 	} else {
 		Log.Warn("Redis client not initialized")
+	}
+
+	if opts.TemporalOpts != nil {
+		tc, err := NewTemporalClient(opts.TemporalOpts)
+		if err != nil {
+			return err
+		}
+		TemporalClient = tc
+	} else {
+		Log.Warn("Temporal client not initialized")
 	}
 
 	return nil

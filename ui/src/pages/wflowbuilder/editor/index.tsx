@@ -34,6 +34,7 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
     processor?.workflow || ""
   );
   const [error, setError] = useState<string | null>(err);
+  const [initialLoad, setInitialLoad] = useState(true);
   const { colorScheme } = useMantineColorScheme();
 
   const { mutateAsync, isPending } = useUpdateProcessorWorkflowMutation();
@@ -51,6 +52,7 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
         "editor.background": "#141414",
       },
     });
+    setInitialLoad(false);
   };
 
   const saveYaml = async () => {
@@ -78,7 +80,7 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
   return (
     <Box>
       <LoadingOverlay
-        visible={isPending}
+        visible={isPending || initialLoad}
         overlayProps={{ backgroundOpacity: 0 }}
         zIndex={1000}
       />
