@@ -1,0 +1,12 @@
+/* For dark mode bg body*/
+:root[data-mantine-color-scheme="dark"] {
+  --mantine-color-body: #151515 !important;
+}
+
+:root[data-mantine-color-scheme="dark"] * {
+  --input-bg: transparent !important;
+}
+
+.mantine-Notifications-notification {
+  background-color: #1e1e1e !important;
+}

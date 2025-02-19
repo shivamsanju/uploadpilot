@@ -1,5 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
 
+@import "./style/datatable.css";
+@import "./style/mantine.css";
+
 body {
   margin: 0;
   font-family: "Inter", sans-serif;
@@ -7,7 +10,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
   line-height: var(--mantine-line-height);
-  background-color: var(--mantine-color-body);
+  /* background-color: var(--mantine-color-body); */
   color: var(--mantine-color-text);
 
   -webkit-font-smoothing: var(--mantine-webkit-font-smoothing);
@@ -17,13 +20,4 @@ body {
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
     monospace;
-}
-
-/* For dark mode bg body*/
-:root[data-mantine-color-scheme="dark"] {
-  --mantine-color-body: #161616 !important;
-}
-
-:root[data-mantine-color-scheme="dark"] * {
-  --input-bg: transparent !important;
 }

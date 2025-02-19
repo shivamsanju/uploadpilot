@@ -1,20 +1,23 @@
 import { useForm } from "@mantine/form";
 import {
+  Box,
   Button,
+  Container,
   Group,
   LoadingOverlay,
   MultiSelect,
+  Paper,
   SelectProps,
-  Stack,
+  Stepper,
   TextInput,
+  Title,
 } from "@mantine/core";
 import { IconCheck, IconClockBolt, IconFile } from "@tabler/icons-react";
 import { MIME_TYPES } from "../../../utils/mime";
 import { MIME_TYPE_ICONS } from "../../../utils/fileicons";
-import {
-  useCreateProcessorMutation,
-  useUpdateProcessorMutation,
-} from "../../../apis/processors";
+import { useCreateProcessorMutation } from "../../../apis/processors";
+import { useNavigate, useParams } from "react-router-dom";
+import { useState } from "react";
 
 const iconProps = {
   stroke: 1.5,
@@ -42,32 +45,17 @@ const renderSelectOption: SelectProps["renderOption"] = ({
   );
 };
 
-type Props = {
-  setOpened: React.Dispatch<React.SetStateAction<boolean>>;
-  workspaceId: string;
-  mode?: "edit" | "add" | "view";
-  setMode: React.Dispatch<React.SetStateAction<"edit" | "add" | "view">>;
-  initialValues?: any;
-  setInitialValues: React.Dispatch<React.SetStateAction<any>>;
-};
+const NewprocessorPage = () => {
+  const [active, setActive] = useState(0);
+  const { workspaceId } = useParams();
+  const navigate = useNavigate();
 
-const AddWebhookForm: React.FC<Props> = ({
-  setInitialValues,
-  setMode,
-  setOpened,
-  workspaceId,
-  mode = "add",
-  initialValues,
-}) => {
   const form = useForm({
-    initialValues:
-      (mode === "edit" || mode === "view") && initialValues
-        ? initialValues
-        : {
-            name: "",
-            triggers: [],
-            enabled: true,
-          },
+    initialValues: {
+      name: "",
+      triggers: [],
+      enabled: true,
+    },
     validate: {
       name: (value) => (value ? null : "Name is required"),
     },
@@ -75,76 +63,112 @@ const AddWebhookForm: React.FC<Props> = ({
 
   const { mutateAsync: createMutateAsync, isPending: isCreating } =
     useCreateProcessorMutation();
-  const { mutateAsync: updateMutateAsync, isPending: isUpdating } =
-    useUpdateProcessorMutation();
 
   const handleAdd = async (values: any) => {
     try {
-      if (mode === "edit") {
-        await updateMutateAsync({
-          processorId: initialValues.id,
+      await createMutateAsync({
+        workspaceId: workspaceId || "",
+        processor: {
           workspaceId,
-          processor: {
-            name: values.name,
-            triggers: values.triggers,
-          },
-        });
-      } else {
-        await createMutateAsync({
-          workspaceId,
-          processor: {
-            workspaceId,
-            name: values.name,
-            triggers: values.triggers,
-            enabled: values.enabled,
-            data: {},
-          },
-        });
-      }
-      setOpened(false);
-      setInitialValues(null);
-      setMode("add");
+          name: values.name,
+          triggers: values.triggers,
+          enabled: values.enabled,
+          data: {},
+        },
+      });
+      form.reset();
+      navigate(`/workspace/${workspaceId}/processors`);
     } catch (error) {
       console.error(error);
     }
   };
 
+  const nextStep = () => {
+    const val = form.validate();
+    if (val.hasErrors) {
+      return;
+    }
+    setActive((current) => (current < 3 ? current + 1 : current));
+  };
+
+  const prevStep = () => {
+    setActive((current) => (current > 0 ? current - 1 : current));
+  };
+
   return (
-    <form onSubmit={form.onSubmit(handleAdd)}>
-      <LoadingOverlay
-        visible={isCreating || isUpdating}
-        overlayProps={{ backgroundOpacity: 0 }}
-        zIndex={1000}
-      />
-      <Stack gap="xl">
-        <TextInput
-          withAsterisk
-          label="Name"
-          description="Name of the processor"
-          type="name"
-          placeholder="Enter a name"
-          {...form.getInputProps("name")}
-          disabled={mode === "view"}
-        />
-        <MultiSelect
-          searchable
-          leftSection={<IconClockBolt size={16} />}
-          label="Trigger"
-          description="File type to trigger the processor"
-          placeholder="Select file type"
-          data={MIME_TYPES}
-          {...form.getInputProps("triggers")}
-          renderOption={renderSelectOption}
-          disabled={mode === "view"}
-        />
-      </Stack>
-      {mode !== "view" && (
-        <Group justify="flex-end" mt={50}>
-          <Button type="submit">{mode === "edit" ? "Save" : "Create"}</Button>
+    <Box mb={50}>
+      <Container>
+        <Group justify="center" mb="xl">
+          <Title order={3} opacity={0.7}>
+            New Processor
+          </Title>
         </Group>
-      )}
-    </form>
+        <Paper p="xl" withBorder>
+          <form onSubmit={form.onSubmit(handleAdd)}>
+            <Stepper size="xs" active={active}>
+              <Stepper.Step
+                label="Name"
+                description="Choose a name for your processor"
+              >
+                <TextInput
+                  mt="xl"
+                  withAsterisk
+                  label="Name"
+                  description="Name of the processor"
+                  type="name"
+                  placeholder="Enter a name"
+                  {...form.getInputProps("name")}
+                />
+              </Stepper.Step>
+              <Stepper.Step label="Trigger" description="Select triggers">
+                <MultiSelect
+                  mt="xl"
+                  searchable
+                  leftSection={<IconClockBolt size={16} />}
+                  label="Trigger"
+                  description="File type to trigger the processor"
+                  placeholder="Select file type"
+                  data={MIME_TYPES}
+                  {...form.getInputProps("triggers")}
+                  renderOption={renderSelectOption}
+                />
+              </Stepper.Step>
+              <Stepper.Step label="Workflow" description="Select a workflow">
+                <MultiSelect
+                  mt="xl"
+                  searchable
+                  leftSection={<IconClockBolt size={16} />}
+                  label="Workflow"
+                  description="File type to trigger the processor"
+                  placeholder="Select file type"
+                  data={MIME_TYPES}
+                  {...form.getInputProps("triggers")}
+                  renderOption={renderSelectOption}
+                />
+              </Stepper.Step>
+            </Stepper>
+            <LoadingOverlay
+              visible={isCreating}
+              overlayProps={{ backgroundOpacity: 0 }}
+              zIndex={1000}
+            />
+
+            <Group justify="flex-end" mt={50}>
+              <Button
+                variant="default"
+                onClick={prevStep}
+                disabled={active === 0}
+              >
+                Back
+              </Button>
+              {active === 2 && <Button type="submit">Create</Button>}
+              {active < 2 && <Button onClick={nextStep}>Next</Button>}
+            </Group>
+          </form>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
 
-export default AddWebhookForm;
+export default NewprocessorPage;

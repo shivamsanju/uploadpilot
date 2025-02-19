@@ -7,6 +7,7 @@ import {
   Group,
   ActionIcon,
   Text,
+  TextInput,
 } from "@mantine/core";
 import {
   IconDots,
@@ -15,6 +16,8 @@ import {
   IconLogs,
   IconDownload,
   IconCopy,
+  IconSearch,
+  IconBolt,
 } from "@tabler/icons-react";
 import { useParams } from "react-router-dom";
 import { useGetUploads } from "../../apis/upload";
@@ -32,6 +35,7 @@ import { UploadStatus } from "./Status";
 import { LogsModal } from "./Logs";
 import { MetadataModal } from "./Metadata";
 import { ContainerOverlay } from "../../components/Overlay";
+import { RefreshButton } from "../../components/Buttons/RefreshButton/RefreshButton";
 
 const batchSize = 20;
 
@@ -50,6 +54,7 @@ const UploadList = ({ setTotalRecords }: any) => {
   const [modalVariant, setModalVariant] = useState<"logs" | "metadata">("logs");
   const [uploadId, setUploadId] = useState<string | null>(null);
   const [metadata, setMetadata] = useState({});
+  const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
 
   const { workspaceId } = useParams();
   const { searchFilter, onSearchFilterChange } = useUploadPilotDataTable();
@@ -118,7 +123,6 @@ const UploadList = ({ setTotalRecords }: any) => {
       {
         title: "File Type",
         accessor: "metadata.filetype",
-        textAlign: "center",
         hidden: width < 768,
         render: (params: any) => (
           <>
@@ -132,7 +136,6 @@ const UploadList = ({ setTotalRecords }: any) => {
       {
         title: "Size",
         accessor: "size",
-        textAlign: "center",
         hidden: width < 768,
         render: (params: any) => (
           <>
@@ -146,7 +149,6 @@ const UploadList = ({ setTotalRecords }: any) => {
       {
         title: "Finished At",
         accessor: "finishedAt",
-        textAlign: "center",
         hidden: width < 768,
         render: (params: any) => (
           <>
@@ -163,9 +165,8 @@ const UploadList = ({ setTotalRecords }: any) => {
       {
         title: "Status",
         accessor: "status",
-        textAlign: "center",
         render: (params: any) => (
-          <Group align="center" gap="sm" justify="center">
+          <Group align="center" gap="sm">
             <UploadStatus status={params?.status} />
             {params?.status}
           </Group>
@@ -175,6 +176,7 @@ const UploadList = ({ setTotalRecords }: any) => {
         title: "Actions",
         accessor: "actions",
         textAlign: "right",
+        width: 100,
         render: (params: any) => (
           <Group gap={0} justify="flex-end">
             <Menu
@@ -257,7 +259,7 @@ const UploadList = ({ setTotalRecords }: any) => {
       <Box mr="md">
         <UploadPilotDataTable
           minHeight={500}
-          verticalSpacing="sm"
+          verticalSpacing="xs"
           horizontalSpacing="lg"
           noHeader={false}
           showSearch={true}
@@ -266,27 +268,44 @@ const UploadList = ({ setTotalRecords }: any) => {
           showRefresh={true}
           onRefresh={handleRefresh}
           onSearchFilterChange={onSearchFilterChange}
+          onScrollToBottom={fetchNextPage}
           columns={colDefs}
           records={uploads}
-          selectionCheckboxProps={{ style: { cursor: "pointer" } }}
-          onScrollToBottom={fetchNextPage}
           scrollViewportRef={scrollViewportRef}
           noRecordsText="No imports yet"
+          selectedRecords={selectedRecords}
+          onSelectedRecordsChange={setSelectedRecords}
+          menuBar={
+            <Group gap="sm" align="center" justify="space-between">
+              <Group gap="sm">
+                <Button variant="subtle" leftSection={<IconBolt size={18} />}>
+                  Process
+                </Button>
+                <RefreshButton variant="subtle" onClick={handleRefresh} />
+              </Group>
+              <TextInput
+                value={searchFilter}
+                onChange={(e) => onSearchFilterChange(e.target.value)}
+                placeholder="Search by name or status"
+                leftSection={<IconSearch size={18} />}
+                variant="subtle"
+              />
+            </Group>
+          }
         />
-
-        <Stack align="center" justify="center" p="md" key="selectedRecords">
-          <Button
-            display={hasNextPage ? "block" : "none"}
-            leftSection={<IconChevronsDown size={16} />}
-            variant="subtle"
-            disabled={isPending || isFetchingNextPage || !hasNextPage}
-            loading={isFetchingNextPage}
-            onClick={() => fetchNextPage({})}
-          >
-            Load More
-          </Button>
-        </Stack>
       </Box>
+      <Stack align="center" justify="center" p="md" key="selectedRecords">
+        <Button
+          display={hasNextPage ? "block" : "none"}
+          leftSection={<IconChevronsDown size={16} />}
+          variant="subtle"
+          disabled={isPending || isFetchingNextPage || !hasNextPage}
+          loading={isFetchingNextPage}
+          onClick={() => fetchNextPage({})}
+        >
+          Load More
+        </Button>
+      </Stack>
     </Box>
   );
 };

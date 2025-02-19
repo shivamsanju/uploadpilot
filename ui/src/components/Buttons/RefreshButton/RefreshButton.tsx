@@ -1,10 +1,15 @@
 import { Button, ButtonProps } from "@mantine/core";
-import { IconRefresh } from "@tabler/icons-react";
+import { Icon, IconProps, IconRefresh } from "@tabler/icons-react";
 import classes from "./RefreshButton.module.css";
 import { useDisclosure, useTimeout } from "@mantine/hooks";
 
 export const RefreshButton: React.FC<
-  React.HTMLAttributes<HTMLButtonElement> & ButtonProps
+  React.HTMLAttributes<HTMLButtonElement> &
+    ButtonProps & {
+      iconProps?: React.ForwardRefExoticComponent<
+        IconProps & React.RefAttributes<Icon>
+      >;
+    }
 > = (props) => {
   const [rotate, handlers] = useDisclosure(false);
   const { start } = useTimeout(() => {
@@ -23,7 +28,11 @@ export const RefreshButton: React.FC<
       className={classes.refreshBtn}
       variant="subtle"
       leftSection={
-        <IconRefresh size={15} className={`${rotate ? classes.rotate : ""}`} />
+        <IconRefresh
+          size={15}
+          className={`${rotate ? classes.rotate : ""}`}
+          {...props.iconProps}
+        />
       }
       {...props}
       onClick={handleRefresh}

@@ -1,17 +1,21 @@
 import {
   IconDots,
-  IconRouteOff,
   IconEdit,
-  IconClockBolt,
   IconLogs,
+  IconBolt,
+  IconSearch,
 } from "@tabler/icons-react";
 import {
   ActionIcon,
+  Badge,
   Box,
+  Button,
   Group,
   Menu,
   Modal,
+  Stack,
   Text,
+  TextInput,
   Title,
 } from "@mantine/core";
 import { useParams } from "react-router-dom";
@@ -23,20 +27,18 @@ import { useGetProcessorRuns } from "../../apis/processors";
 import { useViewportSize } from "@mantine/hooks";
 import { ContainerOverlay } from "../../components/Overlay";
 import { LogsModal } from "./Logs";
+import { RefreshButton } from "../../components/Buttons/RefreshButton/RefreshButton";
+import { statusConfig } from "./status";
 
-const ProcessorList = ({
-  opened,
-  setOpened,
-}: {
-  opened: boolean;
-  setOpened: any;
-}) => {
+const ProcessorRunsList = () => {
   const [workflowId, setWorkflowId] = useState<string>("");
   const [runId, setRunId] = useState<string>("");
+  const [opened, setOpened] = useState(false);
+  const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
 
   const { width } = useViewportSize();
   const { workspaceId, processorId } = useParams();
-  const { isPending, error, runs } = useGetProcessorRuns(
+  const { isPending, error, runs, invalidate } = useGetProcessorRuns(
     workspaceId || "",
     processorId || ""
   );
@@ -56,24 +58,35 @@ const ProcessorList = ({
   const columns: DataTableColumn[] = useMemo(
     () => [
       {
+        accessor: "id",
+        title: "",
+        width: 20,
+        render: (item: any) => (
+          <Stack justify="center">
+            <IconBolt size={16} stroke={1.5} />
+          </Stack>
+        ),
+      },
+      {
         accessor: "runId",
         title: "Run ID",
-        render: (item: any) => (
-          <Group gap="xs" align="center">
-            <IconClockBolt size={16} stroke={1.5} />
-            {item?.runId}
-          </Group>
-        ),
       },
       {
         accessor: "status",
         title: "Status",
-        textAlign: "center",
+        render: (item: any) => (
+          <Badge
+            variant="outline"
+            color={statusConfig[item?.status?.toLowerCase() || ""]}
+            size="sm"
+          >
+            {item?.status}
+          </Badge>
+        ),
       },
       {
         title: "Started At",
         accessor: "startTime",
-        textAlign: "center",
         hidden: width < 768,
         render: (item: any) =>
           new Date(item?.startTime).toLocaleString("en-US"),
@@ -81,14 +94,12 @@ const ProcessorList = ({
       {
         title: "Ended At",
         accessor: "endTime",
-        textAlign: "center",
         hidden: width < 768,
         render: (item: any) => new Date(item?.endTime).toLocaleString("en-US"),
       },
       {
         title: "Execution Time",
         accessor: "durationSeconds",
-        textAlign: "center",
         hidden: width < 768,
         render: (item: any) => `${item?.durationSeconds} s`,
       },
@@ -139,15 +150,38 @@ const ProcessorList = ({
     <Box mr="md">
       <ContainerOverlay visible={isPending} />
       <UploadPilotDataTable
-        minHeight={700}
+        minHeight={500}
         columns={columns}
         records={runs}
-        verticalSpacing="sm"
+        verticalSpacing="xs"
         horizontalSpacing="md"
         noHeader={false}
         noRecordsText="No runs yet"
-        noRecordsIcon={<IconRouteOff size={100} />}
         highlightOnHover
+        menuBar={
+          <Group gap="sm" align="center" justify="space-between">
+            <Group gap="sm">
+              <Button
+                variant="subtle"
+                onClick={() => setOpened(true)}
+                leftSection={<IconBolt size={18} />}
+              >
+                Re Trigger
+              </Button>
+
+              <RefreshButton onClick={invalidate} />
+            </Group>
+            <TextInput
+              value={""}
+              // onChange={(e) => onSearchFilterChange(e.target.value)}
+              placeholder="Search by name or status"
+              leftSection={<IconSearch size={18} />}
+              variant="subtle"
+            />
+          </Group>
+        }
+        selectedRecords={selectedRecords}
+        onSelectedRecordsChange={setSelectedRecords}
       />
       <Modal
         padding="xl"
@@ -181,4 +215,4 @@ const ProcessorList = ({
   );
 };
 
-export default ProcessorList;
+export default ProcessorRunsList;

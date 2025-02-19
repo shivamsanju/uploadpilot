@@ -13,8 +13,8 @@ const UploadsPage = () => {
   });
 
   return (
-    <Box mb={50}>
-      <Group align="center" gap="xs">
+    <Box>
+      <Group align="center" gap="xs" h="10%">
         <Title order={3} opacity={0.7}>
           Uploads
         </Title>

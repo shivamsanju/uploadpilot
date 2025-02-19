@@ -5,15 +5,17 @@ import DashboardPage from "./pages/analytics";
 import EmptyLayout from "./components/Layout/EmptyLayout";
 import ErrorQueryDisplay from "./pages/error";
 import WorkspaceLandingPage from "./pages/workspace";
-import WorkspacesLayout from "./components/Layout/WorkspacesLayout";
+import WorkspacesLayout from "./components/Layout/WorkspaceLayout";
 import UploaderPreviewPage from "./pages/getstarted";
-import UploadsPage from "./pages/uploads/Uploads";
+import UploadsPage from "./pages/uploads";
 import ConfigurationPage from "./pages/configuration";
 import WorkspaceUsersPage from "./pages/users";
 import ToolsPage from "./pages/tools";
 import ProcessorPage from "./pages/processors";
 import WorkflowBuilderPage from "./pages/wflowbuilder";
 import WorkflowRunsPage from "./pages/workflowruns";
+import ProcessorLayout from "./components/Layout/ProcessorLayout";
+import NewprocessorPage from "./pages/processors/Add";
 
 type Route = {
   path: string;
@@ -39,47 +41,52 @@ const routes: Route[] = [
     element: <WorkspaceLandingPage />,
   },
   {
-    path: "/workspaces/:workspaceId",
+    path: "/workspace/:workspaceId",
     layout: AppLayout,
     element: <UploaderPreviewPage />,
   },
   {
-    path: "/workspaces/:workspaceId/uploads",
+    path: "/workspace/:workspaceId/uploads",
     layout: AppLayout,
     element: <UploadsPage />,
   },
   {
-    path: "/workspaces/:workspaceId/configuration",
+    path: "/workspace/:workspaceId/configuration",
     layout: AppLayout,
     element: <ConfigurationPage />,
   },
   {
-    path: "/workspaces/:workspaceId/processors",
+    path: "/workspace/:workspaceId/processors",
     layout: AppLayout,
     element: <ProcessorPage />,
   },
   {
-    path: "/workspaces/:workspaceId/processors/:processorId",
+    path: "/workspace/:workspaceId/processors/new",
     layout: AppLayout,
+    element: <NewprocessorPage />,
+  },
+  {
+    path: "/workspace/:workspaceId/processors/:processorId/workflow",
+    layout: ProcessorLayout,
     element: <WorkflowBuilderPage />,
   },
   {
-    path: "/workspaces/:workspaceId/processors/:processorId/runs",
-    layout: AppLayout,
+    path: "/workspace/:workspaceId/processors/:processorId/runs",
+    layout: ProcessorLayout,
     element: <WorkflowRunsPage />,
   },
   {
-    path: "/workspaces/:workspaceId/users",
+    path: "/workspace/:workspaceId/users",
     layout: AppLayout,
     element: <WorkspaceUsersPage />,
   },
   {
-    path: "/workspaces/:workspaceId/tools",
+    path: "/workspace/:workspaceId/tools",
     layout: AppLayout,
     element: <ToolsPage />,
   },
   {
-    path: "/workspaces/:workspaceId/analytics",
+    path: "/workspace/:workspaceId/analytics",
     layout: AppLayout,
     element: <DashboardPage />,
   },

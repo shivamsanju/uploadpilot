@@ -1,0 +1,41 @@
+.mantine-datatable-pointer-cursor {
+  cursor: pointer !important;
+}
+
+.mantine-datatable {
+  --mantine-datatable-shadow-background-top: 0 !important;
+  --mantine-datatable-shadow-background-bottom: 0 !important;
+  --mantine-datatable-shadow-background-left: 0 !important;
+  --mantine-datatable-shadow-background-right: 0 !important;
+  --mantine-datatable-row-border-color: light-dark(
+    var(--mantine-color-gray-3),
+    var(--mantine-color-dark-6)
+  ) !important;
+}
+
+.mantine-datatable-header {
+  background-color: light-dark(var(--mantine-color-gray-0), #141414) !important;
+  /* padding-right: 20px !important; */
+  /* background-color: var(--mantine-color-body) !important; */
+}
+
+.mantine-datatable-table {
+  border-collapse: unset !important;
+  /* padding-right: 20px !important; */
+}
+
+.mantine-datatable-row:hover {
+  background-color: light-dark(
+    var(--mantine-color-gray-0),
+    var(--mantine-color-dark-7)
+  ) !important;
+}
+
+.mantine-datatable-row[data-selected="true"] {
+  background-color: var(--mantine-color-appcolor-filled) !important;
+  color: var(--mantine-color-white) !important;
+}
+
+.mantine-datatable-row[data-selected="true"] .mantine-Checkbox-input {
+  border-color: var(--mantine-color-white) !important;
+}

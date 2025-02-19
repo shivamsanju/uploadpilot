@@ -26,6 +26,7 @@ type WorkflowUpdate struct {
 }
 
 type WorkflowRun struct {
+	ID              string    `json:"id"`
 	WorkflowID      string    `json:"workflowId"`
 	RunID           string    `json:"runId"`
 	StartTime       time.Time `json:"startTime"`

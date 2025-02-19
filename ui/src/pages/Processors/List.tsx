@@ -3,24 +3,24 @@ import {
   IconCircleOff,
   IconDots,
   IconTrash,
-  IconRoute,
-  IconRouteOff,
-  IconEdit,
-  IconTools,
-  IconStopwatch,
+  IconPlus,
+  IconSearch,
+  IconSettings,
+  IconApps,
+  IconBolt,
+  IconSettingsBolt,
 } from "@tabler/icons-react";
 import {
   ActionIcon,
-  Anchor,
   Badge,
   Box,
+  Button,
   Group,
   Menu,
-  Modal,
   Pill,
+  Stack,
   Text,
-  ThemeIcon,
-  Title,
+  TextInput,
 } from "@mantine/core";
 import { useNavigate, useParams } from "react-router-dom";
 import { useCallback, useMemo, useState } from "react";
@@ -33,23 +33,18 @@ import {
   useEnableDisableProcessorMutation,
   useGetProcessors,
 } from "../../apis/processors";
-import AddProcessorForm from "./Add";
 import { timeAgo } from "../../utils/datetime";
 import { useViewportSize } from "@mantine/hooks";
 import { ContainerOverlay } from "../../components/Overlay";
+import { RefreshButton } from "../../components/Buttons/RefreshButton/RefreshButton";
 
-const ProcessorList = ({
-  opened,
-  setOpened,
-}: {
-  opened: boolean;
-  setOpened: any;
-}) => {
-  const [mode, setMode] = useState<"add" | "edit" | "view">("add");
+const ProcessorList = () => {
   const { width } = useViewportSize();
-  const [initialValues, setInitialValues] = useState(null);
+  const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
   const { workspaceId } = useParams();
-  const { isPending, error, processors } = useGetProcessors(workspaceId || "");
+  const { isPending, error, processors, invalidate } = useGetProcessors(
+    workspaceId || ""
+  );
   const { mutateAsync, isPending: isDeleting } = useDeleteProcessorMutation();
   const { mutateAsync: enableDisableProcessor, isPending: isEnabling } =
     useEnableDisableProcessorMutation();
@@ -105,23 +100,24 @@ const ProcessorList = ({
     [workspaceId, enableDisableProcessor]
   );
 
-  const handleViewEdit = useCallback(
-    async (values: any, mode: "view" | "edit") => {
-      setInitialValues(values);
-      setMode(mode);
-      setOpened(true);
-    },
-    [setOpened, setMode, setInitialValues]
-  );
-
   const columns: DataTableColumn[] = useMemo(
     () => [
+      {
+        accessor: "id",
+        title: "",
+        width: 20,
+        render: (item: any) => (
+          <Stack justify="center">
+            <IconSettingsBolt size={16} stroke={1.5} />
+          </Stack>
+        ),
+      },
       {
         accessor: "name",
         title: "Name",
         render: (item: any) => (
           <Group gap="sm">
-            <ThemeIcon
+            {/* <ThemeIcon
               size={20}
               radius={20}
               variant="light"
@@ -132,28 +128,14 @@ const ProcessorList = ({
               ) : (
                 <IconRouteOff size={16} />
               )}
-            </ThemeIcon>
-            <div>
-              <Anchor
-                onClick={() =>
-                  navigate(`/workspaces/${workspaceId}/processors/${item?.id}`)
-                }
-                fz="sm"
-                fw={500}
-              >
-                {item.name}
-              </Anchor>
-              {/* <Text c="dimmed" fz="xs">
-                Name
-              </Text> */}
-            </div>
+            </ThemeIcon> */}
+            <div>{item.name}</div>
           </Group>
         ),
       },
       {
         accessor: "triggers",
         title: "Triggers",
-        textAlign: "center",
         hidden: width < 768,
         render: (item: any) => (
           <div>
@@ -163,7 +145,7 @@ const ProcessorList = ({
                   {item.triggers
                     .slice(0, 5)
                     .map((trigger: any, index: number) => (
-                      <Pill mr="xs" size="xs" key={index} variant="light">
+                      <Pill mr="xs" size="xs" key={index}>
                         {trigger}
                       </Pill>
                     ))}
@@ -186,7 +168,6 @@ const ProcessorList = ({
       {
         title: "Updated At",
         accessor: "updatedAt",
-        textAlign: "center",
         hidden: width < 768,
         render: (params: any) => (
           <>
@@ -202,7 +183,6 @@ const ProcessorList = ({
       {
         accessor: "enabled",
         title: "Status",
-        textAlign: "center",
         hidden: width < 768,
         render: (item: any) => (
           <>
@@ -221,7 +201,7 @@ const ProcessorList = ({
       //         <ActionIcon
       //             variant="light"
       //             size="lg"
-      //             onClick={() => navigate(`/workspaces/${workspaceId}/processors/${item?.id}`)}
+      //             onClick={() => navigate(`/workspace/${workspaceId}/processors/${item?.id}`)}
       //         >
       //             <IconChevronRight />
       //         </ActionIcon>
@@ -246,33 +226,37 @@ const ProcessorList = ({
               </Menu.Target>
               <Menu.Dropdown>
                 <Menu.Item
-                  leftSection={<IconStopwatch size={16} stroke={1.5} />}
+                  leftSection={<IconApps size={16} stroke={1.5} />}
                   disabled={!item?.enabled}
                   onClick={() =>
                     navigate(
-                      `/workspaces/${workspaceId}/processors/${item?.id}/runs`
+                      `/workspace/${workspaceId}/processors/${item?.id}/workflow`
+                    )
+                  }
+                >
+                  <Text>Workflow</Text>
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={<IconBolt size={16} stroke={1.5} />}
+                  disabled={!item?.enabled}
+                  onClick={() =>
+                    navigate(
+                      `/workspace/${workspaceId}/processors/${item?.id}/runs`
                     )
                   }
                 >
                   <Text>View Runs</Text>
                 </Menu.Item>
                 <Menu.Item
-                  leftSection={<IconEdit size={16} stroke={1.5} />}
-                  disabled={!item?.enabled}
-                  onClick={() => handleViewEdit(item, "edit")}
-                >
-                  <Text>Edit</Text>
-                </Menu.Item>
-                <Menu.Item
-                  leftSection={<IconTools size={16} stroke={1.5} />}
+                  leftSection={<IconSettings size={16} stroke={1.5} />}
                   disabled={!item?.enabled}
                   onClick={() =>
                     navigate(
-                      `/workspaces/${workspaceId}/processors/${item?.id}`
+                      `/workspace/${workspaceId}/processors/${item?.id}/settings`
                     )
                   }
                 >
-                  <Text>Workflow</Text>
+                  <Text>Settings</Text>
                 </Menu.Item>
                 <Menu.Item
                   leftSection={
@@ -304,7 +288,6 @@ const ProcessorList = ({
     [
       handleRemoveProcessor,
       handleEnableDisableProcessor,
-      handleViewEdit,
       width,
       navigate,
       workspaceId,
@@ -320,47 +303,60 @@ const ProcessorList = ({
       <ContainerOverlay visible={isPending} />
       <UploadPilotDataTable
         fetching={isDeleting || isEnabling}
-        minHeight={700}
-        // showSearch={true}
+        minHeight={500}
         columns={columns}
         records={processors}
-        verticalSpacing="sm"
+        verticalSpacing="xs"
         horizontalSpacing="md"
         noHeader={false}
         noRecordsText="No processors. Create a processor by clicking the plus icon on top right to get started."
-        noRecordsIcon={<IconRouteOff size={100} />}
         highlightOnHover
-      />
-      <Modal
-        padding="xl"
-        transitionProps={{ transition: "pop" }}
-        opened={opened}
-        onClose={() => {
-          setOpened(false);
-          setInitialValues(null);
-          setMode("add");
-        }}
-        title={
-          <Title order={5} opacity={0.7}>
-            {mode === "edit"
-              ? "Edit Processor"
-              : mode === "view"
-              ? "View Details"
-              : "Create Processor"}
-          </Title>
+        menuBar={
+          <Group gap="sm" align="center" justify="space-between">
+            <Group gap="sm">
+              <Button
+                variant="subtle"
+                onClick={() =>
+                  navigate(`/workspace/${workspaceId}/processors/new`)
+                }
+                leftSection={<IconPlus size={18} />}
+              >
+                Add
+              </Button>
+              <Button
+                variant="subtle"
+                leftSection={<IconCircleCheck size={18} />}
+              >
+                Enable
+              </Button>
+              <Button
+                variant="subtle"
+                leftSection={<IconCircleOff size={18} />}
+              >
+                Disable
+              </Button>
+              <Button variant="subtle" leftSection={<IconTrash size={18} />}>
+                Delete
+              </Button>
+              <RefreshButton onClick={invalidate} />
+            </Group>
+            <TextInput
+              value={""}
+              // onChange={(e) => onSearchFilterChange(e.target.value)}
+              placeholder="Search by name or status"
+              leftSection={<IconSearch size={18} />}
+              variant="subtle"
+            />
+          </Group>
         }
-        closeOnClickOutside={false}
-        size="lg"
-      >
-        <AddProcessorForm
-          mode={mode}
-          setOpened={setOpened}
-          workspaceId={workspaceId || ""}
-          initialValues={initialValues}
-          setInitialValues={setInitialValues}
-          setMode={setMode}
-        />
-      </Modal>
+        onRowDoubleClick={(row) => {
+          navigate(
+            `/workspace/${workspaceId}/processors/${row?.record?.id}/workflow`
+          );
+        }}
+        selectedRecords={selectedRecords}
+        onSelectedRecordsChange={setSelectedRecords}
+      />
     </Box>
   );
 };

@@ -1,16 +1,22 @@
-import { Button } from "@mantine/core";
-import { IconRestore } from "@tabler/icons-react";
+import { Button, Text, TextProps } from "@mantine/core";
+import { IconRestore, Icon, IconProps } from "@tabler/icons-react";
 import type { ButtonProps } from "@mantine/core";
 
 export const DiscardButton: React.FC<
-  ButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>
+  ButtonProps &
+    React.ButtonHTMLAttributes<HTMLButtonElement> & {
+      iconProps?: React.ForwardRefExoticComponent<
+        IconProps & React.RefAttributes<Icon>
+      >;
+      labelProps?: TextProps;
+    }
 > = (props) => (
   <Button
-    leftSection={<IconRestore size={18} />}
+    leftSection={<IconRestore size={18} {...props.iconProps} />}
     variant="default"
     c="dimmed"
     {...props}
   >
-    Discard
+    <Text {...props.labelProps}>Discard</Text>
   </Button>
 );

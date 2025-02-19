@@ -9,16 +9,18 @@ import { AdminHeader } from "../Header/Header";
 import AuthWrapper from "../AuthWrapper/AuthWrapper";
 import { useMemo, useState } from "react";
 import {
-  IconCategory,
-  IconCreditCardFilled,
+  IconBolt,
+  IconDiabolo,
   IconMenu2,
   IconSettings,
 } from "@tabler/icons-react";
 import NavBar from "../Navigation/Navbar";
+import { useParams } from "react-router-dom";
 
-const WorkspacesLayout: React.FC<{ children: React.ReactNode }> = ({
+const ProcessorLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
+  const { workspaceId, processorId } = useParams();
   const [opened, toggle] = useState(true);
   const { colorScheme } = useMantineColorScheme();
   const theme = useMantineTheme();
@@ -26,27 +28,29 @@ const WorkspacesLayout: React.FC<{ children: React.ReactNode }> = ({
   const bg = colorScheme === "dark" ? "#141414" : theme.colors.gray[0];
 
   const appShellBorderColor =
-    colorScheme === "dark" ? theme.colors.dark[8] : theme.colors.gray[1];
+    colorScheme === "dark" ? theme.colors.dark[6] : theme.colors.gray[1];
+
+  const headerNavBg = colorScheme === "dark" ? "#161616" : "#fff";
 
   const navItems = useMemo(
     () => [
       {
-        label: "Workspaces",
-        icon: IconCategory,
-        link: `/`,
+        label: "Workflow",
+        icon: IconDiabolo,
+        link: `/workspace/${workspaceId}/processors/${processorId}/workflow`,
       },
       {
-        label: "Billing",
-        icon: IconCreditCardFilled,
-        link: `/billing`,
+        label: "Runs",
+        icon: IconBolt,
+        link: `/workspace/${workspaceId}/processors/${processorId}/runs`,
       },
       {
         label: "Settings",
         icon: IconSettings,
-        link: `/settings`,
+        link: `/workspace/${workspaceId}/processors/${processorId}/settings`,
       },
     ],
-    []
+    [workspaceId, processorId]
   );
 
   return (
@@ -62,7 +66,10 @@ const WorkspacesLayout: React.FC<{ children: React.ReactNode }> = ({
         transitionDuration={500}
         transitionTimingFunction="ease"
       >
-        <AppShell.Header style={{ borderColor: appShellBorderColor }}>
+        <AppShell.Header
+          style={{ borderColor: appShellBorderColor }}
+          bg={headerNavBg}
+        >
           <AdminHeader
             burger={
               <ActionIcon
@@ -75,7 +82,10 @@ const WorkspacesLayout: React.FC<{ children: React.ReactNode }> = ({
             }
           />
         </AppShell.Header>
-        <AppShell.Navbar style={{ borderColor: appShellBorderColor }}>
+        <AppShell.Navbar
+          style={{ borderColor: appShellBorderColor }}
+          bg={headerNavBg}
+        >
           <NavBar toggle={toggle} items={navItems} />
         </AppShell.Navbar>
         <AppShell.Main bg={bg} m={0}>
@@ -88,4 +98,4 @@ const WorkspacesLayout: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-export default WorkspacesLayout;
+export default ProcessorLayout;

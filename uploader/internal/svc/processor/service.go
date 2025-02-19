@@ -3,7 +3,6 @@ package processor
 import (
 	"context"
 	"log"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
@@ -47,13 +46,8 @@ func (s *Service) TriggerWorkflow(ctx context.Context, workspaceID string, proce
 			temporal.NewSearchAttributeKeyKeyword("processorId").ValueSet(processor.ID),
 		),
 		RetryPolicy: &temporal.RetryPolicy{
-			MaximumAttempts:    processor.MaxRetries,
-			InitialInterval:    time.Duration(processor.RetryInitialIntervalS) * time.Second,
-			BackoffCoefficient: processor.RetryBackoffCoefficient,
-			MaximumInterval:    time.Duration(processor.RetryMaxIntervalS) * time.Second,
+			MaximumAttempts: 3,
 		},
-		WorkflowExecutionTimeout: time.Duration(processor.WorkflowRunTimeoutS) * time.Second,
-		WorkflowRunTimeout:       time.Duration(processor.WorkflowExecutionTimeoutS) * time.Second,
 	}
 
 	we, err := infra.TemporalClient.ExecuteWorkflow(context.Background(), workflowOptions, dsl.SimpleDSLWorkflow, dslWorkflow)

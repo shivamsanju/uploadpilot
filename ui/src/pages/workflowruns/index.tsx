@@ -1,13 +1,20 @@
-import { ActionIcon, Box, Group, Title } from "@mantine/core";
+import {
+  ActionIcon,
+  Anchor,
+  Box,
+  Breadcrumbs,
+  Group,
+  Text,
+  Title,
+} from "@mantine/core";
 import WorkflowRunsList from "./List";
-import { IconPlus } from "@tabler/icons-react";
-import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { AppLoader } from "../../components/Loader/AppLoader";
+import { IconChevronLeft } from "@tabler/icons-react";
 
 const WorkflowRunsPage = () => {
-  const { workspaceId } = useParams();
-  const [workflowAddOpen, setWorkflowAddOpen] = useState(false);
+  const { workspaceId, processorId } = useParams();
+  const navigate = useNavigate();
 
   if (!workspaceId) {
     return <AppLoader h="70vh" />;
@@ -15,30 +22,25 @@ const WorkflowRunsPage = () => {
 
   return (
     <Box mb={50}>
-      <Group justify="space-between" mb="xl">
-        <Title order={3} opacity={0.7}>
-          Workflow Runs
-        </Title>
-        <Box
-          style={{
-            position: "relative",
-            display: "inline-block",
-            marginRight: "1rem",
-          }}
+      <Breadcrumbs separator=">">
+        <Anchor href={`/`}>Workspaces</Anchor>
+        <Anchor href={`/workspace/${workspaceId}/processors`}>
+          Processors
+        </Anchor>
+        <Text>{processorId}</Text>
+      </Breadcrumbs>
+      <Group mt="xs" mb="xl">
+        <ActionIcon
+          variant="default"
+          radius="xl"
+          size="sm"
+          onClick={() => navigate(`/workspace/${workspaceId}/processors`)}
         >
-          <ActionIcon
-            size="lg"
-            variant="outline"
-            onClick={() => setWorkflowAddOpen(true)}
-          >
-            <IconPlus />
-          </ActionIcon>
-        </Box>
+          <IconChevronLeft size={16} />
+        </ActionIcon>
+        <Title order={3}>Workflow runs</Title>
       </Group>
-      <WorkflowRunsList
-        opened={workflowAddOpen}
-        setOpened={setWorkflowAddOpen}
-      />
+      <WorkflowRunsList />
     </Box>
   );
 };

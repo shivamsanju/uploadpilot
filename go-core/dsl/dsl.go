@@ -1,6 +1,7 @@
 package dsl
 
 import (
+	"log"
 	"time"
 
 	"go.temporal.io/sdk/temporal"
@@ -32,28 +33,28 @@ type (
 	Condition struct {
 		Variable string     `json:"variable" yaml:"variable"`
 		Value    string     `json:"value" yaml:"value"`
-		Then     *Statement `json:"then,omitempty" yaml:"then,omitempty"`
+		Then     *Statement `json:"then" yaml:"then"`
 		Else     *Statement `json:"else,omitempty" yaml:"else,omitempty"`
 	}
 
 	Loop struct {
-		Iterations    int        `json:"iterations" yaml:"iterations"`
+		Iterations    int        `json:"iterations,omitempty" yaml:"iterations,omitempty"`
 		Body          *Statement `json:"body" yaml:"body"`
-		BreakVariable string     `json:"breakVariable" yaml:"breakVariable"`
-		BreakValue    string     `json:"breakValue" yaml:"breakValue"`
+		BreakVariable *string    `json:"breakVariable,omitempty" yaml:"breakVariable,omitempty"`
+		BreakValue    *string    `json:"breakValue,omitempty" yaml:"breakValue,omitempty"`
 	}
 
 	ActivityInvocation struct {
 		Name                          string   `json:"name" yaml:"name"`
-		Arguments                     []string `json:"arguments" yaml:"arguments"`
-		Result                        string   `json:"result" yaml:"result"`
-		ScheduleToCloseTimeoutSeconds int64    `json:"scheduleToCloseTimeoutSeconds" yaml:"scheduleToCloseTimeoutSeconds"`
-		ScheduleToStartTimeoutSeconds int64    `json:"scheduleToStartTimeoutSeconds" yaml:"scheduleToStartTimeoutSeconds"`
-		StartToCloseTimeoutSeconds    int64    `json:"startToCloseTimeoutSeconds" yaml:"startToCloseTimeoutSeconds"`
-		MaxRetries                    int32    `json:"maxRetries" yaml:"maxRetries"`
-		RetryBackoffCoefficient       float64  `json:"retryBackoffCoefficient" yaml:"retryBackoffCoefficient"`
-		RetryMaxIntervalSeconds       int64    `json:"retryMaxIntervalSeconds" yaml:"retryMaxIntervalSeconds"`
-		RetryInitialIntervalSeconds   int64    `json:"retryInitialIntervalSeconds" yaml:"retryInitialIntervalSeconds"`
+		Arguments                     []string `json:"arguments,omitempty" yaml:"arguments,omitempty"`
+		Result                        *string  `json:"result,omitempty" yaml:"result,omitempty"`
+		ScheduleToCloseTimeoutSeconds *int64   `json:"scheduleToCloseTimeoutSeconds,omitempty" yaml:"scheduleToCloseTimeoutSeconds,omitempty"`
+		ScheduleToStartTimeoutSeconds *int64   `json:"scheduleToStartTimeoutSeconds,omitempty" yaml:"scheduleToStartTimeoutSeconds,omitempty"`
+		StartToCloseTimeoutSeconds    *int64   `json:"startToCloseTimeoutSeconds,omitempty" yaml:"startToCloseTimeoutSeconds,omitempty"`
+		MaxRetries                    *int32   `json:"maxRetries,omitempty" yaml:"maxRetries,omitempty"`
+		RetryBackoffCoefficient       *float64 `json:"retryBackoffCoefficient,omitempty" yaml:"retryBackoffCoefficient,omitempty"`
+		RetryMaxIntervalSeconds       *int64   `json:"retryMaxIntervalSeconds,omitempty" yaml:"retryMaxIntervalSeconds,omitempty"`
+		RetryInitialIntervalSeconds   *int64   `json:"retryInitialIntervalSeconds,omitempty" yaml:"retryInitialIntervalSeconds,omitempty"`
 	}
 
 	executable interface {
@@ -116,7 +117,7 @@ func (l *Loop) execute(ctx workflow.Context, bindings map[string]string) error {
 		if err := l.Body.execute(ctx, bindings); err != nil {
 			return err
 		}
-		if bindings[l.BreakVariable] == l.BreakValue {
+		if bindings[*l.BreakVariable] == *l.BreakValue {
 			break
 		}
 	}
@@ -127,23 +128,55 @@ func (a *ActivityInvocation) execute(ctx workflow.Context, bindings map[string]s
 	inputParam := makeInput(a.Arguments, bindings)
 	var result string
 
-	ctx = workflow.WithActivityOptions(ctx, workflow.ActivityOptions{
-		StartToCloseTimeout:    time.Duration(a.StartToCloseTimeoutSeconds) * time.Second,
-		ScheduleToCloseTimeout: time.Duration(a.ScheduleToCloseTimeoutSeconds) * time.Second,
-		ScheduleToStartTimeout: time.Duration(a.ScheduleToStartTimeoutSeconds) * time.Second,
-		RetryPolicy: &temporal.RetryPolicy{
-			InitialInterval:    time.Duration(a.RetryInitialIntervalSeconds) * time.Second,
-			BackoffCoefficient: a.RetryBackoffCoefficient,
-			MaximumInterval:    time.Duration(a.RetryMaxIntervalSeconds) * time.Second,
-			MaximumAttempts:    a.MaxRetries,
-		},
-	})
+	log.Printf("\n\n\n Wflow:  %+v \n\n\n", a)
+	ao := workflow.ActivityOptions{}
+	if a.StartToCloseTimeoutSeconds != nil && *a.StartToCloseTimeoutSeconds != 0 {
+		ao.StartToCloseTimeout = time.Duration(*a.StartToCloseTimeoutSeconds) * time.Second
+	} else {
+		ao.StartToCloseTimeout = 24 * time.Hour
+	}
+
+	if a.ScheduleToCloseTimeoutSeconds != nil {
+		ao.ScheduleToCloseTimeout = time.Duration(*a.ScheduleToCloseTimeoutSeconds) * time.Second
+	} else {
+		ao.ScheduleToCloseTimeout = 24 * time.Hour
+	}
+
+	if a.ScheduleToStartTimeoutSeconds != nil {
+		ao.ScheduleToStartTimeout = time.Duration(*a.ScheduleToStartTimeoutSeconds) * time.Second
+	} else {
+		ao.ScheduleToStartTimeout = 24 * time.Hour
+	}
+
+	ao.RetryPolicy = &temporal.RetryPolicy{
+		MaximumAttempts:    1,
+		InitialInterval:    0,
+		BackoffCoefficient: 2,
+		MaximumInterval:    1 * time.Minute,
+	}
+
+	if a.MaxRetries != nil {
+		ao.RetryPolicy.MaximumAttempts = *a.MaxRetries
+	}
+	if a.RetryInitialIntervalSeconds != nil {
+		ao.RetryPolicy.InitialInterval = time.Duration(*a.RetryInitialIntervalSeconds) * time.Second
+	}
+	if a.RetryBackoffCoefficient != nil {
+		ao.RetryPolicy.BackoffCoefficient = *a.RetryBackoffCoefficient
+	}
+	if a.RetryMaxIntervalSeconds != nil {
+		ao.RetryPolicy.MaximumInterval = time.Duration(*a.RetryMaxIntervalSeconds) * time.Second
+	}
+
+	log.Printf("\n\n\n Wflow filled:  %+v \n\n\n", ao)
+
+	ctx = workflow.WithActivityOptions(ctx, ao)
 	err := workflow.ExecuteActivity(ctx, a.Name, inputParam).Get(ctx, &result)
 	if err != nil {
 		return err
 	}
-	if a.Result != "" {
-		bindings[a.Result] = result
+	if a.Result != nil {
+		bindings[*a.Result] = result
 	}
 	return nil
 }

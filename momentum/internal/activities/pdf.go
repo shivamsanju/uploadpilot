@@ -20,6 +20,6 @@ func (a *PdfActivities) ExtractContentFromPDF(ctx context.Context, input []strin
 		return "Extracted content successfully", nil
 	} else {
 		fmt.Printf("Extracting content failed from PDF %s with input %v \n", name, input)
-		return "Extraction failed", nil
+		return "Extraction failed", fmt.Errorf("extraction failed")
 	}
 }

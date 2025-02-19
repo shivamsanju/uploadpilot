@@ -87,16 +87,16 @@ type Icolors = readonly [
 // ]
 
 const lightBlue: Icolors = [
-  "#dffbff",
-  "#caf2ff",
-  "#99e2ff",
-  "#64d2ff",
-  "#3cc4fe",
-  "#23bcfe",
-  "#09b8ff",
-  "#00a1e4",
-  "#008fcd",
-  "#007cb6",
+  "#e1f8ff",
+  "#cbedff",
+  "#9ad7ff",
+  "#64c1ff",
+  "#3aaefe",
+  "#20a2fe",
+  "#099dff",
+  "#0088e4",
+  "#0079cd",
+  "#0069b6",
 ];
 
 export const myAppTheme = createTheme({

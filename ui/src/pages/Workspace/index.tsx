@@ -52,7 +52,7 @@ const WorkspaceLandingPage = () => {
   const handleCreateWorkspace = async (values: any) => {
     try {
       const id = await mutateAsync(values.name);
-      navigate(`/workspaces/${id}`);
+      navigate(`/workspace/${id}`);
     } catch (error) {
       console.error(error);
     }
@@ -92,7 +92,7 @@ const WorkspaceLandingPage = () => {
                   </Group>
                   <ActionIcon
                     size="lg"
-                    onClick={() => navigate(`/workspaces/${workspace.id}`)}
+                    onClick={() => navigate(`/workspace/${workspace.id}`)}
                   >
                     <IconChevronsRight />
                   </ActionIcon>

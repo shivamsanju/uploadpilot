@@ -54,10 +54,10 @@ export const BlockSearch = ({
     // Multiline text to insert
     const text = [
       `- activity:`,
-      `\tname: ${item.name}`,
-      `\targuments:`,
-      `\t\t- input: ${item.name}_input`,
-      `\tresult: ${item.name}_result`,
+      `    name: ${item.name}`,
+      `    arguments:`,
+      `      - ${item.name}_input`,
+      `    result: ${item.name}_result`,
       ``,
     ]
       .map((line, index) => (index === 0 ? line : baseIndentation + line)) // preserve indentation for all lines except the first one

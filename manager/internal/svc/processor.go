@@ -52,6 +52,19 @@ func (s *ProcessorService) CreateProcessor(ctx context.Context, workspaceID stri
 	processor.CreatedBy = user.UserID
 	processor.UpdatedBy = user.UserID
 	processor.WorkspaceID = workspaceID
+	processor.Workflow = `
+variables:
+    var1: "value1"
+
+root:
+    sequence:
+      elements:
+        - activity:
+            name: ExtractPDFContent
+            arguments:
+              - var1
+            result: result1
+`
 
 	return s.procRepo.Create(ctx, processor)
 }
@@ -114,6 +127,7 @@ func (s *ProcessorService) GetWorkflowRuns(ctx context.Context, processorID stri
 	var runs []dto.WorkflowRun
 	for _, run := range result.Executions {
 		runs = append(runs, dto.WorkflowRun{
+			ID:              run.Execution.RunId,
 			WorkflowID:      run.Execution.WorkflowId,
 			RunID:           run.Execution.RunId,
 			StartTime:       run.StartTime.AsTime(),

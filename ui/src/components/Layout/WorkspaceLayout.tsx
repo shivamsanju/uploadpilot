@@ -6,27 +6,22 @@ import {
   useMantineTheme,
 } from "@mantine/core";
 import { AdminHeader } from "../Header/Header";
-import NavBar from "../Navigation/Navbar";
 import AuthWrapper from "../AuthWrapper/AuthWrapper";
 import { useMemo, useState } from "react";
 import {
+  IconCategory,
+  IconCreditCardFilled,
   IconMenu2,
-  IconAdjustments,
-  IconCircles,
-  IconDatabase,
-  IconRoute,
-  IconGauge,
-  IconUsers,
-  IconShoppingCartBolt,
+  IconSettings,
 } from "@tabler/icons-react";
-import { useParams } from "react-router-dom";
-import WorkspaceSwitcher from "../WorkspaceSwitcher";
+import NavBar from "../Navigation/Navbar";
 
-const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const WorkspacesLayout: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [opened, toggle] = useState(true);
   const { colorScheme } = useMantineColorScheme();
   const theme = useMantineTheme();
-  const { workspaceId } = useParams();
 
   const bg = colorScheme === "dark" ? "#141414" : theme.colors.gray[0];
 
@@ -38,42 +33,22 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const navItems = useMemo(
     () => [
       {
-        label: "Get Started",
-        icon: IconCircles,
-        link: `/workspace/${workspaceId}`,
+        label: "Workspaces",
+        icon: IconCategory,
+        link: `/`,
       },
       {
-        label: "Uploads",
-        icon: IconDatabase,
-        link: `/workspace/${workspaceId}/uploads`,
+        label: "Billing",
+        icon: IconCreditCardFilled,
+        link: `/billing`,
       },
       {
-        label: "Processors",
-        icon: IconRoute,
-        link: `/workspace/${workspaceId}/processors`,
-      },
-      {
-        label: "Configuration",
-        icon: IconAdjustments,
-        link: `/workspace/${workspaceId}/configuration`,
-      },
-      {
-        label: "Users",
-        icon: IconUsers,
-        link: `/workspace/${workspaceId}/users`,
-      },
-      {
-        label: "Marketplace",
-        icon: IconShoppingCartBolt,
-        link: `/workspace/${workspaceId}/tools`,
-      },
-      {
-        label: "Analytics",
-        icon: IconGauge,
-        link: `/workspace/${workspaceId}/analytics`,
+        label: "Settings",
+        icon: IconSettings,
+        link: `/settings`,
       },
     ],
-    [workspaceId]
+    []
   );
 
   return (
@@ -109,14 +84,10 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           style={{ borderColor: appShellBorderColor }}
           bg={headerNavBg}
         >
-          <NavBar
-            toggle={toggle}
-            items={navItems}
-            footer={<WorkspaceSwitcher />}
-          />
+          <NavBar toggle={toggle} items={navItems} />
         </AppShell.Navbar>
-        <AppShell.Main bg={bg} m={0} pr={0}>
-          <ScrollArea scrollbarSize={6} h="93vh" pr="md">
+        <AppShell.Main bg={bg} m={0}>
+          <ScrollArea scrollbarSize={6} h="93vh">
             {children}
           </ScrollArea>
         </AppShell.Main>
@@ -125,4 +96,4 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   );
 };
 
-export default AppLayout;
+export default WorkspacesLayout;

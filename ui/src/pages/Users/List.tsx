@@ -1,12 +1,21 @@
-import { IconDots, IconEdit, IconEye, IconTrash } from "@tabler/icons-react";
+import {
+  IconDots,
+  IconEdit,
+  IconEye,
+  IconPlus,
+  IconSearch,
+  IconTrash,
+} from "@tabler/icons-react";
 import {
   ActionIcon,
   Avatar,
   Box,
+  Button,
   Group,
   Menu,
   Modal,
   Text,
+  TextInput,
 } from "@mantine/core";
 import {
   useGetUsersInWorkspace,
@@ -22,25 +31,23 @@ import AddUserForm from "./Add";
 import { useViewportSize } from "@mantine/hooks";
 import { showConfirmationPopup } from "../../components/Popups/ConfirmPopup";
 import { ContainerOverlay } from "../../components/Overlay";
+import { RefreshButton } from "../../components/Buttons/RefreshButton/RefreshButton";
 
 const getRandomAvatar = () => {
   const randomIndex = Math.floor(Math.random() * 5) + 1;
   return `https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-${randomIndex}.png`;
 };
 
-const WorkspaceUsersList = ({
-  opened,
-  setOpened,
-}: {
-  opened: boolean;
-  setOpened: any;
-}) => {
+const WorkspaceUsersList = () => {
   const [mode, setMode] = useState<"add" | "edit" | "view">("add");
   const { width } = useViewportSize();
 
   const [initialValues, setInitialValues] = useState(null);
+  const [opened, setOpened] = useState(false);
   const { workspaceId } = useParams();
-  const { isPending, error, users } = useGetUsersInWorkspace(workspaceId || "");
+  const { isPending, error, users, invalidate } = useGetUsersInWorkspace(
+    workspaceId || ""
+  );
   const { mutateAsync, isPending: removePending } =
     useRemoveUserFromWorkspaceMutation();
 
@@ -186,8 +193,30 @@ const WorkspaceUsersList = ({
         horizontalSpacing="md"
         noHeader={true}
         noRecordsText="No users found"
+        menuBar={
+          <Group gap="sm" align="center" justify="space-between">
+            <Group gap="sm">
+              <Button
+                variant="subtle"
+                onClick={() => setOpened(true)}
+                leftSection={<IconPlus size={18} />}
+              >
+                Add
+              </Button>
+              <RefreshButton onClick={invalidate} />
+            </Group>
+            <TextInput
+              value={""}
+              // onChange={(e) => onSearchFilterChange(e.target.value)}
+              placeholder="Search by name or status"
+              leftSection={<IconSearch size={18} />}
+              variant="subtle"
+            />
+          </Group>
+        }
       />
       <Modal
+        centered
         padding="xl"
         transitionProps={{ transition: "pop" }}
         opened={opened}

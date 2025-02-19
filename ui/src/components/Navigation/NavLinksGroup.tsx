@@ -45,7 +45,6 @@ export function LinksGroup({
       href={link.link}
       key={link.label}
       onClick={(event) => {
-        console.log(width);
         if (width < 768) {
           toggle(false);
         }
@@ -66,23 +65,22 @@ export function LinksGroup({
       navigate(link);
     }
     if (width < 768) {
-      console.log(width);
       toggle(true);
     }
   };
 
   return (
     <>
-      <UnstyledButton onClick={handleClick} className={classes.control}>
+      <UnstyledButton
+        onClick={handleClick}
+        className={`${active ? classes.active : ""} ${classes.control}`}
+      >
         <Group justify="space-between" gap={0}>
           <Box style={{ display: "flex", alignItems: "center" }}>
             <ThemeIcon variant="light" size={30}>
               <Icon size={18} />
             </ThemeIcon>
-            <Box
-              ml="md"
-              className={`${classes.label} ${active ? classes.active : ""}`}
-            >
+            <Box ml="md" className={`${classes.label}`}>
               {label}
             </Box>
           </Box>

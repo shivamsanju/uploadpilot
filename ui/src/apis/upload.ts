@@ -50,7 +50,7 @@ export const useGetUploads = ({
 
       return axiosInstance
         .get<UploadResponse>(
-          `/workspaces/${workspaceId}/uploads?skip=${skipValue}&limit=${batchSize}${searchParam}`,
+          `/workspaces/${workspaceId}/uploads?skip=${skipValue}&limit=${batchSize}${searchParam}`
         )
         .then((res) => res.data);
     },
@@ -85,7 +85,7 @@ export const useGetUploads = ({
           : "";
         return axiosInstance
           .get<UploadResponse>(
-            `/workspaces/${workspaceId}/uploads?skip=0&limit=${batchSize}${searchParam}`,
+            `/workspaces/${workspaceId}/uploads?skip=0&limit=${batchSize}${searchParam}`
           )
           .then((res) => res.data);
       },
@@ -113,7 +113,7 @@ export const UseGetUploadLogs = (workspaceId: string, uploadId: string) => {
     queryFn: () => {
       if (!workspaceId || !uploadId) {
         return Promise.reject(
-          new Error("workspaceId and uploadId are required"),
+          new Error("workspaceId and uploadId are required")
         );
       }
       return axiosInstance
