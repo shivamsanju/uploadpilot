@@ -16,6 +16,7 @@ import WorkflowBuilderPage from "./pages/wflowbuilder";
 import WorkflowRunsPage from "./pages/workflowruns";
 import ProcessorLayout from "./components/Layout/ProcessorLayout";
 import NewprocessorPage from "./pages/processors/Add";
+import ProcessorSettingsPage from "./pages/processors/settings";
 
 type Route = {
   path: string;
@@ -74,6 +75,11 @@ const routes: Route[] = [
     path: "/workspace/:workspaceId/processors/:processorId/runs",
     layout: ProcessorLayout,
     element: <WorkflowRunsPage />,
+  },
+  {
+    path: "/workspace/:workspaceId/processors/:processorId/settings",
+    layout: ProcessorLayout,
+    element: <ProcessorSettingsPage />,
   },
   {
     path: "/workspace/:workspaceId/users",

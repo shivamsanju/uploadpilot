@@ -82,6 +82,8 @@ func (us *Service) CreateUpload(hook *tusd.HookEvent) (*models.Upload, error) {
 
 	metadata["upload_id"] = id
 	upload.Metadata = metadata
+	upload.FileName = metadata["filename"].(string)
+	upload.FileType = metadata["filetype"].(string)
 	if err := us.uploadRepo.Create(hook.Context, workspaceID, upload); err != nil {
 		infra.Log.Errorf("unable to create upload: %s", err)
 		return nil, err

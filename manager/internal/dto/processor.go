@@ -9,7 +9,8 @@ import (
 type CreateProcessorRequest struct {
 	Name        string             `json:"name" validate:"required,max=25"`
 	WorkspaceID string             `json:"workspaceId" validate:"required,uuid"`
-	Triggers    dtypes.StringArray `json:"triggers" validate:"required,min=1"`
+	Triggers    dtypes.StringArray `json:"triggers"`
+	TemplateKey string             `json:"templateKey"`
 }
 
 type EditProcRequest struct {
@@ -29,14 +30,20 @@ type WorkflowRun struct {
 	ID              string    `json:"id"`
 	WorkflowID      string    `json:"workflowId"`
 	RunID           string    `json:"runId"`
-	StartTime       time.Time `json:"startTime"`
-	EndTime         time.Time `json:"endTime"`
-	DurationSeconds int64     `json:"durationSeconds"`
-	Status          string    `json:"status"`
+	StartTime       time.Time `json:"startTime,omitempty"`
+	EndTime         time.Time `json:"endTime,omitempty"`
+	DurationSeconds int64     `json:"durationSeconds,omitempty"`
+	Status          string    `json:"status,omitempty"`
 }
 
 type WorkflowRunLogs struct {
 	Timestamp time.Time `json:"timestamp"`
 	EventType string    `json:"eventType"`
 	Details   string    `json:"details"`
+}
+
+type ProcessorTemplate struct {
+	Key         string `json:"key"`
+	Label       string `json:"label"`
+	Description string `json:"description"`
 }

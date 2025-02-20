@@ -6,15 +6,7 @@ import {
   IconNumber,
   IconServer2,
 } from "@tabler/icons-react";
-import {
-  Box,
-  Card,
-  Group,
-  Paper,
-  SimpleGrid,
-  Text,
-  Title,
-} from "@mantine/core";
+import { Box, Group, Paper, SimpleGrid, Text, Title } from "@mantine/core";
 import classes from "./dashboard.module.css";
 import { LineChart } from "@mantine/charts";
 
@@ -89,7 +81,7 @@ const DashboardPage = () => {
                 Analyze file upload trends over the last 6 months
             </Text> */}
       <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }}>{stats}</SimpleGrid>
-      <Card mt="xl">
+      <Paper mt="xl" p="sm">
         <LineChart
           title="File upload trends"
           h={400}
@@ -110,7 +102,7 @@ const DashboardPage = () => {
           yAxisProps={{ domain: [0, 60000] }}
           valueFormatter={(value) => `${value / 1000}K`}
         />
-      </Card>
+      </Paper>
     </Box>
   );
 };

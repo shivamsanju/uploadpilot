@@ -1,4 +1,4 @@
-package svc
+package upload
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
 )
 
-type UploadService struct {
+type Service struct {
 	upRepo       *repo.UploadRepo
 	wsRepo       *repo.WorkspaceRepo
 	wsConfigRepo *repo.WorkspaceConfigRepo
@@ -17,9 +17,9 @@ type UploadService struct {
 	logRepo      *repo.UploadLogsRepo
 }
 
-func NewUploadService(upRepo *repo.UploadRepo, wsRepo *repo.WorkspaceRepo, wsConfigRepo *repo.WorkspaceConfigRepo,
-	userRepo *repo.UserRepo, logRepo *repo.UploadLogsRepo) *UploadService {
-	return &UploadService{
+func NewService(upRepo *repo.UploadRepo, wsRepo *repo.WorkspaceRepo, wsConfigRepo *repo.WorkspaceConfigRepo,
+	userRepo *repo.UserRepo, logRepo *repo.UploadLogsRepo) *Service {
+	return &Service{
 		upRepo:       upRepo,
 		wsRepo:       wsRepo,
 		wsConfigRepo: wsConfigRepo,
@@ -28,7 +28,7 @@ func NewUploadService(upRepo *repo.UploadRepo, wsRepo *repo.WorkspaceRepo, wsCon
 	}
 }
 
-func (us *UploadService) GetAllUploads(ctx context.Context, workspaceID string, skip int, limit int, search string) ([]models.Upload, int64, error) {
+func (us *Service) GetAllUploads(ctx context.Context, workspaceID string, skip int, limit int, search string) ([]models.Upload, int64, error) {
 	if strings.HasPrefix(search, "{") {
 		searchParams, err := utils.ExtractKeyValuePairs(search)
 		if err != nil {
@@ -40,11 +40,11 @@ func (us *UploadService) GetAllUploads(ctx context.Context, workspaceID string, 
 	return us.upRepo.GetAll(ctx, workspaceID, skip, limit, search)
 }
 
-func (us *UploadService) GetUploadDetails(ctx context.Context, workspaceID, uploadID string) (*models.Upload, error) {
+func (us *Service) GetUploadDetails(ctx context.Context, workspaceID, uploadID string) (*models.Upload, error) {
 	return us.upRepo.Get(ctx, uploadID)
 }
 
-func (us *UploadService) GetLogs(ctx context.Context, uploadID string) ([]models.UploadLog, error) {
+func (us *Service) GetLogs(ctx context.Context, uploadID string) ([]models.UploadLog, error) {
 	logs, err := us.logRepo.GetLogs(ctx, uploadID)
 	if err != nil {
 		return nil, err

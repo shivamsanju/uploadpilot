@@ -1,0 +1,10 @@
+variables:
+  url: http://localhost:3000/webhook
+
+root:
+  sequence:
+    elements:
+      - activity:
+            name: Webhook
+            arguments:
+              - url

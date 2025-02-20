@@ -1,8 +1,10 @@
-package svc
+package processor
 
 import (
 	"context"
 	"fmt"
+	"os"
+	"time"
 
 	"github.com/uploadpilot/uploadpilot/go-core/common/tasks"
 	"github.com/uploadpilot/uploadpilot/go-core/common/validator"
@@ -11,23 +13,24 @@ import (
 	"github.com/uploadpilot/uploadpilot/go-core/dsl"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/uploadpilot/manager/internal/infra"
+	"github.com/uploadpilot/uploadpilot/manager/internal/svc/processor/templates"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
 	"go.temporal.io/api/enums/v1"
 	"go.temporal.io/api/workflowservice/v1"
 	"gopkg.in/yaml.v3"
 )
 
-type ProcessorService struct {
+type Service struct {
 	procRepo *repo.ProcessorRepo
 }
 
-func NewProcessorService(procRepo *repo.ProcessorRepo) *ProcessorService {
-	return &ProcessorService{
+func NewService(procRepo *repo.ProcessorRepo) *Service {
+	return &Service{
 		procRepo: procRepo,
 	}
 }
 
-func (s *ProcessorService) GetAllProcessorsInWorkspace(ctx context.Context, workspaceID string) ([]models.Processor, error) {
+func (s *Service) GetAllProcessorsInWorkspace(ctx context.Context, workspaceID string) ([]models.Processor, error) {
 	processors, err := s.procRepo.GetAll(ctx, workspaceID)
 	if err != nil {
 		return nil, err
@@ -35,7 +38,7 @@ func (s *ProcessorService) GetAllProcessorsInWorkspace(ctx context.Context, work
 	return processors, nil
 }
 
-func (s *ProcessorService) GetProcessor(ctx context.Context, processorID string) (*models.Processor, error) {
+func (s *Service) GetProcessor(ctx context.Context, processorID string) (*models.Processor, error) {
 	processor, err := s.procRepo.Get(ctx, processorID)
 	if err != nil {
 		return nil, err
@@ -43,33 +46,35 @@ func (s *ProcessorService) GetProcessor(ctx context.Context, processorID string)
 	return processor, nil
 }
 
-func (s *ProcessorService) CreateProcessor(ctx context.Context, workspaceID string, processor *models.Processor) error {
+func (s *Service) GetTemplates(ctx context.Context) []dto.ProcessorTemplate {
+	return templates.ProcessorTemplates
+}
+
+func (s *Service) CreateProcessor(ctx context.Context, workspaceID string, processor *models.Processor, templateKey *string) error {
 	user, err := utils.GetUserDetailsFromContext(ctx)
 	if err != nil {
 		return err
 	}
 
+	if templateKey == nil || *templateKey == "" {
+		templateKey = new(string)
+		*templateKey = "sample"
+	}
+	sampleWflow, err := os.ReadFile("./internal/svc/processor/templates/" + *templateKey + ".yaml")
+	if err != nil {
+		return err
+	}
+	wfData := string(sampleWflow)
+
 	processor.CreatedBy = user.UserID
 	processor.UpdatedBy = user.UserID
 	processor.WorkspaceID = workspaceID
-	processor.Workflow = `
-variables:
-    var1: "value1"
-
-root:
-    sequence:
-      elements:
-        - activity:
-            name: ExtractPDFContent
-            arguments:
-              - var1
-            result: result1
-`
+	processor.Workflow = wfData
 
 	return s.procRepo.Create(ctx, processor)
 }
 
-func (s *ProcessorService) UpdateWorkflow(ctx context.Context, workspaceID, processorID string, workflow string) error {
+func (s *Service) UpdateWorkflow(ctx context.Context, workspaceID, processorID string, workflow string) error {
 	// TODO: Validate workflow
 	//TODO: Validate tasks
 	var json map[string]interface{}
@@ -85,11 +90,11 @@ func (s *ProcessorService) UpdateWorkflow(ctx context.Context, workspaceID, proc
 	return s.procRepo.SaveWorkflow(ctx, workspaceID, processorID, workflow)
 }
 
-func (s *ProcessorService) DeleteProcessor(ctx context.Context, workspaceID, processorID string) error {
+func (s *Service) DeleteProcessor(ctx context.Context, workspaceID, processorID string) error {
 	return s.procRepo.Delete(ctx, workspaceID, processorID)
 }
 
-func (s *ProcessorService) EnableDisableProcessor(ctx context.Context, workspaceID, processorID string, enabled bool) error {
+func (s *Service) EnableDisableProcessor(ctx context.Context, workspaceID, processorID string, enabled bool) error {
 	user, err := utils.GetUserDetailsFromContext(ctx)
 	if err != nil {
 		return err
@@ -99,7 +104,7 @@ func (s *ProcessorService) EnableDisableProcessor(ctx context.Context, workspace
 	return s.procRepo.Patch(ctx, workspaceID, processorID, patch)
 }
 
-func (s *ProcessorService) EditNameAndTrigger(ctx context.Context, workspaceID, processorID string, update *dto.EditProcRequest) error {
+func (s *Service) EditNameAndTrigger(ctx context.Context, workspaceID, processorID string, update *dto.EditProcRequest) error {
 	user, err := utils.GetUserDetailsFromContext(ctx)
 	if err != nil {
 		return err
@@ -109,7 +114,7 @@ func (s *ProcessorService) EditNameAndTrigger(ctx context.Context, workspaceID, 
 	return s.procRepo.Patch(ctx, workspaceID, processorID, patch)
 }
 
-func (s *ProcessorService) GetAllTasks(ctx context.Context) []tasks.Task {
+func (s *Service) GetAllTasks(ctx context.Context) []tasks.Task {
 	var tsks []tasks.Task
 	for _, task := range tasks.TaskCatalog {
 		tsks = append(tsks, *task)
@@ -117,7 +122,7 @@ func (s *ProcessorService) GetAllTasks(ctx context.Context) []tasks.Task {
 	return tsks
 }
 
-func (s *ProcessorService) GetWorkflowRuns(ctx context.Context, processorID string) ([]dto.WorkflowRun, error) {
+func (s *Service) GetWorkflowRuns(ctx context.Context, processorID string) ([]dto.WorkflowRun, error) {
 	result, err := infra.TemporalClient.ListWorkflow(ctx, &workflowservice.ListWorkflowExecutionsRequest{
 		Query: "processorId = '" + processorID + "'",
 	})
@@ -126,20 +131,26 @@ func (s *ProcessorService) GetWorkflowRuns(ctx context.Context, processorID stri
 	}
 	var runs []dto.WorkflowRun
 	for _, run := range result.Executions {
-		runs = append(runs, dto.WorkflowRun{
-			ID:              run.Execution.RunId,
-			WorkflowID:      run.Execution.WorkflowId,
-			RunID:           run.Execution.RunId,
-			StartTime:       run.StartTime.AsTime(),
-			EndTime:         run.CloseTime.AsTime(),
-			DurationSeconds: run.CloseTime.Seconds - run.StartTime.Seconds,
-			Status:          run.Status.Enum().String(),
-		})
+		r := dto.WorkflowRun{
+			ID:         run.Execution.RunId,
+			WorkflowID: run.Execution.WorkflowId,
+			RunID:      run.Execution.RunId,
+			StartTime:  run.StartTime.AsTime(),
+			Status:     run.Status.Enum().String(),
+		}
+		if run.CloseTime != nil {
+			r.EndTime = run.CloseTime.AsTime()
+			r.DurationSeconds = run.CloseTime.Seconds - run.StartTime.Seconds
+		} else {
+			r.DurationSeconds = time.Now().Unix() - run.StartTime.Seconds
+		}
+		runs = append(runs, r)
+
 	}
 	return runs, nil
 }
 
-func (s *ProcessorService) GetWorkflowHistory(ctx context.Context, workflowID string, runID string) ([]dto.WorkflowRunLogs, error) {
+func (s *Service) GetWorkflowHistory(ctx context.Context, workflowID string, runID string) ([]dto.WorkflowRunLogs, error) {
 	infra.Log.Infof("Getting workflow history for workflowID: %s, runID: %s", workflowID, runID)
 	iter := infra.TemporalClient.GetWorkflowHistory(context.Background(), workflowID, runID, false, enums.HISTORY_EVENT_FILTER_TYPE_ALL_EVENT)
 	var logs []dto.WorkflowRunLogs
@@ -158,12 +169,7 @@ func (s *ProcessorService) GetWorkflowHistory(ctx context.Context, workflowID st
 		switch eventType {
 		case enums.EVENT_TYPE_WORKFLOW_EXECUTION_STARTED:
 			attributes := event.GetWorkflowExecutionStartedEventAttributes()
-			payloads := attributes.Input.Payloads
-			payloadStr := ""
-			for _, payload := range payloads {
-				payloadStr += string(payload.Data)
-			}
-			log.Details = fmt.Sprintf("Input: %s", payloadStr)
+			log.Details = fmt.Sprintf("Timeout: %s", attributes.WorkflowRunTimeout)
 		case enums.EVENT_TYPE_ACTIVITY_TASK_SCHEDULED:
 			attributes := event.GetActivityTaskScheduledEventAttributes()
 			payloads := attributes.Input.Payloads
@@ -171,7 +177,7 @@ func (s *ProcessorService) GetWorkflowHistory(ctx context.Context, workflowID st
 			for _, payload := range payloads {
 				payloadStr += string(payload.Data)
 			}
-			log.Details = fmt.Sprintf("ActivityType: %s. Input: %s", attributes.ActivityType.Name, payloadStr)
+			log.Details = fmt.Sprintf("ActivityType: %s,  Input: %s", attributes.ActivityType.Name, payloadStr)
 
 		case enums.EVENT_TYPE_ACTIVITY_TASK_STARTED:
 			attributes := event.GetActivityTaskStartedEventAttributes()
@@ -183,15 +189,15 @@ func (s *ProcessorService) GetWorkflowHistory(ctx context.Context, workflowID st
 
 		case enums.EVENT_TYPE_ACTIVITY_TASK_FAILED:
 			attributes := event.GetActivityTaskFailedEventAttributes()
-			log.Details = fmt.Sprintf("Cause: %s, Message: %s", attributes.Failure.Cause, attributes.Failure.Message)
+			log.Details = fmt.Sprintf("Message: %s", attributes.Failure.Message)
 
 		case enums.EVENT_TYPE_ACTIVITY_TASK_TIMED_OUT:
 			attributes := event.GetActivityTaskTimedOutEventAttributes()
-			log.Details = fmt.Sprintf("Cause: %s, Message: %s", attributes.Failure.Cause, attributes.Failure.Message)
+			log.Details = fmt.Sprintf("Message: %s", attributes.Failure.Message)
 
 		case enums.EVENT_TYPE_WORKFLOW_EXECUTION_FAILED:
 			attributes := event.GetWorkflowExecutionFailedEventAttributes()
-			log.Details = fmt.Sprintf("Cause: %s, Message: %s", attributes.Failure.Cause, attributes.Failure.Message)
+			log.Details = fmt.Sprintf("Message: %s", attributes.Failure.Message)
 
 		case enums.EVENT_TYPE_WORKFLOW_EXECUTION_COMPLETED:
 			attributes := event.GetWorkflowExecutionCompletedEventAttributes()

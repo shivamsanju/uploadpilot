@@ -1,0 +1,11 @@
+variables:
+    var1: "value1"
+
+root:
+    sequence:
+      elements:
+        - activity:
+            name: ExtractPDFContent
+            arguments:
+              - var1
+            result: result1

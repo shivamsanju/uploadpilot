@@ -225,6 +225,26 @@ export const useGetAllProcessingTasks = (workspaceId: string) => {
   return { isPending, error, blocks };
 };
 
+export const useGetAllWorkflowTemplates = (workspaceId: string) => {
+  const {
+    isPending,
+    error,
+    data: templates,
+  } = useQuery({
+    queryKey: ["workflowTemplates"],
+    queryFn: () => {
+      if (!workspaceId) {
+        return Promise.reject(new Error("workspaceId is required"));
+      }
+      return axiosInstance
+        .get(`/workspaces/${workspaceId}/processors/templates`)
+        .then((res) => res.data);
+    },
+  });
+
+  return { isPending, error, templates };
+};
+
 export const useUpdateProcessorWorkflowMutation = () => {
   const queryClient = useQueryClient();
 

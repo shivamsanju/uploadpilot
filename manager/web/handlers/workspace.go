@@ -7,15 +7,15 @@ import (
 	"github.com/go-chi/render"
 	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
-	"github.com/uploadpilot/uploadpilot/manager/internal/svc"
+	"github.com/uploadpilot/uploadpilot/manager/internal/svc/workspace"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
 )
 
 type workspaceHandler struct {
-	workspaceSvc *svc.WorkspaceService
+	workspaceSvc *workspace.Service
 }
 
-func NewWorkspaceHandler(workspaceSvc *svc.WorkspaceService) *workspaceHandler {
+func NewWorkspaceHandler(workspaceSvc *workspace.Service) *workspaceHandler {
 	return &workspaceHandler{
 		workspaceSvc: workspaceSvc,
 	}

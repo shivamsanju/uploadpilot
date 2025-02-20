@@ -10,7 +10,7 @@ import AuthWrapper from "../AuthWrapper/AuthWrapper";
 import { useMemo, useState } from "react";
 import {
   IconBolt,
-  IconDiabolo,
+  IconActivity,
   IconMenu2,
   IconSettings,
 } from "@tabler/icons-react";
@@ -36,7 +36,7 @@ const ProcessorLayout: React.FC<{ children: React.ReactNode }> = ({
     () => [
       {
         label: "Workflow",
-        icon: IconDiabolo,
+        icon: IconActivity,
         link: `/workspace/${workspaceId}/processors/${processorId}/workflow`,
       },
       {

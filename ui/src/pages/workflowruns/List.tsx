@@ -76,7 +76,7 @@ const ProcessorRunsList = () => {
         title: "Status",
         render: (item: any) => (
           <Badge
-            variant="outline"
+            variant="light"
             color={statusConfig[item?.status?.toLowerCase() || ""]}
             size="sm"
           >
@@ -95,7 +95,12 @@ const ProcessorRunsList = () => {
         title: "Ended At",
         accessor: "endTime",
         hidden: width < 768,
-        render: (item: any) => new Date(item?.endTime).toLocaleString("en-US"),
+        render: (item: any) => {
+          if (item?.endTime !== "0001-01-01T00:00:00Z") {
+            return new Date(item?.endTime).toLocaleString("en-US");
+          }
+          return "-";
+        },
       },
       {
         title: "Execution Time",

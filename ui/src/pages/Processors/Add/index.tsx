@@ -4,20 +4,28 @@ import {
   Button,
   Container,
   Group,
-  LoadingOverlay,
   MultiSelect,
   Paper,
+  ScrollArea,
   SelectProps,
+  SimpleGrid,
   Stepper,
+  Text,
   TextInput,
   Title,
 } from "@mantine/core";
 import { IconCheck, IconClockBolt, IconFile } from "@tabler/icons-react";
 import { MIME_TYPES } from "../../../utils/mime";
 import { MIME_TYPE_ICONS } from "../../../utils/fileicons";
-import { useCreateProcessorMutation } from "../../../apis/processors";
+import {
+  useCreateProcessorMutation,
+  useGetAllWorkflowTemplates,
+} from "../../../apis/processors";
 import { useNavigate, useParams } from "react-router-dom";
 import { useState } from "react";
+import { ContainerOverlay } from "../../../components/Overlay";
+import { Template } from "./Template";
+import { ErrorCard } from "../../../components/ErrorCard/ErrorCard";
 
 const iconProps = {
   stroke: 1.5,
@@ -55,6 +63,7 @@ const NewprocessorPage = () => {
       name: "",
       triggers: [],
       enabled: true,
+      templateKey: "",
     },
     validate: {
       name: (value) => (value ? null : "Name is required"),
@@ -63,6 +72,9 @@ const NewprocessorPage = () => {
 
   const { mutateAsync: createMutateAsync, isPending: isCreating } =
     useCreateProcessorMutation();
+  const { isPending, templates, error } = useGetAllWorkflowTemplates(
+    workspaceId || ""
+  );
 
   const handleAdd = async (values: any) => {
     try {
@@ -73,7 +85,7 @@ const NewprocessorPage = () => {
           name: values.name,
           triggers: values.triggers,
           enabled: values.enabled,
-          data: {},
+          templateKey: values.templateKey,
         },
       });
       form.reset();
@@ -93,6 +105,14 @@ const NewprocessorPage = () => {
 
   const prevStep = () => {
     setActive((current) => (current > 0 ? current - 1 : current));
+  };
+
+  const selectTemplate = (templateKey: string) => {
+    if (templateKey === form.values.templateKey) {
+      form.setFieldValue("templateKey", "");
+    } else {
+      form.setFieldValue("templateKey", templateKey);
+    }
   };
 
   return (
@@ -134,25 +154,29 @@ const NewprocessorPage = () => {
                 />
               </Stepper.Step>
               <Stepper.Step label="Workflow" description="Select a workflow">
-                <MultiSelect
-                  mt="xl"
-                  searchable
-                  leftSection={<IconClockBolt size={16} />}
-                  label="Workflow"
-                  description="File type to trigger the processor"
-                  placeholder="Select file type"
-                  data={MIME_TYPES}
-                  {...form.getInputProps("triggers")}
-                  renderOption={renderSelectOption}
-                />
+                <Text size="sm" mb="sm">
+                  Choose workflow from an prebuilt templates
+                </Text>
+                <ScrollArea scrollbarSize={6} h="55vh">
+                  {error && (
+                    <ErrorCard message={error?.message} title={"Error"} />
+                  )}
+                  <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xl">
+                    {templates &&
+                      templates.length > 0 &&
+                      templates.map((t: any) => (
+                        <Box onClick={() => selectTemplate(t.key)}>
+                          <Template
+                            template={t}
+                            selected={t.key === form.values.templateKey}
+                          />
+                        </Box>
+                      ))}
+                  </SimpleGrid>
+                </ScrollArea>
               </Stepper.Step>
             </Stepper>
-            <LoadingOverlay
-              visible={isCreating}
-              overlayProps={{ backgroundOpacity: 0 }}
-              zIndex={1000}
-            />
-
+            <ContainerOverlay visible={isCreating || isPending} />
             <Group justify="flex-end" mt={50}>
               <Button
                 variant="default"

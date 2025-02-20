@@ -14,7 +14,7 @@ import (
 	"github.com/uploadpilot/uploadpilot/manager/internal/config"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/uploadpilot/manager/internal/infra"
-	"github.com/uploadpilot/uploadpilot/manager/internal/svc"
+	"github.com/uploadpilot/uploadpilot/manager/internal/svc/user"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
 	"golang.org/x/net/context"
 )
@@ -22,10 +22,10 @@ import (
 var TOKEN_EXPIRY_DURATION = time.Hour * 24 * 30
 
 type authHandler struct {
-	userSvc *svc.UserService
+	userSvc *user.Service
 }
 
-func NewAuthHandler(userSvc *svc.UserService) *authHandler {
+func NewAuthHandler(userSvc *user.Service) *authHandler {
 	return &authHandler{
 		userSvc: userSvc,
 	}

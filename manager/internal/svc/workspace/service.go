@@ -1,4 +1,4 @@
-package svc
+package workspace
 
 import (
 	"context"
@@ -18,16 +18,16 @@ var DefaultUploaderConfig = &models.UploaderConfig{
 	RequiredMetadataFields: []string{},
 }
 
-type WorkspaceService struct {
+type Service struct {
 	wsRepo       *repo.WorkspaceRepo
 	wsConfigRepo *repo.WorkspaceConfigRepo
 	wsUserRepo   *repo.WorkspaceUserRepo
 	userRepo     *repo.UserRepo
 }
 
-func NewWorkspaceService(wsRepo *repo.WorkspaceRepo, wsConfigRepo *repo.WorkspaceConfigRepo,
-	wsUserRepo *repo.WorkspaceUserRepo, userRepo *repo.UserRepo) *WorkspaceService {
-	return &WorkspaceService{
+func NewService(wsRepo *repo.WorkspaceRepo, wsConfigRepo *repo.WorkspaceConfigRepo,
+	wsUserRepo *repo.WorkspaceUserRepo, userRepo *repo.UserRepo) *Service {
+	return &Service{
 		wsRepo:       wsRepo,
 		wsConfigRepo: wsConfigRepo,
 		wsUserRepo:   wsUserRepo,
@@ -35,7 +35,7 @@ func NewWorkspaceService(wsRepo *repo.WorkspaceRepo, wsConfigRepo *repo.Workspac
 	}
 }
 
-func (s *WorkspaceService) GetWorkspaces(ctx context.Context, userID string) ([]models.WorkspaceNameID, error) {
+func (s *Service) GetWorkspaces(ctx context.Context, userID string) ([]models.WorkspaceNameID, error) {
 	workspaces, err := s.wsRepo.GetAll(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -43,7 +43,7 @@ func (s *WorkspaceService) GetWorkspaces(ctx context.Context, userID string) ([]
 	return workspaces, nil
 }
 
-func (s *WorkspaceService) CreateWorkspace(ctx context.Context, workspace *models.Workspace) error {
+func (s *Service) CreateWorkspace(ctx context.Context, workspace *models.Workspace) error {
 
 	user, err := utils.GetUserDetailsFromContext(ctx)
 	if err != nil {
@@ -63,7 +63,7 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, workspace *model
 	return err
 }
 
-func (s *WorkspaceService) GetWorkspaceDetails(ctx context.Context, workspaceID string) (*models.Workspace, error) {
+func (s *Service) GetWorkspaceDetails(ctx context.Context, workspaceID string) (*models.Workspace, error) {
 	ws, err := s.wsRepo.Get(ctx, workspaceID)
 	if err != nil {
 		return nil, err
@@ -71,7 +71,7 @@ func (s *WorkspaceService) GetWorkspaceDetails(ctx context.Context, workspaceID 
 	return ws, nil
 }
 
-func (s *WorkspaceService) GetWorkspaceUsers(ctx context.Context, workspaceID string) ([]models.WorkspaceUserDetails, error) {
+func (s *Service) GetWorkspaceUsers(ctx context.Context, workspaceID string) ([]models.WorkspaceUserDetails, error) {
 	users, err := s.wsUserRepo.GetUsersInWorkspace(ctx, workspaceID)
 	if err != nil {
 		return nil, err
@@ -79,7 +79,7 @@ func (s *WorkspaceService) GetWorkspaceUsers(ctx context.Context, workspaceID st
 	return users, nil
 }
 
-func (s *WorkspaceService) AddUserToWorkspace(ctx context.Context, workspaceID string, addReq *dto.AddWorkspaceUser) error {
+func (s *Service) AddUserToWorkspace(ctx context.Context, workspaceID string, addReq *dto.AddWorkspaceUser) error {
 	user, err := s.userRepo.GetByEmail(ctx, addReq.Email)
 	if err != nil {
 		infra.Log.Errorf("failed to get user by email: %s", err.Error())
@@ -102,7 +102,7 @@ func (s *WorkspaceService) AddUserToWorkspace(ctx context.Context, workspaceID s
 	return nil
 }
 
-func (s *WorkspaceService) RemoveUserFromWorkspace(ctx context.Context, workspaceID string, userID string) error {
+func (s *Service) RemoveUserFromWorkspace(ctx context.Context, workspaceID string, userID string) error {
 	isLastOwner, err := s.wsUserRepo.IsOwner(ctx, workspaceID, userID)
 	if err != nil {
 		return err
@@ -117,7 +117,7 @@ func (s *WorkspaceService) RemoveUserFromWorkspace(ctx context.Context, workspac
 	return nil
 }
 
-func (s *WorkspaceService) ChangeUserRoleInWorkspace(ctx context.Context, workspaceID string, userID string, role models.UserRole) error {
+func (s *Service) ChangeUserRoleInWorkspace(ctx context.Context, workspaceID string, userID string, role models.UserRole) error {
 	if role != models.UserRoleContributor && role != models.UserRoleViewer {
 		return fmt.Errorf(msg.UnknownRole, role)
 	}
@@ -144,7 +144,7 @@ func (s *WorkspaceService) ChangeUserRoleInWorkspace(ctx context.Context, worksp
 	return nil
 }
 
-func (s *WorkspaceService) GetUploaderConfig(ctx context.Context, workspaceID string) (*models.UploaderConfig, error) {
+func (s *Service) GetUploaderConfig(ctx context.Context, workspaceID string) (*models.UploaderConfig, error) {
 	config, err := s.wsConfigRepo.GetConfig(ctx, workspaceID)
 	if err != nil {
 		return nil, err
@@ -152,7 +152,7 @@ func (s *WorkspaceService) GetUploaderConfig(ctx context.Context, workspaceID st
 	return config, nil
 }
 
-func (s *WorkspaceService) SetUploaderConfig(ctx context.Context, workspaceID string, config *models.UploaderConfig) error {
+func (s *Service) SetUploaderConfig(ctx context.Context, workspaceID string, config *models.UploaderConfig) error {
 	config.WorkspaceID = workspaceID
 	err := s.wsConfigRepo.SetConfig(ctx, config)
 	if err != nil {

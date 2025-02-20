@@ -6,9 +6,9 @@ import {
   IconPlus,
   IconSearch,
   IconSettings,
-  IconApps,
+  IconActivity,
   IconBolt,
-  IconSettingsBolt,
+  IconRoute,
 } from "@tabler/icons-react";
 import {
   ActionIcon,
@@ -37,6 +37,7 @@ import { timeAgo } from "../../utils/datetime";
 import { useViewportSize } from "@mantine/hooks";
 import { ContainerOverlay } from "../../components/Overlay";
 import { RefreshButton } from "../../components/Buttons/RefreshButton/RefreshButton";
+import { showConfirmationPopup } from "../../components/Popups/ConfirmPopup";
 
 const ProcessorList = () => {
   const { width } = useViewportSize();
@@ -75,6 +76,33 @@ const ProcessorList = () => {
     [workspaceId, mutateAsync]
   );
 
+  const handleRemoveProcessorWithConfirmation = useCallback(
+    (processorId: string) => {
+      showConfirmationPopup({
+        message:
+          "Are you sure you want to delete this processor? this is irreversible.",
+        onOk: async () => {
+          await handleRemoveProcessor(processorId);
+        },
+      });
+    },
+    [handleRemoveProcessor]
+  );
+  const handleBulkRemove = useCallback(async () => {
+    if (selectedRecords.length > 0) {
+      showConfirmationPopup({
+        message:
+          "Are you sure you want to delete these processors? this is irreversible.",
+        onOk: async () => {
+          await Promise.all(
+            selectedRecords.map((record) => handleRemoveProcessor(record.id))
+          );
+          setSelectedRecords([]);
+        },
+      });
+    }
+  }, [selectedRecords, handleRemoveProcessor]);
+
   const handleEnableDisableProcessor = useCallback(
     async (processorId: string, enabled: boolean) => {
       if (
@@ -100,6 +128,20 @@ const ProcessorList = () => {
     [workspaceId, enableDisableProcessor]
   );
 
+  const handleBulkEnableDisable = useCallback(
+    async (enabled: boolean) => {
+      if (selectedRecords.length > 0) {
+        await Promise.all(
+          selectedRecords.map((record) =>
+            handleEnableDisableProcessor(record.id, enabled)
+          )
+        );
+        setSelectedRecords([]);
+      }
+    },
+    [selectedRecords, handleEnableDisableProcessor]
+  );
+
   const columns: DataTableColumn[] = useMemo(
     () => [
       {
@@ -108,7 +150,7 @@ const ProcessorList = () => {
         width: 20,
         render: (item: any) => (
           <Stack justify="center">
-            <IconSettingsBolt size={16} stroke={1.5} />
+            <IconRoute size={16} stroke={1.5} />
           </Stack>
         ),
       },
@@ -226,7 +268,7 @@ const ProcessorList = () => {
               </Menu.Target>
               <Menu.Dropdown>
                 <Menu.Item
-                  leftSection={<IconApps size={16} stroke={1.5} />}
+                  leftSection={<IconActivity size={16} stroke={1.5} />}
                   disabled={!item?.enabled}
                   onClick={() =>
                     navigate(
@@ -275,7 +317,7 @@ const ProcessorList = () => {
                 <Menu.Item
                   leftSection={<IconTrash size={16} stroke={1.5} />}
                   color="red"
-                  onClick={() => handleRemoveProcessor(item.id)}
+                  onClick={() => handleRemoveProcessorWithConfirmation(item.id)}
                 >
                   <Text>Delete</Text>
                 </Menu.Item>
@@ -286,7 +328,7 @@ const ProcessorList = () => {
       },
     ],
     [
-      handleRemoveProcessor,
+      handleRemoveProcessorWithConfirmation,
       handleEnableDisableProcessor,
       width,
       navigate,
@@ -309,7 +351,7 @@ const ProcessorList = () => {
         verticalSpacing="xs"
         horizontalSpacing="md"
         noHeader={false}
-        noRecordsText="No processors. Create a processor by clicking the plus icon on top right to get started."
+        noRecordsText="No processors found"
         highlightOnHover
         menuBar={
           <Group gap="sm" align="center" justify="space-between">
@@ -326,16 +368,22 @@ const ProcessorList = () => {
               <Button
                 variant="subtle"
                 leftSection={<IconCircleCheck size={18} />}
+                onClick={() => handleBulkEnableDisable(true)}
               >
                 Enable
               </Button>
               <Button
                 variant="subtle"
                 leftSection={<IconCircleOff size={18} />}
+                onClick={() => handleBulkEnableDisable(false)}
               >
                 Disable
               </Button>
-              <Button variant="subtle" leftSection={<IconTrash size={18} />}>
+              <Button
+                variant="subtle"
+                leftSection={<IconTrash size={18} />}
+                onClick={handleBulkRemove}
+              >
                 Delete
               </Button>
               <RefreshButton onClick={invalidate} />

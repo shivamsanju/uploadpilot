@@ -16,6 +16,7 @@ require (
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/uploadpilot/uploadpilot/go-core/common v0.0.0
 	github.com/uploadpilot/uploadpilot/go-core/dsl v0.0.0
+	go.temporal.io/api v1.43.0
 	go.temporal.io/sdk v1.32.1
 	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.70.0
@@ -55,7 +56,6 @@ require (
 	github.com/stretchr/testify v1.10.0 // indirect
 	go.opentelemetry.io/otel v1.34.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.34.0 // indirect
-	go.temporal.io/api v1.43.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8 // indirect
 	golang.org/x/net v0.34.0 // indirect

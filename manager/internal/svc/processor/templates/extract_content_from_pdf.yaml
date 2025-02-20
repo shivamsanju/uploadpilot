@@ -1,0 +1,28 @@
+variables:
+  pdfLink: zyx
+  successUrl: http://localhost:3000/success
+  errorUrl: http://localhost:3000/failure
+
+root:
+  sequence:
+    elements:
+      - activity:
+          name: ExtractPDFContent
+          arguments:
+            - pdfLink
+          result: pdfExtractResult
+      - condition:
+          variable: pdfExtractResult
+          value: "Extracted content successfully"
+          then:
+            activity:
+              name: Webhook
+              arguments:
+                - successUrl
+              result: successResult
+          else:
+            activity:
+              name: Webhook
+              arguments:
+                - errorUrl
+              result: failureResult

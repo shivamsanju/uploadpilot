@@ -11,6 +11,8 @@ type Upload struct {
 	WorkspaceID    string       `gorm:"column:workspace_id;type:uuid;not null" json:"workspaceId"`
 	Status         UploadStatus `gorm:"column:status;not null" json:"status"`
 	Metadata       dtypes.JSONB `gorm:"column:metadata;type:jsonb" json:"metadata"`
+	FileName       string       `gorm:"column:file_name;not null" json:"fileName"`
+	FileType       string       `gorm:"column:file_type;not null" json:"fileType"`
 	StoredFileName string       `gorm:"column:stored_file_name;not null" json:"storedFileName"`
 	Size           int64        `gorm:"column:size;not null" json:"size"`
 	URL            string       `gorm:"column:url" json:"url"`

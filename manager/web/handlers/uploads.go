@@ -7,15 +7,15 @@ import (
 	"github.com/go-chi/render"
 	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
 	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
-	"github.com/uploadpilot/uploadpilot/manager/internal/svc"
+	"github.com/uploadpilot/uploadpilot/manager/internal/svc/upload"
 	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
 )
 
 type uploadHandler struct {
-	uploadSvc svc.UploadService
+	uploadSvc upload.Service
 }
 
-func NewUploadHandler(uploadSvc *svc.UploadService) *uploadHandler {
+func NewUploadHandler(uploadSvc *upload.Service) *uploadHandler {
 	return &uploadHandler{
 		uploadSvc: *uploadSvc,
 	}
