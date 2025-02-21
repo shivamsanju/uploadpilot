@@ -10,4 +10,4 @@ shutdown() {
 cd /app/
 node index.js &
 # Start the Go app in the foreground
-./uploader || shutdown
+./main || shutdown

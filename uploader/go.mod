@@ -2,14 +2,6 @@ module github.com/uploadpilot/uploader
 
 go 1.23.2
 
-replace github.com/uploadpilot/go-core/db v0.0.0 => ../go-core/db
-
-replace github.com/uploadpilot/go-core/pubsub v0.0.0 => ../go-core/pubsub
-
-replace github.com/uploadpilot/go-core/dsl v0.0.0 => ../go-core/dsl
-
-replace github.com/uploadpilot/go-core/common v0.0.0 => ../go-core/common
-
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.29.6
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.59
@@ -21,6 +13,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/phuslu/log v1.0.113
 	github.com/tus/tusd/v2 v2.6.0
+	golang.org/x/exp v0.0.0-20231127185646-65229373498e
 )
 
 require (
@@ -48,7 +41,6 @@ require (
 	github.com/prometheus/common v0.55.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	github.com/stretchr/testify v1.10.0 // indirect
-	golang.org/x/exp v0.0.0-20231127185646-65229373498e // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect

@@ -88,7 +88,7 @@ func Init() error {
 	TemporalNamespace = os.Getenv("TEMPORAL_NAMESPACE")
 	TemporalHostPort = os.Getenv("TEMPORAL_HOST_PORT")
 	TemporalAPIKey = os.Getenv("TEMPORAL_API_KEY")
-	APIKey = "somekey"
+	APIKey = os.Getenv("API_KEY")
 
 	return nil
 }

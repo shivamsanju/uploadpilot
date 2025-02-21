@@ -2,8 +2,6 @@ module github.com/uploadpilot/momentum
 
 go 1.23.2
 
-replace github.com/uploadpilot/go-core/pubsub v0.0.0 => ../go-core/pubsub
-
 replace github.com/uploadpilot/go-core/dsl v0.0.0 => ../go-core/dsl
 
 replace github.com/uploadpilot/go-core/common v0.0.0 => ../go-core/common
@@ -13,12 +11,11 @@ require (
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.59
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.76.0
 	github.com/joho/godotenv v1.5.1
+	github.com/phuslu/log v1.0.113
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/uploadpilot/go-core/common v0.0.0
 	github.com/uploadpilot/go-core/dsl v0.0.0
-	go.temporal.io/api v1.43.0
 	go.temporal.io/sdk v1.32.1
-	go.uber.org/zap v1.27.0
 	google.golang.org/grpc v1.70.0
 )
 
@@ -56,7 +53,7 @@ require (
 	github.com/stretchr/testify v1.10.0 // indirect
 	go.opentelemetry.io/otel v1.34.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.34.0 // indirect
-	go.uber.org/multierr v1.10.0 // indirect
+	go.temporal.io/api v1.43.0 // indirect
 	golang.org/x/exp v0.0.0-20240613232115-7f521ea00fb8 // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect

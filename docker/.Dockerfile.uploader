@@ -2,10 +2,9 @@ FROM golang:1.23.2 AS builder
 
 WORKDIR /app
 
-COPY . .
+COPY ./uploader .
 
-# Build the Go application (binary output)
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /app/uploader /app/cmd/uploader/main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /app/main ./cmd
 
 
 ######################### STAGE 2 #########################
@@ -14,19 +13,17 @@ FROM node:18
 
 WORKDIR /app
 
-COPY ./companion/package*.json ./
+COPY ./uploader/companion/package*.json ./
 
 RUN npm install
 
-COPY ./companion .
-
-COPY .env ./
+COPY ./uploader/companion .
 
 # Copy the binary from the builder image
-COPY --from=builder /app/uploader /app/uploader
+COPY --from=builder /app/main /app/main
 
 # Copy entrypoint script
-COPY entry.sh /usr/local/bin/entry.sh
+COPY ./uploader/entry.sh /usr/local/bin/entry.sh
 RUN chmod +x /usr/local/bin/entry.sh
 
 EXPOSE 8081

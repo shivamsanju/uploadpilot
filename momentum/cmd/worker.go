@@ -16,6 +16,7 @@ func main() {
 	if err := config.Init(); err != nil {
 		log.Fatalln("Unable to initialize config.", err)
 	}
+	config.InitLogger(config.Environment)
 
 	err := infra.Init(&infra.InfraOpts{
 		TemporalOpts: &infra.TemporalOptions{
