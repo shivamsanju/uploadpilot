@@ -15,6 +15,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/uploadpilot/go-core/db/pkg/driver"
+	cacheplugins "github.com/uploadpilot/go-core/db/pkg/plugins/cache"
 	"github.com/uploadpilot/go-core/db/pkg/repo"
 	"github.com/uploadpilot/manager/internal/auth"
 	"github.com/uploadpilot/manager/internal/config"
@@ -119,8 +120,8 @@ func initialize() (*http.Server, error) {
 	}
 
 	// Add caching layer
-	// rcp := cacheplugins.NewRedisCachesPlugin(infra.RedisClient)
-	// pgDriver.Orm.Use(rcp)
+	rcp := cacheplugins.NewRedisCachesPlugin(infra.RedisClient)
+	pgDriver.Orm.Use(rcp)
 
 	// Initialize the web server.
 	repos := repo.NewRepositories(pgDriver)

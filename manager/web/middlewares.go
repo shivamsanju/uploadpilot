@@ -17,7 +17,7 @@ import (
 
 func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(response http.ResponseWriter, r *http.Request) {
-		response.Header().Set("Access-Control-Allow-Origin", config.FrontendURI)
+		response.Header().Set("Access-Control-Allow-Origin", config.AllowedOrigins)
 		response.Header().Set("Access-Control-Allow-Credentials", "true")
 		if r.Method == "OPTIONS" {
 			response.Header().Set("Access-Control-Allow-Methods", "*")
