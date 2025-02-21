@@ -1,14 +1,14 @@
-module github.com/uploadpilot/uploadpilot/manager
+module github.com/uploadpilot/manager
 
 go 1.23.2
 
-replace github.com/uploadpilot/uploadpilot/go-core/db v0.0.0 => ../go-core/db
+replace github.com/uploadpilot/go-core/db v0.0.0 => ../go-core/db
 
-replace github.com/uploadpilot/uploadpilot/go-core/common v0.0.0 => ../go-core/common
+replace github.com/uploadpilot/go-core/common v0.0.0 => ../go-core/common
 
-replace github.com/uploadpilot/uploadpilot/go-core/dsl v0.0.0 => ../go-core/dsl
+replace github.com/uploadpilot/go-core/dsl v0.0.0 => ../go-core/dsl
 
-replace github.com/uploadpilot/uploadpilot/go-core/pubsub v0.0.0 => ../go-core/pubsub
+replace github.com/uploadpilot/go-core/pubsub v0.0.0 => ../go-core/pubsub
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.29.6
@@ -20,11 +20,13 @@ require (
 	github.com/go-playground/validator/v10 v10.24.0
 	github.com/joho/godotenv v1.5.1
 	github.com/markbates/goth v1.80.0
+	github.com/mitchellh/mapstructure v1.5.0
+	github.com/phuslu/log v1.0.113
 	github.com/quasoft/memstore v0.0.0-20191010062613-2bce066d2b0b
 	github.com/redis/go-redis/v9 v9.7.0
-	github.com/uploadpilot/uploadpilot/go-core/common v0.0.0
-	github.com/uploadpilot/uploadpilot/go-core/db v0.0.0
-	github.com/uploadpilot/uploadpilot/go-core/dsl v0.0.0
+	github.com/uploadpilot/go-core/common v0.0.0
+	github.com/uploadpilot/go-core/db v0.0.0
+	github.com/uploadpilot/go-core/dsl v0.0.0
 	go.temporal.io/api v1.43.0
 	go.temporal.io/sdk v1.32.1
 	go.uber.org/zap v1.27.0
@@ -56,7 +58,6 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/facebookgo/clock v0.0.0-20150410010913-600d898af40a // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
-	github.com/go-gorm/caches/v4 v4.0.5 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
@@ -76,7 +77,6 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
-	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/nexus-rpc/sdk-go v0.1.0 // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

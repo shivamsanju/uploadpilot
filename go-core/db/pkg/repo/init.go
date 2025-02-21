@@ -1,6 +1,6 @@
 package repo
 
-import "github.com/uploadpilot/uploadpilot/go-core/db/pkg/driver"
+import "github.com/uploadpilot/go-core/db/pkg/driver"
 
 type Repositories struct {
 	UserRepo            *UserRepo

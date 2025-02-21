@@ -5,12 +5,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
-	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
-	"github.com/uploadpilot/uploadpilot/manager/internal/infra"
-	"github.com/uploadpilot/uploadpilot/manager/internal/msg"
-	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
+	"github.com/phuslu/log"
+	"github.com/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/go-core/db/pkg/repo"
+	"github.com/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/manager/internal/msg"
+	"github.com/uploadpilot/manager/internal/utils"
 )
 
 var DefaultUploaderConfig = &models.UploaderConfig{
@@ -82,7 +82,7 @@ func (s *Service) GetWorkspaceUsers(ctx context.Context, workspaceID string) ([]
 func (s *Service) AddUserToWorkspace(ctx context.Context, workspaceID string, addReq *dto.AddWorkspaceUser) error {
 	user, err := s.userRepo.GetByEmail(ctx, addReq.Email)
 	if err != nil {
-		infra.Log.Errorf("failed to get user by email: %s", err.Error())
+		log.Error().Msgf("failed to get user by email: %s", err.Error())
 		return fmt.Errorf(msg.UserNotFound, addReq.Email)
 	}
 
@@ -159,4 +159,13 @@ func (s *Service) SetUploaderConfig(ctx context.Context, workspaceID string, con
 		return err
 	}
 	return nil
+}
+
+func (s *Service) DeleteWorkspace(ctx context.Context, workspaceID string) error {
+	return s.wsRepo.Delete(ctx, workspaceID)
+}
+
+func (s *Service) GetSubscription(ctx context.Context, workspaceID string) (*dto.Subscription, error) {
+	active, expiredOn, err := s.wsRepo.GetSubscription(ctx, workspaceID)
+	return &dto.Subscription{Active: active, ExpiredOn: expiredOn}, err
 }

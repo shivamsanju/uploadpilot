@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/driver"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/migrate"
+	"github.com/uploadpilot/go-core/db/pkg/driver"
+	"github.com/uploadpilot/go-core/db/pkg/migrate"
 )
 
 func main() {

@@ -1,15 +1,16 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	commonutils "github.com/uploadpilot/uploadpilot/go-core/common/utils"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
-	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
-	"github.com/uploadpilot/uploadpilot/manager/internal/svc/processor"
-	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
+	commonutils "github.com/uploadpilot/go-core/common/utils"
+	"github.com/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/manager/internal/svc/processor"
+	"github.com/uploadpilot/manager/internal/utils"
 )
 
 type processorHandler struct {
@@ -45,23 +46,21 @@ func (h *processorHandler) GetProcessorDetailsByID(w http.ResponseWriter, r *htt
 
 	render.JSON(w, r, processor)
 }
-func (h *processorHandler) GetTemplates(w http.ResponseWriter, r *http.Request) ([]dto.ProcessorTemplate, error) {
+func (h *processorHandler) GetTemplates(w http.ResponseWriter, r *http.Request) {
 	templates := h.pSvc.GetTemplates(r.Context())
-	return templates, nil
+	render.JSON(w, r, templates)
 }
 
-func (h *processorHandler) CreateProcessor(w http.ResponseWriter, r *http.Request, body *dto.CreateProcessorRequest) (*string, error) {
-	workspaceID := chi.URLParam(r, "workspaceId")
-
+func (h *processorHandler) CreateProcessor(ctx context.Context, params dto.WorkspaceParams, query interface{}, body dto.CreateProcessorRequest) (*string, int, error) {
 	var processor models.Processor
-	if err := commonutils.ConvertDTOToModel(body, &processor); err != nil {
-		return nil, err
+	if err := commonutils.ConvertDTOToModel(&body, &processor); err != nil {
+		return nil, http.StatusUnprocessableEntity, err
 	}
-	if err := h.pSvc.CreateProcessor(r.Context(), workspaceID, &processor, &body.TemplateKey); err != nil {
-		return nil, err
+	if err := h.pSvc.CreateProcessor(ctx, params.WorkspaceID, &processor, &body.TemplateKey); err != nil {
+		return nil, http.StatusBadRequest, err
 	}
 
-	return &processor.ID, nil
+	return &processor.ID, http.StatusOK, nil
 }
 
 func (h *processorHandler) UpdateProcessor(w http.ResponseWriter, r *http.Request) {
@@ -142,13 +141,23 @@ func (h *processorHandler) GetAllTasks(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, h.pSvc.GetAllTasks(r.Context()))
 }
 
-func (h *processorHandler) GetWorkflowRuns(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+func (h *processorHandler) GetWorkflowRuns(w http.ResponseWriter, r *http.Request) {
 	processorID := chi.URLParam(r, "processorId")
-	return h.pSvc.GetWorkflowRuns(r.Context(), processorID)
+	runs, err := h.pSvc.GetWorkflowRuns(r.Context(), processorID)
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	render.JSON(w, r, runs)
 }
 
-func (h *processorHandler) GetWorkflowLogs(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+func (h *processorHandler) GetWorkflowLogs(w http.ResponseWriter, r *http.Request) {
 	workflowID := r.URL.Query().Get("workflowId")
 	runID := r.URL.Query().Get("runId")
-	return h.pSvc.GetWorkflowHistory(r.Context(), workflowID, runID)
+	details, err := h.pSvc.GetWorkflowHistory(r.Context(), workflowID, runID)
+	if err != nil {
+		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
+		return
+	}
+	render.JSON(w, r, details)
 }

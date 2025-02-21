@@ -1,11 +1,11 @@
 package svc
 
 import (
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
-	"github.com/uploadpilot/uploadpilot/manager/internal/svc/processor"
-	"github.com/uploadpilot/uploadpilot/manager/internal/svc/upload"
-	"github.com/uploadpilot/uploadpilot/manager/internal/svc/user"
-	"github.com/uploadpilot/uploadpilot/manager/internal/svc/workspace"
+	"github.com/uploadpilot/go-core/db/pkg/repo"
+	"github.com/uploadpilot/manager/internal/svc/processor"
+	"github.com/uploadpilot/manager/internal/svc/upload"
+	"github.com/uploadpilot/manager/internal/svc/user"
+	"github.com/uploadpilot/manager/internal/svc/workspace"
 )
 
 type Services struct {

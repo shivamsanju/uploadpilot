@@ -1,8 +1,8 @@
 package migrate
 
 import (
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/driver"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/go-core/db/pkg/driver"
+	"github.com/uploadpilot/go-core/db/pkg/models"
 )
 
 func Migrate(db *driver.Driver) error {

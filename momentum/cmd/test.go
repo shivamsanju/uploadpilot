@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/uploadpilot/uploadpilot/momentum/internal/config"
-	"github.com/uploadpilot/uploadpilot/momentum/internal/infra"
+	"github.com/uploadpilot/momentum/internal/config"
+	"github.com/uploadpilot/momentum/internal/infra"
 	"go.temporal.io/api/enums/v1"
 )
 

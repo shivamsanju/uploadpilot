@@ -1,4 +1,4 @@
-module github.com/uploadpilot/uploadpilot/go-core/pubsub
+module github.com/uploadpilot/go-core/pubsub
 
 go 1.23.2
 

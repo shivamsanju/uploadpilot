@@ -9,13 +9,13 @@ import (
 	"github.com/go-chi/render"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/gothic"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
-	"github.com/uploadpilot/uploadpilot/manager/internal/auth"
-	"github.com/uploadpilot/uploadpilot/manager/internal/config"
-	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
-	"github.com/uploadpilot/uploadpilot/manager/internal/infra"
-	"github.com/uploadpilot/uploadpilot/manager/internal/svc/user"
-	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
+	"github.com/phuslu/log"
+	"github.com/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/manager/internal/auth"
+	"github.com/uploadpilot/manager/internal/config"
+	"github.com/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/manager/internal/svc/user"
+	"github.com/uploadpilot/manager/internal/utils"
 	"golang.org/x/net/context"
 )
 
@@ -55,7 +55,7 @@ func (h *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 func (h *authHandler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 	provider := chi.URLParam(r, "provider")
 	r = r.WithContext(context.WithValue(r.Context(), "provider", provider))
-	infra.Log.Infof("handling callback for provider: %s", provider)
+	log.Info().Msgf("handling callback for provider: %s", provider)
 	user, err := gothic.CompleteUserAuth(w, r)
 	if err != nil {
 		redirectWithError(w, r, err)

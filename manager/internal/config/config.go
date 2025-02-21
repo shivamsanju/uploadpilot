@@ -10,6 +10,7 @@ import (
 
 var (
 	AppName            string
+	Environment        string
 	Port               int
 	PostgresURI        string
 	EncryptionKey      string
@@ -31,6 +32,7 @@ var (
 	S3SecretKey        string
 	S3BucketName       string
 	S3Region           string
+	APIKey             string
 
 	// Temporal
 	TemporalNamespace string
@@ -61,6 +63,7 @@ func Init() error {
 	}
 
 	AppName = os.Getenv("APP_NAME")
+	Environment = os.Getenv("ENVIRONMENT")
 	PostgresURI = os.Getenv("POSTGRES_URI")
 	EncryptionKey = os.Getenv("ENCRYPTION_KEY")
 	RedisAddr = os.Getenv("REDIS_HOST")
@@ -85,6 +88,7 @@ func Init() error {
 	TemporalNamespace = os.Getenv("TEMPORAL_NAMESPACE")
 	TemporalHostPort = os.Getenv("TEMPORAL_HOST_PORT")
 	TemporalAPIKey = os.Getenv("TEMPORAL_API_KEY")
+	APIKey = "somekey"
 
 	return nil
 }

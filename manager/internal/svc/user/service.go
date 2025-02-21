@@ -3,9 +3,9 @@ package user
 import (
 	"context"
 
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
-	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/go-core/db/pkg/repo"
+	"github.com/uploadpilot/manager/internal/dto"
 )
 
 type Service struct {

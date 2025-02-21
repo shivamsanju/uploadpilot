@@ -25,7 +25,7 @@
     "react-router-dom": "^6.2.1",
     "react-scripts": "5.0.1",
     "recharts": "^2.15.0",
-    "uppy-react": "^1.0.41",
+    "uppy-react": "1.0.43",
     "uuidv4": "^6.2.13",
     "yaml": "^2.7.0"
   },

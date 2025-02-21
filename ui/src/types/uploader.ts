@@ -10,5 +10,5 @@ export type UploaderConfig = {
   enableImageEditing?: boolean;
   useCompression?: boolean;
   useFaultTolerantMode?: boolean;
-  authEndpoint?: string;
+  allowedOrigins?: string[];
 };

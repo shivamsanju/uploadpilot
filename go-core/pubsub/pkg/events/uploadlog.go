@@ -2,7 +2,7 @@ package events
 
 import (
 	"github.com/redis/go-redis/v9"
-	"github.com/uploadpilot/uploadpilot/go-core/pubsub/pkg/bus"
+	"github.com/uploadpilot/go-core/pubsub/pkg/bus"
 )
 
 type UploadLogEventMsg struct {

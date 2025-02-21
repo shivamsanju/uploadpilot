@@ -6,7 +6,7 @@ import (
 	"github.com/markbates/goth/providers/github"
 	"github.com/markbates/goth/providers/google"
 	"github.com/quasoft/memstore"
-	"github.com/uploadpilot/uploadpilot/manager/internal/config"
+	"github.com/uploadpilot/manager/internal/config"
 )
 
 func InitSessionStore() error {

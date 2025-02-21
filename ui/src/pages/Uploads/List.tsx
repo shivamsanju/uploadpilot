@@ -112,8 +112,8 @@ const UploadList = ({ setTotalRecords }: any) => {
         elipsis: true,
         render: (params: any) => (
           <Group align="center" gap="sm">
-            {getFileIcon(params?.metadata?.filetype, 20)}
-            <Text fz="sm">{params?.metadata?.filename}</Text>
+            {getFileIcon(params?.fileType, 20)}
+            <Text fz="sm">{params?.fileName}</Text>
             {/* <Text fz="xs" c="dimmed">
               Filename
             </Text> */}
@@ -126,7 +126,7 @@ const UploadList = ({ setTotalRecords }: any) => {
         hidden: width < 768,
         render: (params: any) => (
           <>
-            <Text fz="sm">{params?.metadata?.filetype}</Text>
+            <Text fz="sm">{params?.fileType}</Text>
             {/* <Text fz="xs" c="dimmed">
               Mime Type
             </Text> */}

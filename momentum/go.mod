@@ -1,12 +1,12 @@
-module github.com/uploadpilot/uploadpilot/momentum
+module github.com/uploadpilot/momentum
 
 go 1.23.2
 
-replace github.com/uploadpilot/uploadpilot/go-core/pubsub v0.0.0 => ../go-core/pubsub
+replace github.com/uploadpilot/go-core/pubsub v0.0.0 => ../go-core/pubsub
 
-replace github.com/uploadpilot/uploadpilot/go-core/dsl v0.0.0 => ../go-core/dsl
+replace github.com/uploadpilot/go-core/dsl v0.0.0 => ../go-core/dsl
 
-replace github.com/uploadpilot/uploadpilot/go-core/common v0.0.0 => ../go-core/common
+replace github.com/uploadpilot/go-core/common v0.0.0 => ../go-core/common
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.29.6
@@ -14,8 +14,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.76.0
 	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.7.0
-	github.com/uploadpilot/uploadpilot/go-core/common v0.0.0
-	github.com/uploadpilot/uploadpilot/go-core/dsl v0.0.0
+	github.com/uploadpilot/go-core/common v0.0.0
+	github.com/uploadpilot/go-core/dsl v0.0.0
 	go.temporal.io/api v1.43.0
 	go.temporal.io/sdk v1.32.1
 	go.uber.org/zap v1.27.0

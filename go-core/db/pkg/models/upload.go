@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/dtypes"
+	"github.com/uploadpilot/go-core/db/pkg/dtypes"
 )
 
 type Upload struct {

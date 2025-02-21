@@ -1,28 +1,23 @@
 package config
 
 import (
-	"crypto/tls"
 	"fmt"
 	"os"
 	"strconv"
 
 	"github.com/joho/godotenv"
-	"github.com/redis/go-redis/v9"
 )
 
-var (
+type Config struct {
 	// Common
 	Port              int
-	PostgresURI       string
-	EncryptionKey     string
-	RedisAddr         string
-	RedisUsername     string
-	RedisPassword     string
-	RedisTLS          bool
+	Environment       string
 	CompanionEndpoint string
 	UploaderEndpoint  string
-	MomentumEndpoint  string
-	MomentumSecretKey string
+
+	// CoreService
+	CoreServiceEndpoint string
+	CoreServiceAPIKey   string
 
 	// Tus
 	TusUploadBasePath   string
@@ -37,91 +32,68 @@ var (
 	S3SecretKey  string
 	S3BucketName string
 	S3Region     string
+}
 
-	//Event Bus
-	EventBusRedisConfig *redis.Options
+var appConfig *Config
 
-	// Temporal
-	TemporalNamespace string
-	TemporalHostPort  string
-	TemporalAPIKey    string
-)
+func GetAppConfig() *Config {
+	if appConfig == nil {
+		panic("config not initialized")
+	}
+	return appConfig
+}
 
-func Init() error {
+func BuildConfig() {
 	err := godotenv.Load("./.env")
 	if err != nil {
 		fmt.Println("No .env file found, reading from environment variables instead")
 	}
+
+	appConfig = &Config{}
 
 	portStr := os.Getenv("PORT")
 	if portStr == "" {
 		portStr = "8080"
 	}
 
-	Port, err = strconv.Atoi(portStr)
+	appConfig.Port, err = strconv.Atoi(portStr)
 	if err != nil {
-		return fmt.Errorf("invalid PORT: %w", err)
+		panic(fmt.Errorf("invalid PORT: %w", err))
 	}
 
-	EncryptionKey = os.Getenv("ENCRYPTION_KEY")
-	PostgresURI = os.Getenv("POSTGRES_URI")
-	RedisAddr = os.Getenv("REDIS_HOST")
-	RedisUsername = os.Getenv("REDIS_USER")
-	RedisPassword = os.Getenv("REDIS_PASS")
-	RedisTLS = os.Getenv("REDIS_TLS") == "true"
-	CompanionEndpoint = os.Getenv("COMPANION_ENDPOINT")
-	UploaderEndpoint = os.Getenv("UPLOADER_ENDPOINT")
-	MomentumEndpoint = os.Getenv("MOMENTUM_ENDPOINT")
-	MomentumSecretKey = os.Getenv("MOMENTUM_SECRET_KEY")
-	S3AccessKey = os.Getenv("S3_ACCESS_KEY")
-	S3SecretKey = os.Getenv("S3_SECRET_KEY")
-	S3BucketName = os.Getenv("S3_BUCKET_NAME")
-	S3Region = os.Getenv("S3_REGION")
+	appConfig.Environment = os.Getenv("ENVIRONMENT")
+	appConfig.CompanionEndpoint = os.Getenv("COMPANION_ENDPOINT")
+	appConfig.UploaderEndpoint = os.Getenv("UPLOADER_ENDPOINT")
+	appConfig.CoreServiceEndpoint = os.Getenv("CORE_SERVICE_ENDPOINT")
+	appConfig.CoreServiceAPIKey = os.Getenv("CORE_SERVICE_API_KEY")
+	appConfig.S3AccessKey = os.Getenv("S3_ACCESS_KEY")
+	appConfig.S3SecretKey = os.Getenv("S3_SECRET_KEY")
+	appConfig.S3BucketName = os.Getenv("S3_BUCKET_NAME")
+	appConfig.S3Region = os.Getenv("S3_REGION")
 
 	// TUS Config
 	maxSize := os.Getenv("TUS_MAX_FILE_SIZE")
 	if maxSize == "" {
 		maxSize = "1048576000" // 1GB
 	}
-	TusMaxFileSize, err = strconv.ParseInt(maxSize, 10, 64)
+	appConfig.TusMaxFileSize, err = strconv.ParseInt(maxSize, 10, 64)
 	if err != nil {
-		return fmt.Errorf("invalid TUS_MAX_FILE_SIZE: %w", err)
+		panic(fmt.Errorf("invalid TUS_MAX_FILE_SIZE: %w", err))
 	}
 	chunkSize := os.Getenv("TUS_CHUNK_SIZE")
 	if chunkSize == "" {
 		chunkSize = "10485760" // 10MB
 	}
-	TusChunkSize, err = strconv.ParseInt(chunkSize, 10, 64)
+	appConfig.TusChunkSize, err = strconv.ParseInt(chunkSize, 10, 64)
 	if err != nil {
-		return fmt.Errorf("invalid TUS_CHUNK_SIZE: %w", err)
+		panic(fmt.Errorf("invalid TUS_CHUNK_SIZE: %w", err))
 	}
-	TusUploadDir = os.Getenv("TUS_UPLOAD_DIR")
-	if TusUploadDir == "" {
-		TusUploadDir = "/tmp"
+	appConfig.TusUploadDir = os.Getenv("TUS_UPLOAD_DIR")
+	if appConfig.TusUploadDir == "" {
+		appConfig.TusUploadDir = "/tmp"
 	}
-	TusUploadBasePath = UploaderEndpoint + "/upload"
-	TusDisableDownload = os.Getenv("TUS_DISABLE_DOWNLOAD") == "true"
-	TusDisableTerminate = os.Getenv("TUS_DISABLE_TERMINATION") == "true"
+	appConfig.TusUploadBasePath = appConfig.UploaderEndpoint + "/upload/%s"
+	appConfig.TusDisableDownload = os.Getenv("TUS_DISABLE_DOWNLOAD") == "true"
+	appConfig.TusDisableTerminate = os.Getenv("TUS_DISABLE_TERMINATION") == "true"
 
-	// Event Bus
-	ebRedisAddr := os.Getenv("EVENT_BUS_REDIS_ADDR")
-	ebRedisUsername := os.Getenv("EVENT_BUS_REDIS_USERNAME")
-	ebRedisPassword := os.Getenv("EVENT_BUS_REDIS_PASSWORD")
-	ebRedisTls := os.Getenv("EVENT_BUS_REDIS_TLS") == "true"
-
-	EventBusRedisConfig = &redis.Options{
-		Addr:     ebRedisAddr,
-		Username: ebRedisUsername,
-		Password: ebRedisPassword,
-	}
-	if ebRedisTls {
-		EventBusRedisConfig.TLSConfig = &tls.Config{}
-	}
-
-	// Temporal
-	TemporalNamespace = os.Getenv("TEMPORAL_NAMESPACE")
-	TemporalHostPort = os.Getenv("TEMPORAL_HOST_PORT")
-	TemporalAPIKey = os.Getenv("TEMPORAL_API_KEY")
-
-	return nil
 }

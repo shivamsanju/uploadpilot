@@ -1,12 +1,11 @@
 import {
-  ActionIcon,
-  Box,
   Button,
   Group,
   Modal,
   Paper,
   Text,
   TextInput,
+  Title,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import {
@@ -15,12 +14,7 @@ import {
 } from "../../apis/workspace";
 import { useNavigate } from "react-router-dom";
 import classes from "./Workspace.module.css";
-import {
-  IconCategory,
-  IconCategoryPlus,
-  IconChevronsRight,
-  IconPlus,
-} from "@tabler/icons-react";
+import { IconCategory, IconCategoryPlus, IconPlus } from "@tabler/icons-react";
 import { ErrorLoadingWrapper } from "../../components/ErrorLoadingWrapper";
 import { useState } from "react";
 
@@ -60,71 +54,66 @@ const WorkspaceLandingPage = () => {
 
   return (
     <ErrorLoadingWrapper error={error} isPending={isPending || isCreating}>
-      <Group justify="center" mb="50">
-        <Box mt={30} w="90%">
-          <Paper
-            withBorder
-            p="md"
-            radius="md"
-            className={classes.wsItemAdd}
-            onClick={() => toggle(true)}
-          >
-            <Group justify="center" h="100%">
-              <IconPlus size={30} stroke={2} color="gray" />
-            </Group>
-          </Paper>
-          {workspaces?.length > 0 &&
-            workspaces.map((workspace: any) => (
-              <Paper
-                withBorder
-                p="md"
-                radius="md"
-                key={workspace.id}
-                className={classes.wsItem}
-                w="100%"
-              >
-                <Group justify="space-between" key={workspace.id} h="100%">
-                  <Group gap="sm">
-                    <IconCategory size={30} stroke={2} color="gray" />
-                    <Text size="sm" fw="bold" opacity={0.7}>
-                      {workspace.name}
-                    </Text>
-                  </Group>
-                  <ActionIcon
-                    size="lg"
-                    onClick={() => navigate(`/workspace/${workspace.id}`)}
-                  >
-                    <IconChevronsRight />
-                  </ActionIcon>
-                </Group>
-              </Paper>
-            ))}
-        </Box>
-        <Modal
-          title="Create new workspace"
-          size="lg"
-          padding="xl"
-          transitionProps={{ transition: "pop" }}
-          opened={opened}
-          onClose={() => toggle(false)}
-        >
-          <form
-            onSubmit={form.onSubmit((values) => handleCreateWorkspace(values))}
-          >
-            <TextInput
-              mb="xl"
-              label="Workspace name"
-              description="Name of the workspace"
-              leftSection={<IconCategoryPlus stroke={2} color="gray" />}
-              placeholder="Enter a workspace name"
-              {...form.getInputProps("name")}
-            />
-            <Group justify="flex-end">
-              <Button type="submit">Create</Button>
-            </Group>
-          </form>
-        </Modal>
+      <Group align="center" gap="xs" h="10%">
+        <Title order={3} opacity={0.7}>
+          Workspaces
+        </Title>
       </Group>
+      <Group mb="50" align="center" mt="lg">
+        <Paper
+          withBorder
+          p="md"
+          radius="md"
+          className={classes.wsItemAdd}
+          onClick={() => toggle(true)}
+        >
+          <Group justify="center" h="100%">
+            <IconPlus size={30} stroke={2} color="gray" />
+          </Group>
+        </Paper>
+        {workspaces?.length > 0 &&
+          workspaces.map((workspace: any) => (
+            <Paper
+              withBorder
+              p="md"
+              radius="md"
+              key={workspace.id}
+              className={classes.wsItem}
+              onClick={() => navigate(`/workspace/${workspace.id}/uploads`)}
+            >
+              <Group key={workspace.id} h="100%">
+                <IconCategory size={30} stroke={2} color="gray" />
+                <Text size="sm" fw="bold" opacity={0.7}>
+                  {workspace.name}
+                </Text>
+              </Group>
+            </Paper>
+          ))}
+      </Group>
+      <Modal
+        title="Create new workspace"
+        size="lg"
+        padding="xl"
+        transitionProps={{ transition: "pop" }}
+        opened={opened}
+        onClose={() => toggle(false)}
+      >
+        <form
+          onSubmit={form.onSubmit((values) => handleCreateWorkspace(values))}
+        >
+          <TextInput
+            mb="xl"
+            label="Workspace name"
+            description="Name of the workspace"
+            leftSection={<IconCategoryPlus stroke={2} color="gray" />}
+            placeholder="Enter a workspace name"
+            {...form.getInputProps("name")}
+          />
+          <Group justify="flex-end">
+            <Button type="submit">Create</Button>
+          </Group>
+        </form>
+      </Modal>
     </ErrorLoadingWrapper>
   );
 };

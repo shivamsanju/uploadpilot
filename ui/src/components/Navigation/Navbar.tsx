@@ -15,6 +15,7 @@ type NavItem = {
   label: string;
   icon: FC<any>;
   link: string;
+  links?: { label: string; link: string }[];
 };
 
 const NavBar = ({

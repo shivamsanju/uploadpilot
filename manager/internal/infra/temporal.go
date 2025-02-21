@@ -3,7 +3,8 @@ package infra
 import (
 	"context"
 	"crypto/tls"
-	"log"
+
+	"github.com/phuslu/log"
 
 	"go.temporal.io/sdk/client"
 	"google.golang.org/grpc"
@@ -19,6 +20,7 @@ type TemporalOptions struct {
 func NewTemporalClient(opts *TemporalOptions) (client.Client, error) {
 	// The client is a heavyweight object that should be created once per process.
 	c, err := client.Dial(client.Options{
+		Logger:    log.DefaultLogger.Slog(),
 		Namespace: opts.Namespace,
 		HostPort:  opts.HostPort,
 		ConnectionOptions: client.ConnectionOptions{
@@ -41,7 +43,7 @@ func NewTemporalClient(opts *TemporalOptions) (client.Client, error) {
 		Credentials: client.NewAPIKeyStaticCredentials(opts.APIKey),
 	})
 	if err != nil {
-		log.Fatalln("Unable to create Temporal client.", err)
+		log.Fatal().Err(err).Msg("unable to create temporal client")
 	}
 	return c, nil
 }

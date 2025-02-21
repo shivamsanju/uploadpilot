@@ -1,6 +1,6 @@
 package templates
 
-import "github.com/uploadpilot/uploadpilot/manager/internal/dto"
+import "github.com/uploadpilot/manager/internal/dto"
 
 var ProcessorTemplates = []dto.ProcessorTemplate{
 	{Key: "send_webhook", Label: "Send webhook", Description: "Sends a webhook to a target URL"},

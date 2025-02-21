@@ -3,9 +3,9 @@ package repo
 import (
 	"context"
 
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/driver"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
-	dbutils "github.com/uploadpilot/uploadpilot/go-core/db/pkg/utils"
+	"github.com/uploadpilot/go-core/db/pkg/driver"
+	"github.com/uploadpilot/go-core/db/pkg/models"
+	dbutils "github.com/uploadpilot/go-core/db/pkg/utils"
 )
 
 type ProcessorRepo struct {

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/uploadpilot/uploadpilot/uploader/internal/infra"
+	"github.com/phuslu/log"
 )
 
 func AllowAllCorsMiddleware(next http.Handler) http.Handler {
@@ -27,16 +27,25 @@ func LoggerMiddleware(next http.Handler) http.Handler {
 		ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 		t1 := time.Now()
 		defer func() {
-			infra.Log.Infof(`id: %s | %s %s %s | %s | %s | %dB | %s`,
-				middleware.GetReqID(r.Context()), // RequestID (if set)
-				r.Method,                         // Method
-				r.URL.Path,                       // Path
-				r.Proto,                          // Protocol
-				r.RemoteAddr,                     // RemoteAddr
-				GetStatusLabel(ww.Status()),      // "200 OK"
-				ww.BytesWritten(),                // Bytes Written
-				time.Since(t1),                   // Elapsed
-			)
+			if ww.Status() >= 400 {
+				log.Error().
+					Str("request_id", middleware.GetReqID(r.Context())).
+					Str("method", r.Method).
+					Str("path", r.URL.Path).
+					Str("protocol", r.Proto).
+					Str("remote_addr", r.RemoteAddr).
+					Str("status", GetStatusLabel(ww.Status())).
+					Int("bytes_written", int(ww.BytesWritten())).
+					Int64("time_taken", time.Since(t1).Milliseconds()).
+					Msg("request failed")
+			} else {
+				log.Info().
+					Str("method", r.Method).
+					Str("path", r.URL.Path).
+					Int("bytes_written", int(ww.BytesWritten())).
+					Int64("time_taken", time.Since(t1).Milliseconds()).
+					Msg("request completed")
+			}
 		}()
 		next.ServeHTTP(ww, r)
 	})

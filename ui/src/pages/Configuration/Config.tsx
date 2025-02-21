@@ -9,59 +9,20 @@ import {
   SimpleGrid,
   Transition,
   Paper,
-  TextInput,
-  Tooltip,
-  SelectProps,
 } from "@mantine/core";
 import { UploaderConfig } from "../../types/uploader";
 import { useForm } from "@mantine/form";
-import { MIME_TYPES } from "../../utils/mime";
 import classes from "./Form.module.css";
 import { useParams } from "react-router-dom";
 import { useGetAllAllowedSources } from "../../apis/workspace";
-import { IconCheck, IconFile, IconInfoCircle } from "@tabler/icons-react";
 import { useUpdateUploaderConfigMutation } from "../../apis/uploader";
 import { showNotification } from "@mantine/notifications";
-import { MIME_TYPE_ICONS } from "../../utils/fileicons";
 import { DiscardButton } from "../../components/Buttons/DiscardButton";
 import { SaveButton } from "../../components/Buttons/SaveButton";
 import { ContainerOverlay } from "../../components/Overlay";
 
-const authEndpointTooltip = `
-If you have a custom authentication endpoint, enter it here.\n
- We will send a request with all headers you set in uploader to this endpoint for authentication.\n
-You can use this to authenticate the upload by setting your token in the Authorization header.\n
-You can leave this field empty if you don't have a custom authentication endpoint.
-`;
-
 type NewUploaderConfigProps = {
   config: UploaderConfig;
-};
-
-const iconProps = {
-  stroke: 1.5,
-  opacity: 0.6,
-  size: 14,
-};
-
-const renderSelectOption: SelectProps["renderOption"] = ({
-  option,
-  checked,
-}) => {
-  let Icon = MIME_TYPE_ICONS[option.value];
-  if (!Icon) {
-    Icon = IconFile;
-  }
-  return (
-    <Group flex="1" gap="xs">
-      <Icon />
-      {option.label}
-      {/* <Text c="dimmed" ml="sm">({option.value})</Text> */}
-      {checked && (
-        <IconCheck style={{ marginInlineStart: "auto" }} {...iconProps} />
-      )}
-    </Group>
-  );
 };
 
 const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
@@ -78,15 +39,11 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
       allowedFileTypes: config?.allowedFileTypes || [],
       allowedSources: config?.allowedSources || [],
       requiredMetadataFields: config?.requiredMetadataFields || [],
-      authEndpoint: config?.authEndpoint || "",
+      allowedOrigins: config?.allowedOrigins || [],
     },
     validate: {
       allowedSources: (value) =>
         value.length === 0 ? "Please select at least one source" : null,
-      authEndpoint: (value) =>
-        value && !/^https?:\/\//.test(value)
-          ? "Please enter a valid URL"
-          : null,
     },
   });
 
@@ -139,55 +96,13 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
               disabled={isPending}
               searchable
             />
-
-            {/* Allowed file types */}
-            <MultiSelect
-              label="Allowed file types"
-              description="Allowed file types for your uploader"
-              data={MIME_TYPES}
-              {...form.getInputProps("allowedFileTypes")}
-              searchable
-              renderOption={renderSelectOption}
-            />
-
-            {/*Auth Endpoint */}
-            <TextInput
-              label={
-                <Text c="dimmed">
-                  Enter a auth endpoint
-                  <Tooltip
-                    w="300px"
-                    multiline
-                    transitionProps={{ duration: 200 }}
-                    label={authEndpointTooltip}
-                  >
-                    <IconInfoCircle
-                      size={14}
-                      style={{ cursor: "pointer", marginLeft: "5px" }}
-                    />
-                  </Tooltip>
-                </Text>
-              }
-              description="Enter an auth endpoint"
-              type="url"
-              {...form.getInputProps("authEndpoint")}
-              min={0}
-            />
-            <TagsInput
-              label="Required metadata fields"
-              description="Required metadata fields for your uploader"
-              {...form.getInputProps("requiredMetadataFields")}
-              min={0}
-            />
-          </Stack>
-          <Stack p="md">
             {/* Min file size */}
-            <NumberInput
+            {/* <NumberInput
               label="Min file size"
               description="Enter minimum file size in bytes"
               {...form.getInputProps("minFileSize")}
               min={0}
-            />
+            /> */}
 
             {/* Max file size */}
             <NumberInput
@@ -198,12 +113,12 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
             />
 
             {/* Min number of files */}
-            <NumberInput
+            {/* <NumberInput
               label="Min number of files"
               description="Specify the minimum number of files required"
               {...form.getInputProps("minNumberOfFiles")}
               min={0}
-            />
+            /> */}
 
             {/* Max number of files */}
             <NumberInput
@@ -211,6 +126,29 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
               description="Specify the maximum number of files allowed"
               {...form.getInputProps("maxNumberOfFiles")}
               min={1}
+            />
+          </Stack>
+          <Stack p="md">
+            {/* Allowed file types */}
+            <TagsInput
+              label="Allowed mime types"
+              description="Allowed mime types for your uploader"
+              {...form.getInputProps("allowedFileTypes")}
+              min={0}
+            />
+
+            {/*Auth Endpoint */}
+            <TagsInput
+              label="Allowed origins"
+              description="Allowed origins for your uploader"
+              {...form.getInputProps("allowedOrigins")}
+              min={0}
+            />
+            <TagsInput
+              label="Required metadata fields"
+              description="Required metadata fields for your uploader"
+              {...form.getInputProps("requiredMetadataFields")}
+              min={0}
             />
           </Stack>
         </SimpleGrid>

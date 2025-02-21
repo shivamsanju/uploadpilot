@@ -10158,10 +10158,10 @@ update-browserslist-db@^1.1.1:
     escalade "^3.2.0"
     picocolors "^1.1.1"
 
-uppy-react@^1.0.41:
-  version "1.0.41"
-  resolved "https://registry.npmjs.org/uppy-react/-/uppy-react-1.0.41.tgz"
-  integrity sha512-+oCHKwygDDNPHIrZ48VzedbGGR6e1VAWrJUieRcgIMlbv2jUFeGVFKW6eF9G8QBTOA6Ke9RAyDRbMJ7n5WQAyQ==
+uppy-react@1.0.43:
+  version "1.0.43"
+  resolved "https://registry.yarnpkg.com/uppy-react/-/uppy-react-1.0.43.tgz#28e4144421c86f6eaa4afe0e9f41fe52711f90b4"
+  integrity sha512-Z40kGaSWouQ8otugBhmFScsmqFqvJnrhTa596psWPCaGyHKtYfZiwi9gb+Jsa92Lj5qA86WVjot9FSaJzUqFZQ==
   dependencies:
     "@uppy/audio" "^2.1.1"
     "@uppy/compressor" "^2.2.1"

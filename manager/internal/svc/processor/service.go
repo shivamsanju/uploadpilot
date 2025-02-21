@@ -6,15 +6,16 @@ import (
 	"os"
 	"time"
 
-	"github.com/uploadpilot/uploadpilot/go-core/common/tasks"
-	"github.com/uploadpilot/uploadpilot/go-core/common/validator"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
-	"github.com/uploadpilot/uploadpilot/go-core/dsl"
-	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
-	"github.com/uploadpilot/uploadpilot/manager/internal/infra"
-	"github.com/uploadpilot/uploadpilot/manager/internal/svc/processor/templates"
-	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
+	"github.com/phuslu/log"
+	"github.com/uploadpilot/go-core/common/tasks"
+	"github.com/uploadpilot/go-core/common/validator"
+	"github.com/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/go-core/db/pkg/repo"
+	"github.com/uploadpilot/go-core/dsl"
+	"github.com/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/manager/internal/infra"
+	"github.com/uploadpilot/manager/internal/svc/processor/templates"
+	"github.com/uploadpilot/manager/internal/utils"
 	"go.temporal.io/api/enums/v1"
 	"go.temporal.io/api/workflowservice/v1"
 	"gopkg.in/yaml.v3"
@@ -79,7 +80,7 @@ func (s *Service) UpdateWorkflow(ctx context.Context, workspaceID, processorID s
 	//TODO: Validate tasks
 	var json map[string]interface{}
 	if err := yaml.Unmarshal([]byte(workflow), &json); err != nil {
-		infra.Log.Errorf("failed to unmarshal workflow: %s", err.Error())
+		log.Error().Msgf("failed to unmarshal workflow: %s", err.Error())
 		return err
 	}
 
@@ -151,7 +152,7 @@ func (s *Service) GetWorkflowRuns(ctx context.Context, processorID string) ([]dt
 }
 
 func (s *Service) GetWorkflowHistory(ctx context.Context, workflowID string, runID string) ([]dto.WorkflowRunLogs, error) {
-	infra.Log.Infof("Getting workflow history for workflowID: %s, runID: %s", workflowID, runID)
+	log.Info().Msgf("Getting workflow history for workflowID: %s, runID: %s", workflowID, runID)
 	iter := infra.TemporalClient.GetWorkflowHistory(context.Background(), workflowID, runID, false, enums.HISTORY_EVENT_FILTER_TYPE_ALL_EVENT)
 	var logs []dto.WorkflowRunLogs
 	for iter.HasNext() {

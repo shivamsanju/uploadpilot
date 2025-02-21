@@ -10,13 +10,13 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/uploadpilot/uploadpilot/uploader/internal/config"
-	"github.com/uploadpilot/uploadpilot/uploader/internal/infra"
-	"github.com/uploadpilot/uploadpilot/uploader/internal/svc"
+	"github.com/uploadpilot/uploader/internal/config"
+	"github.com/uploadpilot/uploader/internal/service"
 )
 
-func InitWebserver(services *svc.Services) (*http.Server, error) {
-	h := Newhandler(services.UploadService, services.ConfigService)
+func InitWebserver(svc *service.Service) (*http.Server, error) {
+	appConfig := config.GetAppConfig()
+	h := Newhandler(svc)
 
 	router := chi.NewRouter()
 	router.Use(middleware.Recoverer)
@@ -25,7 +25,7 @@ func InitWebserver(services *svc.Services) (*http.Server, error) {
 	router.Use(LoggerMiddleware)
 
 	// Add companion proxy
-	rp, err := companionReverseProxy(config.CompanionEndpoint, config.UploaderEndpoint)
+	rp, err := companionReverseProxy(appConfig.CompanionEndpoint, appConfig.UploaderEndpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -36,13 +36,13 @@ func InitWebserver(services *svc.Services) (*http.Server, error) {
 		r.Use(AllowAllCorsMiddleware)
 		r.Get("/health", h.HealthCheck)
 		r.Get("/config/{workspaceId}", h.GetUploaderConfig)
-		r.Mount("/upload", http.StripPrefix("/upload", h.TusHandler()))
+		r.Mount("/upload/{workspaceId}", h.GetUploadHandler())
 	})
 
-	infra.Log.Infof("Starting server on port %d", config.Port)
+	// infra.Log.Infof("Starting server on port %d", appConfig.Port)
 	srv := &http.Server{
 		Handler: router,
-		Addr:    fmt.Sprintf(":%d", config.Port),
+		Addr:    fmt.Sprintf(":%d", appConfig.Port),
 	}
 
 	return srv, nil
@@ -51,7 +51,7 @@ func InitWebserver(services *svc.Services) (*http.Server, error) {
 func companionReverseProxy(companionEndpoint, uploaderEndpoint string) (http.Handler, error) {
 	targetURL, err := url.Parse(companionEndpoint)
 	if err != nil {
-		infra.Log.Errorf("Failed to parse target URL: %v", err)
+		// infra.Log.Errorf("Failed to parse target URL: %v", err)
 		return nil, err
 	}
 
@@ -64,7 +64,7 @@ func companionReverseProxy(companionEndpoint, uploaderEndpoint string) (http.Han
 		if strings.Contains(resp.Header.Get("Location"), url.QueryEscape(companionEndpoint)) {
 			resp.Header.Set("Location", strings.Replace(resp.Header.Get("Location"), url.QueryEscape(companionEndpoint), url.QueryEscape(uploaderEndpoint), 1))
 		}
-		infra.Log.Infof("modified response: %s", resp.Header.Get("Location"))
+		// infra.Log.Infof("modified response: %s", resp.Header.Get("Location"))
 		return nil
 	}
 

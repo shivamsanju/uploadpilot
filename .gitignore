@@ -48,6 +48,6 @@ uploadpilot/**/*.env
 uploadpilot/.env.prod
 .envrc
 
-_examples/
+_examples*
 _uploadpilot/
 **/.env

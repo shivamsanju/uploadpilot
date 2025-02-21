@@ -4,7 +4,6 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,15 +11,16 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/phuslu/log"
+
 	"github.com/redis/go-redis/v9"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/driver"
-	cacheplugins "github.com/uploadpilot/uploadpilot/go-core/db/pkg/plugins/cache"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
-	"github.com/uploadpilot/uploadpilot/manager/internal/auth"
-	"github.com/uploadpilot/uploadpilot/manager/internal/config"
-	"github.com/uploadpilot/uploadpilot/manager/internal/infra"
-	"github.com/uploadpilot/uploadpilot/manager/internal/svc"
-	"github.com/uploadpilot/uploadpilot/manager/web"
+	"github.com/uploadpilot/go-core/db/pkg/driver"
+	"github.com/uploadpilot/go-core/db/pkg/repo"
+	"github.com/uploadpilot/manager/internal/auth"
+	"github.com/uploadpilot/manager/internal/config"
+	"github.com/uploadpilot/manager/internal/infra"
+	"github.com/uploadpilot/manager/internal/svc"
+	"github.com/uploadpilot/manager/web"
 )
 
 func main() {
@@ -31,6 +31,7 @@ func main() {
 	srv, err := initialize()
 	if err != nil {
 		cleanup()
+		panic(err)
 	}
 
 	wg.Add(1)
@@ -46,20 +47,20 @@ func main() {
 
 		// Attempt to gracefully shut down the server
 		if err := srv.Shutdown(ctx); err != nil {
-			log.Fatal(fmt.Errorf("graceful server shutdown failed: %w", err))
+			log.Error().Err(err).Msg("graceful server shutdown failed")
 			return
 		}
 
-		log.Println("server gracefully stopped")
+		log.Info().Msg("server gracefully stopped")
 	}(wg)
 
 	// Start the web server.
-	log.Printf("starting web server on port %d\n", config.Port)
+	log.Info().Int("port", config.Port).Msg("starting web server")
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatal(fmt.Errorf("server initialization failed: %w", err))
+		log.Fatal().Err(err).Msg("failed to start web server")
 	}
 	wg.Wait()
-	log.Println("server exited")
+	log.Info().Msg("exited")
 
 }
 
@@ -67,6 +68,7 @@ func initialize() (*http.Server, error) {
 	if err := config.Init(); err != nil {
 		return nil, fmt.Errorf("config initialization failed: %w", err)
 	}
+	config.InitLogger(config.Environment)
 
 	// Initialize infra
 	s3Opts := &infra.S3Options{
@@ -117,8 +119,8 @@ func initialize() (*http.Server, error) {
 	}
 
 	// Add caching layer
-	rcp := cacheplugins.NewRedisCachesPlugin(infra.RedisClient)
-	pgDriver.Orm.Use(rcp)
+	// rcp := cacheplugins.NewRedisCachesPlugin(infra.RedisClient)
+	// pgDriver.Orm.Use(rcp)
 
 	// Initialize the web server.
 	repos := repo.NewRepositories(pgDriver)
@@ -134,5 +136,5 @@ func initialize() (*http.Server, error) {
 func cleanup() {
 	// Perform any cleanup here, e.g., closing database connections, stopping services.
 	// Example: if err := db.Close(); err != nil { return err }
-	log.Println("performing cleanup...")
+	log.Info().Msg("performing cleanup...")
 }

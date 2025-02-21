@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/uploadpilot/uploadpilot/manager/internal/auth"
-	"github.com/uploadpilot/uploadpilot/manager/internal/config"
-	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
-	"github.com/uploadpilot/uploadpilot/manager/internal/infra"
-	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
+	"github.com/phuslu/log"
+	"github.com/uploadpilot/manager/internal/auth"
+	"github.com/uploadpilot/manager/internal/config"
+	"github.com/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/manager/internal/utils"
 )
 
 func CorsMiddleware(next http.Handler) http.Handler {
@@ -34,16 +34,25 @@ func LoggerMiddleware(next http.Handler) http.Handler {
 		ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 		t1 := time.Now()
 		defer func() {
-			infra.Log.Infof(`id: %s | %s %s %s | %s | %s | %dB | %s`,
-				middleware.GetReqID(r.Context()),  // RequestID (if set)
-				r.Method,                          // Method
-				r.URL.Path,                        // Path
-				r.Proto,                           // Protocol
-				r.RemoteAddr,                      // RemoteAddr
-				utils.GetStatusLabel(ww.Status()), // "200 OK"
-				ww.BytesWritten(),                 // Bytes Written
-				time.Since(t1),                    // Elapsed
-			)
+			if ww.Status() >= 400 {
+				log.Error().
+					Str("request_id", middleware.GetReqID(r.Context())).
+					Str("method", r.Method).
+					Str("path", r.URL.Path).
+					Str("protocol", r.Proto).
+					Str("remote_addr", r.RemoteAddr).
+					Str("status", utils.GetStatusLabel(ww.Status())).
+					Int("bytes_written", int(ww.BytesWritten())).
+					Int64("time_taken", time.Since(t1).Milliseconds()).
+					Msg("request failed")
+			} else {
+				log.Info().
+					Str("method", r.Method).
+					Str("path", r.URL.Path).
+					Int("bytes_written", int(ww.BytesWritten())).
+					Int64("time_taken", time.Since(t1).Milliseconds()).
+					Msg("request completed")
+			}
 		}()
 		next.ServeHTTP(ww, r)
 	})
@@ -51,6 +60,17 @@ func LoggerMiddleware(next http.Handler) http.Handler {
 
 func AuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// verify api key
+		apiKey := r.Header.Get("X-Api-Key")
+		if apiKey == config.APIKey {
+			ctx := context.WithValue(r.Context(), dto.UserIDContextKey, "api-key")
+			ctx = context.WithValue(ctx, dto.EmailContextKey, "api-key")
+			ctx = context.WithValue(ctx, dto.NameContextKey, "api-key")
+			next.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
+
+		// verify jwt
 		authHeader := r.Header.Get("Authorization")
 		if authHeader == "" {
 			utils.HandleHttpError(w, r, http.StatusUnauthorized, fmt.Errorf("Unauthorized"))

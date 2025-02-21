@@ -5,15 +5,15 @@ import (
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
-	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
-	"github.com/uploadpilot/uploadpilot/manager/internal/infra"
+	"github.com/phuslu/log"
+	"github.com/uploadpilot/manager/internal/dto"
 )
 
 func HandleHttpError(w http.ResponseWriter, r *http.Request, statusCode int, err error) {
 	reqID := middleware.GetReqID(r.Context())
-	infra.Log.Errorf("request with id [%s] failed: %s", reqID, err.Error())
+	log.Error().Msgf("request with id [%s] failed: %s", reqID, err.Error())
 	render.Status(r, statusCode)
-	infra.Log.Infof("STATUS: %d", statusCode)
+	log.Info().Msgf("STATUS: %d", statusCode)
 	render.JSON(w, r, &dto.ErrorResponse{
 		RequestID: reqID,
 		Message:   err.Error(),

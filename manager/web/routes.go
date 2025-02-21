@@ -2,9 +2,8 @@ package web
 
 import (
 	"github.com/go-chi/chi/v5"
-	"github.com/uploadpilot/uploadpilot/manager/internal/svc"
-	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
-	"github.com/uploadpilot/uploadpilot/manager/web/handlers"
+	"github.com/uploadpilot/manager/internal/svc"
+	"github.com/uploadpilot/manager/web/handlers"
 )
 
 func Routes(services *svc.Services) *chi.Mux {
@@ -43,7 +42,9 @@ func Routes(services *svc.Services) *chi.Mux {
 			r.Route("/{workspaceId}", func(r chi.Router) {
 				r.Get("/config", workspaceHandler.GetUploaderConfig)
 				r.Put("/config", workspaceHandler.UpdateUploaderConfig)
-				r.Get("/allowedSources", workspaceHandler.GetAllAllowedSources)
+				r.Get("/allowedSources", CreateJSONHandler(workspaceHandler.GetAllAllowedSources))
+				r.Get("/subscription", CreateJSONHandler(workspaceHandler.GetSubscription))
+				r.Post("/log-upload", CreateJSONHandler(workspaceHandler.LogUpload))
 
 				// Users
 				r.Route("/users", func(r chi.Router) {
@@ -57,19 +58,20 @@ func Routes(services *svc.Services) *chi.Mux {
 
 				// Uploads
 				r.Route("/uploads", func(r chi.Router) {
+					r.Post("/", CreateJSONHandler(uploadHandler.CreateUpload))
 					r.Get("/", uploadHandler.GetPaginatedUploads)
 					r.Route("/{uploadId}", func(r chi.Router) {
 						r.Get("/", uploadHandler.GetUploadDetailsByID)
-						r.Get("/logs", uploadHandler.GetUploadLogs)
+						r.Post("/finish", CreateJSONHandler(uploadHandler.FinishUpload))
 					})
 				})
 
 				// processors
 				r.Route("/processors", func(r chi.Router) {
 					r.Get("/", procHandler.GetProcessors)
-					r.Post("/", utils.CreateJSONHandlerWithBody(procHandler.CreateProcessor))
+					r.Post("/", CreateJSONHandler(procHandler.CreateProcessor))
 					r.Get("/tasks", procHandler.GetAllTasks)
-					r.Get("/templates", utils.CreateJSONHandler(procHandler.GetTemplates))
+					r.Get("/templates", procHandler.GetTemplates)
 					r.Route("/{processorId}", func(r chi.Router) {
 						r.Get("/", procHandler.GetProcessorDetailsByID)
 						r.Put("/", procHandler.UpdateProcessor)
@@ -77,8 +79,8 @@ func Routes(services *svc.Services) *chi.Mux {
 						r.Put("/enable", procHandler.EnableProcessor)
 						r.Put("/disable", procHandler.DisableProcessor)
 						r.Put("/workflow", procHandler.UpdateWorkflow)
-						r.Get("/runs", utils.CreateJSONHandler(procHandler.GetWorkflowRuns))
-						r.Get("/logs", utils.CreateJSONHandler(procHandler.GetWorkflowLogs))
+						r.Get("/runs", procHandler.GetWorkflowRuns)
+						r.Get("/logs", procHandler.GetWorkflowLogs)
 					})
 				})
 			})

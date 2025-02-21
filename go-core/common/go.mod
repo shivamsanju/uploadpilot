@@ -1,4 +1,4 @@
-module github.com/uploadpilot/uploadpilot/go-core/common
+module github.com/uploadpilot/go-core/common
 
 go 1.23.2
 

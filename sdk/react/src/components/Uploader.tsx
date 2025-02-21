@@ -118,14 +118,11 @@ const Uploader: React.FC<UploaderProps> = ({
           companionAllowedHosts: [uploadEndpoint],
         });
         uppy.use(Tus, {
-          endpoint: `${uploadEndpoint}/upload`,
+          endpoint: `${uploadEndpoint}/upload/${workspaceId}`,
           retryDelays: [0, 1000, 3000, 5000],
           chunkSize: config.chunkSize || 10485760, // 10 MB
           removeFingerprintOnSuccess: true,
-          headers: {
-            workspaceId: workspaceId,
-            ...headers,
-          },
+          headers: headers,
         });
         if (config.allowedSources.includes("Audio")) uppy.use(Audio);
         if (config.allowedSources.includes("Webcamera")) uppy.use(Webcam);

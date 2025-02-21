@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -11,14 +9,11 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/redis/go-redis/v9"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/driver"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
-	"github.com/uploadpilot/uploadpilot/uploader/internal/config"
-	"github.com/uploadpilot/uploadpilot/uploader/internal/infra"
-	"github.com/uploadpilot/uploadpilot/uploader/internal/listeners"
-	"github.com/uploadpilot/uploadpilot/uploader/internal/svc"
-	"github.com/uploadpilot/uploadpilot/uploader/web"
+	"github.com/phuslu/log"
+	"github.com/uploadpilot/uploader/internal/clients"
+	"github.com/uploadpilot/uploader/internal/config"
+	"github.com/uploadpilot/uploader/internal/service"
+	"github.com/uploadpilot/uploader/web"
 )
 
 func main() {
@@ -26,16 +21,23 @@ func main() {
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	wg := &sync.WaitGroup{}
 
-	srv, err := initServices()
+	config.BuildConfig()
+	appConfig := config.GetAppConfig()
+	config.InitLogger(appConfig.Environment)
+	coreClient := clients.NewCoreServiceClient(appConfig.CoreServiceEndpoint, appConfig.CoreServiceAPIKey)
+	svc := service.NewUploadService(coreClient)
+
+	srv, err := web.InitWebserver(svc)
 	if err != nil {
-		cleanup()
+		log.Error().Err(err).Msg("failed to initialize web server routes")
+		os.Exit(1)
 	}
 
 	wg.Add(1)
 	go func(wg *sync.WaitGroup) {
 		defer wg.Done()
 		sig := <-sigChan
-		log.Printf("received shutdown signal: %s\n", sig)
+		log.Info().Str("signal", sig.String()).Msg("received shutdown signal")
 
 		cleanup()
 
@@ -44,90 +46,25 @@ func main() {
 
 		// Attempt to gracefully shut down the server
 		if err := srv.Shutdown(ctx); err != nil {
-			log.Fatal(wrapError("graceful server shutdown failed", err))
-			return
+			log.Error().Err(err).Msg("graceful server shutdown failed")
+			os.Exit(1)
 		}
 
-		log.Println("server gracefully stopped")
+		log.Info().Msg("server gracefully stopped")
 	}(wg)
 
 	// Start the web server.
+	log.Info().Int("port", appConfig.Port).Msg("starting web server")
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatal(wrapError("server initialization failed", err))
+		log.Error().Err(err).Msg("failed to start web server")
+		os.Exit(1)
 	}
 
 	wg.Wait()
-	log.Println("server exited")
-
-}
-
-func initServices() (*http.Server, error) {
-	// Initialize configuration.
-	if err := config.Init(); err != nil {
-		return nil, wrapError("config initialization failed", err)
-	}
-
-	// Initialize infra.
-	s3Opts := &infra.S3Options{
-		AccessKey: config.S3AccessKey,
-		SecretKey: config.S3SecretKey,
-		Region:    config.S3Region,
-	}
-
-	temporalOpts := &infra.TemporalOptions{
-		Namespace: config.TemporalNamespace,
-		HostPort:  config.TemporalHostPort,
-		APIKey:    config.TemporalAPIKey,
-	}
-
-	redisOpts := &redis.Options{
-		Addr:     config.RedisAddr,
-		Username: config.RedisUsername,
-		Password: config.RedisPassword,
-	}
-
-	if err := infra.Init(&infra.InfraOpts{
-		S3Opts:       s3Opts,
-		TemporalOpts: temporalOpts,
-		RedisOpts:    redisOpts,
-	}); err != nil {
-		return nil, wrapError("infra initialization failed", err)
-	}
-
-	// Initialize database.
-	pgDriver, err := driver.NewPostgresDriver(config.PostgresURI, &driver.DBConfig{
-		MaxOpenConn:     10,
-		MaxIdleConn:     5,
-		ConnMaxLifeTime: time.Minute * 30,
-		ConnMaxIdleTime: time.Minute * 5,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("database initialization failed: %w", err)
-	}
-
-	// Initialize the services
-	repos := repo.NewRepositories(pgDriver)
-	svcs := svc.NewServices(repos)
-
-	// Initialize listeners.
-	listeners.StartListeners(svcs)
-
-	// Initialize the uploader web server.
-	srv, err := web.InitWebserver(svcs)
-	if err != nil {
-		return nil, wrapError("web server initialization failed", err)
-	}
-
-	return srv, nil
 }
 
 func cleanup() {
 	// Perform any cleanup here, e.g., closing database connections, stopping services.
 	// Example: if err := db.Close(); err != nil { return err }
-	log.Println("performing cleanup...")
-}
-
-// wrapError provides better error context.
-func wrapError(context string, err error) error {
-	return fmt.Errorf("%s: %w", context, err)
+	log.Info().Msg("performing cleanup...")
 }

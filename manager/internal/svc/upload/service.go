@@ -4,9 +4,10 @@ import (
 	"context"
 	"strings"
 
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/repo"
-	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
+	"github.com/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/go-core/db/pkg/repo"
+	"github.com/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/manager/internal/utils"
 )
 
 type Service struct {
@@ -44,10 +45,23 @@ func (us *Service) GetUploadDetails(ctx context.Context, workspaceID, uploadID s
 	return us.upRepo.Get(ctx, uploadID)
 }
 
-func (us *Service) GetLogs(ctx context.Context, uploadID string) ([]models.UploadLog, error) {
-	logs, err := us.logRepo.GetLogs(ctx, uploadID)
+func (us *Service) CreateUpload(ctx context.Context, workspaceID string, upload *models.Upload) error {
+	upload.Status = models.UploadStatusInProgress
+	upload.WorkspaceID = workspaceID
+	return us.upRepo.Create(ctx, workspaceID, upload)
+}
+
+func (us *Service) FinishUpload(ctx context.Context, workspaceID, uploadID string, req *dto.FinishUploadRequest) error {
+	upload, err := us.upRepo.Get(ctx, uploadID)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return logs, nil
+	upload.FinishedAt = req.FinishedAt
+	if req.Status != "" {
+		upload.Status = models.UploadStatus(req.Status)
+	}
+	if req.Size != 0 {
+		upload.Size = req.Size
+	}
+	return us.upRepo.Update(ctx, uploadID, upload)
 }

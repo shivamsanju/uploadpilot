@@ -1,4 +1,4 @@
-module github.com/uploadpilot/uploadpilot/go-core/dsl
+module github.com/uploadpilot/go-core/dsl
 
 go 1.23.2
 

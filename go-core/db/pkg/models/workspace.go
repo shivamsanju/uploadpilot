@@ -1,6 +1,6 @@
 package models
 
-import "github.com/uploadpilot/uploadpilot/go-core/db/pkg/dtypes"
+import "github.com/uploadpilot/go-core/db/pkg/dtypes"
 
 type Workspace struct {
 	ID          string             `gorm:"column:id;primaryKey;type:uuid;default:uuid_generate_v4()" json:"id"`

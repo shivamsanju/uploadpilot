@@ -6,7 +6,6 @@ import EmptyLayout from "./components/Layout/EmptyLayout";
 import ErrorQueryDisplay from "./pages/error";
 import WorkspaceLandingPage from "./pages/workspace";
 import WorkspacesLayout from "./components/Layout/WorkspaceLayout";
-import UploaderPreviewPage from "./pages/getstarted";
 import UploadsPage from "./pages/uploads";
 import ConfigurationPage from "./pages/configuration";
 import WorkspaceUsersPage from "./pages/users";
@@ -17,6 +16,9 @@ import WorkflowRunsPage from "./pages/workflowruns";
 import ProcessorLayout from "./components/Layout/ProcessorLayout";
 import NewprocessorPage from "./pages/processors/Add";
 import ProcessorSettingsPage from "./pages/processors/settings";
+import BillingsPage from "./pages/billing";
+import ReactUploaderPreviewPage from "./pages/getstarted/react";
+import GoSdkIntegrationPage from "./pages/getstarted/go";
 
 type Route = {
   path: string;
@@ -42,9 +44,19 @@ const routes: Route[] = [
     element: <WorkspaceLandingPage />,
   },
   {
-    path: "/workspace/:workspaceId",
+    path: "/billing",
+    layout: WorkspacesLayout,
+    element: <BillingsPage />,
+  },
+  {
+    path: "/workspace/:workspaceId/react",
     layout: AppLayout,
-    element: <UploaderPreviewPage />,
+    element: <ReactUploaderPreviewPage />,
+  },
+  {
+    path: "/workspace/:workspaceId/go",
+    layout: AppLayout,
+    element: <GoSdkIntegrationPage />,
   },
   {
     path: "/workspace/:workspaceId/uploads",

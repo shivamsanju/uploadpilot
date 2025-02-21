@@ -6,12 +6,12 @@ import {
   IconConfetti,
   IconEditCircle,
 } from "@tabler/icons-react";
-import { CodeHighlight, CodeHighlightTabs } from "@mantine/code-highlight";
+import { CodeHighlight } from "@mantine/code-highlight";
 import "@mantine/code-highlight/styles.css";
 import { useParams } from "react-router-dom";
-import { AppLoader } from "../../components/Loader/AppLoader";
-import { getUploadApiDomain } from "../../utils/config";
-import { useGetSession } from "../../apis/user";
+import { AppLoader } from "../../../components/Loader/AppLoader";
+import { getUploadApiDomain } from "../../../utils/config";
+import { useGetSession } from "../../../apis/user";
 import Settings from "./Settings";
 import { useSettingsProps } from "./SettingsProps";
 import { useViewportSize } from "@mantine/hooks";
@@ -68,7 +68,7 @@ export default UploaderComponent
 
 const uploadEndpoint = getUploadApiDomain();
 
-const UploaderPreviewPage = () => {
+const ReactUploaderPreviewPage = () => {
   const settingsProps = useSettingsProps();
   const { width } = useViewportSize();
   const { workspaceId } = useParams();
@@ -163,15 +163,7 @@ const UploaderPreviewPage = () => {
             Based on your framework, add the code to your page
           </Text>
           <Paper p="lg">
-            <CodeHighlightTabs
-              m="sm"
-              code={[
-                { fileName: "React", code: code, language: "tsx" },
-                { fileName: "Angular", code: code, language: "tsx" },
-                { fileName: "Vue", code: code, language: "tsx" },
-                { fileName: "Svelte", code: code, language: "tsx" },
-              ]}
-            />
+            <CodeHighlight m="sm" code={code} language="tsx" />
           </Paper>
         </Timeline.Item>
 
@@ -186,4 +178,4 @@ const UploaderPreviewPage = () => {
   );
 };
 
-export default UploaderPreviewPage;
+export default ReactUploaderPreviewPage;

@@ -6,9 +6,9 @@ import (
 	"slices"
 	"time"
 
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/driver"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
-	dbutils "github.com/uploadpilot/uploadpilot/go-core/db/pkg/utils"
+	"github.com/uploadpilot/go-core/db/pkg/driver"
+	"github.com/uploadpilot/go-core/db/pkg/models"
+	dbutils "github.com/uploadpilot/go-core/db/pkg/utils"
 )
 
 type UploadRepo struct {
@@ -25,7 +25,7 @@ func (r *UploadRepo) GetAll(ctx context.Context, workspaceID string, skip, limit
 	var uploads []models.Upload
 	var totalRecords int64
 
-	query := r.db.Orm.WithContext(ctx).Model(&models.Upload{}).Where("workspace_id = ?", workspaceID)
+	query := r.db.Orm.WithContext(ctx).Model(&models.Upload{}).Omit("workspace").Where("workspace_id = ?", workspaceID)
 
 	if search != "" {
 		query = query.Where("status LIKE ? OR stored_file_name LIKE ?", "%"+search+"%", "%"+search+"%")

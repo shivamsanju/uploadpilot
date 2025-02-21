@@ -3,7 +3,7 @@ package cacheplugins
 import (
 	"github.com/go-gorm/caches/v4"
 	"github.com/redis/go-redis/v9"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/cache"
+	"github.com/uploadpilot/go-core/db/pkg/cache"
 )
 
 func NewRedisCachesPlugin(redisClient *redis.Client) *caches.Caches {

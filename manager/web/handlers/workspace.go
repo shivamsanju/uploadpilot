@@ -1,14 +1,15 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
-	"github.com/uploadpilot/uploadpilot/manager/internal/dto"
-	"github.com/uploadpilot/uploadpilot/manager/internal/svc/workspace"
-	"github.com/uploadpilot/uploadpilot/manager/internal/utils"
+	"github.com/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/manager/internal/svc/workspace"
+	"github.com/uploadpilot/manager/internal/utils"
 )
 
 type workspaceHandler struct {
@@ -137,6 +138,24 @@ func (h *workspaceHandler) UpdateUploaderConfig(w http.ResponseWriter, r *http.R
 	render.JSON(w, r, nil)
 }
 
-func (h *workspaceHandler) GetAllAllowedSources(w http.ResponseWriter, r *http.Request) {
-	render.JSON(w, r, models.AllAllowedSources)
+func (h *workspaceHandler) GetSubscription(
+	ctx context.Context, params dto.WorkspaceParams, query interface{}, body interface{},
+) (*dto.Subscription, int, error) {
+	sub, err := h.workspaceSvc.GetSubscription(ctx, params.WorkspaceID)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
+	}
+	return sub, http.StatusOK, nil
+}
+
+func (h *workspaceHandler) GetAllAllowedSources(
+	ctx context.Context, params dto.WorkspaceParams, query interface{}, body interface{},
+) ([]models.AllowedSources, int, error) {
+	return models.AllAllowedSources, http.StatusOK, nil
+}
+
+func (h *workspaceHandler) LogUpload(
+	ctx context.Context, params dto.WorkspaceParams, query interface{}, body interface{},
+) (string, int, error) {
+	return "", http.StatusOK, nil
 }

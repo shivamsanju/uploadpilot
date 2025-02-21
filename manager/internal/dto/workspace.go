@@ -1,7 +1,9 @@
 package dto
 
 import (
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
+	"time"
+
+	"github.com/uploadpilot/go-core/db/pkg/models"
 )
 
 type WorkspaceUser struct {
@@ -28,4 +30,9 @@ type WorkspaceNameID struct {
 type UploaderConfig struct {
 	models.UploaderConfig
 	ChunkSize int64 `json:"chunkSize"`
+}
+
+type Subscription struct {
+	Active    bool      `json:"active"`
+	ExpiredOn time.Time `json:"expiredOn"`
 }

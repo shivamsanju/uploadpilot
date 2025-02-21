@@ -4,10 +4,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/uploadpilot/uploadpilot/go-core/dsl"
-	"github.com/uploadpilot/uploadpilot/momentum/internal/activities"
-	"github.com/uploadpilot/uploadpilot/momentum/internal/config"
-	"github.com/uploadpilot/uploadpilot/momentum/internal/infra"
+	"github.com/uploadpilot/go-core/dsl"
+	"github.com/uploadpilot/momentum/internal/activities"
+	"github.com/uploadpilot/momentum/internal/config"
+	"github.com/uploadpilot/momentum/internal/infra"
 	"go.temporal.io/sdk/worker"
 )
 

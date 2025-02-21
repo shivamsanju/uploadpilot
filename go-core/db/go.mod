@@ -1,4 +1,4 @@
-module github.com/uploadpilot/uploadpilot/go-core/db
+module github.com/uploadpilot/go-core/db
 
 go 1.23.2
 

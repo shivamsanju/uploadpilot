@@ -1,7 +1,6 @@
 package driver
 
 import (
-	"log"
 	"time"
 
 	"gorm.io/driver/postgres"
@@ -34,8 +33,6 @@ func NewPostgresDriver(postgresURI string, config *DBConfig) (*Driver, error) {
 	sqlDB.SetMaxIdleConns(config.MaxIdleConn)
 	sqlDB.SetConnMaxLifetime(config.ConnMaxLifeTime)
 	sqlDB.SetConnMaxIdleTime(config.ConnMaxIdleTime)
-
-	log.Println("successfully connected to postgres!")
 
 	return &Driver{
 		Orm: orm,

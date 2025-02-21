@@ -4,9 +4,9 @@ import (
 	"context"
 	"time"
 
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/driver"
-	"github.com/uploadpilot/uploadpilot/go-core/db/pkg/models"
-	dbutils "github.com/uploadpilot/uploadpilot/go-core/db/pkg/utils"
+	"github.com/uploadpilot/go-core/db/pkg/driver"
+	"github.com/uploadpilot/go-core/db/pkg/models"
+	dbutils "github.com/uploadpilot/go-core/db/pkg/utils"
 	"gorm.io/gorm"
 )
 
@@ -72,7 +72,7 @@ func (r *WorkspaceRepo) Delete(ctx context.Context, workspaceID string) error {
 	return nil
 }
 
-func (r *WorkspaceRepo) IsSubscriptionActive(ctx context.Context, workspaceID string) (bool, error) {
+func (r *WorkspaceRepo) GetSubscription(ctx context.Context, workspaceID string) (bool, time.Time, error) {
 	var trialEndsAt time.Time
 
 	if err := r.db.Orm.WithContext(ctx).
@@ -81,8 +81,8 @@ func (r *WorkspaceRepo) IsSubscriptionActive(ctx context.Context, workspaceID st
 		Where("workspaces.id = ?", workspaceID).
 		Select("u.trial_ends_at").
 		Scan(&trialEndsAt).Error; err != nil {
-		return false, dbutils.DBError(err)
+		return false, time.Time{}, dbutils.DBError(err)
 	}
 
-	return trialEndsAt.After(time.Now()), nil
+	return trialEndsAt.After(time.Now()), trialEndsAt, nil
 }

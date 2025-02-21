@@ -12,7 +12,7 @@ import {
   IconCategory,
   IconCreditCardFilled,
   IconMenu2,
-  IconSettings,
+  IconUser,
 } from "@tabler/icons-react";
 import NavBar from "../Navigation/Navbar";
 
@@ -43,9 +43,9 @@ const WorkspacesLayout: React.FC<{ children: React.ReactNode }> = ({
         link: `/billing`,
       },
       {
-        label: "Settings",
-        icon: IconSettings,
-        link: `/settings`,
+        label: "Profile",
+        icon: IconUser,
+        link: `/profile`,
       },
     ],
     []

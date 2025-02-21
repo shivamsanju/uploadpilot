@@ -1,7 +1,7 @@
 package activities
 
 import (
-	"github.com/uploadpilot/uploadpilot/go-core/common/tasks"
+	"github.com/uploadpilot/go-core/common/tasks"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/worker"
 )

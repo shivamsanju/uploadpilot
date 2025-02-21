@@ -4,19 +4,15 @@ import {
   Button,
   Container,
   Group,
-  MultiSelect,
   Paper,
   ScrollArea,
-  SelectProps,
   SimpleGrid,
   Stepper,
+  TagsInput,
   Text,
   TextInput,
   Title,
 } from "@mantine/core";
-import { IconCheck, IconClockBolt, IconFile } from "@tabler/icons-react";
-import { MIME_TYPES } from "../../../utils/mime";
-import { MIME_TYPE_ICONS } from "../../../utils/fileicons";
 import {
   useCreateProcessorMutation,
   useGetAllWorkflowTemplates,
@@ -26,32 +22,6 @@ import { useState } from "react";
 import { ContainerOverlay } from "../../../components/Overlay";
 import { Template } from "./Template";
 import { ErrorCard } from "../../../components/ErrorCard/ErrorCard";
-
-const iconProps = {
-  stroke: 1.5,
-  opacity: 0.6,
-  size: 14,
-};
-
-const renderSelectOption: SelectProps["renderOption"] = ({
-  option,
-  checked,
-}) => {
-  let Icon = MIME_TYPE_ICONS[option.value];
-  if (!Icon) {
-    Icon = IconFile;
-  }
-  return (
-    <Group flex="1" gap="xs">
-      <Icon />
-      {option.label}
-      {/* <Text c="dimmed" ml="sm">({option.value})</Text> */}
-      {checked && (
-        <IconCheck style={{ marginInlineStart: "auto" }} {...iconProps} />
-      )}
-    </Group>
-  );
-};
 
 const NewprocessorPage = () => {
   const [active, setActive] = useState(0);
@@ -141,16 +111,12 @@ const NewprocessorPage = () => {
                 />
               </Stepper.Step>
               <Stepper.Step label="Trigger" description="Select triggers">
-                <MultiSelect
+                <TagsInput
                   mt="xl"
-                  searchable
-                  leftSection={<IconClockBolt size={16} />}
-                  label="Trigger"
-                  description="File type to trigger the processor"
-                  placeholder="Select file type"
-                  data={MIME_TYPES}
+                  label="Triggers"
+                  description="Mime type to trigger the processor"
+                  placeholder="Add comma separated mime types"
                   {...form.getInputProps("triggers")}
-                  renderOption={renderSelectOption}
                 />
               </Stepper.Step>
               <Stepper.Step label="Workflow" description="Select a workflow">
