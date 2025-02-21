@@ -23,12 +23,16 @@ func Newhandler(uploadSvc *service.Service) *handler {
 	}
 }
 
-func (h *handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
+func (h *handler) HealthCheckWithCompanion(w http.ResponseWriter, r *http.Request) {
 	resp, err := http.Get(config.GetAppConfig().CompanionEndpoint + "/health")
 	if err != nil || resp.StatusCode != http.StatusOK {
 		HandleHttpError(w, r, http.StatusServiceUnavailable, errors.New("companion is not healthy"))
 		return
 	}
+	render.JSON(w, r, "uploader is healthy")
+}
+
+func (h *handler) HealthCheck(w http.ResponseWriter, r *http.Request) {
 	render.JSON(w, r, "uploader is healthy")
 }
 

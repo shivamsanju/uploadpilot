@@ -15,7 +15,7 @@ COPY ./momentum /app/momentum
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /app/main ./cmd/worker.go
 
 ## Stage 2: Create a minimal runtime image
-FROM scratch
+FROM alpine:latest
 
 WORKDIR /root/
 

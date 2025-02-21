@@ -35,6 +35,7 @@ func InitWebserver(svc *service.Service) (*http.Server, error) {
 	router.Group(func(r chi.Router) {
 		r.Use(AllowAllCorsMiddleware)
 		r.Get("/health", h.HealthCheck)
+		r.Get("/healthc", h.HealthCheckWithCompanion)
 		r.Get("/config/{workspaceId}", h.GetUploaderConfig)
 		r.Mount("/upload/{workspaceId}", h.GetUploadHandler())
 	})

@@ -5,22 +5,13 @@ FROM node:16-alpine as build
 WORKDIR /app
 
 # Copy the package.json and package-lock.json files
-COPY ./ui/package*.json ./
+COPY ./package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 # Copy the rest of the application files
-COPY ./ui .
-
-# Copy the React SDK into the container (adjust path accordingly)
-COPY ./sdk/react ./uploadpilot-react-sdk
-
-# Install and build the React SDK
-RUN cd /app/uploadpilot-react-sdk && npm install && npm run build && cd /app
-
-# Ensure the SDK is linked or included properly
-RUN npm install /app/uploadpilot-react-sdk
+COPY . .
 
 # Build the React app for production
 RUN npm run build
