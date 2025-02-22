@@ -1,7 +1,7 @@
 import axiosInstance from "../utils/axios";
 import {
   useInfiniteQuery,
-  useQuery,
+  useMutation,
   useQueryClient,
 } from "@tanstack/react-query";
 import { areBracketsBalanced } from "../utils/utility";
@@ -106,24 +106,27 @@ export const useGetUploads = ({
   };
 };
 
-export const UseGetUploadLogs = (workspaceId: string, uploadId: string) => {
+export const useDownloadUploadedFile = (workspaceId: string) => {
   const queryClient = useQueryClient();
-  const { isPending, error, data } = useQuery({
-    queryKey: ["uploadLogs", workspaceId, uploadId],
-    queryFn: () => {
-      if (!workspaceId || !uploadId) {
-        return Promise.reject(
-          new Error("workspaceId and uploadId are required")
-        );
+
+  const { mutateAsync: downloadFile } = useMutation({
+    mutationKey: ["downloadFile"],
+    mutationFn: async ({ uploadId }: { uploadId: string }) => {
+      if (!workspaceId) {
+        throw new Error("workspaceId is required");
       }
-      return axiosInstance
-        .get(`/workspaces/${workspaceId}/uploads/${uploadId}/logs`)
-        .then((res) => res.data);
+      const response = await axiosInstance.get(
+        `/workspaces/${workspaceId}/uploads/${uploadId}/download`
+      );
+      return response.data;
     },
   });
-  const invalidate = () =>
+
+  const invalidate = (uploadId: string) => {
     queryClient.invalidateQueries({
       queryKey: ["uploadLogs", workspaceId, uploadId],
     });
-  return { isPending, error, data, invalidate };
+  };
+
+  return { downloadFile, invalidate };
 };

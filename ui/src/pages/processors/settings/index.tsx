@@ -6,21 +6,13 @@ import {
   Breadcrumbs,
   Button,
   Group,
-  MultiSelect,
   Paper,
-  SelectProps,
+  TagsInput,
   Text,
   TextInput,
   Title,
 } from "@mantine/core";
-import {
-  IconCheck,
-  IconChevronLeft,
-  IconClockBolt,
-  IconFile,
-} from "@tabler/icons-react";
-import { MIME_TYPES } from "../../../utils/mime";
-import { MIME_TYPE_ICONS } from "../../../utils/fileicons";
+import { IconChevronLeft } from "@tabler/icons-react";
 import {
   useUpdateProcessorMutation,
   useGetProcessor,
@@ -29,32 +21,6 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ContainerOverlay } from "../../../components/Overlay";
 import { ErrorCard } from "../../../components/ErrorCard/ErrorCard";
 import { useEffect } from "react";
-
-const iconProps = {
-  stroke: 1.5,
-  opacity: 0.6,
-  size: 14,
-};
-
-const renderSelectOption: SelectProps["renderOption"] = ({
-  option,
-  checked,
-}) => {
-  let Icon = MIME_TYPE_ICONS[option.value];
-  if (!Icon) {
-    Icon = IconFile;
-  }
-  return (
-    <Group flex="1" gap="xs">
-      <Icon />
-      {option.label}
-      {/* <Text c="dimmed" ml="sm">({option.value})</Text> */}
-      {checked && (
-        <IconCheck style={{ marginInlineStart: "auto" }} {...iconProps} />
-      )}
-    </Group>
-  );
-};
 
 const ProcessorSettingsPage = () => {
   const { workspaceId, processorId } = useParams();
@@ -142,16 +108,13 @@ const ProcessorSettingsPage = () => {
             placeholder="Enter a name"
             {...form.getInputProps("name")}
           />
-          <MultiSelect
+          <TagsInput
             mt="xl"
-            searchable
-            leftSection={<IconClockBolt size={16} />}
             label="Trigger"
             description="File type to trigger the processor"
-            placeholder="Select file type"
-            data={MIME_TYPES}
+            placeholder="Enter comma separated file type"
             {...form.getInputProps("triggers")}
-            renderOption={renderSelectOption}
+            min={0}
           />
           <Group justify="flex-end" mt={50}>
             <Button type="submit">Update</Button>

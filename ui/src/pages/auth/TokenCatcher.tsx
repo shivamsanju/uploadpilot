@@ -9,7 +9,6 @@ const TokenHandler = () => {
     const token = urlParams.get("uploadpilottoken");
 
     if (token) {
-      console.log("Token found:", token);
       localStorage.setItem("uploadpilottoken", token);
       navigate("/");
     }

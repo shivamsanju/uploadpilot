@@ -63,6 +63,7 @@ func Routes(services *svc.Services) *chi.Mux {
 					r.Route("/{uploadId}", func(r chi.Router) {
 						r.Get("/", uploadHandler.GetUploadDetailsByID)
 						r.Post("/finish", CreateJSONHandler(uploadHandler.FinishUpload))
+						r.Get("/download", CreateJSONHandler(uploadHandler.GetUploadURL))
 					})
 				})
 

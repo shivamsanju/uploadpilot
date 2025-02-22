@@ -41,16 +41,6 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         label: "Get Started",
         icon: IconCircles,
         link: `/workspace/${workspaceId}`,
-        links: [
-          {
-            label: "React",
-            link: `/workspace/${workspaceId}/react`,
-          },
-          {
-            label: "Go",
-            link: `/workspace/${workspaceId}/go`,
-          },
-        ],
       },
       {
         label: "Uploads",

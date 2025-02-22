@@ -46,7 +46,7 @@ const WorkspaceLandingPage = () => {
   const handleCreateWorkspace = async (values: any) => {
     try {
       const id = await mutateAsync(values.name);
-      navigate(`/workspace/${id}`);
+      navigate(`/workspace/${id}/uploads`);
     } catch (error) {
       console.error(error);
     }

@@ -1,0 +1,8 @@
+.frameworkCard {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.selected {
+  border-color: var(--mantine-color-appcolor-filled) !important;
+}

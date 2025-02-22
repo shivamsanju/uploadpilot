@@ -3,10 +3,16 @@ package upload
 import (
 	"context"
 	"strings"
+	"time"
 
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/phuslu/log"
 	"github.com/uploadpilot/go-core/db/pkg/models"
 	"github.com/uploadpilot/go-core/db/pkg/repo"
+	"github.com/uploadpilot/manager/internal/config"
 	"github.com/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/manager/internal/infra"
+	"github.com/uploadpilot/manager/internal/svc/processor"
 	"github.com/uploadpilot/manager/internal/utils"
 )
 
@@ -15,17 +21,17 @@ type Service struct {
 	wsRepo       *repo.WorkspaceRepo
 	wsConfigRepo *repo.WorkspaceConfigRepo
 	userRepo     *repo.UserRepo
-	logRepo      *repo.UploadLogsRepo
+	processorSvc *processor.Service
 }
 
 func NewService(upRepo *repo.UploadRepo, wsRepo *repo.WorkspaceRepo, wsConfigRepo *repo.WorkspaceConfigRepo,
-	userRepo *repo.UserRepo, logRepo *repo.UploadLogsRepo) *Service {
+	userRepo *repo.UserRepo, processorSvc *processor.Service) *Service {
 	return &Service{
 		upRepo:       upRepo,
 		wsRepo:       wsRepo,
 		wsConfigRepo: wsConfigRepo,
 		userRepo:     userRepo,
-		logRepo:      logRepo,
+		processorSvc: processorSvc,
 	}
 }
 
@@ -63,5 +69,27 @@ func (us *Service) FinishUpload(ctx context.Context, workspaceID, uploadID strin
 	if req.Size != 0 {
 		upload.Size = req.Size
 	}
+	err = us.processorSvc.TriggerWorkflows(ctx, workspaceID, upload)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to trigger workflows")
+		upload.Status = models.UploadStatusFailed
+		upload.StatusReason = "failed to trigger workflows"
+		us.upRepo.Update(ctx, uploadID, upload)
+		return err
+	}
 	return us.upRepo.Update(ctx, uploadID, upload)
+}
+
+func (us *Service) GetUploadSignedURL(ctx context.Context, workspaceID, uploadID string) (string, error) {
+	expiry := time.Now().Add(15 * time.Minute)
+	resp, err := s3.NewPresignClient(infra.S3Client).PresignGetObject(ctx, &s3.GetObjectInput{
+		Bucket:          &config.S3BucketName,
+		Key:             &uploadID,
+		ResponseExpires: &expiry,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return resp.URL, nil
 }

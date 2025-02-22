@@ -26,14 +26,20 @@ type WorkflowUpdate struct {
 	Workflow string `json:"workflow"`
 }
 
+type TriggerWorkflowResp struct {
+	WorkflowID string `json:"workflowId"`
+	RunID      string `json:"runId"`
+}
+
 type WorkflowRun struct {
-	ID              string    `json:"id"`
-	WorkflowID      string    `json:"workflowId"`
-	RunID           string    `json:"runId"`
-	StartTime       time.Time `json:"startTime,omitempty"`
-	EndTime         time.Time `json:"endTime,omitempty"`
-	DurationSeconds int64     `json:"durationSeconds,omitempty"`
-	Status          string    `json:"status,omitempty"`
+	ID                 string    `json:"id"`
+	WorkflowID         string    `json:"workflowId"`
+	RunID              string    `json:"runId"`
+	StartTime          time.Time `json:"startTime,omitempty"`
+	EndTime            time.Time `json:"endTime,omitempty"`
+	WorkflowTimeMillis int64     `json:"workflowTimeMillis"`
+	ExecutionTimeMilis int64     `json:"executionTimeMillis"`
+	Status             string    `json:"status,omitempty"`
 }
 
 type WorkflowRunLogs struct {

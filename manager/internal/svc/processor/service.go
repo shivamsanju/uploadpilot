@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/phuslu/log"
 	"github.com/uploadpilot/go-core/common/tasks"
 	"github.com/uploadpilot/go-core/common/validator"
@@ -18,6 +19,8 @@ import (
 	"github.com/uploadpilot/manager/internal/utils"
 	"go.temporal.io/api/enums/v1"
 	"go.temporal.io/api/workflowservice/v1"
+	"go.temporal.io/sdk/client"
+	"go.temporal.io/sdk/temporal"
 	"gopkg.in/yaml.v3"
 )
 
@@ -123,6 +126,69 @@ func (s *Service) GetAllTasks(ctx context.Context) []tasks.Task {
 	return tsks
 }
 
+func (s *Service) TriggerWorkflows(ctx context.Context, workspaceID string, upload *models.Upload) error {
+	processors, err := s.GetAllProcessorsInWorkspace(ctx, workspaceID)
+	if err != nil {
+		return err
+	}
+	for _, processor := range processors {
+		if processor.Enabled {
+			var doTrigger bool = false
+			if len(processor.Triggers) != 0 {
+				for _, trigger := range processor.Triggers {
+					if trigger == upload.FileType {
+						doTrigger = true
+						break
+					}
+				}
+			} else {
+				doTrigger = true
+			}
+			if !doTrigger {
+				log.Debug().Msgf("Skipping workflow for processor %s", processor.Name)
+				continue
+			}
+			log.Debug().Msgf("Triggering workflow for processor %s", processor.Name)
+			_, err := s.TriggerWorkflow(ctx, upload, processor.Workflow, workspaceID, processor.ID)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (s *Service) TriggerWorkflow(ctx context.Context, upload *models.Upload, yamlContent, workspaceID, processorID string) (*dto.TriggerWorkflowResp, error) {
+	var dslWorkflow dsl.Workflow
+	if err := yaml.Unmarshal([]byte(yamlContent), &dslWorkflow); err != nil {
+		return nil, err
+	}
+
+	workflowOptions := client.StartWorkflowOptions{
+		ID:        uuid.New().String(),
+		TaskQueue: "dsl",
+		TypedSearchAttributes: temporal.NewSearchAttributes(
+			temporal.NewSearchAttributeKeyKeyword("processorId").ValueSet(processorID),
+		),
+		RetryPolicy: &temporal.RetryPolicy{
+			MaximumAttempts: 1,
+		},
+		Memo: map[string]interface{}{
+			"uploadId":    upload.ID,
+			"workspaceId": workspaceID,
+			"fileType":    upload.FileType,
+			"fileName":    upload.FileName,
+		},
+	}
+
+	we, err := infra.TemporalClient.ExecuteWorkflow(context.Background(), workflowOptions, dsl.SimpleDSLWorkflow, dslWorkflow)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to start workflow")
+		return nil, err
+	}
+	return &dto.TriggerWorkflowResp{WorkflowID: we.GetID(), RunID: we.GetRunID()}, nil
+}
+
 func (s *Service) GetWorkflowRuns(ctx context.Context, processorID string) ([]dto.WorkflowRun, error) {
 	result, err := infra.TemporalClient.ListWorkflow(ctx, &workflowservice.ListWorkflowExecutionsRequest{
 		Query: "processorId = '" + processorID + "'",
@@ -141,9 +207,10 @@ func (s *Service) GetWorkflowRuns(ctx context.Context, processorID string) ([]dt
 		}
 		if run.CloseTime != nil {
 			r.EndTime = run.CloseTime.AsTime()
-			r.DurationSeconds = run.CloseTime.Seconds - run.StartTime.Seconds
+			r.WorkflowTimeMillis = run.CloseTime.AsTime().UnixMilli() - run.StartTime.AsTime().UnixMilli()
+			r.ExecutionTimeMilis = run.ExecutionDuration.AsDuration().Milliseconds()
 		} else {
-			r.DurationSeconds = time.Now().Unix() - run.StartTime.Seconds
+			r.WorkflowTimeMillis = time.Now().Unix() - run.StartTime.Seconds
 		}
 		runs = append(runs, r)
 

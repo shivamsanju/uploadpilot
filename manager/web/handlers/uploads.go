@@ -90,3 +90,17 @@ func (h *uploadHandler) FinishUpload(
 
 	return true, http.StatusOK, nil
 }
+
+func (h *uploadHandler) GetUploadURL(
+	ctx context.Context,
+	params dto.UploadParams,
+	query interface{},
+	body interface{},
+) (string, int, error) {
+	url, err := h.uploadSvc.GetUploadSignedURL(ctx, params.WorkspaceID, params.UploadID)
+	if err != nil {
+		return "", http.StatusBadRequest, err
+	}
+
+	return url, http.StatusOK, nil
+}

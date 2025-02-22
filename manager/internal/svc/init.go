@@ -16,10 +16,15 @@ type Services struct {
 }
 
 func NewServices(repos *repo.Repositories) *Services {
+	processorSvc := processor.NewService(repos.ProcessorRepo)
+	workspaceSvc := workspace.NewService(repos.WorkspaceRepo, repos.WorkspaceConfigRepo, repos.WorkspaceUserRepo, repos.UserRepo)
+	userSvc := user.NewService(repos.UserRepo)
+	uploadSvc := upload.NewService(repos.UploadRepo, repos.WorkspaceRepo, repos.WorkspaceConfigRepo, repos.UserRepo, processorSvc)
+
 	return &Services{
-		WorkspaceService: workspace.NewService(repos.WorkspaceRepo, repos.WorkspaceConfigRepo, repos.WorkspaceUserRepo, repos.UserRepo),
-		UploadService:    upload.NewService(repos.UploadRepo, repos.WorkspaceRepo, repos.WorkspaceConfigRepo, repos.UserRepo, repos.UploadLogsRepo),
-		UserService:      user.NewService(repos.UserRepo),
-		ProcessorService: processor.NewService(repos.ProcessorRepo),
+		WorkspaceService: workspaceSvc,
+		UploadService:    uploadSvc,
+		UserService:      userSvc,
+		ProcessorService: processorSvc,
 	}
 }

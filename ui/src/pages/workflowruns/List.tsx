@@ -29,6 +29,7 @@ import { ContainerOverlay } from "../../components/Overlay";
 import { LogsModal } from "./Logs";
 import { RefreshButton } from "../../components/Buttons/RefreshButton/RefreshButton";
 import { statusConfig } from "./status";
+import { formatMilliseconds } from "../../utils/datetime";
 
 const ProcessorRunsList = () => {
   const [workflowId, setWorkflowId] = useState<string>("");
@@ -103,10 +104,18 @@ const ProcessorRunsList = () => {
         },
       },
       {
-        title: "Execution Time",
-        accessor: "durationSeconds",
+        title: "Workflow Time",
+        accessor: "workflowTimeMillis",
         hidden: width < 768,
-        render: (item: any) => `${item?.durationSeconds} s`,
+        render: (item: any) =>
+          formatMilliseconds(item?.workflowTimeMillis || 0),
+      },
+      {
+        title: "Execution Time",
+        accessor: "executionTimeMillis",
+        hidden: width < 768,
+        render: (item: any) =>
+          formatMilliseconds(item?.executionTimeMillis || 0),
       },
       {
         accessor: "actions",

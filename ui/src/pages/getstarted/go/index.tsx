@@ -1,14 +1,15 @@
-import { Paper, Stack, Text, Timeline } from "@mantine/core";
+import { MantineStyleProp, Paper, Stack, Text, Timeline } from "@mantine/core";
 import { IconBrandNpm, IconCode, IconConfetti } from "@tabler/icons-react";
 import { CodeHighlight } from "@mantine/code-highlight";
 import "@mantine/code-highlight/styles.css";
 import { useParams } from "react-router-dom";
 import { AppLoader } from "../../../components/Loader/AppLoader";
 import { useGetSession } from "../../../apis/user";
-import { useViewportSize } from "@mantine/hooks";
+import { getUploadApiDomain } from "../../../utils/config";
 
-const GoSdkIntegrationPage = () => {
-  const { width } = useViewportSize();
+const uploadEndpoint = getUploadApiDomain();
+
+const GoIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
   const { workspaceId } = useParams();
   const { isPending: isUserPending } = useGetSession();
 
@@ -16,30 +17,14 @@ const GoSdkIntegrationPage = () => {
     return <AppLoader h="50vh" />;
   }
 
-  // TODO: Heavy engineering: Need to find some smarter way to do this
-  const style = () => {
-    if (width > 768) {
-      return {};
-    }
-
-    let scale = 1;
-    if (width < 768 && width > 700) {
-      scale = width / 768;
-    } else if (width < 700 && width > 500) {
-      scale = (width / 768) * 1.1;
-    } else {
-      scale = (width / 768) * 1.35;
-    }
-
-    return {
-      transform: `scale(${scale})`,
-      transformOrigin: "top left",
-    };
-  };
-
   return (
-    <Stack justify="center" align="center" pt="sm" mb={50} style={style()}>
-      <Timeline active={3} bulletSize={24} lineWidth={2} w="70%">
+    <Stack justify="center" align="center" pt="sm" mb={50}>
+      <Timeline
+        active={3}
+        bulletSize={24}
+        lineWidth={2}
+        w={{ sm: "100vw", md: "70vw", lg: "60vw" }}
+      >
         <Timeline.Item
           bullet={<IconBrandNpm size={12} />}
           title="Install package"
@@ -68,22 +53,34 @@ package main
 
 import (
 	"log"
+	"os"
 
 	gocl "github.com/uploadpilot/sdk/go-client"
 )
 
 func main() {
-	err := gocl.UploadFile(
-		"ddd6d6d7-5805-419d-8e86-1976d626f79b",
-		"go.sum",
+	log.Println("uploading file start...")
+	cl, err := gocl.NewUploader(
+          "${workspaceId}", // replace with your workspace id
+          "${uploadEndpoint}", // uploadpilot endpoint
+          "your_api_key", // replace with your api key
+        )
+	if err != nil {
+		log.Fatal("failed to create uploader:", err)
+		os.Exit(1)
+	}
+	err = cl.UploadFile(
+		"../wf.yaml",
 		&gocl.UploadOptions{
-			BaseURI:  "http://localhost:8081",
-			Metadata: map[string]string{"test": "test"},
-			Headers:  map[string]string{"test": "test"},
+			Metadata: map[string]string{
+				"filename": "wf.yaml",
+				"filetype": "text/plain",
+			},
 		},
 	)
 	if err != nil {
-		panic(err)
+		log.Fatal("failed to upload file:", err)
+		os.Exit(1)
 	}
 	log.Println("file uploaded successfully!")
 }`}
@@ -102,4 +99,4 @@ func main() {
   );
 };
 
-export default GoSdkIntegrationPage;
+export default GoIntegrationPage;

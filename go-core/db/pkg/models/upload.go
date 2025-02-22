@@ -10,6 +10,7 @@ type Upload struct {
 	ID             string       `gorm:"column:id;primaryKey;default:uuid_generate_v4();type:uuid" json:"id"`
 	WorkspaceID    string       `gorm:"column:workspace_id;type:uuid;not null" json:"workspaceId"`
 	Status         UploadStatus `gorm:"column:status;not null" json:"status"`
+	StatusReason   string       `gorm:"column:status_reason" json:"statusReason"`
 	Metadata       dtypes.JSONB `gorm:"column:metadata;type:jsonb" json:"metadata"`
 	FileName       string       `gorm:"column:file_name;not null" json:"fileName"`
 	FileType       string       `gorm:"column:file_type;not null" json:"fileType"`

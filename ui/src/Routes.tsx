@@ -17,8 +17,7 @@ import ProcessorLayout from "./components/Layout/ProcessorLayout";
 import NewprocessorPage from "./pages/processors/Add";
 import ProcessorSettingsPage from "./pages/processors/settings";
 import BillingsPage from "./pages/billing";
-import ReactUploaderPreviewPage from "./pages/getstarted/react";
-import GoSdkIntegrationPage from "./pages/getstarted/go";
+import { GetStartedPage } from "./pages/getstarted";
 
 type Route = {
   path: string;
@@ -49,14 +48,9 @@ const routes: Route[] = [
     element: <BillingsPage />,
   },
   {
-    path: "/workspace/:workspaceId/react",
+    path: "/workspace/:workspaceId",
     layout: AppLayout,
-    element: <ReactUploaderPreviewPage />,
-  },
-  {
-    path: "/workspace/:workspaceId/go",
-    layout: AppLayout,
-    element: <GoSdkIntegrationPage />,
+    element: <GetStartedPage />,
   },
   {
     path: "/workspace/:workspaceId/uploads",

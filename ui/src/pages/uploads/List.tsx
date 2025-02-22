@@ -13,14 +13,13 @@ import {
   IconDots,
   IconBraces,
   IconChevronsDown,
-  IconLogs,
   IconDownload,
   IconCopy,
   IconSearch,
   IconBolt,
 } from "@tabler/icons-react";
 import { useParams } from "react-router-dom";
-import { useGetUploads } from "../../apis/upload";
+import { useDownloadUploadedFile, useGetUploads } from "../../apis/upload";
 import { timeAgo } from "../../utils/datetime";
 import { formatBytes } from "../../utils/utility";
 import {
@@ -32,27 +31,17 @@ import { DataTableColumn } from "mantine-datatable";
 import { getFileIcon } from "../../utils/fileicons";
 import { useViewportSize } from "@mantine/hooks";
 import { UploadStatus } from "./Status";
-import { LogsModal } from "./Logs";
 import { MetadataModal } from "./Metadata";
 import { ContainerOverlay } from "../../components/Overlay";
 import { RefreshButton } from "../../components/Buttons/RefreshButton/RefreshButton";
 
 const batchSize = 20;
 
-const handleDownload = (url: string) => {
-  window.open(url, "_blank");
-};
-
-const handleCopyToClipboard = (url: string) => {
-  navigator.clipboard.writeText(url);
-};
-
 const UploadList = ({ setTotalRecords }: any) => {
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const { width } = useViewportSize();
   const [openModal, setOpenModal] = useState(false);
   const [modalVariant, setModalVariant] = useState<"logs" | "metadata">("logs");
-  const [uploadId, setUploadId] = useState<string | null>(null);
   const [metadata, setMetadata] = useState({});
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
 
@@ -75,16 +64,36 @@ const UploadList = ({ setTotalRecords }: any) => {
     search: searchFilter,
   });
 
-  const handleViewLogs = useCallback(
-    (importId: string) => {
-      const uploadItem = uploads?.find((item: any) => item.id === importId);
-      if (uploadItem) {
-        setOpenModal(true);
-        setUploadId(uploadItem.id);
-        setModalVariant("logs");
+  const { downloadFile } = useDownloadUploadedFile(workspaceId as string);
+
+  const getFileUrl = useCallback(
+    async (uploadId: string) => {
+      try {
+        const url = await downloadFile({
+          uploadId,
+        });
+        return url;
+      } catch (error) {
+        console.error("Error downloading file:", error);
       }
     },
-    [uploads]
+    [downloadFile]
+  );
+
+  const handleDownload = useCallback(
+    async (uploadId: string) => {
+      const url = await getFileUrl(uploadId);
+      window.open(url, "_blank");
+    },
+    [getFileUrl]
+  );
+
+  const handleCopyLink = useCallback(
+    async (uploadId: string) => {
+      const url = await getFileUrl(uploadId);
+      navigator.clipboard.writeText(url);
+    },
+    [getFileUrl]
   );
 
   const handleViewMetadata = useCallback(
@@ -191,28 +200,22 @@ const UploadList = ({ setTotalRecords }: any) => {
                 </ActionIcon>
               </Menu.Target>
               <Menu.Dropdown>
-                {params?.url && (
+                {params?.status === "Uploaded" && (
                   <Menu.Item
-                    onClick={() => handleDownload(params?.url)}
+                    onClick={() => handleDownload(params?.id)}
                     leftSection={<IconDownload size={18} />}
                   >
                     <Text>Download</Text>
                   </Menu.Item>
                 )}
-                {params?.url && (
+                {params?.status === "Uploaded" && (
                   <Menu.Item
-                    onClick={() => handleCopyToClipboard(params?.url)}
+                    onClick={() => handleCopyLink(params?.id)}
                     leftSection={<IconCopy size={18} />}
                   >
                     <Text>Copy URL</Text>
                   </Menu.Item>
                 )}
-                <Menu.Item
-                  onClick={() => handleViewLogs(params?.id)}
-                  leftSection={<IconLogs size={18} />}
-                >
-                  <Text>View Logs</Text>
-                </Menu.Item>
                 <Menu.Item
                   onClick={() => handleViewMetadata(params?.id)}
                   leftSection={<IconBraces size={18} />}
@@ -225,7 +228,7 @@ const UploadList = ({ setTotalRecords }: any) => {
         ),
       },
     ];
-  }, [handleViewLogs, handleViewMetadata, width]);
+  }, [handleViewMetadata, width, handleDownload, handleCopyLink]);
 
   useEffect(() => {
     setTotalRecords(totalRecords);
@@ -245,12 +248,6 @@ const UploadList = ({ setTotalRecords }: any) => {
     <Box mt="lg">
       {/* Loading overlay only while pending, not on refetch*/}
       <ContainerOverlay visible={isPending} />{" "}
-      <LogsModal
-        open={openModal && modalVariant === "logs"}
-        onClose={() => setOpenModal(false)}
-        uploadId={uploadId || ""}
-        workspaceId={workspaceId || ""}
-      />
       <MetadataModal
         open={openModal && modalVariant === "metadata"}
         onClose={() => setOpenModal(false)}

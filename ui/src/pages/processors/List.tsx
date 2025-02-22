@@ -399,7 +399,7 @@ const ProcessorList = () => {
         }
         onRowDoubleClick={(row) => {
           navigate(
-            `/workspace/${workspaceId}/processors/${row?.record?.id}/workflow`
+            `/workspace/${workspaceId}/processors/${row?.record?.id}/runs`
           );
         }}
         selectedRecords={selectedRecords}

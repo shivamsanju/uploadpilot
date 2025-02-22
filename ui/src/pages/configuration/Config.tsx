@@ -91,6 +91,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
             <MultiSelect
               label="Allowed input sources"
               description="Allowed input sources for your uploader"
+              placeholder="Select allowed input sources"
               data={allowedSources || []}
               {...form.getInputProps("allowedSources")}
               disabled={isPending}
@@ -108,6 +109,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
             <NumberInput
               label="Max file size"
               description="Enter maximum file size in bytes"
+              placeholder="Enter maximum file size in bytes"
               {...form.getInputProps("maxFileSize")}
               min={0}
             />
@@ -124,6 +126,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
             <NumberInput
               label="Max number of files"
               description="Specify the maximum number of files allowed"
+              placeholder="Specify the maximum number of files allowed"
               {...form.getInputProps("maxNumberOfFiles")}
               min={1}
             />
@@ -133,6 +136,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
             <TagsInput
               label="Allowed mime types"
               description="Allowed mime types for your uploader"
+              placeholder="Comma separated mime types"
               {...form.getInputProps("allowedFileTypes")}
               min={0}
             />
@@ -141,11 +145,13 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
             <TagsInput
               label="Allowed origins"
               description="Allowed origins for your uploader"
+              placeholder="Comma separated origins"
               {...form.getInputProps("allowedOrigins")}
               min={0}
             />
             <TagsInput
               label="Required metadata fields"
+              placeholder="Comma separated fields"
               description="Required metadata fields for your uploader"
               {...form.getInputProps("requiredMetadataFields")}
               min={0}
