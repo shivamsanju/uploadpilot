@@ -33,6 +33,8 @@ type TriggerWorkflowResp struct {
 
 type WorkflowRun struct {
 	ID                 string    `json:"id"`
+	WorkspaceID        string    `json:"workspaceId"`
+	UploadID           string    `json:"uploadId"`
 	WorkflowID         string    `json:"workflowId"`
 	RunID              string    `json:"runId"`
 	StartTime          time.Time `json:"startTime,omitempty"`

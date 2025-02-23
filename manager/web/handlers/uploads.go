@@ -24,25 +24,26 @@ func NewUploadHandler(uploadSvc *upload.Service) *uploadHandler {
 	}
 }
 
-func (h *uploadHandler) GetPaginatedUploads(w http.ResponseWriter, r *http.Request) {
-	workspaceID := chi.URLParam(r, "workspaceId")
+func (h *uploadHandler) GetPaginatedUploads(
+	ctx context.Context,
+	params dto.WorkspaceParams,
+	query dto.PaginatedQuery,
+	body interface{},
+) (*dto.PaginatedResponse[models.Upload], int, error) {
 
-	skip, limit, search, err := utils.GetSkipLimitSearchParams(r)
+	paginationParams, err := utils.GetPaginatedQueryParams(&query)
 	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
+		return nil, http.StatusBadRequest, err
+	}
+	uploads, totalRecords, err := h.uploadSvc.GetAllUploads(ctx, params.WorkspaceID, paginationParams)
+	if err != nil {
+		return nil, http.StatusBadRequest, err
 	}
 
-	uploads, totalRecords, err := h.uploadSvc.GetAllUploads(r.Context(), workspaceID, skip, limit, search)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-
-	render.JSON(w, r, &dto.PaginatedResponse[models.Upload]{
+	return &dto.PaginatedResponse[models.Upload]{
 		TotalRecords: totalRecords,
 		Records:      uploads,
-	})
+	}, http.StatusOK, nil
 }
 
 func (h *uploadHandler) GetUploadDetailsByID(w http.ResponseWriter, r *http.Request) {
@@ -103,4 +104,17 @@ func (h *uploadHandler) GetUploadURL(
 	}
 
 	return url, http.StatusOK, nil
+}
+
+func (h *uploadHandler) ProcessUpload(
+	ctx context.Context,
+	params dto.UploadParams,
+	query interface{},
+	body interface{},
+) (string, int, error) {
+	err := h.uploadSvc.ProcessUpload(ctx, params.WorkspaceID, params.UploadID)
+	if err != nil {
+		return "", http.StatusBadRequest, err
+	}
+	return "OK", http.StatusOK, nil
 }

@@ -12,8 +12,8 @@ const ToolsPage = () => {
 
   return (
     <Box mb={50} mr="sm">
-      <Title order={3} opacity={0.7}>
-        Tools
+      <Title order={3} opacity={0.7} mb="md">
+        Marketplace
       </Title>
       {/* <Text c="dimmed" mb="md" mt={2}>
                 Add more features and transformations to your files

@@ -1,10 +1,4 @@
-import {
-  IconDots,
-  IconEdit,
-  IconLogs,
-  IconBolt,
-  IconSearch,
-} from "@tabler/icons-react";
+import { IconDots, IconLogs, IconBolt, IconSearch } from "@tabler/icons-react";
 import {
   ActionIcon,
   Badge,
@@ -30,6 +24,8 @@ import { LogsModal } from "./Logs";
 import { RefreshButton } from "../../components/Buttons/RefreshButton/RefreshButton";
 import { statusConfig } from "./status";
 import { formatMilliseconds } from "../../utils/datetime";
+import { useTriggerProcessUpload } from "../../apis/upload";
+import { showConfirmationPopup } from "../../components/Popups/ConfirmPopup";
 
 const ProcessorRunsList = () => {
   const [workflowId, setWorkflowId] = useState<string>("");
@@ -43,6 +39,46 @@ const ProcessorRunsList = () => {
     workspaceId || "",
     processorId || ""
   );
+
+  const { mutateAsync: triggerProcessUpload, isPending: isTriggeringProcess } =
+    useTriggerProcessUpload(workspaceId || "");
+
+  const processUpload = useCallback(
+    async (uploadId: string) => {
+      try {
+        await triggerProcessUpload({ uploadId });
+        setTimeout(() => {
+          invalidate();
+        }, 2000);
+      } catch (error) {
+        console.error("Error processing upload:", error);
+      }
+    },
+    [triggerProcessUpload, invalidate]
+  );
+
+  const handleBulkProcess = async () => {
+    showConfirmationPopup({
+      message: "Are you sure you want to start processing for these uploads?",
+      onOk: async () => {
+        try {
+          await Promise.all(
+            selectedRecords.map((record) =>
+              triggerProcessUpload({
+                uploadId: record?.uploadId,
+              })
+            )
+          );
+          setSelectedRecords([]);
+          setTimeout(() => {
+            invalidate();
+          }, 2000);
+        } catch (error) {
+          console.error("Error processing upload:", error);
+        }
+      },
+    });
+  };
 
   const handleViewLogs = useCallback((runId: string, workflowId: string) => {
     setRunId(runId);
@@ -73,11 +109,15 @@ const ProcessorRunsList = () => {
         title: "Run ID",
       },
       {
+        accessor: "uploadId",
+        title: "Upload ID",
+      },
+      {
         accessor: "status",
         title: "Status",
         render: (item: any) => (
           <Badge
-            variant="light"
+            variant="outline"
             color={statusConfig[item?.status?.toLowerCase() || ""]}
             size="sm"
           >
@@ -103,13 +143,13 @@ const ProcessorRunsList = () => {
           return "-";
         },
       },
-      {
-        title: "Workflow Time",
-        accessor: "workflowTimeMillis",
-        hidden: width < 768,
-        render: (item: any) =>
-          formatMilliseconds(item?.workflowTimeMillis || 0),
-      },
+      // {
+      //   title: "Workflow Time",
+      //   accessor: "workflowTimeMillis",
+      //   hidden: width < 768,
+      //   render: (item: any) =>
+      //     formatMilliseconds(item?.workflowTimeMillis || 0),
+      // },
       {
         title: "Execution Time",
         accessor: "executionTimeMillis",
@@ -142,10 +182,10 @@ const ProcessorRunsList = () => {
                   <Text>View Logs</Text>
                 </Menu.Item>
                 <Menu.Item
-                  leftSection={<IconEdit size={16} stroke={1.5} />}
-                  disabled={true}
+                  leftSection={<IconBolt size={16} stroke={1.5} />}
+                  onClick={() => processUpload(item?.uploadId)}
                 >
-                  <Text>Trigger Again</Text>
+                  <Text>Re Trigger</Text>
                 </Menu.Item>
               </Menu.Dropdown>
             </Menu>
@@ -153,7 +193,7 @@ const ProcessorRunsList = () => {
         ),
       },
     ],
-    [width, handleViewLogs]
+    [width, handleViewLogs, processUpload]
   );
 
   if (error) {
@@ -161,8 +201,8 @@ const ProcessorRunsList = () => {
   }
 
   return (
-    <Box mr="md">
-      <ContainerOverlay visible={isPending} />
+    <Box>
+      <ContainerOverlay visible={isPending || isTriggeringProcess} />
       <UploadPilotDataTable
         minHeight={500}
         columns={columns}
@@ -177,7 +217,7 @@ const ProcessorRunsList = () => {
             <Group gap="sm">
               <Button
                 variant="subtle"
-                onClick={() => setOpened(true)}
+                onClick={handleBulkProcess}
                 leftSection={<IconBolt size={18} />}
               >
                 Re Trigger
@@ -187,9 +227,8 @@ const ProcessorRunsList = () => {
             </Group>
             <TextInput
               value={""}
-              // onChange={(e) => onSearchFilterChange(e.target.value)}
-              placeholder="Search by name or status"
-              leftSection={<IconSearch size={18} />}
+              placeholder="Search (Upload ID, Run ID)"
+              rightSection={<IconSearch size={18} />}
               variant="subtle"
             />
           </Group>

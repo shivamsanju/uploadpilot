@@ -186,7 +186,6 @@ const WorkspaceUsersList = () => {
       <UploadPilotDataTable
         fetching={removePending}
         minHeight={500}
-        showSearch={false}
         columns={columns}
         records={users}
         verticalSpacing="md"

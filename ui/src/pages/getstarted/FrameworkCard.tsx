@@ -10,7 +10,7 @@ type Props = {
 export const FrameworkCard: React.FC<Props> = ({ framework, Icon, h, w }) => {
   return (
     <Stack align="center" justify="center" h={h} w={w}>
-      <Icon size={50} />
+      <Icon size={50} opacity={0.7} />
       <Text fw={500} c="dimmed" fz="sm">
         {framework}
       </Text>

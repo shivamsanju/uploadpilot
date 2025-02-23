@@ -21,44 +21,29 @@ func NewUploadRepo(db *driver.Driver) *UploadRepo {
 	}
 }
 
-func (r *UploadRepo) GetAll(ctx context.Context, workspaceID string, skip, limit int, search string) ([]models.Upload, int64, error) {
+func (r *UploadRepo) GetAll(ctx context.Context, workspaceID string, paginationParams *models.PaginationParams) ([]models.Upload, int64, error) {
 	var uploads []models.Upload
-	var totalRecords int64
 
-	query := r.db.Orm.WithContext(ctx).Model(&models.Upload{}).Omit("workspace").Where("workspace_id = ?", workspaceID)
+	query := r.db.Orm.WithContext(ctx).Debug().Model(&models.Upload{}).Omit("workspace").Where("workspace_id = ?", workspaceID)
 
-	if search != "" {
-		query = query.Where("status LIKE ? OR stored_file_name LIKE ?", "%"+search+"%", "%"+search+"%")
+	query, totalRecords, sortApplied, err := dbutils.BuildPaginationQuery(
+		query,
+		&dbutils.PaginationQueryInput{
+			PaginationParams:    paginationParams,
+			AllowedSearchFields: []string{"file_name", "status", "file_type"},
+			AllowedFilterFields: []string{"status"},
+		},
+	)
+
+	if err != nil {
+		return nil, 0, err
 	}
 
-	if err := query.Count(&totalRecords).Error; err != nil {
-		return nil, 0, dbutils.DBError(err)
+	if !sortApplied {
+		query = query.Order("finished_at DESC")
 	}
 
-	if err := query.Order("finished_at DESC").Offset(skip).Limit(limit).Find(&uploads).Error; err != nil {
-		return nil, 0, dbutils.DBError(err)
-	}
-
-	return uploads, totalRecords, nil
-}
-
-func (r *UploadRepo) GetAllFilterByMetadata(ctx context.Context, workspaceID string, skip, limit int, search map[string]string) ([]models.Upload, int64, error) {
-	var uploads []models.Upload
-	var totalRecords int64
-
-	query := r.db.Orm.WithContext(ctx).Model(&models.Upload{}).Where("workspace_id = ?", workspaceID)
-
-	for key, value := range search {
-		if key != "" && value != "" {
-			query = query.Where("metadata->>? = ?", key, value)
-		}
-	}
-
-	if err := query.Count(&totalRecords).Error; err != nil {
-		return nil, 0, dbutils.DBError(err)
-	}
-
-	if err := query.Order("finished_at DESC").Offset(int(skip)).Limit(int(limit)).Find(&uploads).Error; err != nil {
+	if err := query.Find(&uploads).Error; err != nil {
 		return nil, 0, dbutils.DBError(err)
 	}
 

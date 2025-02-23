@@ -13,6 +13,7 @@ import {
   IconMail,
   IconSearch,
   IconShieldCheck,
+  IconShoppingCartBolt,
   IconSortDescendingSmallBig,
   IconStopwatch,
   IconTag,
@@ -21,7 +22,16 @@ import {
   IconTool,
   IconTransformPoint,
 } from "@tabler/icons-react";
-import { Paper, SimpleGrid, Text, useMantineTheme } from "@mantine/core";
+import {
+  Box,
+  Button,
+  Group,
+  Paper,
+  SimpleGrid,
+  Stack,
+  Text,
+  useMantineTheme,
+} from "@mantine/core";
 import classes from "./Utils.module.css";
 
 const mockdata = [
@@ -153,14 +163,23 @@ const mockdata = [
 export const ToolsGrid = () => {
   const theme = useMantineTheme();
   const features = mockdata.map((feature) => (
-    <Paper key={feature.title} radius="md" p="xl">
-      <feature.icon size={50} stroke={2} color={theme.colors.appcolor[6]} />
-      <Text fz="lg" fw={500} className={classes.cardTitle} mt="md">
-        {feature.title}
-      </Text>
-      <Text fz="sm" c="dimmed" mt="sm">
-        {feature.description}
-      </Text>
+    <Paper key={feature.title} p="sm" withBorder>
+      <Stack justify="space-between" h="100%">
+        <Box p="sm">
+          <feature.icon size={50} stroke={2} color={theme.colors.appcolor[6]} />
+          <Text fz="lg" fw={500} className={classes.cardTitle} mt="md">
+            {feature.title}
+          </Text>
+          <Text fz="sm" c="dimmed" mt="sm">
+            {feature.description}
+          </Text>
+        </Box>
+        <Group justify="flex-end" align="flex-end" mt="sm">
+          <Button leftSection={<IconShoppingCartBolt size={18} />}>
+            Add to cart
+          </Button>
+        </Group>
+      </Stack>
     </Paper>
   ));
 

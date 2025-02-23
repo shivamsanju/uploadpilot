@@ -41,17 +41,17 @@
 }
 
 .active {
-  color: var(--mantine-color-white);
+  color: var(--mantine-color-appcolor-filled);
 }
 
 .active:hover {
-  color: var(--mantine-color-white);
+  color: var(--mantine-color-appcolor-filled);
 }
 
 .label:hover {
-  color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+  color: var(--mantine-color-appcolor-filled);
 }
 
 .active .label:hover {
-  color: var(--mantine-color-white);
+  color: var(--mantine-color-appcolor-filled);
 }

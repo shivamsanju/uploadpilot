@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -198,6 +199,7 @@ func (s *Service) GetWorkflowRuns(ctx context.Context, processorID string) ([]dt
 	}
 	var runs []dto.WorkflowRun
 	for _, run := range result.Executions {
+
 		r := dto.WorkflowRun{
 			ID:         run.Execution.RunId,
 			WorkflowID: run.Execution.WorkflowId,
@@ -205,6 +207,18 @@ func (s *Service) GetWorkflowRuns(ctx context.Context, processorID string) ([]dt
 			StartTime:  run.StartTime.AsTime(),
 			Status:     run.Status.Enum().String(),
 		}
+		if workspaceIDField, ok := run.Memo.Fields["workspaceId"]; ok && workspaceIDField != nil {
+			r.WorkspaceID = strings.Trim(string(workspaceIDField.GetData()), "\"")
+		} else {
+			return nil, fmt.Errorf("workspaceId not found in run")
+		}
+
+		if uploadIDField, ok := run.Memo.Fields["uploadId"]; ok && uploadIDField != nil {
+			r.UploadID = strings.Trim(string(uploadIDField.GetData()), "\"")
+		} else {
+			return nil, fmt.Errorf("uploadId not found in run")
+		}
+
 		if run.CloseTime != nil {
 			r.EndTime = run.CloseTime.AsTime()
 			r.WorkflowTimeMillis = run.CloseTime.AsTime().UnixMilli() - run.StartTime.AsTime().UnixMilli()

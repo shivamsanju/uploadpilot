@@ -6,12 +6,6 @@ import { useDebouncedState } from "@mantine/hooks";
 import { IconDatabaseOff } from "@tabler/icons-react";
 
 export type TableProps = {
-  showSearch?: boolean;
-  searchPlaceholder?: string;
-  showRefresh?: boolean;
-  showExport?: boolean;
-  onRefresh?: () => void;
-  onSearchFilterChange?: (value: string) => void;
   menuBar?: React.ReactNode;
 } & DataTableProps;
 

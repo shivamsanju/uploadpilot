@@ -6,7 +6,15 @@ import {
   IconNumber,
   IconServer2,
 } from "@tabler/icons-react";
-import { Box, Group, Paper, SimpleGrid, Text, Title } from "@mantine/core";
+import {
+  Badge,
+  Box,
+  Group,
+  Paper,
+  SimpleGrid,
+  Text,
+  Title,
+} from "@mantine/core";
 import classes from "./dashboard.module.css";
 import { LineChart } from "@mantine/charts";
 
@@ -74,9 +82,13 @@ const DashboardPage = () => {
   });
   return (
     <Box mb={50}>
-      <Title order={3} opacity={0.7} mb="xl">
-        Analytics
-      </Title>
+      <Group align="center" mb="xl">
+        <Title order={3} opacity={0.7}>
+          Analytics
+        </Title>
+        <Badge color="yellow">Coming Soon</Badge>
+      </Group>
+
       {/* <Text c="dimmed" size="xs" mt={2} mb="lg">
                 Analyze file upload trends over the last 6 months
             </Text> */}

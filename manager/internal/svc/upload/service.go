@@ -2,7 +2,6 @@ package upload
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -13,7 +12,6 @@ import (
 	"github.com/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/manager/internal/infra"
 	"github.com/uploadpilot/manager/internal/svc/processor"
-	"github.com/uploadpilot/manager/internal/utils"
 )
 
 type Service struct {
@@ -35,16 +33,8 @@ func NewService(upRepo *repo.UploadRepo, wsRepo *repo.WorkspaceRepo, wsConfigRep
 	}
 }
 
-func (us *Service) GetAllUploads(ctx context.Context, workspaceID string, skip int, limit int, search string) ([]models.Upload, int64, error) {
-	if strings.HasPrefix(search, "{") {
-		searchParams, err := utils.ExtractKeyValuePairs(search)
-		if err != nil {
-			return nil, 0, err
-		}
-		return us.upRepo.GetAllFilterByMetadata(ctx, workspaceID, skip, limit, searchParams)
-	}
-
-	return us.upRepo.GetAll(ctx, workspaceID, skip, limit, search)
+func (us *Service) GetAllUploads(ctx context.Context, workspaceID string, paginationParams *models.PaginationParams) ([]models.Upload, int64, error) {
+	return us.upRepo.GetAll(ctx, workspaceID, paginationParams)
 }
 
 func (us *Service) GetUploadDetails(ctx context.Context, workspaceID, uploadID string) (*models.Upload, error) {
@@ -78,6 +68,17 @@ func (us *Service) FinishUpload(ctx context.Context, workspaceID, uploadID strin
 		return err
 	}
 	return us.upRepo.Update(ctx, uploadID, upload)
+}
+
+func (us *Service) ProcessUpload(ctx context.Context, workspaceID, uploadID string) error {
+	upload, err := us.upRepo.Get(ctx, uploadID)
+	if err != nil {
+		return err
+	}
+	return us.processorSvc.TriggerWorkflows(ctx, workspaceID, upload)
+}
+func (us *Service) DeleteUpload(ctx context.Context, workspaceID, uploadID string) error {
+	return us.upRepo.Delete(ctx, uploadID)
 }
 
 func (us *Service) GetUploadSignedURL(ctx context.Context, workspaceID, uploadID string) (string, error) {

@@ -40,3 +40,26 @@ export const areBracketsBalanced = (input: string) => {
 
   return stack.length === 0;
 };
+
+export const getFilterParams = (filter: Record<string, string[]>): string => {
+  let filterParam = "";
+  if (Object.entries(filter).length > 0) {
+    const fp: string[] = [];
+    for (const [key, values] of Object.entries(filter)) {
+      const encodedValues = values.map((value) => encodeURIComponent(value));
+      if (values.length !== 0) {
+        fp.push(`${key}:${encodedValues.join(",")}`);
+      }
+    }
+
+    if (fp.length !== 0) {
+      filterParam = `&filter=${fp.join(";")}`;
+    }
+  }
+
+  return filterParam;
+};
+
+export const getSearchParam = (search: string): string => {
+  return search ? `&search=${encodeURIComponent(search)}` : "";
+};

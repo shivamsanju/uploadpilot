@@ -59,11 +59,12 @@ func Routes(services *svc.Services) *chi.Mux {
 				// Uploads
 				r.Route("/uploads", func(r chi.Router) {
 					r.Post("/", CreateJSONHandler(uploadHandler.CreateUpload))
-					r.Get("/", uploadHandler.GetPaginatedUploads)
+					r.Get("/", CreateJSONHandler(uploadHandler.GetPaginatedUploads))
 					r.Route("/{uploadId}", func(r chi.Router) {
 						r.Get("/", uploadHandler.GetUploadDetailsByID)
 						r.Post("/finish", CreateJSONHandler(uploadHandler.FinishUpload))
 						r.Get("/download", CreateJSONHandler(uploadHandler.GetUploadURL))
+						r.Post("/process", CreateJSONHandler(uploadHandler.ProcessUpload))
 					})
 				})
 

@@ -8,6 +8,7 @@ import {
   ActionIcon,
   Text,
   TextInput,
+  MultiSelect,
 } from "@mantine/core";
 import {
   IconDots,
@@ -19,21 +20,23 @@ import {
   IconBolt,
 } from "@tabler/icons-react";
 import { useParams } from "react-router-dom";
-import { useDownloadUploadedFile, useGetUploads } from "../../apis/upload";
+import {
+  useDownloadUploadedFile,
+  useGetUploads,
+  useTriggerProcessUpload,
+} from "../../apis/upload";
 import { timeAgo } from "../../utils/datetime";
 import { formatBytes } from "../../utils/utility";
-import {
-  UploadPilotDataTable,
-  useUploadPilotDataTable,
-} from "../../components/Table/Table";
+import { UploadPilotDataTable } from "../../components/Table/Table";
 import { ErrorCard } from "../../components/ErrorCard/ErrorCard";
 import { DataTableColumn } from "mantine-datatable";
 import { getFileIcon } from "../../utils/fileicons";
-import { useViewportSize } from "@mantine/hooks";
+import { useDebouncedValue, useViewportSize } from "@mantine/hooks";
 import { UploadStatus } from "./Status";
 import { MetadataModal } from "./Metadata";
 import { ContainerOverlay } from "../../components/Overlay";
 import { RefreshButton } from "../../components/Buttons/RefreshButton/RefreshButton";
+import { showConfirmationPopup } from "../../components/Popups/ConfirmPopup";
 
 const batchSize = 20;
 
@@ -44,9 +47,12 @@ const UploadList = ({ setTotalRecords }: any) => {
   const [modalVariant, setModalVariant] = useState<"logs" | "metadata">("logs");
   const [metadata, setMetadata] = useState({});
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
+  const [search, setSearch] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string[]>([]);
+  const [debouncedSearch] = useDebouncedValue(search, 1000);
+  const [debouncedStatusFilter] = useDebouncedValue(statusFilter, 1000);
 
   const { workspaceId } = useParams();
-  const { searchFilter, onSearchFilterChange } = useUploadPilotDataTable();
 
   const {
     isPending,
@@ -61,13 +67,24 @@ const UploadList = ({ setTotalRecords }: any) => {
   } = useGetUploads({
     workspaceId: workspaceId || "",
     batchSize,
-    search: searchFilter,
+    search: debouncedSearch,
+    filter: {
+      status: debouncedStatusFilter,
+    },
   });
 
-  const { downloadFile } = useDownloadUploadedFile(workspaceId as string);
+  const { mutateAsync: downloadFile } = useDownloadUploadedFile(
+    workspaceId || ""
+  );
+
+  const { mutateAsync: triggerProcessUpload, isPending: isTriggeringProcess } =
+    useTriggerProcessUpload(workspaceId || "");
 
   const getFileUrl = useCallback(
     async (uploadId: string) => {
+      if (!workspaceId) {
+        return;
+      }
       try {
         const url = await downloadFile({
           uploadId,
@@ -77,8 +94,34 @@ const UploadList = ({ setTotalRecords }: any) => {
         console.error("Error downloading file:", error);
       }
     },
-    [downloadFile]
+    [downloadFile, workspaceId]
   );
+
+  const processUpload = useCallback(
+    async (uploadId: string) => {
+      try {
+        await triggerProcessUpload({ uploadId });
+      } catch (error) {
+        console.error("Error processing upload:", error);
+      }
+    },
+    [triggerProcessUpload]
+  );
+
+  const handleBulkProcess = useCallback(async () => {
+    showConfirmationPopup({
+      message: "Are you sure you want to start processing for these uploads?",
+      onOk: async () => {
+        try {
+          await Promise.all(
+            selectedRecords.map((record) => processUpload(record.id))
+          );
+        } catch (error) {
+          console.error("Error processing upload:", error);
+        }
+      },
+    });
+  }, [selectedRecords, processUpload]);
 
   const handleDownload = useCallback(
     async (uploadId: string) => {
@@ -116,18 +159,22 @@ const UploadList = ({ setTotalRecords }: any) => {
   const colDefs: DataTableColumn[] = useMemo(() => {
     return [
       {
+        accessor: "id",
+        title: "",
+        width: 20,
+        render: (params: any) => (
+          <Stack justify="center">{getFileIcon(params?.fileType, 16)}</Stack>
+        ),
+      },
+      {
+        accessor: "id",
+        title: "Upload ID",
+      },
+      {
         title: "Name",
         accessor: "metadata.filename",
         elipsis: true,
-        render: (params: any) => (
-          <Group align="center" gap="sm">
-            {getFileIcon(params?.fileType, 20)}
-            <Text fz="sm">{params?.fileName}</Text>
-            {/* <Text fz="xs" c="dimmed">
-              Filename
-            </Text> */}
-          </Group>
-        ),
+        render: (params: any) => <Text fz="sm">{params?.fileName}</Text>,
       },
       {
         title: "File Type",
@@ -180,6 +227,19 @@ const UploadList = ({ setTotalRecords }: any) => {
             {params?.status}
           </Group>
         ),
+        filter: (
+          <MultiSelect
+            w={200}
+            data={["Uploaded", "Failed", "In Progress", "Queued"]}
+            value={statusFilter}
+            placeholder="Filter by status"
+            onChange={setStatusFilter}
+            comboboxProps={{ withinPortal: false }}
+            clearable
+            searchable
+          />
+        ),
+        filtering: statusFilter.length > 0,
       },
       {
         title: "Actions",
@@ -222,13 +282,27 @@ const UploadList = ({ setTotalRecords }: any) => {
                 >
                   <Text>View Metadata</Text>
                 </Menu.Item>
+                <Menu.Item
+                  onClick={() => processUpload(params?.id)}
+                  leftSection={<IconBolt size={18} />}
+                >
+                  <Text>Process</Text>
+                </Menu.Item>
               </Menu.Dropdown>
             </Menu>
           </Group>
         ),
       },
     ];
-  }, [handleViewMetadata, width, handleDownload, handleCopyLink]);
+  }, [
+    handleViewMetadata,
+    width,
+    handleDownload,
+    handleCopyLink,
+    statusFilter,
+    setStatusFilter,
+    processUpload,
+  ]);
 
   useEffect(() => {
     setTotalRecords(totalRecords);
@@ -247,7 +321,7 @@ const UploadList = ({ setTotalRecords }: any) => {
   return (
     <Box mt="lg">
       {/* Loading overlay only while pending, not on refetch*/}
-      <ContainerOverlay visible={isPending} />{" "}
+      <ContainerOverlay visible={isPending || isTriggeringProcess} />{" "}
       <MetadataModal
         open={openModal && modalVariant === "metadata"}
         onClose={() => setOpenModal(false)}
@@ -259,12 +333,6 @@ const UploadList = ({ setTotalRecords }: any) => {
           verticalSpacing="xs"
           horizontalSpacing="lg"
           noHeader={false}
-          showSearch={true}
-          searchPlaceholder='Search imports by name or status. For metadata search use {key: "regex"}'
-          showExport={true}
-          showRefresh={true}
-          onRefresh={handleRefresh}
-          onSearchFilterChange={onSearchFilterChange}
           onScrollToBottom={fetchNextPage}
           columns={colDefs}
           records={uploads}
@@ -275,17 +343,21 @@ const UploadList = ({ setTotalRecords }: any) => {
           menuBar={
             <Group gap="sm" align="center" justify="space-between">
               <Group gap="sm">
-                <Button variant="subtle" leftSection={<IconBolt size={18} />}>
+                <Button
+                  variant="subtle"
+                  leftSection={<IconBolt size={18} />}
+                  onClick={handleBulkProcess}
+                >
                   Process
                 </Button>
                 <RefreshButton variant="subtle" onClick={handleRefresh} />
               </Group>
               <TextInput
-                value={searchFilter}
-                onChange={(e) => onSearchFilterChange(e.target.value)}
-                placeholder="Search by name or status"
-                leftSection={<IconSearch size={18} />}
-                variant="subtle"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search (min 3 characters)"
+                rightSection={<IconSearch size={18} />}
+                variant="outline"
               />
             </Group>
           }

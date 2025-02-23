@@ -21,7 +21,7 @@ const WorkflowRunsPage = () => {
   }
 
   return (
-    <Box mb={50}>
+    <Box>
       <Breadcrumbs separator=">">
         <Anchor href={`/`}>Workspaces</Anchor>
         <Anchor href={`/workspace/${workspaceId}/processors`}>

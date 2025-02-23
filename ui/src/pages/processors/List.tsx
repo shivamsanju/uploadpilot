@@ -228,7 +228,11 @@ const ProcessorList = () => {
         hidden: width < 768,
         render: (item: any) => (
           <>
-            <Badge color={item?.enabled ? "green" : "red"} size="sm">
+            <Badge
+              color={item?.enabled ? "green" : "red"}
+              size="sm"
+              variant="outline"
+            >
               {item?.enabled ? "Enabled" : "Disabled"}
             </Badge>
           </>
