@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/phuslu/log"
-	"github.com/uploadpilot/go-core/common/tasks"
+	"github.com/uploadpilot/go-core/common/activitycatalog"
 	"github.com/uploadpilot/go-core/common/validator"
 	"github.com/uploadpilot/go-core/db/pkg/models"
 	"github.com/uploadpilot/go-core/db/pkg/repo"
@@ -119,9 +119,9 @@ func (s *Service) EditNameAndTrigger(ctx context.Context, workspaceID, processor
 	return s.procRepo.Patch(ctx, workspaceID, processorID, patch)
 }
 
-func (s *Service) GetAllTasks(ctx context.Context) []tasks.Task {
-	var tsks []tasks.Task
-	for _, task := range tasks.TaskCatalog {
+func (s *Service) GetAllTasks(ctx context.Context) []activitycatalog.ActivityMetadata {
+	var tsks []activitycatalog.ActivityMetadata
+	for _, task := range activitycatalog.ActivityCatalog {
 		tsks = append(tsks, *task)
 	}
 	return tsks
@@ -181,6 +181,12 @@ func (s *Service) TriggerWorkflow(ctx context.Context, upload *models.Upload, ya
 			"fileName":    upload.FileName,
 		},
 	}
+
+	dslWorkflow.WorkspaceID = workspaceID
+	dslWorkflow.UploadID = upload.ID
+	dslWorkflow.ProcessorID = processorID
+	dslWorkflow.UploadFileName = upload.FileName
+	dslWorkflow.UploadFileType = upload.FileType
 
 	we, err := infra.TemporalClient.ExecuteWorkflow(context.Background(), workflowOptions, dsl.SimpleDSLWorkflow, dslWorkflow)
 	if err != nil {

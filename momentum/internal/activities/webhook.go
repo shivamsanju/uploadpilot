@@ -10,8 +10,8 @@ import (
 type WebhookActivities struct {
 }
 
-func (a *WebhookActivities) SendWebhook(ctx context.Context, input []string) (string, error) {
+func (a *WebhookActivities) SendWebhook(ctx context.Context, wfMeta, activityKey, inputActivityKey, argsStr string) (string, error) {
 	name := activity.GetInfo(ctx).ActivityType.Name
-	fmt.Printf("Sending webhook %s with input %v \n", name, input)
-	return "Sending webhook to " + input[0], nil
+	fmt.Printf("Sending webhook %s with input %v \n", name, argsStr)
+	return "Sending webhook to " + inputActivityKey, nil
 }

@@ -34,8 +34,8 @@ export const BlockSearch = ({
 
     const filteredBlocks = blocks.filter(
       (c: any) =>
-        c.key.toLowerCase().includes(searchText.toLowerCase()) ||
-        c.description.toLowerCase().includes(searchText.toLowerCase())
+        c.name?.toLowerCase()?.includes(searchText.toLowerCase()) ||
+        c.description?.toLowerCase()?.includes(searchText.toLowerCase())
     );
 
     setFiltered(filteredBlocks);
@@ -52,16 +52,12 @@ export const BlockSearch = ({
     const baseIndentation = lineContent.match(/^\s*/)[0];
 
     // Multiline text to insert
-    const text = [
-      `- activity:`,
-      `    name: ${item.name}`,
-      `    arguments:`,
-      `      - ${item.name}_input`,
-      `    result: ${item.name}_result`,
-      ``,
-    ]
-      .map((line, index) => (index === 0 ? line : baseIndentation + line)) // preserve indentation for all lines except the first one
-      .join("\n");
+    const text = item?.workflow
+      ?.split("\n")
+      ?.map((line: string, index: number) =>
+        index === 0 ? line : baseIndentation + line
+      ) // preserve indentation for all lines except the first one
+      ?.join("\n");
 
     const id = { major: 1, minor: 1 };
     const op = {

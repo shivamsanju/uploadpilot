@@ -1,36 +1,53 @@
 package activities
 
 import (
-	"github.com/uploadpilot/go-core/common/tasks"
+	"context"
+
+	activitycatalog "github.com/uploadpilot/go-core/common/activitycatalog"
+	"github.com/uploadpilot/momentum/internal/activities/img"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/worker"
 )
 
-func RegisterActivities(worker worker.Worker) {
-	// Register all activities
-	RegisterPdfActivities(worker)
-	RegisterWebhookActivities(worker)
+type ActivityRegistry struct {
+	worker worker.Worker
 }
 
-func RegisterPdfActivities(worker worker.Worker) {
-	// Register all activities
-	pdfActivities := &PdfActivities{}
+func NewActivityRegistry(worker worker.Worker) *ActivityRegistry {
+	return &ActivityRegistry{
+		worker: worker,
+	}
+}
 
-	worker.RegisterActivityWithOptions(
-		pdfActivities.ExtractContentFromPDF,
+func (ar *ActivityRegistry) register(
+	activityName string,
+	activityFunc func(ctx context.Context, wfMeta, activityKey, inputActivityKey, argsStr string) (string, error),
+) {
+	ar.worker.RegisterActivityWithOptions(
+		activityFunc,
 		activity.RegisterOptions{
-			Name: tasks.ExtractPDFContentTask.Name,
+			Name: activityName,
 		},
 	)
-
 }
 
-func RegisterWebhookActivities(worker worker.Worker) {
+func (ar *ActivityRegistry) RegisterActivities(worker worker.Worker) {
 	// Register all activities
+
+	// Register pdf activities
+	pdfActivities := &PdfActivities{}
+	ar.register(activitycatalog.ExtractPDFContentV1_0.Name, pdfActivities.ExtractContentFromPDF)
+
+	// Register webhook activities
 	webhookActivities := &WebhookActivities{}
-	worker.RegisterActivityWithOptions(
-		webhookActivities.SendWebhook,
-		activity.RegisterOptions{
-			Name: tasks.WebhookTask.Name,
-		})
+	ar.register(activitycatalog.WebhookV_1_0.Name, webhookActivities.SendWebhook)
+
+	// Register image activities
+	ar.register(activitycatalog.ImageResizeV1_0.Name, img.ResizeImage)
+	ar.register(activitycatalog.ImageConvertToPngV1_0.Name, img.ConvertImageToPng)
+	ar.register(activitycatalog.ImageConvertToBmpV1_0.Name, img.ConvertImageToBmp)
+	ar.register(activitycatalog.ImageConvertToJpegV1_0.Name, img.ConvertImageToJpeg)
+	ar.register(activitycatalog.ImageAddWatermarkActivityV1_0.Name, img.ApplyTextWatermark)
+	ar.register(activitycatalog.ImageMetadataExtractionActivityV1_0.Name, img.ExtractMetadataFromImage)
+	ar.register(activitycatalog.ImageBlurActivityV1_0.Name, img.BlurImage)
 }

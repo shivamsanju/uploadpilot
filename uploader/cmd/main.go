@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -21,7 +22,11 @@ func main() {
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	wg := &sync.WaitGroup{}
 
-	config.BuildConfig()
+	if err := config.BuildConfig(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 	appConfig := config.GetAppConfig()
 	config.InitLogger(appConfig.Environment)
 	coreClient := clients.NewCoreServiceClient(appConfig.CoreServiceEndpoint, appConfig.CoreServiceAPIKey)

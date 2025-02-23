@@ -17,16 +17,22 @@ import (
 
 func startWorker() {
 	// Initialize config
-	if err := config.Init(); err != nil {
+	if err := config.BuildConfig(); err != nil {
 		log.Fatalln("Unable to initialize config.", err)
 	}
-	config.InitLogger(config.Environment)
+	appConfig := config.GetAppConfig()
+	config.InitLogger(appConfig.Environment)
 
 	err := infra.Init(&infra.InfraOpts{
 		TemporalOpts: &infra.TemporalOptions{
-			Namespace: config.TemporalNamespace,
-			HostPort:  config.TemporalHostPort,
-			APIKey:    config.TemporalAPIKey,
+			Namespace: appConfig.TemporalNamespace,
+			HostPort:  appConfig.TemporalHostPort,
+			APIKey:    appConfig.TemporalAPIKey,
+		},
+		S3Opts: &infra.S3Options{
+			AccessKey: appConfig.S3AccessKey,
+			SecretKey: appConfig.S3SecretKey,
+			Region:    appConfig.S3Region,
 		},
 	})
 
@@ -40,7 +46,8 @@ func startWorker() {
 	w.RegisterWorkflow(dsl.SimpleDSLWorkflow)
 
 	// Register all activities
-	activities.RegisterActivities(w)
+	ar := activities.NewActivityRegistry(w)
+	ar.RegisterActivities(w)
 
 	err = w.Run(worker.InterruptCh())
 	if err != nil {

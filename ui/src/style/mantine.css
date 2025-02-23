@@ -7,6 +7,6 @@
   --input-bg: transparent !important;
 }
 
-.mantine-Notifications-notification {
+[data-mantine-color-scheme="dark"] .mantine-Notifications-notification {
   background-color: #1e1e1e !important;
 }

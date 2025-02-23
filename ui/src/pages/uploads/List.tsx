@@ -116,6 +116,7 @@ const UploadList = ({ setTotalRecords }: any) => {
           await Promise.all(
             selectedRecords.map((record) => processUpload(record.id))
           );
+          setSelectedRecords([]);
         } catch (error) {
           console.error("Error processing upload:", error);
         }

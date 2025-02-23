@@ -38,12 +38,12 @@ var appConfig *Config
 
 func GetAppConfig() *Config {
 	if appConfig == nil {
-		panic("config not initialized")
+		panic("please call BuildConfig first")
 	}
 	return appConfig
 }
 
-func BuildConfig() {
+func BuildConfig() error {
 	err := godotenv.Load("./.env")
 	if err != nil {
 		fmt.Println("No .env file found, reading from environment variables instead")
@@ -58,7 +58,7 @@ func BuildConfig() {
 
 	appConfig.Port, err = strconv.Atoi(portStr)
 	if err != nil {
-		panic(fmt.Errorf("invalid PORT: %w", err))
+		return fmt.Errorf("invalid PORT: %w", err)
 	}
 
 	appConfig.Environment = os.Getenv("ENVIRONMENT")
@@ -78,7 +78,7 @@ func BuildConfig() {
 	}
 	appConfig.TusMaxFileSize, err = strconv.ParseInt(maxSize, 10, 64)
 	if err != nil {
-		panic(fmt.Errorf("invalid TUS_MAX_FILE_SIZE: %w", err))
+		return fmt.Errorf("invalid TUS_MAX_FILE_SIZE: %w", err)
 	}
 	chunkSize := os.Getenv("TUS_CHUNK_SIZE")
 	if chunkSize == "" {
@@ -86,7 +86,7 @@ func BuildConfig() {
 	}
 	appConfig.TusChunkSize, err = strconv.ParseInt(chunkSize, 10, 64)
 	if err != nil {
-		panic(fmt.Errorf("invalid TUS_CHUNK_SIZE: %w", err))
+		return fmt.Errorf("invalid TUS_CHUNK_SIZE: %w", err)
 	}
 	appConfig.TusUploadDir = os.Getenv("TUS_UPLOAD_DIR")
 	if appConfig.TusUploadDir == "" {
@@ -96,4 +96,5 @@ func BuildConfig() {
 	appConfig.TusDisableDownload = os.Getenv("TUS_DISABLE_DOWNLOAD") == "true"
 	appConfig.TusDisableTerminate = os.Getenv("TUS_DISABLE_TERMINATION") == "true"
 
+	return nil
 }

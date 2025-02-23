@@ -8,9 +8,6 @@ const schema = {
   properties: {
     variables: {
       type: "object",
-      additionalProperties: {
-        type: "string",
-      },
       description: "Map of variables that can be used as input to Activities.",
     },
     root: {
@@ -75,26 +72,26 @@ const schema = {
         then: { $ref: "#/definitions/Statement" },
         else: { $ref: "#/definitions/Statement" },
       },
-      required: ["variable", "value", "then", "else"],
+      required: ["variable", "value", "then"],
     },
     Loop: {
       type: "object",
       description: "Defines a loop execution block.",
       properties: {
-        breakvariable: {
-          type: "string",
-          description: "The variable to check for breaking the loop.",
-        },
-        breakvalue: {
-          type: "string",
-          description: "The expected value to break the loop.",
-        },
         iterations: {
           type: "integer",
           minimum: 1,
           description: "Number of iterations to run.",
         },
         body: { $ref: "#/definitions/Statement" },
+        breakVariable: {
+          type: "string",
+          description: "The variable to check for breaking the loop.",
+        },
+        breakValue: {
+          type: "string",
+          description: "The expected value to break the loop.",
+        },
       },
       required: ["iterations", "body"],
     },
@@ -103,29 +100,39 @@ const schema = {
       description:
         "Defines an activity invocation with arguments and execution properties.",
       properties: {
-        name: {
+        key: {
+          type: "string",
+          description: "A unique key identifying the activity.",
+        },
+        uses: {
           type: "string",
           description: "The name of the activity to invoke.",
         },
-        arguments: {
-          type: "array",
-          items: { type: "string" },
-          description: "List of arguments passed to the activity.",
+        with: {
+          type: "object",
+          description: "Key-value pairs for activity parameters.",
         },
-        result: {
+        input: {
           type: "string",
-          description:
-            "The name of the variable where the result will be stored.",
+          description: "Optional input string for the activity.",
         },
+        scheduleToCloseTimeoutSeconds: { type: "integer", minimum: 1 },
+        scheduleToStartTimeoutSeconds: { type: "integer", minimum: 1 },
+        startToCloseTimeoutSeconds: { type: "integer", minimum: 1 },
+        maxRetries: { type: "integer", minimum: 0 },
+        retryBackoffCoefficient: { type: "number", minimum: 0 },
+        retryMaxIntervalSeconds: { type: "integer", minimum: 1 },
+        retryInitialIntervalSeconds: { type: "integer", minimum: 1 },
       },
-      required: ["name", "arguments"],
+      required: ["key", "uses"],
     },
   },
 };
 
 export const validateYaml = (content: string): string | null => {
   try {
-    const parsedData = parse(content) as unknown;
+    const formattedContent = content.replace(/\t/g, "  ");
+    const parsedData = parse(formattedContent) as unknown;
     const ajv = new Ajv();
     const validate = ajv.compile(schema);
     const valid = validate(parsedData);

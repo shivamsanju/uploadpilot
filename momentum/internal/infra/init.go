@@ -3,14 +3,12 @@ package infra
 import (
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/phuslu/log"
-	"github.com/redis/go-redis/v9"
 	"go.temporal.io/sdk/client"
 )
 
 var (
 	S3Client       *s3.Client
 	TemporalClient client.Client
-	RedisClient    *redis.Client
 )
 
 type InfraOpts struct {

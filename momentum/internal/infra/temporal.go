@@ -3,7 +3,8 @@ package infra
 import (
 	"context"
 	"crypto/tls"
-	"log"
+
+	"github.com/phuslu/log"
 
 	"go.temporal.io/sdk/client"
 	"google.golang.org/grpc"
@@ -39,9 +40,10 @@ func NewTemporalClient(opts *TemporalOptions) (client.Client, error) {
 			},
 		},
 		Credentials: client.NewAPIKeyStaticCredentials(opts.APIKey),
+		Logger:      log.DefaultLogger.Slog(),
 	})
 	if err != nil {
-		log.Fatalln("Unable to create Temporal client.", err)
+		log.Error().Err(err).Msg("Unable to create Temporal client.")
 	}
 	return c, nil
 }

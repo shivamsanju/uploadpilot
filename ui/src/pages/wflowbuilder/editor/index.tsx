@@ -7,6 +7,7 @@ import {
   LoadingOverlay,
   Text,
   Title,
+  Tooltip,
   useMantineColorScheme,
 } from "@mantine/core";
 import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
@@ -60,7 +61,7 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
       await mutateAsync({
         workspaceId,
         processorId: processor?.id,
-        workflow: yamlContent,
+        workflow: yamlContent?.replace(/\t/g, "  "),
       });
     } catch (error: any) {
       setError(error?.response?.data?.message || error.message);
@@ -85,7 +86,7 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
         zIndex={1000}
       />
       <Group justify="space-between" align="center" p="xs">
-        <Box w="60%">
+        <Box w="65%">
           <Title order={4} opacity={0.8}>
             Steps
           </Title>
@@ -95,13 +96,26 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
             c={error ? "red" : "dimmed"}
             p={0}
             pt={2}
+            wrap="nowrap"
           >
-            {error ? (
-              <IconAlertCircle size="12" />
-            ) : (
-              <IconCircleCheck size="12" />
-            )}
-            <Text size="xs">{error || "Everything looks good"}</Text>
+            <Box w="12">
+              {error ? (
+                <IconAlertCircle size="12" />
+              ) : (
+                <IconCircleCheck size="12" />
+              )}
+            </Box>
+            <Tooltip
+              multiline
+              w={500}
+              maw="90vw"
+              label={error || "Everything looks good"}
+              color={error ? "red" : "dimmed"}
+            >
+              <Text size="xs" lineClamp={1}>
+                {error || "Everything looks good"}
+              </Text>
+            </Tooltip>
           </Group>
         </Box>
         <Group gap="md">
