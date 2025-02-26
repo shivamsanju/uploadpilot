@@ -20,7 +20,7 @@ const WorkflowRunsPage = () => {
   }
 
   return (
-    <Box>
+    <Box mb="30">
       <Breadcrumbs separator=">">
         <NavLink to="/" className="bredcrumb-link">
           <Text>Workspaces</Text>

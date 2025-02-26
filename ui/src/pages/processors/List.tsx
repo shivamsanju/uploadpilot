@@ -1,6 +1,5 @@
 import {
   ActionIcon,
-  Badge,
   Box,
   Button,
   Group,
@@ -9,11 +8,13 @@ import {
   Stack,
   Text,
   TextInput,
+  ThemeIcon,
 } from '@mantine/core';
 import { useViewportSize } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
 import {
   IconActivity,
+  IconAlertCircle,
   IconBolt,
   IconCancel,
   IconCircleCheck,
@@ -227,15 +228,16 @@ const ProcessorList = () => {
         title: 'Status',
         hidden: width < 768,
         render: (item: any) => (
-          <>
-            <Badge
-              color={item?.enabled ? 'green' : 'red'}
-              size="sm"
-              variant="outline"
-            >
-              {item?.enabled ? 'Enabled' : 'Disabled'}
-            </Badge>
-          </>
+          <Group align="center" gap="0">
+            <ThemeIcon variant="subtle" color={item.enabled ? 'green' : 'red'}>
+              {!item.enabled ? (
+                <IconAlertCircle size={18} stroke={1.5} />
+              ) : (
+                <IconCircleCheck size={18} stroke={1.5} />
+              )}
+            </ThemeIcon>
+            {item.enabled ? 'Enabled' : 'Disabled'}
+          </Group>
         ),
       },
       // {

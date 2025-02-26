@@ -223,7 +223,7 @@ const UploadList = ({ setTotalRecords }: any) => {
         title: 'Status',
         accessor: 'status',
         render: (params: any) => (
-          <Group align="center" gap="sm">
+          <Group align="center" gap="0">
             <UploadStatus status={params?.status} />
             {params?.status}
           </Group>

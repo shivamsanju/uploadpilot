@@ -109,7 +109,7 @@ const ProcessorRunsList = () => {
         title: 'Status',
         render: (item: any) => (
           <Badge
-            variant="outline"
+            variant="subtle"
             color={statusConfig[item?.status?.toLowerCase() || '']}
             size="sm"
           >

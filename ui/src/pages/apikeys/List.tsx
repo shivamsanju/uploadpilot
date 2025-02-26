@@ -1,6 +1,5 @@
 import {
   ActionIcon,
-  Badge,
   Box,
   Button,
   Group,
@@ -8,11 +7,14 @@ import {
   Stack,
   Text,
   TextInput,
+  ThemeIcon,
 } from '@mantine/core';
 import { useViewportSize } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
 import {
+  IconAlertCircle,
   IconCancel,
+  IconCircleCheck,
   IconDots,
   IconKey,
   IconPlus,
@@ -95,11 +97,34 @@ const WorkspaceApiKeyList = () => {
       {
         accessor: 'revoked',
         title: 'Status',
-        render: (item: any) => (
-          <Badge color={item.revoked ? 'red' : 'green'} variant="outline">
-            {item.revoked ? 'Revoked' : 'Active'}
-          </Badge>
-        ),
+        render: (item: any) => {
+          const expired = new Date(item.expiresAt).getTime() < Date.now();
+          return (
+            <Group align="center" gap="0">
+              <ThemeIcon
+                variant="subtle"
+                color={item.revoked || expired ? 'red' : 'green'}
+              >
+                {item.revoked || expired ? (
+                  <IconAlertCircle size={18} stroke={1.5} />
+                ) : (
+                  <IconCircleCheck size={18} stroke={1.5} />
+                )}
+              </ThemeIcon>
+              {item.revoked ? 'Revoked' : expired ? 'Expired' : 'Active'}
+            </Group>
+            // <Badge
+            //   variant="subtle"
+            //   color={item.revoked || expired ? 'red' : 'green'}
+            // >
+            //   {item.revoked || expired
+            //     ? 'Revoked'
+            //     : expired
+            //       ? 'Expired'
+            //       : 'Active'}
+            // </Badge>
+          );
+        },
       },
       {
         accessor: 'actions',
