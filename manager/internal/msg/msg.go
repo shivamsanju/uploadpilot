@@ -57,5 +57,6 @@ var (
 	// APIKey
 	ErrApiKeyCreateFailed  = "failed to create api key. please try again later"
 	ErrInvalidAPIKey       = "invalid api key"
+	ErrExpiredAPIKey       = "api key has expired"
 	ErrSubscriptionExpired = "your subscription has expired. please renew your subscription to continue using uploadpilot"
 )

@@ -9,26 +9,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/phuslu/log"
-	"github.com/uploadpilot/go-core/db/pkg/models"
 	"github.com/uploadpilot/manager/internal/config"
 	"github.com/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/manager/internal/msg"
 	"github.com/uploadpilot/manager/internal/svc/auth"
 	"github.com/uploadpilot/manager/internal/utils"
-)
-
-type WorkspacePerm string
-
-const (
-	CanRead   WorkspacePerm = "read_ws"
-	CanManage WorkspacePerm = "manage_ws"
-	CanUpload WorkspacePerm = "upload_ws"
-)
-
-type AccountPerm string
-
-const (
-	CanReadAcc   AccountPerm = "read_acc"
-	CanManageAcc AccountPerm = "manage_acc"
 )
 
 type Middlewares struct {
@@ -82,28 +67,40 @@ func (m *Middlewares) LoggerMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (m *Middlewares) AccountAuthMiddleware(perms ...AccountPerm) func(next http.Handler) http.Handler {
+func (m *Middlewares) AccountAuthMiddleware(perms ...auth.AccountPerm) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			var claims *dto.UserClaims
-			akc, err := m.verifyAPIKey(r)
-			if err == nil && m.checkAccountAccess(akc, perms...) {
-				claims = akc.UserClaims
-			} else {
-				jwtc, err := m.verifyJWTToken(r)
+			var claims dto.UserClaims
+			apiKey := r.Header.Get("X-Api-Key")
+			jwtToken := r.Header.Get("Authorization")
+
+			if apiKey == "" && jwtToken == "" {
+				utils.HandleHttpError(w, r, http.StatusUnauthorized, errors.New("authorization header is required"))
+				return
+			}
+
+			if apiKey != "" {
+				akc, err := m.authSvc.ValidateAPIKeyAccountPerm(r.Context(), apiKey)
 				if err != nil {
 					utils.HandleHttpError(w, r, http.StatusUnauthorized, err)
 					return
 				}
-				claims = jwtc.UserClaims
+				claims = *akc.UserClaims
+			} else {
+				jwtc, err := m.authSvc.ValidateJWTToken(jwtToken)
+				if err != nil {
+					utils.HandleHttpError(w, r, http.StatusUnauthorized, err)
+					return
+				}
+				claims = *jwtc.UserClaims
 			}
 
-			next.ServeHTTP(w, r.WithContext(m.prepareContext(r, claims)))
+			next.ServeHTTP(w, r.WithContext(m.prepareContext(r, &claims)))
 		})
 	}
 }
 
-func (m *Middlewares) WorkspaceAuthMiddleware(perms ...WorkspacePerm) func(http.Handler) http.Handler {
+func (m *Middlewares) WorkspaceAuthMiddleware(perms ...auth.WorkspacePerm) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			workspaceID := chi.URLParam(r, "workspaceId")
@@ -112,25 +109,44 @@ func (m *Middlewares) WorkspaceAuthMiddleware(perms ...WorkspacePerm) func(http.
 				return
 			}
 
-			claims, err := m.authenticateWorkspacePerm(r, workspaceID, perms...)
-			if err != nil {
-				utils.HandleHttpError(w, r, http.StatusUnauthorized, err)
+			apiKey := r.Header.Get("X-Api-Key")
+			jwtToken := r.Header.Get("Authorization")
+
+			if apiKey == "" && jwtToken == "" {
+				utils.HandleHttpError(w, r, http.StatusUnauthorized, errors.New("authorization header is required"))
 				return
 			}
+			var claims dto.UserClaims
+			if apiKey != "" {
+				akc, err := m.authSvc.ValidateAPIKeyWorkspacePerm(r.Context(), apiKey, workspaceID, perms...)
+				if err != nil {
+					utils.HandleHttpError(w, r, http.StatusUnauthorized, errors.New(msg.ErrInvalidAPIKey))
+					return
+				}
+				claims = *akc.UserClaims
+			} else {
+				jwtc, err := m.authSvc.ValidateJWTToken(jwtToken)
+				if err != nil {
+					utils.HandleHttpError(w, r, http.StatusUnauthorized, err)
+					return
+				}
+				claims = *jwtc.UserClaims
+			}
 
-			next.ServeHTTP(w, r.WithContext(m.prepareContext(r, claims)))
+			next.ServeHTTP(w, r.WithContext(m.prepareContext(r, &claims)))
 		})
 	}
 }
 
 func (m *Middlewares) JWTOnlyAuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, err := m.verifyJWTToken(r)
+		token := r.Header.Get("Authorization")
+		claims, err := m.authSvc.ValidateJWTToken(token)
 		if err != nil {
 			utils.HandleHttpError(w, r, http.StatusUnauthorized, err)
 			return
 		}
-		next.ServeHTTP(w, r)
+		next.ServeHTTP(w, r.WithContext(m.prepareContext(r, claims.UserClaims)))
 	})
 }
 
@@ -146,80 +162,9 @@ func (m *Middlewares) RequestTimeoutMiddleware(timeout time.Duration) func(http.
 	return middleware.Timeout(timeout)
 }
 
-func (m *Middlewares) verifyAPIKey(r *http.Request) (*dto.APIKeyClaims, error) {
-	apiKey := r.Header.Get("X-Api-Key")
-	claims, err := m.authSvc.ValidateAPIKey(r.Context(), apiKey)
-	if err != nil {
-		return nil, err
-	}
-	return claims, nil
-}
-
-func (m *Middlewares) verifyJWTToken(r *http.Request) (*dto.JWTClaims, error) {
-	jwtToken := r.Header.Get("Authorization")
-	claims, err := m.authSvc.ValidateJWTToken(jwtToken)
-	if err != nil {
-		return nil, err
-	}
-	return claims, nil
-}
-
-func (m *Middlewares) authenticateWorkspacePerm(r *http.Request, workspaceID string, perms ...WorkspacePerm) (*dto.UserClaims, error) {
-	akc, err := m.verifyAPIKey(r)
-	if err == nil {
-		for _, perm := range akc.Permissions {
-			if perm.WorkspaceID == workspaceID && m.checkWorkspaceAccess(&perm, perms...) {
-				return akc.UserClaims, nil
-			}
-		}
-	}
-
-	jwtc, err := m.verifyJWTToken(r)
-	if err != nil {
-		return nil, err
-	}
-	return jwtc.UserClaims, nil
-}
-
 func (m *Middlewares) prepareContext(r *http.Request, claims *dto.UserClaims) context.Context {
 	ctx := context.WithValue(r.Context(), dto.UserIDContextKey, claims.UserID)
 	ctx = context.WithValue(ctx, dto.EmailContextKey, claims.Email)
 	ctx = context.WithValue(ctx, dto.NameContextKey, claims.Name)
 	return ctx
-}
-
-func (m *Middlewares) checkAccountAccess(claims *dto.APIKeyClaims, access ...AccountPerm) bool {
-	for _, a := range access {
-		switch a {
-		case CanReadAcc:
-			if claims.CanReadAcc {
-				return true
-			}
-		case CanManageAcc:
-			if claims.CanManageAcc {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func (m *Middlewares) checkWorkspaceAccess(perm *models.APIKeyPerm, access ...WorkspacePerm) bool {
-	for _, a := range access {
-		switch a {
-		case CanRead:
-			if perm.CanRead {
-				return true
-			}
-		case CanManage:
-			if perm.CanManage {
-				return true
-			}
-		case CanUpload:
-			if perm.CanUpload {
-				return true
-			}
-		}
-	}
-	return false
 }

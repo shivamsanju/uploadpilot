@@ -3,26 +3,21 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { APIKey, type CreateApiKeyData } from '../types/apikey';
 import axiosInstance from '../utils/axios';
 
-export const useGetApiKeysInWorkspace = (workspaceId: string) => {
+export const useGetApiKeys = () => {
   const queryClient = useQueryClient();
   const {
     isPending,
     error,
     data: apikeys,
   } = useQuery<APIKey[]>({
-    queryKey: ['apikeys', workspaceId],
+    queryKey: ['apikeys'],
     queryFn: () => {
-      if (!workspaceId) {
-        return Promise.reject(new Error('workspaceId is required'));
-      }
-      return axiosInstance
-        .get(`/workspaces/${workspaceId}/apikeys`)
-        .then(res => res.data);
+      return axiosInstance.get(`/api-keys`).then(res => res.data);
     },
   });
 
   const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ['apikeys', workspaceId] });
+    queryClient.invalidateQueries({ queryKey: ['apikeys'] });
 
   return { isPending, error, apikeys, invalidate };
 };
@@ -32,16 +27,8 @@ export const useCreateApiKeyMutation = () => {
 
   return useMutation({
     mutationKey: ['ApiKeys'],
-    mutationFn: ({
-      workspaceId,
-      data,
-    }: {
-      workspaceId: string;
-      data: CreateApiKeyData;
-    }) => {
-      return axiosInstance
-        .post(`/workspaces/${workspaceId}/apikeys`, data)
-        .then(res => res.data);
+    mutationFn: ({ data }: { data: CreateApiKeyData }) => {
+      return axiosInstance.post(`/api-keys`, data).then(res => res.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['apikeys'] });
@@ -66,10 +53,8 @@ export const useRevokeApiKeyMutation = () => {
 
   return useMutation({
     mutationKey: ['apikeys'],
-    mutationFn: ({ workspaceId, id }: { workspaceId: string; id: string }) => {
-      return axiosInstance
-        .post(`/workspaces/${workspaceId}/apikeys/${id}/revoke`)
-        .then(res => res.data);
+    mutationFn: ({ id }: { id: string }) => {
+      return axiosInstance.post(`/api-keys/${id}/revoke`).then(res => res.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['apikeys'] });

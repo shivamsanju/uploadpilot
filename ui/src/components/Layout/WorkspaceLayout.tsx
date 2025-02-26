@@ -8,6 +8,7 @@ import {
 import {
   IconCategory,
   IconCreditCardFilled,
+  IconKey,
   IconMenu2,
   IconUser,
 } from '@tabler/icons-react';
@@ -41,6 +42,11 @@ const WorkspacesLayout: React.FC<{ children: React.ReactNode }> = ({
         label: 'Billing',
         icon: IconCreditCardFilled,
         link: `/billing`,
+      },
+      {
+        label: 'API Keys',
+        icon: IconKey,
+        link: `/api-keys`,
       },
       {
         label: 'Profile',

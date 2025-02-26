@@ -24,7 +24,10 @@ func NewUploadRepo(db *driver.Driver) *UploadRepo {
 func (r *UploadRepo) GetAll(ctx context.Context, workspaceID string, paginationParams *models.PaginationParams) ([]models.Upload, int64, error) {
 	var uploads []models.Upload
 
-	query := r.db.Orm.WithContext(ctx).Debug().Model(&models.Upload{}).Omit("workspace").Where("workspace_id = ?", workspaceID)
+	query := r.db.Orm.WithContext(ctx).
+		Model(&models.Upload{}).
+		Select("id", "file_name", "status", "file_type", "started_at", "size", "finished_at").
+		Where("workspace_id = ?", workspaceID)
 
 	query, totalRecords, sortApplied, err := dbutils.BuildPaginationQuery(
 		query,

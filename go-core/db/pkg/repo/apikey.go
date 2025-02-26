@@ -21,30 +21,23 @@ func NewApiKeyRepo(db *driver.Driver) *ApiKeyRepo {
 }
 
 func (r *ApiKeyRepo) CreateApiKey(ctx context.Context, apiKey *models.APIKey) error {
-	// Start a transaction
-	tx := r.db.Orm.WithContext(ctx).Begin()
-
-	// Create API Key
-	if err := tx.Create(apiKey).Error; err != nil {
-		tx.Rollback()
-		return err
-	}
-
-	for _, perm := range apiKey.Permissions {
-		perm.APIKeyID = apiKey.ID
-		if err := tx.Create(&perm).Error; err != nil {
-			tx.Rollback()
-			return err
-		}
-	}
-
-	// Commit transaction
-	return tx.Commit().Error
+	return r.db.Orm.WithContext(ctx).Create(apiKey).Error
 }
 
 func (r *ApiKeyRepo) GetApiKeyDetailsByID(ctx context.Context, id string) (*models.APIKey, error) {
 	var apiKey models.APIKey
 	if err := r.db.Orm.WithContext(ctx).First(&apiKey, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &apiKey, nil
+}
+
+func (r *ApiKeyRepo) GetApiKeyLimitedDetailsByID(ctx context.Context, id string) (*models.APIKey, error) {
+	var apiKey models.APIKey
+	if err := r.db.Orm.WithContext(ctx).
+		Preload("Permissions").
+		Select("id", "name", "created_by", "created_at", "expires_at", "revoked", "revoked_at", "revoked_by", "can_read_acc", "can_manage_acc").
+		First(&apiKey, "id = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &apiKey, nil
@@ -64,12 +57,13 @@ func (r *ApiKeyRepo) GetApiKeyDetails(ctx context.Context, hash string) (*models
 func (r *ApiKeyRepo) GetAllApiKeys(ctx context.Context, userID string) ([]models.APIKey, error) {
 	var apiKeys []models.APIKey
 	if err := r.db.Orm.WithContext(ctx).
-		Select("id", "workspace_id", "name", "created_by", "created_at", "expires_at", "revoked", "revoked_at", "revoked_by").
+		Omit("user").
+		Select("id", "name", "created_by", "created_at", "expires_at", "revoked", "revoked_at", "revoked_by").
 		Order(clause.OrderBy{Columns: []clause.OrderByColumn{
 			{Column: clause.Column{Name: "revoked"}, Desc: false},
 			{Column: clause.Column{Name: "created_at"}, Desc: true},
 		}}).
-		Find(&apiKeys, "created_by = ?", userID).
+		Find(&apiKeys, "user_id = ?", userID).
 		Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return make([]models.APIKey, 0), nil

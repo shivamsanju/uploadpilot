@@ -5,7 +5,6 @@ import {
   Button,
   Group,
   Menu,
-  Modal,
   Stack,
   Text,
   TextInput,
@@ -20,35 +19,28 @@ import {
   IconSearch,
 } from '@tabler/icons-react';
 import { DataTableColumn } from 'mantine-datatable';
-import { useCallback, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import {
-  useGetApiKeysInWorkspace,
-  useRevokeApiKeyMutation,
-} from '../../apis/apikeys';
+import { useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useGetApiKeys, useRevokeApiKeyMutation } from '../../apis/apikeys';
 import { RefreshButton } from '../../components/Buttons/RefreshButton/RefreshButton';
 import { ErrorCard } from '../../components/ErrorCard/ErrorCard';
 import { ContainerOverlay } from '../../components/Overlay';
 import { showConfirmationPopup } from '../../components/Popups/ConfirmPopup';
 import { UploadPilotDataTable } from '../../components/Table/Table';
-import CreateApiKeyForm from './add';
 
 const WorkspaceApiKeyList = () => {
   const { width } = useViewportSize();
-  const [opened, setOpened] = useState(false);
-  const { workspaceId } = useParams();
-  const { isPending, error, apikeys, invalidate } = useGetApiKeysInWorkspace(
-    workspaceId || '',
-  );
+  const { isPending, error, apikeys, invalidate } = useGetApiKeys();
   const { mutateAsync, isPending: revoking } = useRevokeApiKeyMutation();
+  const navigate = useNavigate();
 
   const revokeApiKey = useCallback(
     async (id: string) => {
-      if (!workspaceId || workspaceId === '' || !id || id === '') {
+      if (!id || id === '') {
         showNotification({
           color: 'red',
           title: 'Error',
-          message: 'Workspace ID or ID is not available',
+          message: 'ID is not available',
         });
         return;
       }
@@ -58,14 +50,14 @@ const WorkspaceApiKeyList = () => {
           'Are you sure you want to revoke this api key? this is irreversible.',
         onOk: async () => {
           try {
-            await mutateAsync({ workspaceId, id });
+            await mutateAsync({ id });
           } catch (error) {
             console.error(error);
           }
         },
       });
     },
-    [workspaceId, mutateAsync],
+    [mutateAsync],
   );
 
   const columns: DataTableColumn[] = useMemo(
@@ -97,7 +89,7 @@ const WorkspaceApiKeyList = () => {
       },
       {
         accessor: 'createdBy',
-        title: 'Created By',
+        title: 'Owner',
         hidden: width < 768,
       },
       {
@@ -165,7 +157,7 @@ const WorkspaceApiKeyList = () => {
             <Group gap="sm">
               <Button
                 variant="subtle"
-                onClick={() => setOpened(true)}
+                onClick={() => navigate('/api-keys/new')}
                 leftSection={<IconPlus size={18} />}
               >
                 Add
@@ -182,21 +174,6 @@ const WorkspaceApiKeyList = () => {
           </Group>
         }
       />
-      <Modal
-        centered
-        padding="xl"
-        transitionProps={{ transition: 'pop' }}
-        opened={opened}
-        onClose={() => setOpened(false)}
-        title="Create APIKey"
-        closeOnClickOutside={false}
-        size="lg"
-      >
-        <CreateApiKeyForm
-          setOpened={setOpened}
-          workspaceId={workspaceId || ''}
-        />
-      </Modal>
     </Box>
   );
 };

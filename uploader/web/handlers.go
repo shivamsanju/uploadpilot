@@ -68,11 +68,6 @@ func (h *handler) GetUploadHandler() http.Handler {
 			return
 		}
 		handlerConfig.Logger = slog.New(config.NewLogHandler())
-		if err != nil {
-			HandleHttpError(w, r, http.StatusBadRequest, err)
-			return
-		}
-
 		// tusd handler
 		uploadHandler, err := tusd.NewHandler(*handlerConfig)
 		if err != nil {

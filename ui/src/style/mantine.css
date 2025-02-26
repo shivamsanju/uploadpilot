@@ -22,3 +22,7 @@
 .bredcrumb-link:hover {
   text-decoration: underline;
 }
+
+.mantine-Checkbox-input {
+  cursor: pointer !important;
+}

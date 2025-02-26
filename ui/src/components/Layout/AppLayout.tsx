@@ -10,7 +10,6 @@ import {
   IconCircles,
   IconDatabase,
   IconGauge,
-  IconKey,
   IconMenu2,
   IconRoute,
   IconShoppingCartBolt,
@@ -62,11 +61,6 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         label: 'Users',
         icon: IconUsers,
         link: `/workspace/${workspaceId}/users`,
-      },
-      {
-        label: 'API Keys',
-        icon: IconKey,
-        link: `/workspace/${workspaceId}/apikeys`,
       },
       {
         label: 'Marketplace',

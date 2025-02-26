@@ -26,8 +26,11 @@ type APIKeyClaims struct {
 }
 
 type CreateApiKeyData struct {
-	Name      string    `json:"name" validate:"required,max=20"`
-	ExpiresAt time.Time `json:"expiresAt" validate:"required,future"`
+	Name         string              `json:"name" validate:"required,max=20"`
+	ExpiresAt    time.Time           `json:"expiresAt" validate:"required,future"`
+	CanManageAcc bool                `json:"canManageAcc"`
+	CanReadAcc   bool                `json:"canReadAcc"`
+	Permissions  []models.APIKeyPerm `json:"permissions"`
 }
 
 type ApiKeyLimitedDetails struct {

@@ -5,6 +5,7 @@ import WorkspacesLayout from './components/Layout/WorkspaceLayout';
 import { NotFoundImage } from './components/NotFound';
 import DashboardPage from './pages/analytics';
 import ApiKeyPage from './pages/apikeys';
+import CreateApiKeyPage from './pages/apikeys/add';
 import AuthPage from './pages/auth';
 import BillingsPage from './pages/billing';
 import ConfigurationPage from './pages/configuration';
@@ -47,6 +48,16 @@ const routes: Route[] = [
     path: '/billing',
     layout: WorkspacesLayout,
     element: <BillingsPage />,
+  },
+  {
+    path: '/api-keys',
+    layout: WorkspacesLayout,
+    element: <ApiKeyPage />,
+  },
+  {
+    path: '/api-keys/new',
+    layout: WorkspacesLayout,
+    element: <CreateApiKeyPage />,
   },
   {
     path: '/workspace/:workspaceId',
@@ -92,11 +103,6 @@ const routes: Route[] = [
     path: '/workspace/:workspaceId/users',
     layout: AppLayout,
     element: <WorkspaceUsersPage />,
-  },
-  {
-    path: '/workspace/:workspaceId/apikeys',
-    layout: AppLayout,
-    element: <ApiKeyPage />,
   },
   {
     path: '/workspace/:workspaceId/tools',

@@ -91,6 +91,7 @@ func (s *Service) CreateApiKey(ctx context.Context, data *dto.CreateApiKeyData) 
 		CreatedByColumn: models.CreatedByColumn{
 			CreatedBy: user.Email,
 		},
+		Permissions: data.Permissions,
 	}
 
 	if err := s.apiKeyRepo.CreateApiKey(ctx, apiKey); err != nil {
@@ -136,7 +137,7 @@ func (s *Service) ValidateAPIKey(ctx context.Context, apiKey string) (*dto.APIKe
 	}
 
 	if apiKeyDetails.Revoked || apiKeyDetails.ExpiresAt.Before(time.Now()) {
-		return nil, nil
+		return nil, errors.New(msg.ErrExpiredAPIKey)
 	}
 
 	return &dto.APIKeyClaims{
@@ -162,6 +163,33 @@ func (s *Service) isValidAPIKeyFormat(apiKey string) bool {
 		return false
 	}
 	return true
+}
+
+func (s *Service) ValidateAPIKeyWorkspacePerm(ctx context.Context, apiKey string, workspaceID string, perms ...WorkspacePerm) (*dto.APIKeyClaims, error) {
+	claims, err := s.ValidateAPIKey(ctx, apiKey)
+	if err != nil {
+		return nil, err
+	}
+	for _, p := range claims.Permissions {
+
+		if p.WorkspaceID == workspaceID {
+			if s.checkWorkspaceAccess(&p, perms...) {
+				return claims, nil
+			}
+		}
+	}
+	return nil, errors.New(msg.ErrInvalidAPIKey)
+}
+
+func (s *Service) ValidateAPIKeyAccountPerm(ctx context.Context, apiKey string, perms ...AccountPerm) (*dto.APIKeyClaims, error) {
+	claims, err := s.ValidateAPIKey(ctx, apiKey)
+	if err != nil {
+		return nil, err
+	}
+	if s.checkAccountAccess(claims, perms...) {
+		return claims, nil
+	}
+	return nil, errors.New(msg.ErrInvalidAPIKey)
 }
 
 func (s *Service) GenerateJWTToken(w http.ResponseWriter, user *models.User, expiry time.Duration) (string, error) {
@@ -214,4 +242,41 @@ func (s *Service) ValidateJWTToken(jwtToken string) (*dto.JWTClaims, error) {
 		return claims, errors.New(msg.TokenExpired)
 	}
 	return claims, nil
+}
+
+func (s *Service) checkWorkspaceAccess(perm *models.APIKeyPerm, access ...WorkspacePerm) bool {
+	log.Debug().Msgf("checking access %+v for %+v", access, perm)
+	for _, a := range access {
+		switch a {
+		case CanRead:
+			if perm.CanRead {
+				return true
+			}
+		case CanManage:
+			if perm.CanManage {
+				return true
+			}
+		case CanUpload:
+			if perm.CanUpload {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (s *Service) checkAccountAccess(claims *dto.APIKeyClaims, access ...AccountPerm) bool {
+	for _, a := range access {
+		switch a {
+		case CanReadAcc:
+			if claims.CanReadAcc {
+				return true
+			}
+		case CanManageAcc:
+			if claims.CanManageAcc {
+				return true
+			}
+		}
+	}
+	return false
 }

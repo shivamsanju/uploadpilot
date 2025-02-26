@@ -127,8 +127,7 @@ const ReactIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
                     note="Test your uploader"
                     headers={{
                       Authorization:
-                        'Bearer ' + localStorage.getItem('uploadpilottoken') ||
-                        '',
+                        'Bearer ' + localStorage.getItem('uploadpilottoken'),
                     }}
                   />
                 </Group>

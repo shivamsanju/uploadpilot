@@ -5,17 +5,17 @@ import "time"
 type APIKey struct {
 	ID           string       `gorm:"column:id;primaryKey;type:uuid;default:uuid_generate_v4()" json:"id"`
 	Name         string       `gorm:"column:name;not null;type:varchar(25)" json:"name"`
-	ApiKeyHash   string       `gorm:"column:api_key_hash;not null;type:varchar(128)" json:"apiKeyHash"`
+	ApiKeyHash   string       `gorm:"column:api_key_hash;not null;type:varchar(128)" json:"apiKeyHash,omitempty"`
 	LastUsedAt   time.Time    `gorm:"column:last_used_at;" json:"lastUsedAt"`
 	ExpiresAt    time.Time    `gorm:"column:expires_at;not null" json:"expiresAt"`
-	Revoked      bool         `gorm:"column:revoked;not null;default:false" json:"revoked"`
-	RevokedAt    time.Time    `gorm:"column:revoked_at" json:"revokedAt"`
-	RevokedBy    string       `gorm:"column:revoked_by" json:"revokedBy"`
-	UserID       string       `gorm:"column:user_id;not null;type:uuid" json:"userId"`
-	User         User         `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"user"`
-	CanReadAcc   bool         `gorm:"column:can_read_acc;not null;default:false" json:"canReadAcc"`
-	CanManageAcc bool         `gorm:"column:can_manage_acc;not null;default:false" json:"canManageAcc"`
-	Permissions  []APIKeyPerm `gorm:"foreignKey:APIKeyID;constraint:OnDelete:CASCADE" json:"permissions"`
+	Revoked      bool         `gorm:"column:revoked;not null;default:false" json:"revoked,omitempty"`
+	RevokedAt    time.Time    `gorm:"column:revoked_at" json:"revokedAt,omitempty"`
+	RevokedBy    string       `gorm:"column:revoked_by" json:"revokedBy,omitempty"`
+	UserID       string       `gorm:"column:user_id;not null;type:uuid" json:"userId,omitempty"`
+	User         User         `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"-"`
+	CanReadAcc   bool         `gorm:"column:can_read_acc;not null;default:false" json:"canReadAcc,omitempty"`
+	CanManageAcc bool         `gorm:"column:can_manage_acc;not null;default:false" json:"canManageAcc,omitempty"`
+	Permissions  []APIKeyPerm `gorm:"foreignKey:APIKeyID;constraint:OnDelete:CASCADE" json:"permissions,omitempty"`
 	CreatedByColumn
 	CreatedAtColumn
 }

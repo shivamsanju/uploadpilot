@@ -15,8 +15,7 @@ type UploadParams struct {
 }
 
 type ApiKeyParams struct {
-	WorkspaceID string `json:"workspaceId" validate:"required,uuid"`
-	ApiKeyID    string `json:"apiKeyId" validate:"required,uuid"`
+	ApiKeyID string `json:"apiKeyId" validate:"required,uuid"`
 }
 
 type PaginatedQuery struct {

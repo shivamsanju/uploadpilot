@@ -117,6 +117,7 @@ func (h *authHandler) CreateAPIKey(
 	query interface{},
 	body dto.CreateApiKeyData,
 ) (string, int, error) {
+	log.Debug().Msgf("creating api key with data %+v", body)
 	key, err := h.authSvc.CreateApiKey(r.Context(), &body)
 	if err != nil {
 		return "", http.StatusInternalServerError, err

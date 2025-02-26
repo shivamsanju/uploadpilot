@@ -56,6 +56,7 @@ END $$;
 		&models.Processor{},
 		&models.UploadLog{},
 		&models.APIKey{},
+		&models.APIKeyPerm{},
 		&models.Secret{},
 	); err != nil {
 		return err
