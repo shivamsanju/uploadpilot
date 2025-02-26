@@ -12,7 +12,7 @@
   margin: auto;
 
   &::after {
-    content: "";
+    content: '';
     display: block;
     background-color: var(--mantine-color-appcolor-filled);
     width: 45px;
@@ -30,7 +30,7 @@
 
 .cardTitle {
   &::after {
-    content: "";
+    content: '';
     display: block;
     background-color: var(--mantine-color-appcolor-filled);
     width: 45px;

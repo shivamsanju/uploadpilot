@@ -7,8 +7,10 @@ type Workspace struct {
 	Name        string             `gorm:"column:name;not null;size:100" json:"name"`
 	Description *string            `gorm:"column:description;size:255" json:"description"`
 	Tags        dtypes.StringArray `gorm:"column:tags;type:text[]" json:"tags"`
-	At
-	By
+	CreatedAtColumn
+	UpdatedAtColumn
+	CreatedByColumn
+	UpdatedByColumn
 }
 
 func (Workspace) TableName() string {
@@ -21,7 +23,8 @@ type UserWorkspace struct {
 	Role        UserRole  `gorm:"column:role;not null" json:"role"`
 	User        User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"user"`
 	Workspace   Workspace `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE" json:"workspace"`
-	At
+	CreatedAtColumn
+	UpdatedAtColumn
 }
 
 func (UserWorkspace) TableName() string {

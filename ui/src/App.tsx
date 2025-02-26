@@ -1,12 +1,14 @@
-import "@mantine/core/styles.css";
-import "@mantine/notifications/styles.css";
-import { Routes, BrowserRouter as Router, Route } from "react-router-dom";
-import { MantineProvider } from "@mantine/core";
-import routes from "./Routes";
-import { myAppTheme } from "./style/theme";
-import { Notifications } from "@mantine/notifications";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ModalsProvider } from "@mantine/modals";
+import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
+import '@mantine/notifications/styles.css';
+
+import { MantineProvider } from '@mantine/core';
+import { ModalsProvider } from '@mantine/modals';
+import { Notifications } from '@mantine/notifications';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import routes from './Routes';
+import { myAppTheme } from './style/theme';
 const queryClient = new QueryClient();
 function App() {
   return (
@@ -16,7 +18,7 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <Router>
             <Routes>
-              {routes.map((route) => (
+              {routes.map(route => (
                 <Route
                   key={route.path}
                   path={route.path}

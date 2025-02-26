@@ -1,6 +1,6 @@
-import { useNavigate } from "react-router-dom";
-import { useGetSession } from "../../apis/user";
-import { AppLoader } from "../Loader/AppLoader";
+import { useNavigate } from 'react-router-dom';
+import { useGetSession } from '../../apis/user';
+import { AppLoader } from '../Loader/AppLoader';
 
 const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isPending, error, session } = useGetSession();
@@ -11,7 +11,7 @@ const AuthWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   if (error || !session) {
-    navigate("/auth", { replace: true });
+    navigate('/auth', { replace: true });
   }
 
   return <>{children}</>;

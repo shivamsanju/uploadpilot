@@ -1,6 +1,6 @@
-import { Button, Text, TextProps } from "@mantine/core";
-import { IconRestore, Icon, IconProps } from "@tabler/icons-react";
-import type { ButtonProps } from "@mantine/core";
+import type { ButtonProps } from '@mantine/core';
+import { Button, Text, TextProps } from '@mantine/core';
+import { Icon, IconProps, IconRestore } from '@tabler/icons-react';
 
 export const DiscardButton: React.FC<
   ButtonProps &
@@ -10,7 +10,7 @@ export const DiscardButton: React.FC<
       >;
       labelProps?: TextProps;
     }
-> = (props) => (
+> = props => (
   <Button
     leftSection={<IconRestore size={18} {...props.iconProps} />}
     variant="default"

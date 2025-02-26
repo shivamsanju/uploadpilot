@@ -5,9 +5,9 @@ import {
   SimpleGrid,
   Text,
   Title,
-} from "@mantine/core";
-import image from "../../assets/images/404.svg";
-import classes from "./NotFound.module.css";
+} from '@mantine/core';
+import image from '../../assets/images/404.svg';
+import classes from './NotFound.module.css';
 
 export function NotFoundImage() {
   return (

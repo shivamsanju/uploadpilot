@@ -1,25 +1,53 @@
-import { Box, Title, Group, Badge, Alert } from "@mantine/core";
-import UploadList from "./List";
-import { useState } from "react";
-import { IconInfoCircle } from "@tabler/icons-react";
-import { useLocalStorage } from "@mantine/hooks";
+import {
+  ActionIcon,
+  Alert,
+  Badge,
+  Box,
+  Breadcrumbs,
+  Group,
+  Text,
+  Title,
+} from '@mantine/core';
+import { useLocalStorage } from '@mantine/hooks';
+import { IconChevronLeft, IconInfoCircle } from '@tabler/icons-react';
+import { useState } from 'react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import UploadList from './List';
 
 const UploadsPage = () => {
   const [totalRecords, setTotalRecords] = useState(0);
+  const navigate = useNavigate();
   const [alert, setAlert] = useLocalStorage({
-    key: "alert",
+    key: 'alert',
     defaultValue: 1,
     getInitialValueInEffect: false,
   });
 
   return (
     <Box>
-      <Group align="center" gap="xs" h="10%">
-        <Title order={3} opacity={0.7}>
-          Uploads
-        </Title>
-        <Badge variant="outline">{totalRecords}</Badge>
+      <Breadcrumbs separator=">">
+        <NavLink to="/" className="bredcrumb-link">
+          <Text>Workspaces</Text>
+        </NavLink>
+        <Text>Uploads</Text>
+      </Breadcrumbs>
+      <Group mt="xs" mb="xl">
+        <ActionIcon
+          variant="default"
+          radius="xl"
+          size="sm"
+          onClick={() => navigate(`/`)}
+        >
+          <IconChevronLeft size={16} />
+        </ActionIcon>
+        <Group align="center" gap="xs" h="10%">
+          <Title order={3}>Uploads</Title>
+          <Badge variant="outline" radius="xl">
+            {totalRecords}
+          </Badge>
+        </Group>
       </Group>
+
       {alert === 1 && (
         <Alert
           opacity={0.7}

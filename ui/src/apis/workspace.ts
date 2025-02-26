@@ -1,17 +1,17 @@
-import { notifications } from "@mantine/notifications";
-import axiosInstance from "../utils/axios";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { notifications } from '@mantine/notifications';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import axiosInstance from '../utils/axios';
 
 export const useGetWorkspaces = () => {
   const queryClient = useQueryClient();
 
   const { isPending, error, data } = useQuery({
-    queryKey: ["workspaces"],
-    queryFn: () => axiosInstance.get(`/workspaces`).then((res) => res.data),
+    queryKey: ['workspaces'],
+    queryFn: () => axiosInstance.get(`/workspaces`).then(res => res.data),
   });
 
   const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+    queryClient.invalidateQueries({ queryKey: ['workspaces'] });
   return { isPending, error, workspaces: data, invalidate };
 };
 
@@ -19,24 +19,24 @@ export const useCreateWorkspaceMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ["workspaces"],
+    mutationKey: ['workspaces'],
     mutationFn: (name: string) =>
       axiosInstance
-        .post("/workspaces", { name, tags: ["default"] })
-        .then((res) => res.data),
+        .post('/workspaces', { name, tags: ['default'] })
+        .then(res => res.data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+      queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       notifications.show({
-        title: "Success",
-        message: "Workspace created successfully",
-        color: "green",
+        title: 'Success',
+        message: 'Workspace created successfully',
+        color: 'green',
       });
     },
     onError: () => {
       notifications.show({
-        title: "Error",
-        message: "Failed to create workspace",
-        color: "red",
+        title: 'Error',
+        message: 'Failed to create workspace',
+        color: 'red',
       });
     },
   });
@@ -48,14 +48,14 @@ export const useGetAllAllowedSources = (workspaceId: string) => {
     error,
     data: allowedSources,
   } = useQuery({
-    queryKey: ["allowedSources"],
+    queryKey: ['allowedSources'],
     queryFn: () => {
       if (!workspaceId) {
-        return Promise.reject(new Error("workspaceId is required"));
+        return Promise.reject(new Error('workspaceId is required'));
       }
       return axiosInstance
         .get(`workspaces/${workspaceId}/allowedSources`)
-        .then((res) => res.data);
+        .then(res => res.data);
     },
   });
 
@@ -66,20 +66,20 @@ export const useGetUsersInWorkspace = (workspaceId: string) => {
   const queryClient = useQueryClient();
 
   const { isPending, error, data, isFetching } = useQuery({
-    queryKey: ["workspaceUsers", workspaceId],
+    queryKey: ['workspaceUsers', workspaceId],
     queryFn: () => {
       if (!workspaceId) {
-        return Promise.reject(new Error("workspaceId is required"));
+        return Promise.reject(new Error('workspaceId is required'));
       }
       return axiosInstance
         .get(`workspaces/${workspaceId}/users`)
-        .then((res) => res.data);
+        .then(res => res.data);
     },
   });
 
   const invalidate = () =>
     queryClient.invalidateQueries({
-      queryKey: ["workspaceUsers", workspaceId],
+      queryKey: ['workspaceUsers', workspaceId],
     });
   return { isPending, error, users: data, invalidate, isFetching };
 };
@@ -88,7 +88,7 @@ export const useAddUserToWorkspaceMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ["workspaceUsers"],
+    mutationKey: ['workspaceUsers'],
     mutationFn: ({
       workspaceId,
       email,
@@ -100,23 +100,23 @@ export const useAddUserToWorkspaceMutation = () => {
     }) => {
       return axiosInstance
         .post(`/workspaces/${workspaceId}/users`, { email, role })
-        .then((res) => res.data);
+        .then(res => res.data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["workspaceUsers"] });
+      queryClient.invalidateQueries({ queryKey: ['workspaceUsers'] });
       notifications.show({
-        title: "Success",
-        message: "User added to workspace successfully",
-        color: "green",
+        title: 'Success',
+        message: 'User added to workspace successfully',
+        color: 'green',
       });
     },
     onError: (error: any) => {
       notifications.show({
-        title: "Error",
+        title: 'Error',
         message: `Failed to add user to workspace. Reason: ${
           error?.response?.data?.message || error.message
         }`,
-        color: "red",
+        color: 'red',
       });
     },
   });
@@ -126,7 +126,7 @@ export const useRemoveUserFromWorkspaceMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ["workspaceUsers"],
+    mutationKey: ['workspaceUsers'],
     mutationFn: ({
       workspaceId,
       userId,
@@ -136,23 +136,23 @@ export const useRemoveUserFromWorkspaceMutation = () => {
     }) => {
       return axiosInstance
         .delete(`/workspaces/${workspaceId}/users/${userId}`)
-        .then((res) => res.data);
+        .then(res => res.data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["workspaceUsers"] });
+      queryClient.invalidateQueries({ queryKey: ['workspaceUsers'] });
       notifications.show({
-        title: "Success",
-        message: "User removed from workspace successfully",
-        color: "green",
+        title: 'Success',
+        message: 'User removed from workspace successfully',
+        color: 'green',
       });
     },
     onError: (error: any) => {
       notifications.show({
-        title: "Error",
+        title: 'Error',
         message:
-          "Failed to remove user from workspace. Reason: " +
+          'Failed to remove user from workspace. Reason: ' +
             error?.response?.data?.message || error.message,
-        color: "red",
+        color: 'red',
       });
     },
   });
@@ -162,7 +162,7 @@ export const useEditUserInWorkspaceMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationKey: ["workspaceUsers"],
+    mutationKey: ['workspaceUsers'],
     mutationFn: ({
       workspaceId,
       userId,
@@ -174,24 +174,24 @@ export const useEditUserInWorkspaceMutation = () => {
     }) => {
       return axiosInstance
         .put(`/workspaces/${workspaceId}/users/${userId}`, { role })
-        .then((res) => res.data);
+        .then(res => res.data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["workspaceUsers"] });
+      queryClient.invalidateQueries({ queryKey: ['workspaceUsers'] });
       notifications.show({
-        title: "Success",
-        message: "User role modified successfully",
-        color: "green",
+        title: 'Success',
+        message: 'User role modified successfully',
+        color: 'green',
       });
     },
     onError: (error: any) => {
       console.log(error);
       notifications.show({
-        title: "Error",
+        title: 'Error',
         message: `Failed to modify user role. Reason: ${
           error?.response?.data?.message || error.message
         }`,
-        color: "red",
+        color: 'red',
       });
     },
   });

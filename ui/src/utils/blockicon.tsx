@@ -2,8 +2,8 @@ import {
   IconCube3dSphere,
   IconFileTextSpark,
   IconWebhook,
-} from "@tabler/icons-react";
-import { ReactNode } from "react";
+} from '@tabler/icons-react';
+import { ReactNode } from 'react';
 
 export const BLOCK_ICONS: { [key: string]: any } = {
   Webhook: IconWebhook,

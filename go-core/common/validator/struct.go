@@ -1,8 +1,9 @@
-package commonutils
+package validator
 
 import (
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -11,6 +12,12 @@ func IsInteger(fl validator.FieldLevel) bool {
 	value := fl.Field().String()
 	_, err := strconv.Atoi(value)
 	return err == nil
+}
+
+func IsFutureTime(fl validator.FieldLevel) bool {
+	dateTime := fl.Field().Interface().(time.Time)
+	now := time.Now().UTC()
+	return dateTime.After(now)
 }
 
 // IsKeyValuePairs validates search query (field:value,field:value,...)
@@ -39,6 +46,7 @@ func IsSortValid(fl validator.FieldLevel) bool {
 func NewValidator() *validator.Validate {
 	validate := validator.New()
 	validate.RegisterValidation("integer", IsInteger)
+	validate.RegisterValidation("future", IsFutureTime)
 	validate.RegisterValidation("keyvaluepairs", IsKeyValuePairs)
 	validate.RegisterValidation("sort", IsSortValid)
 	return validate

@@ -1,11 +1,11 @@
-import { ScrollArea } from "@mantine/core";
-import { LinksGroup } from "./NavLinksGroup";
-import classes from "./Navbar.module.css";
-import { useLocation } from "react-router-dom";
-import { FC, ReactNode, useMemo } from "react";
+import { ScrollArea } from '@mantine/core';
+import { FC, ReactNode, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
+import classes from './Navbar.module.css';
+import { LinksGroup } from './NavLinksGroup';
 
 const isActive = (pathname: string, item: any) => {
-  if (item.label === "Get Started" || item.label === "Workspaces") {
+  if (item.label === 'Get Started' || item.label === 'Workspaces') {
     return pathname === item.link;
   }
   return pathname.includes(item.link);
@@ -30,7 +30,7 @@ const NavBar = ({
   const { pathname } = useLocation();
 
   const links = useMemo(() => {
-    return items.map((item) => (
+    return items.map(item => (
       <LinksGroup
         {...item}
         key={item.label}

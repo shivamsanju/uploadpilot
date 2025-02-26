@@ -1,15 +1,15 @@
-import React, { useState } from "react";
-import { Box, Divider, Stack } from "@mantine/core";
-import { DataTable, DataTableProps } from "mantine-datatable";
-import "mantine-datatable/styles.layer.css";
-import { useDebouncedState } from "@mantine/hooks";
-import { IconDatabaseOff } from "@tabler/icons-react";
+import { Box, Divider, Stack } from '@mantine/core';
+import { useDebouncedState } from '@mantine/hooks';
+import { IconDatabaseOff } from '@tabler/icons-react';
+import { DataTable, DataTableProps } from 'mantine-datatable';
+import 'mantine-datatable/styles.layer.css';
+import React, { useState } from 'react';
 
 export type TableProps = {
   menuBar?: React.ReactNode;
 } & DataTableProps;
 
-export const UploadPilotDataTable: React.FC<TableProps> = (props) => {
+export const UploadPilotDataTable: React.FC<TableProps> = props => {
   return (
     <Stack gap={2}>
       {props.menuBar && <Box>{props.menuBar}</Box>}
@@ -17,14 +17,14 @@ export const UploadPilotDataTable: React.FC<TableProps> = (props) => {
       <DataTable
         backgroundColor="transparent"
         selectionCheckboxProps={{
-          style: { "*": { cursor: "pointer" } },
+          style: { '*': { cursor: 'pointer' } },
         }}
         noRecordsIcon={
           (
             <IconDatabaseOff
               size={50}
               stroke={1}
-              style={{ marginBottom: "10px" }}
+              style={{ marginBottom: '10px' }}
             />
           ) as any
         }
@@ -36,8 +36,8 @@ export const UploadPilotDataTable: React.FC<TableProps> = (props) => {
 
 export const useUploadPilotDataTable = (searchDelay = 1000) => {
   const [searchFilter, onSearchFilterChange] = useDebouncedState<string>(
-    "",
-    searchDelay
+    '',
+    searchDelay,
   );
 
   const [page, onPageChange] = useState<number>(1);

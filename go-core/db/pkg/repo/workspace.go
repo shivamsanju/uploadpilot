@@ -86,3 +86,16 @@ func (r *WorkspaceRepo) GetSubscription(ctx context.Context, workspaceID string)
 
 	return trialEndsAt.After(time.Now()), trialEndsAt, nil
 }
+
+func (r *WorkspaceRepo) GetApiKeySalt(ctx context.Context, workspaceID string) (string, error) {
+	var apiKeySalt string
+	if err := r.db.Orm.WithContext(ctx).
+		Table("workspaces").
+		Where("id = ?", workspaceID).
+		Select("api_key_salt").
+		Scan(&apiKeySalt).Error; err != nil {
+		return "", dbutils.DBError(err)
+	}
+
+	return apiKeySalt, nil
+}

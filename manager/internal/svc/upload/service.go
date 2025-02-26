@@ -16,19 +16,12 @@ import (
 
 type Service struct {
 	upRepo       *repo.UploadRepo
-	wsRepo       *repo.WorkspaceRepo
-	wsConfigRepo *repo.WorkspaceConfigRepo
-	userRepo     *repo.UserRepo
 	processorSvc *processor.Service
 }
 
-func NewService(upRepo *repo.UploadRepo, wsRepo *repo.WorkspaceRepo, wsConfigRepo *repo.WorkspaceConfigRepo,
-	userRepo *repo.UserRepo, processorSvc *processor.Service) *Service {
+func NewService(upRepo *repo.UploadRepo, processorSvc *processor.Service) *Service {
 	return &Service{
 		upRepo:       upRepo,
-		wsRepo:       wsRepo,
-		wsConfigRepo: wsConfigRepo,
-		userRepo:     userRepo,
 		processorSvc: processorSvc,
 	}
 }
@@ -41,6 +34,7 @@ func (us *Service) GetUploadDetails(ctx context.Context, workspaceID, uploadID s
 	return us.upRepo.Get(ctx, uploadID)
 }
 
+// Upload Related Methods
 func (us *Service) CreateUpload(ctx context.Context, workspaceID string, upload *models.Upload) error {
 	upload.Status = models.UploadStatusInProgress
 	upload.WorkspaceID = workspaceID

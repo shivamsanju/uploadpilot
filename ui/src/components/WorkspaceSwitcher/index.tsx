@@ -1,7 +1,7 @@
-import { Stack, Title, Button } from "@mantine/core";
-import { IconSwitch3 } from "@tabler/icons-react";
-import { useNavigate, useParams } from "react-router-dom";
-import { useGetWorkspaces } from "../../apis/workspace";
+import { Button, Stack, Title } from '@mantine/core';
+import { IconSwitch3 } from '@tabler/icons-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useGetWorkspaces } from '../../apis/workspace';
 
 const WorkspaceSwitcher = () => {
   const navigate = useNavigate();

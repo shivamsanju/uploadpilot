@@ -1,13 +1,13 @@
-import { useLocation, Link } from "react-router-dom";
-import { Breadcrumbs, Anchor } from "@mantine/core";
+import { Anchor, Breadcrumbs } from '@mantine/core';
+import { Link, useLocation } from 'react-router-dom';
 
-function Breadcrumb() {
+const Breadcrumb = () => {
   const location = useLocation();
 
-  const pathParts = location.pathname.split("/").filter(Boolean);
+  const pathParts = location.pathname.split('/').filter(Boolean);
 
   const breadcrumbItems = pathParts.map((part, index) => {
-    const href = `/${pathParts.slice(0, index + 1).join("/")}`;
+    const href = `/${pathParts.slice(0, index + 1).join('/')}`;
 
     const title = part.charAt(0).toUpperCase() + part.slice(1);
 
@@ -26,6 +26,6 @@ function Breadcrumb() {
   ];
 
   return <Breadcrumbs>{items}</Breadcrumbs>;
-}
+};
 
 export default Breadcrumb;

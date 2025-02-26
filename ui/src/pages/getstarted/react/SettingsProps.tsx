@@ -1,6 +1,6 @@
-import { useMantineColorScheme } from "@mantine/core";
-import { useViewportSize } from "@mantine/hooks";
-import { useEffect, useState } from "react";
+import { useMantineColorScheme } from '@mantine/core';
+import { useViewportSize } from '@mantine/hooks';
+import { useEffect, useState } from 'react';
 
 const _useSettingsProps = () => {
   const { width: screenWidth } = useViewportSize();
@@ -8,9 +8,9 @@ const _useSettingsProps = () => {
   const { colorScheme } = useMantineColorScheme();
   const [height, setHeight] = useState<number>(screenWidth > 600 ? 400 : 400);
   const [width, setWidth] = useState<number>(
-    screenWidth > 600 ? 600 : screenWidth
+    screenWidth > 600 ? 600 : screenWidth,
   );
-  const [theme, setTheme] = useState<"auto" | "light" | "dark">(colorScheme);
+  const [theme, setTheme] = useState<'auto' | 'light' | 'dark'>(colorScheme);
   const [primaryColor, setPrimaryColor] = useState<string | undefined>();
   const [textColor, setTextColor] = useState<string | undefined>();
   const [hoverColor, setHoverColor] = useState<string | undefined>();
@@ -25,7 +25,7 @@ const _useSettingsProps = () => {
     useState<boolean>(false);
   const [hideProgressAfterFinish, setHideProgressAfterFinish] =
     useState<boolean>(false);
-  const [note, setNote] = useState<string>("");
+  const [note, setNote] = useState<string>('');
   const [singleFileFullScreen, setSingleFileFullScreen] =
     useState<boolean>(true);
   const [showSelectedFiles, setShowSelectedFiles] = useState<boolean>(true);

@@ -1,4 +1,4 @@
-import styles from "./stars.module.css";
+import styles from './stars.module.css';
 
 const Starfield = () => {
   return (

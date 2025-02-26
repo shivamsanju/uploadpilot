@@ -2,24 +2,24 @@ import {
   Group,
   MultiSelect,
   NumberInput,
+  Paper,
+  SimpleGrid,
   Stack,
-  Text,
   Switch,
   TagsInput,
-  SimpleGrid,
+  Text,
   Transition,
-  Paper,
-} from "@mantine/core";
-import { UploaderConfig } from "../../types/uploader";
-import { useForm } from "@mantine/form";
-import classes from "./Form.module.css";
-import { useParams } from "react-router-dom";
-import { useGetAllAllowedSources } from "../../apis/workspace";
-import { useUpdateUploaderConfigMutation } from "../../apis/uploader";
-import { showNotification } from "@mantine/notifications";
-import { DiscardButton } from "../../components/Buttons/DiscardButton";
-import { SaveButton } from "../../components/Buttons/SaveButton";
-import { ContainerOverlay } from "../../components/Overlay";
+} from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { showNotification } from '@mantine/notifications';
+import { useParams } from 'react-router-dom';
+import { useUpdateUploaderConfigMutation } from '../../apis/uploader';
+import { useGetAllAllowedSources } from '../../apis/workspace';
+import { DiscardButton } from '../../components/Buttons/DiscardButton';
+import { SaveButton } from '../../components/Buttons/SaveButton';
+import { ContainerOverlay } from '../../components/Overlay';
+import { UploaderConfig } from '../../types/uploader';
+import classes from './Form.module.css';
 
 type NewUploaderConfigProps = {
   config: UploaderConfig;
@@ -28,7 +28,7 @@ type NewUploaderConfigProps = {
 const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
   const { workspaceId } = useParams();
   const { isPending, allowedSources } = useGetAllAllowedSources(
-    workspaceId || ""
+    workspaceId || '',
   );
   const { mutateAsync, isPending: isPendingMutation } =
     useUpdateUploaderConfigMutation();
@@ -42,17 +42,17 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
       allowedOrigins: config?.allowedOrigins || [],
     },
     validate: {
-      allowedSources: (value) =>
-        value.length === 0 ? "Please select at least one source" : null,
+      allowedSources: value =>
+        value.length === 0 ? 'Please select at least one source' : null,
     },
   });
 
   const handleEditAndSaveButton = async () => {
     if (!workspaceId) {
       showNotification({
-        color: "red",
-        title: "Error",
-        message: "Workspace ID is not available",
+        color: 'red',
+        title: 'Error',
+        message: 'Workspace ID is not available',
       });
       return;
     }
@@ -66,7 +66,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
           minNumberOfFiles: form.values.minNumberOfFiles || 0,
           maxNumberOfFiles: form.values.maxNumberOfFiles || 0,
         },
-      }).catch((error) => {
+      }).catch(error => {
         console.log(error);
       });
     }
@@ -93,7 +93,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
               description="Allowed input sources for your uploader"
               placeholder="Select allowed input sources"
               data={allowedSources || []}
-              {...form.getInputProps("allowedSources")}
+              {...form.getInputProps('allowedSources')}
               disabled={isPending}
               searchable
             />
@@ -110,7 +110,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
               label="Max file size"
               description="Enter maximum file size in bytes"
               placeholder="Enter maximum file size in bytes"
-              {...form.getInputProps("maxFileSize")}
+              {...form.getInputProps('maxFileSize')}
               min={0}
             />
 
@@ -127,7 +127,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
               label="Max number of files"
               description="Specify the maximum number of files allowed"
               placeholder="Specify the maximum number of files allowed"
-              {...form.getInputProps("maxNumberOfFiles")}
+              {...form.getInputProps('maxNumberOfFiles')}
               min={1}
             />
           </Stack>
@@ -137,7 +137,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
               label="Allowed mime types"
               description="Allowed mime types for your uploader"
               placeholder="Comma separated mime types"
-              {...form.getInputProps("allowedFileTypes")}
+              {...form.getInputProps('allowedFileTypes')}
               min={0}
             />
 
@@ -146,14 +146,14 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
               label="Allowed origins"
               description="Allowed origins for your uploader"
               placeholder="Comma separated origins"
-              {...form.getInputProps("allowedOrigins")}
+              {...form.getInputProps('allowedOrigins')}
               min={0}
             />
             <TagsInput
               label="Required metadata fields"
               placeholder="Comma separated fields"
               description="Required metadata fields for your uploader"
-              {...form.getInputProps("requiredMetadataFields")}
+              {...form.getInputProps('requiredMetadataFields')}
               min={0}
             />
           </Stack>
@@ -175,8 +175,8 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
                 onLabel="ON"
                 offLabel="OFF"
                 checked={form.values.allowPauseAndResume}
-                onChange={(e) =>
-                  form.setFieldValue("allowPauseAndResume", e.target.checked)
+                onChange={e =>
+                  form.setFieldValue('allowPauseAndResume', e.target.checked)
                 }
               />
             </Group>
@@ -193,8 +193,8 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
                 onLabel="ON"
                 offLabel="OFF"
                 checked={form.values.enableImageEditing}
-                onChange={(e) =>
-                  form.setFieldValue("enableImageEditing", e.target.checked)
+                onChange={e =>
+                  form.setFieldValue('enableImageEditing', e.target.checked)
                 }
               />
             </Group>
@@ -212,8 +212,8 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
                 onLabel="ON"
                 offLabel="OFF"
                 checked={form.values.useCompression}
-                onChange={(e) =>
-                  form.setFieldValue("useCompression", e.target.checked)
+                onChange={e =>
+                  form.setFieldValue('useCompression', e.target.checked)
                 }
               />
             </Group>
@@ -230,8 +230,8 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
                 onLabel="ON"
                 offLabel="OFF"
                 checked={form.values.useFaultTolerantMode}
-                onChange={(e) =>
-                  form.setFieldValue("useFaultTolerantMode", e.target.checked)
+                onChange={e =>
+                  form.setFieldValue('useFaultTolerantMode', e.target.checked)
                 }
               />
             </Group>
@@ -244,7 +244,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
         duration={400}
         timingFunction="ease"
       >
-        {(styles) => (
+        {styles => (
           <div style={styles}>
             <Group justify="center" gap="md" mt="xl">
               <DiscardButton type="reset" />

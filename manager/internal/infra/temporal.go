@@ -3,6 +3,7 @@ package infra
 import (
 	"context"
 	"crypto/tls"
+	"time"
 
 	"github.com/phuslu/log"
 
@@ -24,7 +25,8 @@ func NewTemporalClient(opts *TemporalOptions) (client.Client, error) {
 		Namespace: opts.Namespace,
 		HostPort:  opts.HostPort,
 		ConnectionOptions: client.ConnectionOptions{
-			TLS: &tls.Config{},
+			GetSystemInfoTimeout: time.Second * 60,
+			TLS:                  &tls.Config{},
 			DialOptions: []grpc.DialOption{
 				grpc.WithUnaryInterceptor(
 					func(ctx context.Context, method string, req any, reply any, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, grpcOpts ...grpc.CallOption) error {

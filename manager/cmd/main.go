@@ -14,13 +14,14 @@ import (
 	"github.com/phuslu/log"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/uploadpilot/go-core/common/vault"
 	"github.com/uploadpilot/go-core/db/pkg/driver"
 	cacheplugins "github.com/uploadpilot/go-core/db/pkg/plugins/cache"
 	"github.com/uploadpilot/go-core/db/pkg/repo"
-	"github.com/uploadpilot/manager/internal/auth"
 	"github.com/uploadpilot/manager/internal/config"
 	"github.com/uploadpilot/manager/internal/infra"
 	"github.com/uploadpilot/manager/internal/svc"
+	"github.com/uploadpilot/manager/internal/svc/auth"
 	"github.com/uploadpilot/manager/web"
 )
 
@@ -104,7 +105,7 @@ func initialize() (*http.Server, error) {
 	}
 
 	// Initialize authentication
-	if err := auth.InitSessionStore(); err != nil {
+	if err := auth.InitJWTSessionStore(config.JWTSecretKey); err != nil {
 		return nil, fmt.Errorf("auth initialization failed: %w", err)
 	}
 
@@ -123,9 +124,14 @@ func initialize() (*http.Server, error) {
 	rcp := cacheplugins.NewRedisCachesPlugin(infra.RedisClient)
 	pgDriver.Orm.Use(rcp)
 
+	// Initialize KMS
+	kms, err := vault.NewKMS(config.ApiKeyEncryptionKey)
+	if err != nil {
+		return nil, fmt.Errorf("kms initialization failed: %w", err)
+	}
 	// Initialize the web server.
 	repos := repo.NewRepositories(pgDriver)
-	svcs := svc.NewServices(repos)
+	svcs := svc.NewServices(repos, kms)
 	srv, err := web.InitWebServer(svcs)
 	if err != nil {
 		return nil, fmt.Errorf("web server initialization failed: %w", err)

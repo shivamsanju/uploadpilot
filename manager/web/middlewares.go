@@ -2,20 +2,44 @@ package web
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"net/http"
-	"strings"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/phuslu/log"
-	"github.com/uploadpilot/manager/internal/auth"
+	"github.com/uploadpilot/go-core/db/pkg/models"
 	"github.com/uploadpilot/manager/internal/config"
 	"github.com/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/manager/internal/svc/auth"
 	"github.com/uploadpilot/manager/internal/utils"
 )
 
-func CorsMiddleware(next http.Handler) http.Handler {
+type WorkspacePerm string
+
+const (
+	CanRead   WorkspacePerm = "read_ws"
+	CanManage WorkspacePerm = "manage_ws"
+	CanUpload WorkspacePerm = "upload_ws"
+)
+
+type AccountPerm string
+
+const (
+	CanReadAcc   AccountPerm = "read_acc"
+	CanManageAcc AccountPerm = "manage_acc"
+)
+
+type Middlewares struct {
+	authSvc *auth.Service
+}
+
+func NewAppMiddlewares(authSvc *auth.Service) *Middlewares {
+	return &Middlewares{authSvc: authSvc}
+}
+
+func (m *Middlewares) CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(response http.ResponseWriter, r *http.Request) {
 		response.Header().Set("Access-Control-Allow-Origin", config.AllowedOrigins)
 		response.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -29,7 +53,7 @@ func CorsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func LoggerMiddleware(next http.Handler) http.Handler {
+func (m *Middlewares) LoggerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 		t1 := time.Now()
@@ -58,44 +82,144 @@ func LoggerMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func AuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// verify api key
-		apiKey := r.Header.Get("X-Api-Key")
-		if apiKey == config.APIKey {
-			ctx := context.WithValue(r.Context(), dto.UserIDContextKey, "api-key")
-			ctx = context.WithValue(ctx, dto.EmailContextKey, "api-key")
-			ctx = context.WithValue(ctx, dto.NameContextKey, "api-key")
-			next.ServeHTTP(w, r.WithContext(ctx))
-			return
-		}
+func (m *Middlewares) AccountAuthMiddleware(perms ...AccountPerm) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var claims *dto.UserClaims
+			akc, err := m.verifyAPIKey(r)
+			if err == nil && m.checkAccountAccess(akc, perms...) {
+				claims = akc.UserClaims
+			} else {
+				jwtc, err := m.verifyJWTToken(r)
+				if err != nil {
+					utils.HandleHttpError(w, r, http.StatusUnauthorized, err)
+					return
+				}
+				claims = jwtc.UserClaims
+			}
 
-		// verify jwt
-		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			utils.HandleHttpError(w, r, http.StatusUnauthorized, fmt.Errorf("Unauthorized"))
-			return
-		}
-		parts := strings.Split(authHeader, " ")
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			utils.HandleHttpError(w, r, http.StatusUnauthorized, fmt.Errorf("Unauthorized"))
-			return
-		}
-		token := parts[1]
-		if len(token) == 0 {
-			utils.HandleHttpError(w, r, http.StatusUnauthorized, fmt.Errorf("Unauthorized"))
-			return
-		}
-		claims, err := auth.ValidateToken(token)
+			next.ServeHTTP(w, r.WithContext(m.prepareContext(r, claims)))
+		})
+	}
+}
+
+func (m *Middlewares) WorkspaceAuthMiddleware(perms ...WorkspacePerm) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			workspaceID := chi.URLParam(r, "workspaceId")
+			if workspaceID == "" {
+				utils.HandleHttpError(w, r, http.StatusBadRequest, errors.New("workspaceId is required"))
+				return
+			}
+
+			claims, err := m.authenticateWorkspacePerm(r, workspaceID, perms...)
+			if err != nil {
+				utils.HandleHttpError(w, r, http.StatusUnauthorized, err)
+				return
+			}
+
+			next.ServeHTTP(w, r.WithContext(m.prepareContext(r, claims)))
+		})
+	}
+}
+
+func (m *Middlewares) JWTOnlyAuthMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, err := m.verifyJWTToken(r)
 		if err != nil {
 			utils.HandleHttpError(w, r, http.StatusUnauthorized, err)
 			return
 		}
-
-		ctx := context.WithValue(r.Context(), dto.UserIDContextKey, claims.UserID)
-		ctx = context.WithValue(ctx, dto.EmailContextKey, claims.Email)
-		ctx = context.WithValue(ctx, dto.NameContextKey, claims.Name)
-
-		next.ServeHTTP(w, r.WithContext(ctx))
+		next.ServeHTTP(w, r)
 	})
+}
+
+func (m *Middlewares) RecoveryMiddleware(next http.Handler) http.Handler {
+	return middleware.Recoverer(next)
+}
+
+func (m *Middlewares) RequestIDMiddleware(next http.Handler) http.Handler {
+	return middleware.RequestID(next)
+}
+
+func (m *Middlewares) RequestTimeoutMiddleware(timeout time.Duration) func(http.Handler) http.Handler {
+	return middleware.Timeout(timeout)
+}
+
+func (m *Middlewares) verifyAPIKey(r *http.Request) (*dto.APIKeyClaims, error) {
+	apiKey := r.Header.Get("X-Api-Key")
+	claims, err := m.authSvc.ValidateAPIKey(r.Context(), apiKey)
+	if err != nil {
+		return nil, err
+	}
+	return claims, nil
+}
+
+func (m *Middlewares) verifyJWTToken(r *http.Request) (*dto.JWTClaims, error) {
+	jwtToken := r.Header.Get("Authorization")
+	claims, err := m.authSvc.ValidateJWTToken(jwtToken)
+	if err != nil {
+		return nil, err
+	}
+	return claims, nil
+}
+
+func (m *Middlewares) authenticateWorkspacePerm(r *http.Request, workspaceID string, perms ...WorkspacePerm) (*dto.UserClaims, error) {
+	akc, err := m.verifyAPIKey(r)
+	if err == nil {
+		for _, perm := range akc.Permissions {
+			if perm.WorkspaceID == workspaceID && m.checkWorkspaceAccess(&perm, perms...) {
+				return akc.UserClaims, nil
+			}
+		}
+	}
+
+	jwtc, err := m.verifyJWTToken(r)
+	if err != nil {
+		return nil, err
+	}
+	return jwtc.UserClaims, nil
+}
+
+func (m *Middlewares) prepareContext(r *http.Request, claims *dto.UserClaims) context.Context {
+	ctx := context.WithValue(r.Context(), dto.UserIDContextKey, claims.UserID)
+	ctx = context.WithValue(ctx, dto.EmailContextKey, claims.Email)
+	ctx = context.WithValue(ctx, dto.NameContextKey, claims.Name)
+	return ctx
+}
+
+func (m *Middlewares) checkAccountAccess(claims *dto.APIKeyClaims, access ...AccountPerm) bool {
+	for _, a := range access {
+		switch a {
+		case CanReadAcc:
+			if claims.CanReadAcc {
+				return true
+			}
+		case CanManageAcc:
+			if claims.CanManageAcc {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func (m *Middlewares) checkWorkspaceAccess(perm *models.APIKeyPerm, access ...WorkspacePerm) bool {
+	for _, a := range access {
+		switch a {
+		case CanRead:
+			if perm.CanRead {
+				return true
+			}
+		case CanManage:
+			if perm.CanManage {
+				return true
+			}
+		case CanUpload:
+			if perm.CanUpload {
+				return true
+			}
+		}
+	}
+	return false
 }

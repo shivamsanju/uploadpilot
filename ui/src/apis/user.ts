@@ -1,6 +1,6 @@
-import { useNavigate } from "react-router-dom";
-import axiosInstance from "../utils/axios";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
+import axiosInstance from '../utils/axios';
 
 export const useGetSession = () => {
   const navigate = useNavigate();
@@ -10,22 +10,21 @@ export const useGetSession = () => {
     error,
     data: session,
   } = useQuery({
-    queryKey: ["session"],
-    refetchInterval: 60000,
-    staleTime: 60000,
+    queryKey: ['session'],
+    refetchInterval: 1200000,
     queryFn: () => {
       return axiosInstance
         .get(`/session`)
-        .then((res) => {
+        .then(res => {
           if (res.status !== 200) {
-            localStorage.removeItem("uploadpilottoken");
-            navigate("/auth");
+            localStorage.removeItem('uploadpilottoken');
+            navigate('/auth');
           }
           return res.data;
         })
         .catch(() => {
-          localStorage.removeItem("uploadpilottoken");
-          navigate("/auth");
+          localStorage.removeItem('uploadpilottoken');
+          navigate('/auth');
         });
     },
   });

@@ -1,4 +1,14 @@
 import {
+  Box,
+  Button,
+  Group,
+  Paper,
+  SimpleGrid,
+  Stack,
+  Text,
+  useMantineTheme,
+} from '@mantine/core';
+import {
   IconAi,
   IconBadge,
   IconBrandGit,
@@ -21,148 +31,138 @@ import {
   IconTextRecognition,
   IconTool,
   IconTransformPoint,
-} from "@tabler/icons-react";
-import {
-  Box,
-  Button,
-  Group,
-  Paper,
-  SimpleGrid,
-  Stack,
-  Text,
-  useMantineTheme,
-} from "@mantine/core";
-import classes from "./Utils.module.css";
+} from '@tabler/icons-react';
+import classes from './Utils.module.css';
 
 const mockdata = [
   {
-    title: "Virus scanning",
-    description: "Automatically scan uploaded files for viruses and malware.",
+    title: 'Virus scanning',
+    description: 'Automatically scan uploaded files for viruses and malware.',
     icon: IconShieldCheck,
   },
   {
-    title: "Metadata storage",
+    title: 'Metadata storage',
     description:
-      "Store upload metadata such as file size, type, and creation date on elasticsearch.",
+      'Store upload metadata such as file size, type, and creation date on elasticsearch.',
     icon: IconFileInfo,
   },
   {
-    title: "Convert file format",
+    title: 'Convert file format',
     description:
-      "Convert uploaded files into different formats like PDF, JPG, or DOCX.",
+      'Convert uploaded files into different formats like PDF, JPG, or DOCX.',
     icon: IconTransformPoint,
   },
   {
-    title: "Copy to cloud storage",
+    title: 'Copy to cloud storage',
     description:
-      "Copy the imports to a cloud storage service like S3, GCS or Azure",
+      'Copy the imports to a cloud storage service like S3, GCS or Azure',
     icon: IconCloud,
   },
   {
-    title: "Reduce file size",
-    description: "Compress files before they are uploaded to your workspace",
+    title: 'Reduce file size',
+    description: 'Compress files before they are uploaded to your workspace',
     icon: IconSortDescendingSmallBig,
   },
   {
-    title: "OCR processing",
+    title: 'OCR processing',
     description:
-      "Extract text from images or scanned documents using Optical Character Recognition.",
+      'Extract text from images or scanned documents using Optical Character Recognition.',
     icon: IconTextRecognition,
   },
   {
-    title: "Content tagging",
+    title: 'Content tagging',
     description:
-      "Automatically tag files based on their content for easy categorization.",
+      'Automatically tag files based on their content for easy categorization.',
     icon: IconTag,
   },
   {
-    title: "AI-based classification",
+    title: 'AI-based classification',
     description:
-      "Classify files into predefined categories using AI and machine learning.",
+      'Classify files into predefined categories using AI and machine learning.',
     icon: IconAi,
   },
   {
-    title: "Duplicate detection",
-    description: "Identify and flag duplicate files in the system.",
+    title: 'Duplicate detection',
+    description: 'Identify and flag duplicate files in the system.',
     icon: IconDualScreen,
   },
   {
-    title: "Encryption",
-    description: "Encrypt files to secure sensitive information.",
+    title: 'Encryption',
+    description: 'Encrypt files to secure sensitive information.',
     icon: IconLock,
   },
   {
-    title: "File preview generation",
-    description: "Generate previews for images, videos, and documents.",
+    title: 'File preview generation',
+    description: 'Generate previews for images, videos, and documents.',
     icon: IconImageInPicture,
   },
   {
-    title: "Transcoding",
+    title: 'Transcoding',
     description:
-      "Transcode videos or audio files into different resolutions or bitrates.",
+      'Transcode videos or audio files into different resolutions or bitrates.',
     icon: IconTool,
   },
   {
-    title: "Automatic backup",
-    description: "Backup uploaded files to a secure storage location.",
+    title: 'Automatic backup',
+    description: 'Backup uploaded files to a secure storage location.',
     icon: IconDeviceFloppy,
   },
   {
-    title: "Email notifications",
+    title: 'Email notifications',
     description:
-      "Send notifications upon successful processing of uploaded files.",
+      'Send notifications upon successful processing of uploaded files.',
     icon: IconMail,
   },
   {
-    title: "Version control",
-    description: "Maintain a history of changes and updates to files.",
+    title: 'Version control',
+    description: 'Maintain a history of changes and updates to files.',
     icon: IconBrandGit,
   },
   {
-    title: "File expiration",
+    title: 'File expiration',
     description:
-      "Set expiration dates for files to automatically delete old data.",
+      'Set expiration dates for files to automatically delete old data.',
     icon: IconStopwatch,
   },
   {
-    title: "Watermarking",
+    title: 'Watermarking',
     description:
-      "Add watermarks to images or documents for branding or copyright protection.",
+      'Add watermarks to images or documents for branding or copyright protection.',
     icon: IconTagsOff,
   },
   {
-    title: "Audit logging",
+    title: 'Audit logging',
     description:
-      "Log all actions taken on files for compliance and monitoring.",
+      'Log all actions taken on files for compliance and monitoring.',
     icon: IconBadge,
   },
   {
-    title: "Access control",
+    title: 'Access control',
     description:
-      "Define permissions to control who can view or edit uploaded files.",
+      'Define permissions to control who can view or edit uploaded files.',
     icon: IconLockAccessOff,
   },
   {
-    title: "Integration with third-party apps",
+    title: 'Integration with third-party apps',
     description:
-      "Sync files with third-party services like Dropbox, Google Drive, or Slack.",
+      'Sync files with third-party services like Dropbox, Google Drive, or Slack.',
     icon: IconJoinRound,
   },
   {
-    title: "Searchable file repository",
-    description: "Index files to enable fast and efficient searching.",
+    title: 'Searchable file repository',
+    description: 'Index files to enable fast and efficient searching.',
     icon: IconSearch,
   },
   {
-    title: "Thumbnail generation",
-    description: "Generate thumbnails for uploaded images and videos.",
+    title: 'Thumbnail generation',
+    description: 'Generate thumbnails for uploaded images and videos.',
     icon: IconImageInPicture,
   },
 ];
 
 export const ToolsGrid = () => {
   const theme = useMantineTheme();
-  const features = mockdata.map((feature) => (
+  const features = mockdata.map(feature => (
     <Paper key={feature.title} p="sm" withBorder>
       <Stack justify="space-between" h="100%">
         <Box p="sm">

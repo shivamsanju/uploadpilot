@@ -1,24 +1,26 @@
 package handlers
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
 	"github.com/uploadpilot/go-core/db/pkg/models"
 	"github.com/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/manager/internal/svc/auth"
 	"github.com/uploadpilot/manager/internal/svc/workspace"
 	"github.com/uploadpilot/manager/internal/utils"
 )
 
 type workspaceHandler struct {
 	workspaceSvc *workspace.Service
+	authSvc      *auth.Service
 }
 
-func NewWorkspaceHandler(workspaceSvc *workspace.Service) *workspaceHandler {
+func NewWorkspaceHandler(workspaceSvc *workspace.Service, authSvc *auth.Service) *workspaceHandler {
 	return &workspaceHandler{
 		workspaceSvc: workspaceSvc,
+		authSvc:      authSvc,
 	}
 }
 
@@ -37,7 +39,7 @@ func (h *workspaceHandler) CreateWorkspace(w http.ResponseWriter, r *http.Reques
 	render.JSON(w, r, workspace.ID)
 }
 
-func (h *workspaceHandler) GetWorkspacesForUser(w http.ResponseWriter, r *http.Request) {
+func (h *workspaceHandler) GetAllWorkspaces(w http.ResponseWriter, r *http.Request) {
 	user, err := utils.GetUserDetailsFromContext(r.Context())
 
 	if err != nil {
@@ -82,7 +84,7 @@ func (h *workspaceHandler) RemoveUserFromWorkspace(w http.ResponseWriter, r *htt
 	render.JSON(w, r, true)
 }
 
-func (h *workspaceHandler) ChangeUserRoleInWorkspace(w http.ResponseWriter, r *http.Request) {
+func (h *workspaceHandler) EditUser(w http.ResponseWriter, r *http.Request) {
 	workspaceID := chi.URLParam(r, "workspaceId")
 	userID := chi.URLParam(r, "userId")
 
@@ -139,9 +141,9 @@ func (h *workspaceHandler) UpdateUploaderConfig(w http.ResponseWriter, r *http.R
 }
 
 func (h *workspaceHandler) GetSubscription(
-	ctx context.Context, params dto.WorkspaceParams, query interface{}, body interface{},
+	r *http.Request, params dto.WorkspaceParams, query interface{}, body interface{},
 ) (*dto.Subscription, int, error) {
-	sub, err := h.workspaceSvc.GetSubscription(ctx, params.WorkspaceID)
+	sub, err := h.workspaceSvc.GetSubscription(r.Context(), params.WorkspaceID)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
@@ -149,13 +151,13 @@ func (h *workspaceHandler) GetSubscription(
 }
 
 func (h *workspaceHandler) GetAllAllowedSources(
-	ctx context.Context, params dto.WorkspaceParams, query interface{}, body interface{},
+	r *http.Request, params dto.WorkspaceParams, query interface{}, body interface{},
 ) ([]models.AllowedSources, int, error) {
 	return models.AllAllowedSources, http.StatusOK, nil
 }
 
 func (h *workspaceHandler) LogUpload(
-	ctx context.Context, params dto.WorkspaceParams, query interface{}, body interface{},
+	r *http.Request, params dto.WorkspaceParams, query interface{}, body interface{},
 ) (string, int, error) {
 	return "", http.StatusOK, nil
 }

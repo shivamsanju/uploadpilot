@@ -1,16 +1,15 @@
 import {
   ActionIcon,
-  Anchor,
   Box,
   Breadcrumbs,
   Group,
   Text,
   Title,
-} from "@mantine/core";
-import WorkflowRunsList from "./List";
-import { useNavigate, useParams } from "react-router-dom";
-import { AppLoader } from "../../components/Loader/AppLoader";
-import { IconChevronLeft } from "@tabler/icons-react";
+} from '@mantine/core';
+import { IconChevronLeft } from '@tabler/icons-react';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
+import { AppLoader } from '../../components/Loader/AppLoader';
+import WorkflowRunsList from './List';
 
 const WorkflowRunsPage = () => {
   const { workspaceId, processorId } = useParams();
@@ -23,10 +22,15 @@ const WorkflowRunsPage = () => {
   return (
     <Box>
       <Breadcrumbs separator=">">
-        <Anchor href={`/`}>Workspaces</Anchor>
-        <Anchor href={`/workspace/${workspaceId}/processors`}>
-          Processors
-        </Anchor>
+        <NavLink to="/" className="bredcrumb-link">
+          <Text>Workspaces</Text>
+        </NavLink>
+        <NavLink
+          to={`/workspace/${workspaceId}/processors`}
+          className="bredcrumb-link"
+        >
+          <Text>Processors</Text>
+        </NavLink>
         <Text>{processorId}</Text>
       </Breadcrumbs>
       <Group mt="xs" mb="xl">

@@ -21,7 +21,8 @@ type User struct {
 	BanReason     *string   `gorm:"column:ban_reason;size:255" json:"banReason"`
 	TrialStartsAt time.Time `gorm:"column:trial_starts_at;not null" json:"trialStartsAt"`
 	TrialEndsAt   time.Time `gorm:"column:trial_ends_at;not null" json:"trialEndsAt"`
-	At
+	CreatedAtColumn
+	UpdatedAtColumn
 }
 
 func (User) TableName() string {

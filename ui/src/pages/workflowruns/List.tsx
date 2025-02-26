@@ -1,4 +1,3 @@
-import { IconDots, IconLogs, IconBolt, IconSearch } from "@tabler/icons-react";
 import {
   ActionIcon,
   Badge,
@@ -11,37 +10,38 @@ import {
   Text,
   TextInput,
   Title,
-} from "@mantine/core";
-import { useParams } from "react-router-dom";
-import { useCallback, useMemo, useState } from "react";
-import { DataTableColumn } from "mantine-datatable";
-import { UploadPilotDataTable } from "../../components/Table/Table";
-import { ErrorCard } from "../../components/ErrorCard/ErrorCard";
-import { useGetProcessorRuns } from "../../apis/processors";
-import { useViewportSize } from "@mantine/hooks";
-import { ContainerOverlay } from "../../components/Overlay";
-import { LogsModal } from "./Logs";
-import { RefreshButton } from "../../components/Buttons/RefreshButton/RefreshButton";
-import { statusConfig } from "./status";
-import { formatMilliseconds } from "../../utils/datetime";
-import { useTriggerProcessUpload } from "../../apis/upload";
-import { showConfirmationPopup } from "../../components/Popups/ConfirmPopup";
+} from '@mantine/core';
+import { useViewportSize } from '@mantine/hooks';
+import { IconBolt, IconDots, IconLogs, IconSearch } from '@tabler/icons-react';
+import { DataTableColumn } from 'mantine-datatable';
+import { useCallback, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useGetProcessorRuns } from '../../apis/processors';
+import { useTriggerProcessUpload } from '../../apis/upload';
+import { RefreshButton } from '../../components/Buttons/RefreshButton/RefreshButton';
+import { ErrorCard } from '../../components/ErrorCard/ErrorCard';
+import { ContainerOverlay } from '../../components/Overlay';
+import { showConfirmationPopup } from '../../components/Popups/ConfirmPopup';
+import { UploadPilotDataTable } from '../../components/Table/Table';
+import { formatMilliseconds } from '../../utils/datetime';
+import { LogsModal } from './Logs';
+import { statusConfig } from './status';
 
 const ProcessorRunsList = () => {
-  const [workflowId, setWorkflowId] = useState<string>("");
-  const [runId, setRunId] = useState<string>("");
+  const [workflowId, setWorkflowId] = useState<string>('');
+  const [runId, setRunId] = useState<string>('');
   const [opened, setOpened] = useState(false);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
 
   const { width } = useViewportSize();
   const { workspaceId, processorId } = useParams();
   const { isPending, error, runs, invalidate } = useGetProcessorRuns(
-    workspaceId || "",
-    processorId || ""
+    workspaceId || '',
+    processorId || '',
   );
 
   const { mutateAsync: triggerProcessUpload, isPending: isTriggeringProcess } =
-    useTriggerProcessUpload(workspaceId || "");
+    useTriggerProcessUpload(workspaceId || '');
 
   const processUpload = useCallback(
     async (uploadId: string) => {
@@ -51,30 +51,30 @@ const ProcessorRunsList = () => {
           invalidate();
         }, 2000);
       } catch (error) {
-        console.error("Error processing upload:", error);
+        console.error('Error processing upload:', error);
       }
     },
-    [triggerProcessUpload, invalidate]
+    [triggerProcessUpload, invalidate],
   );
 
   const handleBulkProcess = async () => {
     showConfirmationPopup({
-      message: "Are you sure you want to start processing for these uploads?",
+      message: 'Are you sure you want to start processing for these uploads?',
       onOk: async () => {
         try {
           await Promise.all(
-            selectedRecords.map((record) =>
+            selectedRecords.map(record =>
               triggerProcessUpload({
                 uploadId: record?.uploadId,
-              })
-            )
+              }),
+            ),
           );
           setSelectedRecords([]);
           setTimeout(() => {
             invalidate();
           }, 2000);
         } catch (error) {
-          console.error("Error processing upload:", error);
+          console.error('Error processing upload:', error);
         }
       },
     });
@@ -87,16 +87,16 @@ const ProcessorRunsList = () => {
   }, []);
 
   const closeLogs = useCallback(() => {
-    setRunId("");
-    setWorkflowId("");
+    setRunId('');
+    setWorkflowId('');
     setOpened(false);
   }, []);
 
   const columns: DataTableColumn[] = useMemo(
     () => [
       {
-        accessor: "id",
-        title: "",
+        accessor: 'id',
+        title: '',
         width: 20,
         render: (item: any) => (
           <Stack justify="center">
@@ -105,20 +105,12 @@ const ProcessorRunsList = () => {
         ),
       },
       {
-        accessor: "runId",
-        title: "Run ID",
-      },
-      {
-        accessor: "uploadId",
-        title: "Upload ID",
-      },
-      {
-        accessor: "status",
-        title: "Status",
+        accessor: 'status',
+        title: 'Status',
         render: (item: any) => (
           <Badge
             variant="outline"
-            color={statusConfig[item?.status?.toLowerCase() || ""]}
+            color={statusConfig[item?.status?.toLowerCase() || '']}
             size="sm"
           >
             {item?.status}
@@ -126,21 +118,29 @@ const ProcessorRunsList = () => {
         ),
       },
       {
-        title: "Started At",
-        accessor: "startTime",
-        hidden: width < 768,
-        render: (item: any) =>
-          new Date(item?.startTime).toLocaleString("en-US"),
+        accessor: 'runId',
+        title: 'Run ID',
       },
       {
-        title: "Ended At",
-        accessor: "endTime",
+        accessor: 'uploadId',
+        title: 'Upload ID',
+      },
+      {
+        title: 'Started At',
+        accessor: 'startTime',
+        hidden: width < 768,
+        render: (item: any) =>
+          new Date(item?.startTime).toLocaleString('en-US'),
+      },
+      {
+        title: 'Ended At',
+        accessor: 'endTime',
         hidden: width < 768,
         render: (item: any) => {
-          if (item?.endTime !== "0001-01-01T00:00:00Z") {
-            return new Date(item?.endTime).toLocaleString("en-US");
+          if (item?.endTime !== '0001-01-01T00:00:00Z') {
+            return new Date(item?.endTime).toLocaleString('en-US');
           }
-          return "-";
+          return '-';
         },
       },
       // {
@@ -151,20 +151,20 @@ const ProcessorRunsList = () => {
       //     formatMilliseconds(item?.workflowTimeMillis || 0),
       // },
       {
-        title: "Execution Time",
-        accessor: "executionTimeMillis",
+        title: 'Execution Time',
+        accessor: 'executionTimeMillis',
         hidden: width < 768,
         render: (item: any) =>
           formatMilliseconds(item?.executionTimeMillis || 0),
       },
       {
-        accessor: "actions",
-        title: "Actions",
-        textAlign: "right",
+        accessor: 'actions',
+        title: 'Actions',
+        textAlign: 'right',
         render: (item: any) => (
           <Group gap={0} justify="flex-end">
             <Menu
-              transitionProps={{ transition: "pop" }}
+              transitionProps={{ transition: 'pop' }}
               withArrow
               position="bottom-end"
               withinPortal
@@ -193,7 +193,7 @@ const ProcessorRunsList = () => {
         ),
       },
     ],
-    [width, handleViewLogs, processUpload]
+    [width, handleViewLogs, processUpload],
   );
 
   if (error) {
@@ -226,7 +226,7 @@ const ProcessorRunsList = () => {
               <RefreshButton onClick={invalidate} />
             </Group>
             <TextInput
-              value={""}
+              value={''}
               placeholder="Search (Upload ID, Run ID)"
               rightSection={<IconSearch size={18} />}
               variant="subtle"
@@ -238,7 +238,7 @@ const ProcessorRunsList = () => {
       />
       <Modal
         padding="xl"
-        transitionProps={{ transition: "pop" }}
+        transitionProps={{ transition: 'pop' }}
         opened={opened}
         onClose={() => {
           setOpened(false);

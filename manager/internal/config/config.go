@@ -9,30 +9,32 @@ import (
 )
 
 var (
-	AppName            string
-	Environment        string
-	Port               int
-	PostgresURI        string
-	EncryptionKey      string
-	RedisAddr          string
-	RedisUsername      string
-	RedisPassword      string
-	RedisTLS           bool
-	DatabaseName       string
-	FrontendURI        string
-	AllowedOrigins     string
-	JWTSecretKey       string
-	GoogleClientID     string
-	GoogleClientSecret string
-	GoogleCallbackURL  string
-	GithubClientID     string
-	GithubClientSecret string
-	GithubCallbackURL  string
-	S3AccessKey        string
-	S3SecretKey        string
-	S3BucketName       string
-	S3Region           string
-	APIKey             string
+	AppName               string
+	Environment           string
+	Port                  int
+	PostgresURI           string
+	RedisAddr             string
+	RedisUsername         string
+	RedisPassword         string
+	RedisTLS              bool
+	DatabaseName          string
+	FrontendURI           string
+	AllowedOrigins        string
+	JWTSecretKey          string
+	GoogleClientID        string
+	GoogleClientSecret    string
+	GoogleCallbackURL     string
+	GithubClientID        string
+	GithubClientSecret    string
+	GithubCallbackURL     string
+	S3AccessKey           string
+	S3SecretKey           string
+	S3BucketName          string
+	S3Region              string
+	ApiKeyEncryptionKey   string
+	ApiKeyEncryptionSalt  string
+	SecretsEncryptionKey  string
+	SecretsEncryptionSalt string
 
 	// Temporal
 	TemporalNamespace string
@@ -65,7 +67,6 @@ func Init() error {
 	AppName = os.Getenv("APP_NAME")
 	Environment = os.Getenv("ENVIRONMENT")
 	PostgresURI = os.Getenv("POSTGRES_URI")
-	EncryptionKey = os.Getenv("ENCRYPTION_KEY")
 	RedisAddr = os.Getenv("REDIS_HOST")
 	RedisUsername = os.Getenv("REDIS_USER")
 	RedisPassword = os.Getenv("REDIS_PASS")
@@ -84,11 +85,15 @@ func Init() error {
 	S3BucketName = os.Getenv("S3_BUCKET_NAME")
 	S3Region = os.Getenv("S3_REGION")
 	AllowedOrigins = os.Getenv("ALLOWED_ORIGINS")
+	ApiKeyEncryptionKey = os.Getenv("API_KEY_ENCRYPTION_KEY")
+	ApiKeyEncryptionSalt = os.Getenv("API_KEY_ENCRYPTION_SALT")
+	SecretsEncryptionKey = os.Getenv("SECRETS_ENCRYPTION_KEY")
+	SecretsEncryptionSalt = os.Getenv("SECRETS_ENCRYPTION_SALT")
+
 	// Temporal
 	TemporalNamespace = os.Getenv("TEMPORAL_NAMESPACE")
 	TemporalHostPort = os.Getenv("TEMPORAL_HOST_PORT")
 	TemporalAPIKey = os.Getenv("TEMPORAL_API_KEY")
-	APIKey = os.Getenv("API_KEY")
 
 	return nil
 }

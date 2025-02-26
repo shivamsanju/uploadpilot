@@ -10,6 +10,8 @@ type Repositories struct {
 	UploadRepo          *UploadRepo
 	UploadLogsRepo      *UploadLogsRepo
 	ProcessorRepo       *ProcessorRepo
+	ApiKeyRepo          *ApiKeyRepo
+	SecretsRepo         *SecretRepo
 }
 
 func NewRepositories(driver *driver.Driver) *Repositories {
@@ -21,5 +23,7 @@ func NewRepositories(driver *driver.Driver) *Repositories {
 		UploadRepo:          NewUploadRepo(driver),
 		UploadLogsRepo:      NewUploadLogsRepo(driver),
 		ProcessorRepo:       NewProcessorRepo(driver),
+		ApiKeyRepo:          NewApiKeyRepo(driver),
+		SecretsRepo:         NewSecretRepo(driver),
 	}
 }

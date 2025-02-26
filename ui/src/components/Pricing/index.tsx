@@ -1,15 +1,15 @@
 import {
-  Container,
-  Text,
-  Card,
-  Group,
   Button,
+  Card,
+  Container,
+  Group,
   List,
-  ThemeIcon,
   SimpleGrid,
-} from "@mantine/core";
-import { IconCheck, IconX } from "@tabler/icons-react";
-import classes from "./Pricing.module.css";
+  Text,
+  ThemeIcon,
+} from '@mantine/core';
+import { IconCheck, IconX } from '@tabler/icons-react';
+import classes from './Pricing.module.css';
 
 interface PlanFeature {
   text: string;
@@ -30,7 +30,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 
   return (
     <Card
-      className={`${classes.card} ${highlighted ? classes.highlighted : ""}`}
+      className={`${classes.card} ${highlighted ? classes.highlighted : ''}`}
       padding="xl"
     >
       <div className={classes.planHeader}>
@@ -39,7 +39,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
         </Text>
         <Text
           fz="sm"
-          c={highlighted ? "white" : "dimmed"}
+          c={highlighted ? 'white' : 'dimmed'}
           className={classes.planDescription}
         >
           {description}
@@ -53,7 +53,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
         <Text fz="50" fw={700} span>
           {price}
         </Text>
-        <Text fz="sm" c={highlighted ? "white" : "dimmed"} span>
+        <Text fz="sm" c={highlighted ? 'white' : 'dimmed'} span>
           /month
         </Text>
       </Group>
@@ -73,7 +73,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
                 </ThemeIcon>
               )
             }
-            className={feature.included ? "" : classes.disabledFeature}
+            className={feature.included ? '' : classes.disabledFeature}
           >
             {feature.text}
           </List.Item>
@@ -83,7 +83,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       <Button
         fullWidth
         size="md"
-        variant={highlighted ? "white" : "light"}
+        variant={highlighted ? 'white' : 'light'}
         className={classes.button}
       >
         {buttonText}
@@ -95,46 +95,46 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
 export function PricingSection() {
   const plans: PricingPlan[] = [
     {
-      name: "Starter",
-      price: "0",
-      description: "Perfect for side projects and small teams",
-      buttonText: "Get Started",
+      name: 'Starter',
+      price: '0',
+      description: 'Perfect for side projects and small teams',
+      buttonText: 'Get Started',
       features: [
-        { text: "Up to 5 team members", included: true },
-        { text: "Basic analytics", included: true },
-        { text: "24/7 email support", included: true },
-        { text: "Community access", included: true },
-        { text: "Custom domains", included: false },
-        { text: "Advanced security", included: false },
+        { text: 'Up to 5 team members', included: true },
+        { text: 'Basic analytics', included: true },
+        { text: '24/7 email support', included: true },
+        { text: 'Community access', included: true },
+        { text: 'Custom domains', included: false },
+        { text: 'Advanced security', included: false },
       ],
     },
     {
-      name: "Professional",
-      price: "29",
-      description: "Ideal for growing businesses",
-      buttonText: "Start Free Trial",
+      name: 'Professional',
+      price: '29',
+      description: 'Ideal for growing businesses',
+      buttonText: 'Start Free Trial',
       highlighted: true,
       features: [
-        { text: "Up to 20 team members", included: true },
-        { text: "Advanced analytics", included: true },
-        { text: "Priority support", included: true },
-        { text: "Community access", included: true },
-        { text: "Custom domains", included: true },
-        { text: "Advanced security", included: true },
+        { text: 'Up to 20 team members', included: true },
+        { text: 'Advanced analytics', included: true },
+        { text: 'Priority support', included: true },
+        { text: 'Community access', included: true },
+        { text: 'Custom domains', included: true },
+        { text: 'Advanced security', included: true },
       ],
     },
     {
-      name: "Enterprise",
-      price: "99",
-      description: "For large-scale applications",
-      buttonText: "Contact Sales",
+      name: 'Enterprise',
+      price: '99',
+      description: 'For large-scale applications',
+      buttonText: 'Contact Sales',
       features: [
-        { text: "Unlimited team members", included: true },
-        { text: "Custom analytics", included: true },
-        { text: "24/7 phone support", included: true },
-        { text: "Community access", included: true },
-        { text: "Multiple domains", included: true },
-        { text: "Enterprise security", included: true },
+        { text: 'Unlimited team members', included: true },
+        { text: 'Custom analytics', included: true },
+        { text: '24/7 phone support', included: true },
+        { text: 'Community access', included: true },
+        { text: 'Multiple domains', included: true },
+        { text: 'Enterprise security', included: true },
       ],
     },
   ];
@@ -149,7 +149,7 @@ export function PricingSection() {
       </Text>
 
       <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="xl">
-        {plans.map((plan) => (
+        {plans.map(plan => (
           <PricingCard key={plan.name} plan={plan} />
         ))}
       </SimpleGrid>

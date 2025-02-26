@@ -4,18 +4,18 @@ import {
   ScrollArea,
   useMantineColorScheme,
   useMantineTheme,
-} from "@mantine/core";
-import { AdminHeader } from "../Header/Header";
-import AuthWrapper from "../AuthWrapper/AuthWrapper";
-import { useMemo, useState } from "react";
+} from '@mantine/core';
 import {
-  IconBolt,
   IconActivity,
+  IconBolt,
   IconMenu2,
   IconSettings,
-} from "@tabler/icons-react";
-import NavBar from "../Navigation/Navbar";
-import { useParams } from "react-router-dom";
+} from '@tabler/icons-react';
+import { useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import AuthWrapper from '../AuthWrapper/AuthWrapper';
+import { AdminHeader } from '../Header/Header';
+import NavBar from '../Navigation/Navbar';
 
 const ProcessorLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -25,41 +25,41 @@ const ProcessorLayout: React.FC<{ children: React.ReactNode }> = ({
   const { colorScheme } = useMantineColorScheme();
   const theme = useMantineTheme();
 
-  const bg = colorScheme === "dark" ? "#141414" : theme.colors.gray[0];
+  const bg = colorScheme === 'dark' ? '#141414' : theme.colors.gray[0];
 
   const appShellBorderColor =
-    colorScheme === "dark" ? theme.colors.dark[6] : theme.colors.gray[1];
+    colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[1];
 
-  const headerNavBg = colorScheme === "dark" ? "#161616" : "#fff";
+  const headerNavBg = colorScheme === 'dark' ? '#161616' : '#fff';
 
   const navItems = useMemo(
     () => [
       {
-        label: "Workflow",
+        label: 'Workflow',
         icon: IconActivity,
         link: `/workspace/${workspaceId}/processors/${processorId}/workflow`,
       },
       {
-        label: "Runs",
+        label: 'Runs',
         icon: IconBolt,
         link: `/workspace/${workspaceId}/processors/${processorId}/runs`,
       },
       {
-        label: "Settings",
+        label: 'Settings',
         icon: IconSettings,
         link: `/workspace/${workspaceId}/processors/${processorId}/settings`,
       },
     ],
-    [workspaceId, processorId]
+    [workspaceId, processorId],
   );
 
   return (
     <AuthWrapper>
       <AppShell
-        header={{ height: "7vh" }}
+        header={{ height: '7vh' }}
         navbar={{
           width: 250,
-          breakpoint: "sm",
+          breakpoint: 'sm',
           collapsed: { mobile: opened, desktop: !opened },
         }}
         padding="md"
@@ -75,7 +75,7 @@ const ProcessorLayout: React.FC<{ children: React.ReactNode }> = ({
               <ActionIcon
                 variant="default"
                 size="lg"
-                onClick={() => toggle((o) => !o)}
+                onClick={() => toggle(o => !o)}
               >
                 <IconMenu2 color="gray" />
               </ActionIcon>

@@ -1,10 +1,19 @@
-import { Box, Group, Title } from "@mantine/core";
-import UserList from "./List";
-import { useParams } from "react-router-dom";
-import { AppLoader } from "../../components/Loader/AppLoader";
+import {
+  ActionIcon,
+  Box,
+  Breadcrumbs,
+  Group,
+  Text,
+  Title,
+} from '@mantine/core';
+import { IconChevronLeft } from '@tabler/icons-react';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
+import { AppLoader } from '../../components/Loader/AppLoader';
+import UserList from './List';
 
 const WorkspaceUsersPage = () => {
   const { workspaceId } = useParams();
+  const navigate = useNavigate();
 
   if (!workspaceId) {
     return <AppLoader h="70vh" />;
@@ -12,10 +21,22 @@ const WorkspaceUsersPage = () => {
 
   return (
     <Box mb={50}>
-      <Group justify="space-between" mb="xl">
-        <Title order={3} opacity={0.7}>
-          Users
-        </Title>
+      <Breadcrumbs separator=">">
+        <NavLink to="/" className="bredcrumb-link">
+          <Text>Workspaces</Text>
+        </NavLink>
+        <Text>Users</Text>
+      </Breadcrumbs>
+      <Group mt="xs" mb="xl">
+        <ActionIcon
+          variant="default"
+          radius="xl"
+          size="sm"
+          onClick={() => navigate(`/`)}
+        >
+          <IconChevronLeft size={16} />
+        </ActionIcon>
+        <Title order={3}>Users</Title>
       </Group>
       <UserList />
     </Box>

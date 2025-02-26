@@ -1,23 +1,23 @@
-import React, { useEffect, useState } from "react";
-import Uppy from "@uppy/core";
-import Webcam from "@uppy/webcam";
-import { Dashboard } from "@uppy/react";
-import RemoteSources from "@uppy/remote-sources";
 import Audio from "@uppy/audio";
-import ScreenCapture from "@uppy/screen-capture";
-import ImageEditor from "@uppy/image-editor";
-import GoldenRetriever from "@uppy/golden-retriever";
 import Compressor from "@uppy/compressor";
+import Uppy from "@uppy/core";
+import GoldenRetriever from "@uppy/golden-retriever";
+import ImageEditor from "@uppy/image-editor";
 import Informer from "@uppy/informer";
 import Progress from "@uppy/progress-bar";
+import { Dashboard } from "@uppy/react";
+import RemoteSources from "@uppy/remote-sources";
+import ScreenCapture from "@uppy/screen-capture";
 import StatusBar from "@uppy/status-bar";
 import Tus from "@uppy/tus";
+import Webcam from "@uppy/webcam";
+import React, { useEffect, useState } from "react";
 
+import "@uppy/audio/dist/style.css";
 import "@uppy/core/dist/style.css";
 import "@uppy/dashboard/dist/style.css";
-import "@uppy/audio/dist/style.css";
-import "@uppy/screen-capture/dist/style.css";
 import "@uppy/image-editor/dist/style.css";
+import "@uppy/screen-capture/dist/style.css";
 import "./style.css";
 
 const isValidHex = (color: string) => /^#([0-9A-Fa-f]{3}){1,2}$/.test(color);
@@ -78,7 +78,10 @@ const Uploader: React.FC<UploaderProps> = ({
 
   useEffect(() => {
     if (!workspaceId) return;
-    fetch(`${uploadEndpoint}/config/${workspaceId}`)
+    fetch(`${uploadEndpoint}/config/${workspaceId}`, {
+      method: "GET",
+      headers: headers,
+    })
       .then((response) => response.json())
       .then((config) => {
         if (config?.message) {

@@ -1,11 +1,11 @@
-import { MantineStyleProp, Paper, Stack, Text, Timeline } from "@mantine/core";
-import { IconBrandNpm, IconCode, IconConfetti } from "@tabler/icons-react";
-import { CodeHighlight } from "@mantine/code-highlight";
-import "@mantine/code-highlight/styles.css";
-import { useParams } from "react-router-dom";
-import { AppLoader } from "../../../components/Loader/AppLoader";
-import { useGetSession } from "../../../apis/user";
-import { getUploadApiDomain } from "../../../utils/config";
+import { CodeHighlight } from '@mantine/code-highlight';
+import '@mantine/code-highlight/styles.css';
+import { MantineStyleProp, Paper, Stack, Text, Timeline } from '@mantine/core';
+import { IconBrandNpm, IconCode, IconConfetti } from '@tabler/icons-react';
+import { useParams } from 'react-router-dom';
+import { useGetSession } from '../../../apis/user';
+import { AppLoader } from '../../../components/Loader/AppLoader';
+import { getUploadApiDomain } from '../../../utils/config';
 
 const uploadEndpoint = getUploadApiDomain();
 
@@ -23,7 +23,7 @@ const GoIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
         active={3}
         bulletSize={24}
         lineWidth={2}
-        w={{ sm: "100vw", md: "70vw", lg: "60vw" }}
+        w={{ sm: '100vw', md: '70vw', lg: '60vw' }}
       >
         <Timeline.Item
           bullet={<IconBrandNpm size={12} />}

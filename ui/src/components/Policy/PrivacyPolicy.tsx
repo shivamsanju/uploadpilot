@@ -1,5 +1,5 @@
-import React from "react";
-import { Container, Title, Text, List, Anchor, Divider } from "@mantine/core";
+import { Anchor, Container, Divider, List, Text, Title } from '@mantine/core';
+import React from 'react';
 
 const PrivacyPolicy: React.FC = () => {
   return (
@@ -148,7 +148,7 @@ const PrivacyPolicy: React.FC = () => {
       <Section title="10. Contact Us">
         <Text size="sm">
           If you have any questions or concerns about this Privacy Policy or our
-          data practices, please contact us at{" "}
+          data practices, please contact us at{' '}
           <Anchor size="sm" href="mailto:support@uploadpilot.app">
             support@uploadpilot.app
           </Anchor>

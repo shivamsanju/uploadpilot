@@ -1,7 +1,6 @@
 package web
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -12,12 +11,22 @@ import (
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
-	commonutils "github.com/uploadpilot/go-core/common/utils"
+	vald "github.com/uploadpilot/go-core/common/validator"
 	"github.com/uploadpilot/manager/internal/utils"
 )
 
+func WithMiddleware(handler http.HandlerFunc, middlewares ...func(http.Handler) http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		finalHandler := http.Handler(handler)
+		for _, mw := range middlewares {
+			finalHandler = mw(finalHandler)
+		}
+		finalHandler.ServeHTTP(w, r)
+	}
+}
+
 func CreateJSONHandler[Params any, Query any, Body any, Result any](
-	h func(ctx context.Context, params Params, query Query, body Body) (Result, int, error),
+	h func(r *http.Request, params Params, query Query, body Body) (Result, int, error),
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
@@ -70,7 +79,7 @@ func CreateJSONHandler[Params any, Query any, Body any, Result any](
 		}
 
 		// Call the handler function
-		result, status, err := h(r.Context(), params, query, body)
+		result, status, err := h(r, params, query, body)
 		if err != nil {
 			utils.HandleHttpError(w, r, status, err)
 			return
@@ -81,7 +90,7 @@ func CreateJSONHandler[Params any, Query any, Body any, Result any](
 }
 
 func validateStruct(s any) error {
-	validate := commonutils.NewValidator()
+	validate := vald.NewValidator()
 	if err := validate.Struct(s); err != nil {
 		if ve, ok := err.(validator.ValidationErrors); ok {
 			var errMsgs []string

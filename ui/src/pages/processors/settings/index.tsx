@@ -1,7 +1,5 @@
-import { useForm } from "@mantine/form";
 import {
   ActionIcon,
-  Anchor,
   Box,
   Breadcrumbs,
   Button,
@@ -11,16 +9,17 @@ import {
   Text,
   TextInput,
   Title,
-} from "@mantine/core";
-import { IconChevronLeft } from "@tabler/icons-react";
+} from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { IconChevronLeft } from '@tabler/icons-react';
+import { useEffect } from 'react';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
 import {
-  useUpdateProcessorMutation,
   useGetProcessor,
-} from "../../../apis/processors";
-import { useNavigate, useParams } from "react-router-dom";
-import { ContainerOverlay } from "../../../components/Overlay";
-import { ErrorCard } from "../../../components/ErrorCard/ErrorCard";
-import { useEffect } from "react";
+  useUpdateProcessorMutation,
+} from '../../../apis/processors';
+import { ErrorCard } from '../../../components/ErrorCard/ErrorCard';
+import { ContainerOverlay } from '../../../components/Overlay';
 
 const ProcessorSettingsPage = () => {
   const { workspaceId, processorId } = useParams();
@@ -28,27 +27,27 @@ const ProcessorSettingsPage = () => {
 
   const form = useForm({
     initialValues: {
-      name: "",
+      name: '',
       triggers: [],
       enabled: true,
-      templateKey: "",
+      templateKey: '',
     },
     validate: {
-      name: (value) => (value ? null : "Name is required"),
+      name: value => (value ? null : 'Name is required'),
     },
   });
 
   const { mutateAsync, isPending: isCreating } = useUpdateProcessorMutation();
   const { isPending, error, processor } = useGetProcessor(
-    workspaceId || "",
-    processorId || ""
+    workspaceId || '',
+    processorId || '',
   );
 
   const handleUpdate = async (values: any) => {
     try {
       await mutateAsync({
-        workspaceId: workspaceId || "",
-        processorId: processorId || "",
+        workspaceId: workspaceId || '',
+        processorId: processorId || '',
         processor: {
           workspaceId,
           name: values.name,
@@ -79,10 +78,15 @@ const ProcessorSettingsPage = () => {
   return (
     <Box mb={50}>
       <Breadcrumbs separator=">">
-        <Anchor href={`/`}>Workspaces</Anchor>
-        <Anchor href={`/workspace/${workspaceId}/processors`}>
-          Processors
-        </Anchor>
+        <NavLink to="/" className="bredcrumb-link">
+          <Text>Workspaces</Text>
+        </NavLink>
+        <NavLink
+          to={`/workspace/${workspaceId}/processors`}
+          className="bredcrumb-link"
+        >
+          <Text>Processors</Text>
+        </NavLink>
         <Text>{processorId}</Text>
       </Breadcrumbs>
       <Group mt="xs" mb="xl">
@@ -106,14 +110,14 @@ const ProcessorSettingsPage = () => {
             description="Name of the processor"
             type="name"
             placeholder="Enter a name"
-            {...form.getInputProps("name")}
+            {...form.getInputProps('name')}
           />
           <TagsInput
             mt="xl"
             label="Trigger"
             description="File type to trigger the processor"
             placeholder="Enter comma separated file type"
-            {...form.getInputProps("triggers")}
+            {...form.getInputProps('triggers')}
             min={0}
           />
           <Group justify="flex-end" mt={50}>

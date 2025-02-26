@@ -1,5 +1,5 @@
-import React from "react";
-import { Container, Title, Text, List, Anchor, Divider } from "@mantine/core";
+import { Anchor, Container, Divider, List, Text, Title } from '@mantine/core';
+import React from 'react';
 
 const TermsOfService: React.FC = () => {
   return (
@@ -149,7 +149,7 @@ const TermsOfService: React.FC = () => {
 
       <Section title="8. Data Deletion Requests">
         <Text size="sm">
-          You may request to delete your personal data by emailing us at{" "}
+          You may request to delete your personal data by emailing us at{' '}
           <Anchor size="sm" href="mailto:support@uploadpilot.app">
             support@uploadpilot.app
           </Anchor>

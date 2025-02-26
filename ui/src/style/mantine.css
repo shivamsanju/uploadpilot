@@ -1,12 +1,24 @@
 /* For dark mode bg body*/
-:root[data-mantine-color-scheme="dark"] {
+:root[data-mantine-color-scheme='dark'] {
   --mantine-color-body: #151515 !important;
 }
 
-:root[data-mantine-color-scheme="dark"] * {
+:root[data-mantine-color-scheme='dark'] * {
   --input-bg: transparent !important;
 }
 
-[data-mantine-color-scheme="dark"] .mantine-Notifications-notification {
+[data-mantine-color-scheme='dark'] .mantine-Notifications-notification {
   background-color: #1e1e1e !important;
+}
+
+.bredcrumb-link {
+  text-decoration: none;
+  color: light-dark(
+    var(--mantine-color-appcolor-7),
+    var(--mantine-color-appcolor-2)
+  );
+}
+
+.bredcrumb-link:hover {
+  text-decoration: underline;
 }

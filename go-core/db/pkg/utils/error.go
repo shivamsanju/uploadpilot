@@ -15,6 +15,11 @@ func DBError(err error) error {
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return errors.New("record not found")
 	}
+
+	if errors.Is(err, gorm.ErrUnsupportedRelation) {
+		return errors.New("unknown err")
+	}
+
 	return errors.New("database error: " + err.Error())
 }
 

@@ -13,11 +13,15 @@ type DBConfig struct {
 	MaxIdleConn     int           // Maximum idle connections
 	ConnMaxLifeTime time.Duration // Reuse connections for ConnMaxLifeTime
 	ConnMaxIdleTime time.Duration // Idle connections max time
+	LogMode         logger.LogLevel
 }
 
 func NewPostgresDriver(postgresURI string, config *DBConfig) (*Driver, error) {
+	if config.LogMode == 0 {
+		config.LogMode = logger.Error
+	}
 	orm, err := gorm.Open(postgres.Open(postgresURI), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Error),
+		Logger: logger.Default.LogMode(config.LogMode),
 	})
 
 	if err != nil {

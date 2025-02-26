@@ -20,7 +20,7 @@ type Upload struct {
 	ProcessedURL   string       `gorm:"column:processed_url" json:"processedUrl"`
 	StartedAt      time.Time    `gorm:"column:started_at;default:now()" json:"startedAt"`
 	FinishedAt     time.Time    `gorm:"column:finished_at" json:"finishedAt"`
-	Workspace      Workspace    `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE" json:"workspace"`
+	Workspace      Workspace    `gorm:"foreignKey:workspace_id;constraint:OnDelete:CASCADE" json:"workspace"`
 }
 
 type UploadStatus string

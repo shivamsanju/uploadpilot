@@ -1,12 +1,4 @@
 import {
-  IconDots,
-  IconEdit,
-  IconEye,
-  IconPlus,
-  IconSearch,
-  IconTrash,
-} from "@tabler/icons-react";
-import {
   ActionIcon,
   Avatar,
   Box,
@@ -16,22 +8,30 @@ import {
   Modal,
   Text,
   TextInput,
-} from "@mantine/core";
+} from '@mantine/core';
+import { useViewportSize } from '@mantine/hooks';
+import { showNotification } from '@mantine/notifications';
+import {
+  IconDots,
+  IconEdit,
+  IconEye,
+  IconPlus,
+  IconSearch,
+  IconTrash,
+} from '@tabler/icons-react';
+import { DataTableColumn } from 'mantine-datatable';
+import { useCallback, useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import {
   useGetUsersInWorkspace,
   useRemoveUserFromWorkspaceMutation,
-} from "../../apis/workspace";
-import { useParams } from "react-router-dom";
-import { useCallback, useMemo, useState } from "react";
-import { DataTableColumn } from "mantine-datatable";
-import { UploadPilotDataTable } from "../../components/Table/Table";
-import { ErrorCard } from "../../components/ErrorCard/ErrorCard";
-import { showNotification } from "@mantine/notifications";
-import AddUserForm from "./Add";
-import { useViewportSize } from "@mantine/hooks";
-import { showConfirmationPopup } from "../../components/Popups/ConfirmPopup";
-import { ContainerOverlay } from "../../components/Overlay";
-import { RefreshButton } from "../../components/Buttons/RefreshButton/RefreshButton";
+} from '../../apis/workspace';
+import { RefreshButton } from '../../components/Buttons/RefreshButton/RefreshButton';
+import { ErrorCard } from '../../components/ErrorCard/ErrorCard';
+import { ContainerOverlay } from '../../components/Overlay';
+import { showConfirmationPopup } from '../../components/Popups/ConfirmPopup';
+import { UploadPilotDataTable } from '../../components/Table/Table';
+import AddUserForm from './Add';
 
 const getRandomAvatar = () => {
   const randomIndex = Math.floor(Math.random() * 5) + 1;
@@ -39,31 +39,31 @@ const getRandomAvatar = () => {
 };
 
 const WorkspaceUsersList = () => {
-  const [mode, setMode] = useState<"add" | "edit" | "view">("add");
+  const [mode, setMode] = useState<'add' | 'edit' | 'view'>('add');
   const { width } = useViewportSize();
 
   const [initialValues, setInitialValues] = useState(null);
   const [opened, setOpened] = useState(false);
   const { workspaceId } = useParams();
   const { isPending, error, users, invalidate } = useGetUsersInWorkspace(
-    workspaceId || ""
+    workspaceId || '',
   );
   const { mutateAsync, isPending: removePending } =
     useRemoveUserFromWorkspaceMutation();
 
   const handleRemoveUser = useCallback(
     async (userId: string) => {
-      if (!workspaceId || workspaceId === "" || !userId || userId === "") {
+      if (!workspaceId || workspaceId === '' || !userId || userId === '') {
         showNotification({
-          color: "red",
-          title: "Error",
-          message: "Workspace ID or User ID is not available",
+          color: 'red',
+          title: 'Error',
+          message: 'Workspace ID or User ID is not available',
         });
         return;
       }
 
       showConfirmationPopup({
-        message: "Are you sure you want to remove this user from workspace?",
+        message: 'Are you sure you want to remove this user from workspace?',
         onOk: async () => {
           try {
             await mutateAsync({ workspaceId, userId });
@@ -73,23 +73,23 @@ const WorkspaceUsersList = () => {
         },
       });
     },
-    [workspaceId, mutateAsync]
+    [workspaceId, mutateAsync],
   );
 
   const handleViewEdit = useCallback(
-    (item: any, mode: "edit" | "view") => {
+    (item: any, mode: 'edit' | 'view') => {
       setMode(mode);
       setInitialValues(item);
       setOpened(true);
     },
-    [setMode, setInitialValues, setOpened]
+    [setMode, setInitialValues, setOpened],
   );
 
   const columns: DataTableColumn[] = useMemo(
     () => [
       {
-        accessor: "name",
-        title: "Name",
+        accessor: 'name',
+        title: 'Name',
         render: (item: any) => (
           <Group gap="sm">
             <Avatar size={40} src={getRandomAvatar()} radius={40} />
@@ -105,8 +105,8 @@ const WorkspaceUsersList = () => {
         ),
       },
       {
-        accessor: "email",
-        title: "Email",
+        accessor: 'email',
+        title: 'Email',
         hidden: width < 768,
         render: (item: any) => (
           <>
@@ -118,8 +118,8 @@ const WorkspaceUsersList = () => {
         ),
       },
       {
-        accessor: "role",
-        title: "Role",
+        accessor: 'role',
+        title: 'Role',
         render: (item: any) => (
           <>
             <Text fz="sm">{item.role}</Text>
@@ -130,12 +130,12 @@ const WorkspaceUsersList = () => {
         ),
       },
       {
-        accessor: "actions",
-        title: "Actions",
+        accessor: 'actions',
+        title: 'Actions',
         render: (item: any) => (
           <Group gap={0} justify="flex-end">
             <Menu
-              transitionProps={{ transition: "pop" }}
+              transitionProps={{ transition: 'pop' }}
               withArrow
               position="bottom-end"
               withinPortal
@@ -148,19 +148,19 @@ const WorkspaceUsersList = () => {
               <Menu.Dropdown>
                 <Menu.Item
                   leftSection={<IconEye size={16} stroke={1.5} />}
-                  onClick={() => handleViewEdit(item, "view")}
+                  onClick={() => handleViewEdit(item, 'view')}
                 >
                   <Text>View</Text>
                 </Menu.Item>
                 <Menu.Item
-                  disabled={item.role === "Owner"}
+                  disabled={item.role === 'Owner'}
                   leftSection={<IconEdit size={16} stroke={1.5} />}
-                  onClick={() => handleViewEdit(item, "edit")}
+                  onClick={() => handleViewEdit(item, 'edit')}
                 >
                   <Text>Edit role</Text>
                 </Menu.Item>
                 <Menu.Item
-                  disabled={item.role === "Owner"}
+                  disabled={item.role === 'Owner'}
                   leftSection={<IconTrash size={16} stroke={1.5} />}
                   color="red"
                   onClick={() => handleRemoveUser(item.userId)}
@@ -173,7 +173,7 @@ const WorkspaceUsersList = () => {
         ),
       },
     ],
-    [handleRemoveUser, handleViewEdit, width]
+    [handleRemoveUser, handleViewEdit, width],
   );
 
   if (error) {
@@ -205,7 +205,7 @@ const WorkspaceUsersList = () => {
               <RefreshButton onClick={invalidate} />
             </Group>
             <TextInput
-              value={""}
+              value={''}
               // onChange={(e) => onSearchFilterChange(e.target.value)}
               placeholder="Search by name or status"
               leftSection={<IconSearch size={18} />}
@@ -217,19 +217,19 @@ const WorkspaceUsersList = () => {
       <Modal
         centered
         padding="xl"
-        transitionProps={{ transition: "pop" }}
+        transitionProps={{ transition: 'pop' }}
         opened={opened}
         onClose={() => {
           setOpened(false);
-          setMode("add");
+          setMode('add');
           setInitialValues(null);
         }}
         title={
-          mode === "edit"
-            ? "Edit User"
-            : mode === "view"
-            ? "User Details"
-            : "Add User"
+          mode === 'edit'
+            ? 'Edit User'
+            : mode === 'view'
+              ? 'User Details'
+              : 'Add User'
         }
         closeOnClickOutside={false}
         size="lg"
@@ -237,7 +237,7 @@ const WorkspaceUsersList = () => {
         <AddUserForm
           mode={mode}
           setOpened={setOpened}
-          workspaceId={workspaceId || ""}
+          workspaceId={workspaceId || ''}
           initialValues={initialValues}
           setInitialValues={setInitialValues}
           setMode={setMode}

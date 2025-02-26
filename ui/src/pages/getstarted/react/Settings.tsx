@@ -1,22 +1,22 @@
 import {
   ColorInput,
+  Grid,
   NumberInput,
+  SegmentedControl,
+  SimpleGrid,
   Switch,
   Text,
-  SimpleGrid,
-  Grid,
-  SegmentedControl,
-} from "@mantine/core";
-import classes from "./Preview.module.css";
-const w = "150px";
+} from '@mantine/core';
+import classes from './Preview.module.css';
+const w = '150px';
 
 type SettingsProps = {
   height: number;
   setHeight: React.Dispatch<React.SetStateAction<number>>;
   width: number;
   setWidth: React.Dispatch<React.SetStateAction<number>>;
-  theme: "light" | "dark" | "auto";
-  setTheme: React.Dispatch<React.SetStateAction<"light" | "dark" | "auto">>;
+  theme: 'light' | 'dark' | 'auto';
+  setTheme: React.Dispatch<React.SetStateAction<'light' | 'dark' | 'auto'>>;
   primaryColor: string | undefined;
   setPrimaryColor: React.Dispatch<React.SetStateAction<string | undefined>>;
   textColor: string | undefined;
@@ -83,88 +83,88 @@ const Settings: React.FC<SettingsProps> = ({
 }) => {
   const items: any = [
     {
-      label: "Height",
-      description: "Set the height of the file uploader in px",
+      label: 'Height',
+      description: 'Set the height of the file uploader in px',
       value: height,
       setter: setHeight,
-      type: "number",
+      type: 'number',
     },
     {
-      label: "Theme",
-      description: "Change the theme",
+      label: 'Theme',
+      description: 'Change the theme',
       value: theme,
       setter: setTheme,
-      type: "segmented",
+      type: 'segmented',
     },
     {
-      label: "Width",
-      description: "Set the width of the file uploader in px",
+      label: 'Width',
+      description: 'Set the width of the file uploader in px',
       value: width,
       setter: setWidth,
-      type: "number",
+      type: 'number',
     },
     {
-      label: "Auto Proceed",
-      description: "Start uploading automatically",
+      label: 'Auto Proceed',
+      description: 'Start uploading automatically',
       value: autoProceed,
       setter: setAutoProceed,
-      type: "switch",
+      type: 'switch',
     },
     {
-      label: "Primary Color",
-      description: "Change the primary color of the uploader",
+      label: 'Primary Color',
+      description: 'Change the primary color of the uploader',
       value: primaryColor,
       setter: setPrimaryColor,
-      type: "color",
+      type: 'color',
     },
     {
-      label: "Show Status Bar",
-      description: "Toggle to show the status bar",
+      label: 'Show Status Bar',
+      description: 'Toggle to show the status bar',
       value: showStatusBar,
       setter: setShowStatusBar,
-      type: "switch",
+      type: 'switch',
     },
     {
-      label: "Primary Hover Color",
-      description: "Change the color when hovered",
+      label: 'Primary Hover Color',
+      description: 'Change the color when hovered',
       value: hoverColor,
       setter: setHoverColor,
-      type: "color",
+      type: 'color',
     },
     {
-      label: "Show Progress Bar",
-      description: "Toggle to show progress",
+      label: 'Show Progress Bar',
+      description: 'Toggle to show progress',
       value: showProgress,
       setter: setShowProgress,
-      type: "switch",
+      type: 'switch',
     },
     {
-      label: "Primary Text Color",
-      description: "Change the primary text color",
+      label: 'Primary Text Color',
+      description: 'Change the primary text color',
       value: textColor,
       setter: setTextColor,
-      type: "color",
+      type: 'color',
     },
     {
-      label: "Hide Upload Button",
-      description: "Toggle to hide upload button",
+      label: 'Hide Upload Button',
+      description: 'Toggle to hide upload button',
       value: hideUploadButton,
       setter: setHideUploadButton,
-      type: "switch",
+      type: 'switch',
     },
     {
-      label: "Note Text Color",
-      description: "Change the note text color",
+      label: 'Note Text Color',
+      description: 'Change the note text color',
       value: noteColor,
       setter: setNoteColor,
-      type: "color",
+      type: 'color',
     },
     {
-      label: "Hide Cancel Button",
-      description: "Toggle to hide cancel button",
+      label: 'Hide Cancel Button',
+      description: 'Toggle to hide cancel button',
       value: hideCancelButton,
       setter: setHideCancelButton,
-      type: "switch",
+      type: 'switch',
     },
   ];
 
@@ -178,24 +178,24 @@ const Settings: React.FC<SettingsProps> = ({
               <Text c="dimmed">{description}</Text>
             </Grid.Col>
             <Grid.Col span={6} className={classes.inputContainer}>
-              {type === "number" && (
+              {type === 'number' && (
                 <NumberInput
                   w={w}
                   value={value}
-                  onChange={(e) => setter(Number(e))}
+                  onChange={e => setter(Number(e))}
                 />
               )}
-              {type === "color" && (
+              {type === 'color' && (
                 <ColorInput w={w} value={value} onChange={setter} />
               )}
-              {type === "switch" && (
+              {type === 'switch' && (
                 <Switch
                   className={classes.customSwitch}
                   checked={value}
-                  onChange={(e) => setter(e.target.checked)}
+                  onChange={e => setter(e.target.checked)}
                 />
               )}
-              {type === "segmented" && (
+              {type === 'segmented' && (
                 <SegmentedControl
                   w={250}
                   h="34"
@@ -204,15 +204,15 @@ const Settings: React.FC<SettingsProps> = ({
                   value={value}
                   onChange={setter}
                   data={[
-                    { label: "Auto", value: "auto" },
-                    { label: "Light", value: "light" },
-                    { label: "Dark", value: "dark" },
+                    { label: 'Auto', value: 'auto' },
+                    { label: 'Light', value: 'light' },
+                    { label: 'Dark', value: 'dark' },
                   ]}
                 />
               )}
             </Grid.Col>
           </Grid>
-        )
+        ),
       )}
     </SimpleGrid>
   );

@@ -53,4 +53,9 @@ var (
 	UploadStarted        = "upload started"
 	UploadFailed         = "upload failed. reason: %s"
 	UploadComplete       = "upload completed"
+
+	// APIKey
+	ErrApiKeyCreateFailed  = "failed to create api key. please try again later"
+	ErrInvalidAPIKey       = "invalid api key"
+	ErrSubscriptionExpired = "your subscription has expired. please renew your subscription to continue using uploadpilot"
 )

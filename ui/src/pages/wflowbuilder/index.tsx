@@ -1,6 +1,5 @@
 import {
   ActionIcon,
-  Anchor,
   Box,
   Breadcrumbs,
   Group,
@@ -8,16 +7,16 @@ import {
   ScrollArea,
   Text,
   Title,
-} from "@mantine/core";
-import { useNavigate, useParams } from "react-router-dom";
-import { AppLoader } from "../../components/Loader/AppLoader";
-import { useGetProcessor } from "../../apis/processors";
-import { ErrorCard } from "../../components/ErrorCard/ErrorCard";
-import { WorkflowYamlEditor } from "./editor";
-import { BlockSearch } from "./blocksearch";
-import { ContainerOverlay } from "../../components/Overlay";
-import { useState } from "react";
-import { IconChevronLeft } from "@tabler/icons-react";
+} from '@mantine/core';
+import { IconChevronLeft } from '@tabler/icons-react';
+import { useState } from 'react';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
+import { useGetProcessor } from '../../apis/processors';
+import { ErrorCard } from '../../components/ErrorCard/ErrorCard';
+import { AppLoader } from '../../components/Loader/AppLoader';
+import { ContainerOverlay } from '../../components/Overlay';
+import { BlockSearch } from './blocksearch';
+import { WorkflowYamlEditor } from './editor';
 
 const WorkflowBuilderPage = () => {
   const { workspaceId, processorId } = useParams();
@@ -26,7 +25,7 @@ const WorkflowBuilderPage = () => {
 
   const { isPending, error, processor } = useGetProcessor(
     workspaceId as string,
-    processorId as string
+    processorId as string,
   );
 
   if (!workspaceId || !processorId) {
@@ -41,10 +40,15 @@ const WorkflowBuilderPage = () => {
     <Box mb={50}>
       <ContainerOverlay visible={isPending} />
       <Breadcrumbs separator=">">
-        <Anchor href={`/`}>Workspaces</Anchor>
-        <Anchor href={`/workspace/${workspaceId}/processors`}>
-          Processors
-        </Anchor>
+        <NavLink to="/" className="bredcrumb-link">
+          <Text>Workspaces</Text>
+        </NavLink>
+        <NavLink
+          to={`/workspace/${workspaceId}/processors`}
+          className="bredcrumb-link"
+        >
+          <Text>Processors</Text>
+        </NavLink>
         <Text>{processor?.name}</Text>
       </Breadcrumbs>
       <Group mt="xs" mb="xl">

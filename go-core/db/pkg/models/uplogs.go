@@ -11,7 +11,7 @@ type UploadLog struct {
 	WorkspaceID string       `gorm:"type:uuid;column:workspace_id;not null" json:"workspaceId"`
 	Data        dtypes.JSONB `gorm:"column:data;type:jsonb" json:"data"`
 	Timestamp   time.Time    `gorm:"column:timestamp;type:timestamp;not null" json:"timestamp"`
-	Workspace   Workspace    `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE" json:"workspace"`
+	Workspace   Workspace    `gorm:"foreignKey:workspace_id;constraint:OnDelete:CASCADE" json:"workspace"`
 }
 
 func (UploadLog) TableName() string {

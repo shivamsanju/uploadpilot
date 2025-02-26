@@ -6,17 +6,17 @@ import {
   Text,
   TextInput,
   Title,
-} from "@mantine/core";
-import { useForm } from "@mantine/form";
+} from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { IconCategory, IconCategoryPlus, IconPlus } from '@tabler/icons-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   useCreateWorkspaceMutation,
   useGetWorkspaces,
-} from "../../apis/workspace";
-import { useNavigate } from "react-router-dom";
-import classes from "./Workspace.module.css";
-import { IconCategory, IconCategoryPlus, IconPlus } from "@tabler/icons-react";
-import { ErrorLoadingWrapper } from "../../components/ErrorLoadingWrapper";
-import { useState } from "react";
+} from '../../apis/workspace';
+import { ErrorLoadingWrapper } from '../../components/ErrorLoadingWrapper';
+import classes from './Workspace.module.css';
 
 const WorkspaceLandingPage = () => {
   const [opened, toggle] = useState(false);
@@ -26,16 +26,16 @@ const WorkspaceLandingPage = () => {
 
   const form = useForm({
     initialValues: {
-      name: "",
+      name: '',
       tags: [],
     },
     validate: {
-      name: (value) => {
+      name: value => {
         if (!value.trim()) {
-          return "Workspace name is required";
+          return 'Workspace name is required';
         }
         if (value.trim().length > 20 || value.trim().length < 2) {
-          return "Workspace name must be between 2 and 20 characters";
+          return 'Workspace name must be between 2 and 20 characters';
         }
         return null;
       },
@@ -55,9 +55,7 @@ const WorkspaceLandingPage = () => {
   return (
     <ErrorLoadingWrapper error={error} isPending={isPending || isCreating}>
       <Group align="center" gap="xs" h="10%">
-        <Title order={3} opacity={0.7}>
-          Workspaces
-        </Title>
+        <Title order={3}>Workspaces</Title>
       </Group>
       <Group mb="50" align="center" mt="lg">
         <Paper
@@ -94,20 +92,18 @@ const WorkspaceLandingPage = () => {
         title="Create new workspace"
         size="lg"
         padding="xl"
-        transitionProps={{ transition: "pop" }}
+        transitionProps={{ transition: 'pop' }}
         opened={opened}
         onClose={() => toggle(false)}
       >
-        <form
-          onSubmit={form.onSubmit((values) => handleCreateWorkspace(values))}
-        >
+        <form onSubmit={form.onSubmit(values => handleCreateWorkspace(values))}>
           <TextInput
             mb="xl"
             label="Workspace name"
             description="Name of the workspace"
             leftSection={<IconCategoryPlus stroke={2} color="gray" />}
             placeholder="Enter a workspace name"
-            {...form.getInputProps("name")}
+            {...form.getInputProps('name')}
           />
           <Group justify="flex-end">
             <Button type="submit">Create</Button>

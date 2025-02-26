@@ -1,19 +1,19 @@
 import {
-  useMantineTheme,
-  rem,
-  useMantineColorScheme,
   Menu,
+  rem,
   Text,
-} from "@mantine/core";
-import { IconSun, IconMoonStars, IconCheck } from "@tabler/icons-react";
-import { useCallback } from "react";
+  useMantineColorScheme,
+  useMantineTheme,
+} from '@mantine/core';
+import { IconCheck, IconMoonStars, IconSun } from '@tabler/icons-react';
+import { useCallback } from 'react';
 
 const ThemeSwitcher = () => {
   const theme = useMantineTheme();
   const { colorScheme, setColorScheme } = useMantineColorScheme();
 
   const changeTheme = useCallback(
-    (scheme: "dark" | "light" | "auto") => {
+    (scheme: 'dark' | 'light' | 'auto') => {
       setColorScheme(scheme);
     },
     [setColorScheme],
@@ -45,7 +45,7 @@ const ThemeSwitcher = () => {
 
   return (
     <Menu
-      transitionProps={{ transition: "pop" }}
+      transitionProps={{ transition: 'pop' }}
       width={200}
       position="left"
       trigger="click"
@@ -58,15 +58,15 @@ const ThemeSwitcher = () => {
       <Menu.Dropdown>
         <Menu.Item
           leftSection={sunIcon}
-          onClick={() => changeTheme("light")}
-          rightSection={colorScheme === "light" && checkIcon}
+          onClick={() => changeTheme('light')}
+          rightSection={colorScheme === 'light' && checkIcon}
         >
           <Text size="sm">Light</Text>
         </Menu.Item>
         <Menu.Item
           leftSection={moonIcon}
-          onClick={() => changeTheme("dark")}
-          rightSection={colorScheme === "dark" && checkIcon}
+          onClick={() => changeTheme('dark')}
+          rightSection={colorScheme === 'dark' && checkIcon}
         >
           <Text size="sm">Dark</Text>
         </Menu.Item>

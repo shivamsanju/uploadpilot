@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import Editor, { Monaco, OnMount } from "@monaco-editor/react";
+import Editor, { Monaco, OnMount } from '@monaco-editor/react';
+import React, { useState } from 'react';
 
 import {
   Box,
@@ -9,13 +9,13 @@ import {
   Title,
   Tooltip,
   useMantineColorScheme,
-} from "@mantine/core";
-import { IconAlertCircle, IconCircleCheck } from "@tabler/icons-react";
-import { DiscardButton } from "../../../components/Buttons/DiscardButton";
-import { SaveButton } from "../../../components/Buttons/SaveButton";
-import { useUpdateProcessorWorkflowMutation } from "../../../apis/processors";
-import { validateYaml } from "./schema";
-import { showConfirmationPopup } from "../../../components/Popups/ConfirmPopup";
+} from '@mantine/core';
+import { IconAlertCircle, IconCircleCheck } from '@tabler/icons-react';
+import { useUpdateProcessorWorkflowMutation } from '../../../apis/processors';
+import { DiscardButton } from '../../../components/Buttons/DiscardButton';
+import { SaveButton } from '../../../components/Buttons/SaveButton';
+import { showConfirmationPopup } from '../../../components/Popups/ConfirmPopup';
+import { validateYaml } from './schema';
 
 type Props = {
   workspaceId: string;
@@ -30,9 +30,9 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
   setEditor,
   editor,
 }) => {
-  const err = validateYaml(processor?.workflow || "");
+  const err = validateYaml(processor?.workflow || '');
   const [yamlContent, setYamlContent] = useState<string>(
-    processor?.workflow || ""
+    processor?.workflow || '',
   );
   const [error, setError] = useState<string | null>(err);
   const [initialLoad, setInitialLoad] = useState(true);
@@ -40,17 +40,17 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
 
   const { mutateAsync, isPending } = useUpdateProcessorWorkflowMutation();
 
-  const editorMount: OnMount = (editorL) => {
+  const editorMount: OnMount = editorL => {
     setEditor(editorL);
   };
 
   const handleEditorDidMount = (monaco: Monaco) => {
-    monaco.editor.defineTheme("myCustomThemeDark", {
-      base: "vs-dark",
+    monaco.editor.defineTheme('myCustomThemeDark', {
+      base: 'vs-dark',
       inherit: true,
-      rules: [{ token: "comment", fontStyle: "italic" }],
+      rules: [{ token: 'comment', fontStyle: 'italic' }],
       colors: {
-        "editor.background": "#141414",
+        'editor.background': '#141414',
       },
     });
     setInitialLoad(false);
@@ -61,7 +61,7 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
       await mutateAsync({
         workspaceId,
         processorId: processor?.id,
-        workflow: yamlContent?.replace(/\t/g, "  "),
+        workflow: yamlContent?.replace(/\t/g, '  '),
       });
     } catch (error: any) {
       setError(error?.response?.data?.message || error.message);
@@ -71,9 +71,9 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
   const discardChanges = () => {
     showConfirmationPopup({
       message:
-        "Are you sure you want to discard the changes? this is irreversible.",
+        'Are you sure you want to discard the changes? this is irreversible.',
       onOk: () => {
-        setYamlContent(processor?.workflow || "");
+        setYamlContent(processor?.workflow || '');
       },
     });
   };
@@ -93,7 +93,7 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
           <Group
             align="center"
             gap={2}
-            c={error ? "red" : "dimmed"}
+            c={error ? 'red' : 'dimmed'}
             p={0}
             pt={2}
             wrap="nowrap"
@@ -109,11 +109,11 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
               multiline
               w={500}
               maw="90vw"
-              label={error || "Everything looks good"}
-              color={error ? "red" : "dimmed"}
+              label={error || 'Everything looks good'}
+              color={error ? 'red' : 'dimmed'}
             >
               <Text size="xs" lineClamp={1}>
-                {error || "Everything looks good"}
+                {error || 'Everything looks good'}
               </Text>
             </Tooltip>
           </Group>
@@ -128,13 +128,13 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
         loading={false}
         beforeMount={handleEditorDidMount}
         onMount={editorMount}
-        theme={colorScheme === "dark" ? "myCustomThemeDark" : "vs"}
+        theme={colorScheme === 'dark' ? 'myCustomThemeDark' : 'vs'}
         language="yaml"
         height="70vh"
         defaultLanguage="yaml"
         value={yamlContent}
         onChange={(value: any) => {
-          if (typeof value === "string") {
+          if (typeof value === 'string') {
             setYamlContent(value);
             const err = validateYaml(value);
             setError(err);
@@ -143,7 +143,7 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
         options={{
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
-          renderLineHighlight: "none",
+          renderLineHighlight: 'none',
           padding: {
             top: 10,
             bottom: 50,

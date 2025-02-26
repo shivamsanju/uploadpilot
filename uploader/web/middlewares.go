@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"github.com/phuslu/log"
 )
 
@@ -12,14 +13,29 @@ func AllowAllCorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(response http.ResponseWriter, r *http.Request) {
 		response.Header().Set("Access-Control-Allow-Origin", "*")
 		response.Header().Set("Access-Control-Allow-Credentials", "true")
+		response.Header().Set("Access-Control-Allow-Methods", "*")
+		response.Header().Set("Access-Control-Allow-Headers", "*")
+
+		// Handle preflight requests properly
 		if r.Method == "OPTIONS" {
-			response.Header().Set("Access-Control-Allow-Methods", "*")
-			response.Header().Set("Access-Control-Allow-Headers", "*")
-			response.Write([]byte(""))
-		} else {
-			next.ServeHTTP(response, r)
+			response.WriteHeader(http.StatusNoContent) // Respond with 204 No Content
+			return
 		}
+
+		next.ServeHTTP(response, r)
 	})
+}
+
+func AllowCorsMiddleware(next http.Handler) http.Handler {
+	return cors.New(cors.Options{
+		AllowOriginFunc:  func(r *http.Request, origin string) bool { return true },
+		AllowedMethods:   []string{"GET", "OPTIONS"},
+		AllowedHeaders:   []string{"Content-Type", "Accept", "Origin", "X-Api-Key", "Authorization"},
+		ExposedHeaders:   []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not ignored by any of major browsers
+
+	}).Handler(next)
 }
 
 func LoggerMiddleware(next http.Handler) http.Handler {

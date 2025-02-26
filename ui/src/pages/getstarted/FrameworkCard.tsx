@@ -1,5 +1,5 @@
-import { Stack, Text } from "@mantine/core";
-import { TablerIcon } from "@tabler/icons-react";
+import { Stack, Text } from '@mantine/core';
+import { TablerIcon } from '@tabler/icons-react';
 
 type Props = {
   framework: string;

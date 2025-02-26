@@ -1,3 +1,5 @@
+import { CodeHighlight } from '@mantine/code-highlight';
+import '@mantine/code-highlight/styles.css';
 import {
   Box,
   Grid,
@@ -7,28 +9,26 @@ import {
   Stack,
   Text,
   Timeline,
-} from "@mantine/core";
-import { Uploader } from "uppy-react";
+} from '@mantine/core';
 import {
   IconBrandNpm,
   IconCode,
   IconConfetti,
   IconEditCircle,
-} from "@tabler/icons-react";
-import { CodeHighlight } from "@mantine/code-highlight";
-import "@mantine/code-highlight/styles.css";
-import { useParams } from "react-router-dom";
-import { AppLoader } from "../../../components/Loader/AppLoader";
-import { getUploadApiDomain } from "../../../utils/config";
-import { useGetSession } from "../../../apis/user";
-import Settings from "./Settings";
-import { useSettingsProps } from "./SettingsProps";
-import "uppy-react/dist/style.css";
+} from '@tabler/icons-react';
+import { useParams } from 'react-router-dom';
+import { Uploader } from 'uppy-react';
+import 'uppy-react/dist/style.css';
+import { useGetSession } from '../../../apis/user';
+import { AppLoader } from '../../../components/Loader/AppLoader';
+import { getUploadApiDomain } from '../../../utils/config';
+import Settings from './Settings';
+import { useSettingsProps } from './SettingsProps';
 
 const getCode = (
   workspaceId: string,
   backendEndpoint: string,
-  settingsProps: any
+  settingsProps: any,
 ) => {
   const properties = [
     `workspaceId="${workspaceId}"`,
@@ -43,19 +43,19 @@ const getCode = (
     settingsProps.noteColor && `noteColor="${settingsProps.noteColor}"`,
     `metadata={{"key": "value"}}`,
     `headers={{"key": "value"}}`,
-    !settingsProps.showStatusBar && "showStatusBar={false}",
-    !settingsProps.showProgress && "showProgress={false}",
-    settingsProps.hideUploadButton && "hideUploadButton={true}",
-    settingsProps.hideCancelButton && "hideCancelButton={true}",
-    settingsProps.hideRetryButton && "hideRetryButton={true}",
-    settingsProps.hidePauseResumeButton && "hidePauseResumeButton={true}",
-    settingsProps.hideProgressAfterFinish && "hideProgressAfterFinish={true}",
+    !settingsProps.showStatusBar && 'showStatusBar={false}',
+    !settingsProps.showProgress && 'showProgress={false}',
+    settingsProps.hideUploadButton && 'hideUploadButton={true}',
+    settingsProps.hideCancelButton && 'hideCancelButton={true}',
+    settingsProps.hideRetryButton && 'hideRetryButton={true}',
+    settingsProps.hidePauseResumeButton && 'hidePauseResumeButton={true}',
+    settingsProps.hideProgressAfterFinish && 'hideProgressAfterFinish={true}',
     settingsProps.note && `note="${settingsProps.note}"`,
-    !settingsProps.singleFileFullScreen && "singleFileFullScreen={false}",
-    !settingsProps.showSelectedFiles && "showSelectedFiles={false}",
+    !settingsProps.singleFileFullScreen && 'singleFileFullScreen={false}',
+    !settingsProps.showSelectedFiles && 'showSelectedFiles={false}',
   ]
     .filter(Boolean) // Remove any falsy values
-    .join("\n            "); // Join with proper indentation
+    .join('\n            '); // Join with proper indentation
 
   const code = `
 import { Uploader } from "uppy-react"
@@ -71,7 +71,7 @@ const UploaderComponent = () => {
 export default UploaderComponent
 `;
 
-  return code.replace(/[\r\n]+/g, "\n").trim();
+  return code.replace(/[\r\n]+/g, '\n').trim();
 };
 
 const uploadEndpoint = getUploadApiDomain();
@@ -92,7 +92,7 @@ const ReactIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
         active={3}
         bulletSize={24}
         lineWidth={2}
-        w={{ sm: "100vw", md: "70vw", lg: "60vw" }}
+        w={{ sm: '100vw', md: '70vw', lg: '60vw' }}
       >
         <Timeline.Item bullet={<IconEditCircle size={12} />} title="Customize">
           <Text opacity={0.7} size="sm" mb="lg">
@@ -109,11 +109,11 @@ const ReactIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
                   justify="center"
                   align="center"
                   style={{
-                    overflow: "auto",
+                    overflow: 'auto',
                     background:
-                      settingsProps.theme === "light" ? "#ccc" : "#1e1e1e",
-                    backgroundSize: "10px 10px",
-                    borderRadius: "20px",
+                      settingsProps.theme === 'light' ? '#ccc' : '#1e1e1e',
+                    backgroundSize: '10px 10px',
+                    borderRadius: '20px',
                   }}
                 >
                   <Uploader
@@ -121,11 +121,15 @@ const ReactIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
                     workspaceId={workspaceId}
                     metadata={{
                       uploaderEmail: session.email,
-                      uploaderName: session.name || "Unknown",
+                      uploaderName: session.name || 'Unknown',
                     }}
                     {...settingsProps}
                     note="Test your uploader"
-                    headers={{ Authorization: "Bearer mysecrettoken" }}
+                    headers={{
+                      Authorization:
+                        'Bearer ' + localStorage.getItem('uploadpilottoken') ||
+                        '',
+                    }}
                   />
                 </Group>
               </Grid.Col>

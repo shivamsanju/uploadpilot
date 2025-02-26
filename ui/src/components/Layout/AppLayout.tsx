@@ -4,23 +4,24 @@ import {
   ScrollArea,
   useMantineColorScheme,
   useMantineTheme,
-} from "@mantine/core";
-import { AdminHeader } from "../Header/Header";
-import NavBar from "../Navigation/Navbar";
-import AuthWrapper from "../AuthWrapper/AuthWrapper";
-import { useMemo, useState } from "react";
+} from '@mantine/core';
 import {
-  IconMenu2,
   IconAdjustments,
   IconCircles,
   IconDatabase,
-  IconRoute,
   IconGauge,
-  IconUsers,
+  IconKey,
+  IconMenu2,
+  IconRoute,
   IconShoppingCartBolt,
-} from "@tabler/icons-react";
-import { useParams } from "react-router-dom";
-import WorkspaceSwitcher from "../WorkspaceSwitcher";
+  IconUsers,
+} from '@tabler/icons-react';
+import { useMemo, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import AuthWrapper from '../AuthWrapper/AuthWrapper';
+import { AdminHeader } from '../Header/Header';
+import NavBar from '../Navigation/Navbar';
+import WorkspaceSwitcher from '../WorkspaceSwitcher';
 
 const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [opened, toggle] = useState(true);
@@ -28,61 +29,66 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const theme = useMantineTheme();
   const { workspaceId } = useParams();
 
-  const bg = colorScheme === "dark" ? "#141414" : theme.colors.gray[0];
+  const bg = colorScheme === 'dark' ? '#141414' : theme.colors.gray[0];
 
   const appShellBorderColor =
-    colorScheme === "dark" ? theme.colors.dark[6] : theme.colors.gray[1];
+    colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[1];
 
-  const headerNavBg = colorScheme === "dark" ? "#161616" : "#fff";
+  const headerNavBg = colorScheme === 'dark' ? '#161616' : '#fff';
 
   const navItems = useMemo(
     () => [
       {
-        label: "Get Started",
+        label: 'Get Started',
         icon: IconCircles,
         link: `/workspace/${workspaceId}`,
       },
       {
-        label: "Uploads",
+        label: 'Uploads',
         icon: IconDatabase,
         link: `/workspace/${workspaceId}/uploads`,
       },
       {
-        label: "Processors",
+        label: 'Processors',
         icon: IconRoute,
         link: `/workspace/${workspaceId}/processors`,
       },
       {
-        label: "Configuration",
+        label: 'Configuration',
         icon: IconAdjustments,
         link: `/workspace/${workspaceId}/configuration`,
       },
       {
-        label: "Users",
+        label: 'Users',
         icon: IconUsers,
         link: `/workspace/${workspaceId}/users`,
       },
       {
-        label: "Marketplace",
+        label: 'API Keys',
+        icon: IconKey,
+        link: `/workspace/${workspaceId}/apikeys`,
+      },
+      {
+        label: 'Marketplace',
         icon: IconShoppingCartBolt,
         link: `/workspace/${workspaceId}/tools`,
       },
       {
-        label: "Analytics",
+        label: 'Analytics',
         icon: IconGauge,
         link: `/workspace/${workspaceId}/analytics`,
       },
     ],
-    [workspaceId]
+    [workspaceId],
   );
 
   return (
     <AuthWrapper>
       <AppShell
-        header={{ height: "7vh" }}
+        header={{ height: '7vh' }}
         navbar={{
           width: 250,
-          breakpoint: "sm",
+          breakpoint: 'sm',
           collapsed: { mobile: opened, desktop: !opened },
         }}
         padding="md"
@@ -98,7 +104,7 @@ const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
               <ActionIcon
                 variant="default"
                 size="lg"
-                onClick={() => toggle((o) => !o)}
+                onClick={() => toggle(o => !o)}
               >
                 <IconMenu2 color="gray" />
               </ActionIcon>

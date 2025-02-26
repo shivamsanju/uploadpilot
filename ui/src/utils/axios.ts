@@ -1,17 +1,17 @@
-import axios from "axios";
-import { getApiDomain } from "./config";
+import axios from 'axios';
+import { getApiDomain } from './config';
 
 const axiosInstance = axios.create({
   baseURL: getApiDomain(),
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
 });
 
 // Request Interceptor
 axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("uploadpilottoken");
+  config => {
+    const token = localStorage.getItem('uploadpilottoken');
     if (token) {
       if (!config.headers) {
         config.headers = {};
@@ -20,21 +20,21 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => {
+  error => {
     return Promise.reject(error);
   },
 );
 
 // Response Interceptor
 axiosInstance.interceptors.response.use(
-  (response) => {
+  response => {
     return response;
   },
-  (error) => {
+  error => {
     if (error.response && error.response.status === 401) {
-      console.error("Unauthorized! Redirecting to login...");
-      localStorage.removeItem("uploadpilottoken");
-      window.location.href = "/auth";
+      console.error('Unauthorized! Redirecting to login...');
+      localStorage.removeItem('uploadpilottoken');
+      window.location.href = '/auth';
     }
     return Promise.reject(error);
   },

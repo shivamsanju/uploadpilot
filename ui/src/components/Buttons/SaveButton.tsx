@@ -1,5 +1,5 @@
-import { Button, ButtonProps, Text, TextProps } from "@mantine/core";
-import { IconDeviceFloppy, Icon, IconProps } from "@tabler/icons-react";
+import { Button, ButtonProps, Text, TextProps } from '@mantine/core';
+import { Icon, IconDeviceFloppy, IconProps } from '@tabler/icons-react';
 
 export const SaveButton: React.FC<
   ButtonProps &
@@ -9,7 +9,7 @@ export const SaveButton: React.FC<
       >;
       labelProps?: TextProps;
     }
-> = (props) => (
+> = props => (
   <Button
     leftSection={<IconDeviceFloppy size={18} {...props.iconProps} />}
     {...props}

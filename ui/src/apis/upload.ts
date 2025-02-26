@@ -1,15 +1,15 @@
-import axiosInstance from "../utils/axios";
+import { notifications } from '@mantine/notifications';
 import {
   useInfiniteQuery,
   useMutation,
   useQueryClient,
-} from "@tanstack/react-query";
+} from '@tanstack/react-query';
+import axiosInstance from '../utils/axios';
 import {
   areBracketsBalanced,
   getFilterParams,
   getSearchParam,
-} from "../utils/utility";
-import { notifications } from "@mantine/notifications";
+} from '../utils/utility';
 
 interface UploadParams {
   workspaceId: string;
@@ -26,13 +26,13 @@ interface UploadResponse {
 export const useGetUploads = ({
   workspaceId,
   batchSize = 50,
-  search = "",
+  search = '',
   filter = {},
 }: UploadParams) => {
   const queryClient = useQueryClient();
 
   let formattedSearch =
-    search?.length > 2 && areBracketsBalanced(search) ? search : "";
+    search?.length > 2 && areBracketsBalanced(search) ? search : '';
 
   const {
     isPending,
@@ -44,11 +44,11 @@ export const useGetUploads = ({
     isFetching,
     isFetchNextPageError,
   } = useInfiniteQuery({
-    queryKey: ["uploads", { workspaceId, formattedSearch, filter }],
+    queryKey: ['uploads', { workspaceId, formattedSearch, filter }],
     staleTime: 1 * 1000,
     queryFn: ({ pageParam = 0 }) => {
       if (!workspaceId) {
-        throw new Error("workspaceId is required");
+        throw new Error('workspaceId is required');
       }
       const offset = pageParam * batchSize;
       const searchParam = getSearchParam(formattedSearch);
@@ -57,9 +57,9 @@ export const useGetUploads = ({
 
       return axiosInstance
         .get<UploadResponse>(
-          `/workspaces/${workspaceId}/uploads?offset=${offset}&limit=${batchSize}${searchParam}${filterParam}`
+          `/workspaces/${workspaceId}/uploads?offset=${offset}&limit=${batchSize}${searchParam}${filterParam}`,
         )
-        .then((res) => res.data);
+        .then(res => res.data);
     },
     getNextPageParam: (lastPage, allPages) => {
       const totalPages = Math.ceil(lastPage.totalRecords / batchSize);
@@ -69,32 +69,32 @@ export const useGetUploads = ({
     initialPageParam: 0,
   });
 
-  const allUploads = data?.pages.flatMap((page) => page?.records || []) ?? [];
+  const allUploads = data?.pages.flatMap(page => page?.records || []) ?? [];
   const totalRecords = data?.pages[0]?.totalRecords ?? 0;
 
   const invalidate = async () => {
     // Remove all existing data for this query
     await queryClient.cancelQueries({
-      queryKey: ["uploads", { workspaceId, search }],
+      queryKey: ['uploads', { workspaceId, search }],
     });
 
     // Reset the query to its initial state
     queryClient.resetQueries({
-      queryKey: ["uploads", { workspaceId, search }],
+      queryKey: ['uploads', { workspaceId, search }],
     });
 
     // Fetch only the first page
     return queryClient.fetchQuery({
-      queryKey: ["uploads", { workspaceId, search }],
+      queryKey: ['uploads', { workspaceId, search }],
       queryFn: () => {
         const searchParam = search
           ? `&search=${encodeURIComponent(search)}`
-          : "";
+          : '';
         return axiosInstance
           .get<UploadResponse>(
-            `/workspaces/${workspaceId}/uploads?skip=0&limit=${batchSize}${searchParam}`
+            `/workspaces/${workspaceId}/uploads?skip=0&limit=${batchSize}${searchParam}`,
           )
-          .then((res) => res.data);
+          .then(res => res.data);
       },
     });
   };
@@ -115,13 +115,13 @@ export const useGetUploads = ({
 
 export const useDownloadUploadedFile = (workspaceId: string) => {
   return useMutation({
-    mutationKey: ["downloadFile", workspaceId],
+    mutationKey: ['downloadFile', workspaceId],
     mutationFn: async ({ uploadId }: { uploadId: string }) => {
       if (!workspaceId || !uploadId) {
-        throw new Error("workspaceId and uploadId are required");
+        throw new Error('workspaceId and uploadId are required');
       }
       const response = await axiosInstance.get(
-        `/workspaces/${workspaceId}/uploads/${uploadId}/download`
+        `/workspaces/${workspaceId}/uploads/${uploadId}/download`,
       );
       return response.data;
     },
@@ -130,28 +130,28 @@ export const useDownloadUploadedFile = (workspaceId: string) => {
 
 export const useTriggerProcessUpload = (workspaceId: string) => {
   return useMutation({
-    mutationKey: ["processUpload", workspaceId],
+    mutationKey: ['processUpload', workspaceId],
     mutationFn: async ({ uploadId }: { uploadId: string }) => {
       if (!workspaceId || !uploadId) {
-        throw new Error("workspaceId and uploadId are required");
+        throw new Error('workspaceId and uploadId are required');
       }
       const response = await axiosInstance.post(
-        `/workspaces/${workspaceId}/uploads/${uploadId}/process`
+        `/workspaces/${workspaceId}/uploads/${uploadId}/process`,
       );
       return response.data;
     },
     onSuccess: (_, { uploadId }) => {
       notifications.show({
-        title: "Success",
+        title: 'Success',
         message: `Processing started for upload ${uploadId}`,
-        color: "green",
+        color: 'green',
       });
     },
     onError: (_, { uploadId }) => {
       notifications.show({
-        title: "Error",
+        title: 'Error',
         message: `Failed to start processing for upload ${uploadId}`,
-        color: "red",
+        color: 'red',
       });
     },
   });

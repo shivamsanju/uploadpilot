@@ -6,21 +6,24 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/uploadpilot/manager/internal/config"
 	"github.com/uploadpilot/manager/internal/svc"
 )
 
 func InitWebServer(services *svc.Services) (*http.Server, error) {
 	router := chi.NewRouter()
-	router.Use(middleware.RequestID)
-	router.Use(middleware.Recoverer)
-	router.Use(middleware.Timeout(60 * time.Second))
-	router.Use(LoggerMiddleware)
+	appMiddlewares := NewAppMiddlewares(services.AuthService)
+
+	// App middlewares
+	router.Use(appMiddlewares.RecoveryMiddleware)
+	router.Use(appMiddlewares.RequestIDMiddleware)
+	router.Use(appMiddlewares.LoggerMiddleware)
+	router.Use(appMiddlewares.CorsMiddleware)
+	router.Use(appMiddlewares.RequestTimeoutMiddleware(30 * time.Second))
 
 	// Mount the uploadpilot web routes
 	router.Group(func(r chi.Router) {
-		r.Mount("/", Routes(services))
+		r.Mount("/", Routes(services, appMiddlewares))
 	})
 
 	srv := &http.Server{

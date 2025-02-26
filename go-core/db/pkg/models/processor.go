@@ -16,9 +16,11 @@ type Processor struct {
 	WorkflowRunTimeoutS       uint64             `gorm:"column:workflow_run_timeout_s;not null;default:3600" json:"workflowRunTimeoutS"`
 	TaskRunTimeoutS           uint64             `gorm:"column:task_run_timeout_s;not null;default:600" json:"taskRunTimeoutS"`
 	Enabled                   bool               `gorm:"column:enabled;not null;default:true" json:"enabled"`
-	Workspace                 Workspace          `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE" json:"workspace"`
-	At
-	By
+	Workspace                 Workspace          `gorm:"foreignKey:workspace_id;constraint:OnDelete:CASCADE" json:"workspace"`
+	CreatedAtColumn
+	UpdatedAtColumn
+	CreatedByColumn
+	UpdatedByColumn
 }
 
 func (*Processor) TableName() string {

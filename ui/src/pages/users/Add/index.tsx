@@ -1,8 +1,3 @@
-import { useForm } from "@mantine/form";
-import {
-  useAddUserToWorkspaceMutation,
-  useEditUserInWorkspaceMutation,
-} from "../../../apis/workspace";
 import {
   Button,
   Group,
@@ -10,16 +5,21 @@ import {
   Select,
   Stack,
   TextInput,
-} from "@mantine/core";
-import { IconAt, IconLockAccess } from "@tabler/icons-react";
+} from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { IconAt, IconLockAccess } from '@tabler/icons-react';
+import {
+  useAddUserToWorkspaceMutation,
+  useEditUserInWorkspaceMutation,
+} from '../../../apis/workspace';
 
-const ROLES = ["Contributor", "Viewer"];
+const ROLES = ['Contributor', 'Viewer'];
 
 type Props = {
   setOpened: React.Dispatch<React.SetStateAction<boolean>>;
   workspaceId: string;
-  mode?: "edit" | "add" | "view";
-  setMode: React.Dispatch<React.SetStateAction<"edit" | "add" | "view">>;
+  mode?: 'edit' | 'add' | 'view';
+  setMode: React.Dispatch<React.SetStateAction<'edit' | 'add' | 'view'>>;
   initialValues?: any;
   setInitialValues: React.Dispatch<React.SetStateAction<any>>;
 };
@@ -29,26 +29,26 @@ const AddUserForm: React.FC<Props> = ({
   setInitialValues,
   setMode,
   workspaceId,
-  mode = "add",
+  mode = 'add',
   initialValues,
 }) => {
   const form = useForm({
     initialValues:
-      (mode === "edit" || mode === "view") && initialValues
+      (mode === 'edit' || mode === 'view') && initialValues
         ? initialValues
         : {
-            email: "",
-            role: "",
+            email: '',
+            role: '',
           },
     validate: {
-      email: (value) =>
+      email: value =>
         /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)
           ? null
-          : "Invalid email",
-      role: (value) =>
+          : 'Invalid email',
+      role: value =>
         value && ROLES.includes(value)
           ? null
-          : "Role is required and must be one of the following: Owner, Contributor, Viewer",
+          : 'Role is required and must be one of the following: Owner, Contributor, Viewer',
     },
   });
 
@@ -64,7 +64,7 @@ const AddUserForm: React.FC<Props> = ({
       });
       setOpened(false);
       setInitialValues(null);
-      setMode("add");
+      setMode('add');
     } catch (error) {
       console.error(error);
     }
@@ -79,14 +79,14 @@ const AddUserForm: React.FC<Props> = ({
       });
       setOpened(false);
       setInitialValues(null);
-      setMode("add");
+      setMode('add');
     } catch (error) {
       console.error(error);
     }
   };
 
   return (
-    <form onSubmit={form.onSubmit(mode === "edit" ? handleEdit : handleAdd)}>
+    <form onSubmit={form.onSubmit(mode === 'edit' ? handleEdit : handleAdd)}>
       <LoadingOverlay
         visible={isPending}
         overlayProps={{ backgroundOpacity: 0 }}
@@ -99,8 +99,8 @@ const AddUserForm: React.FC<Props> = ({
           label="Email"
           description="Email address of the user"
           placeholder="Email"
-          disabled={mode === "edit" || mode === "view"}
-          {...form.getInputProps("email")}
+          disabled={mode === 'edit' || mode === 'view'}
+          {...form.getInputProps('email')}
         />
         <Select
           withAsterisk
@@ -109,15 +109,15 @@ const AddUserForm: React.FC<Props> = ({
           description="Role to be assigned to the user"
           placeholder="Role"
           data={ROLES}
-          disabled={mode === "view"}
-          {...form.getInputProps("role")}
+          disabled={mode === 'view'}
+          {...form.getInputProps('role')}
         />
       </Stack>
-      {mode !== "view" && (
+      {mode !== 'view' && (
         <Group justify="flex-end" mt={50}>
           <Button type="submit">
-            {mode === "edit" && "Save"}
-            {mode === "add" && "Add"}
+            {mode === 'edit' && 'Save'}
+            {mode === 'add' && 'Add'}
           </Button>
         </Group>
       )}

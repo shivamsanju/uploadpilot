@@ -1,6 +1,13 @@
-import { Paper, Text, useMantineTheme } from "@mantine/core";
-import { IconActivity } from "@tabler/icons-react";
-import classes from "./Utils.module.css";
+import {
+  Box,
+  Group,
+  Paper,
+  Text,
+  ThemeIcon,
+  useMantineTheme,
+} from '@mantine/core';
+import { IconActivity } from '@tabler/icons-react';
+import classes from './Utils.module.css';
 
 type Props = {
   template: {
@@ -15,16 +22,26 @@ export const Template: React.FC<Props> = ({ template, selected }) => {
 
   return (
     <Paper
-      h="180"
+      h="150"
       key={template.key}
       p="sm"
       withBorder
-      className={`${classes.card} ${selected ? classes.selected : ""}`}
+      className={`${classes.card} ${selected ? classes.selected : ''}`}
     >
-      <IconActivity size={30} stroke={2} color={theme.colors.appcolor[6]} />
-      <Text fz="lg" fw={500} className={classes.cardTitle} mt="md">
-        {template.label}
-      </Text>
+      <Box className={classes.cardTitle}>
+        <Group p={0} m={0} align="center" wrap="nowrap">
+          <ThemeIcon size={30} radius="xl" variant="light">
+            <IconActivity
+              size={20}
+              stroke={2}
+              color={theme.colors.appcolor[6]}
+            />
+          </ThemeIcon>
+          <Text fz="lg" fw={500}>
+            {template.label}
+          </Text>
+        </Group>
+      </Box>
       <Text fz="sm" c="dimmed" mt="sm">
         {template.description}
       </Text>

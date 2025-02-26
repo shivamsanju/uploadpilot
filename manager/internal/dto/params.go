@@ -14,6 +14,11 @@ type UploadParams struct {
 	UploadID    string `json:"uploadId" validate:"required,uuid"`
 }
 
+type ApiKeyParams struct {
+	WorkspaceID string `json:"workspaceId" validate:"required,uuid"`
+	ApiKeyID    string `json:"apiKeyId" validate:"required,uuid"`
+}
+
 type PaginatedQuery struct {
 	Offset              string `json:"offset" validate:"omitempty,integer"`
 	Limit               string `json:"limit" validate:"omitempty,integer"`

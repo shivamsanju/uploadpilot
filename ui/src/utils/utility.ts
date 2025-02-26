@@ -1,18 +1,18 @@
 export const formatBytes = (bytes: number, decimals: number = 2) => {
-  if (!+bytes) return "0 Bytes";
+  if (!+bytes) return '0 Bytes';
 
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = [
-    "Bytes",
-    "KiB",
-    "MiB",
-    "GiB",
-    "TiB",
-    "PiB",
-    "EiB",
-    "ZiB",
-    "YiB",
+    'Bytes',
+    'KiB',
+    'MiB',
+    'GiB',
+    'TiB',
+    'PiB',
+    'EiB',
+    'ZiB',
+    'YiB',
   ];
 
   const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -23,15 +23,15 @@ export const formatBytes = (bytes: number, decimals: number = 2) => {
 export const areBracketsBalanced = (input: string) => {
   const stack = [];
   const brackets: { [key: string]: string } = {
-    ")": "(",
-    "}": "{",
-    "]": "[",
+    ')': '(',
+    '}': '{',
+    ']': '[',
   };
 
   for (const char of input) {
-    if (["(", "{", "["].includes(char)) {
+    if (['(', '{', '['].includes(char)) {
       stack.push(char);
-    } else if ([")", "}", "]"].includes(char)) {
+    } else if ([')', '}', ']'].includes(char)) {
       if (stack.pop() !== brackets[char]) {
         return false;
       }
@@ -42,18 +42,18 @@ export const areBracketsBalanced = (input: string) => {
 };
 
 export const getFilterParams = (filter: Record<string, string[]>): string => {
-  let filterParam = "";
+  let filterParam = '';
   if (Object.entries(filter).length > 0) {
     const fp: string[] = [];
     for (const [key, values] of Object.entries(filter)) {
-      const encodedValues = values.map((value) => encodeURIComponent(value));
+      const encodedValues = values.map(value => encodeURIComponent(value));
       if (values.length !== 0) {
-        fp.push(`${key}:${encodedValues.join(",")}`);
+        fp.push(`${key}:${encodedValues.join(',')}`);
       }
     }
 
     if (fp.length !== 0) {
-      filterParam = `&filter=${fp.join(";")}`;
+      filterParam = `&filter=${fp.join(';')}`;
     }
   }
 
@@ -61,5 +61,5 @@ export const getFilterParams = (filter: Record<string, string[]>): string => {
 };
 
 export const getSearchParam = (search: string): string => {
-  return search ? `&search=${encodeURIComponent(search)}` : "";
+  return search ? `&search=${encodeURIComponent(search)}` : '';
 };

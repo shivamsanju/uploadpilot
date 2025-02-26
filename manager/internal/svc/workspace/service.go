@@ -166,6 +166,6 @@ func (s *Service) DeleteWorkspace(ctx context.Context, workspaceID string) error
 }
 
 func (s *Service) GetSubscription(ctx context.Context, workspaceID string) (*dto.Subscription, error) {
-	active, expiredOn, err := s.wsRepo.GetSubscription(ctx, workspaceID)
-	return &dto.Subscription{Active: active, ExpiredOn: expiredOn}, err
+	active, expiresAt, err := s.wsRepo.GetSubscription(ctx, workspaceID)
+	return &dto.Subscription{Active: active, ExpiresAt: expiresAt}, err
 }

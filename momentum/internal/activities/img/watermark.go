@@ -87,7 +87,7 @@ func ApplyTextWatermark(ctx context.Context, wfMeta, activityKey, inputActivityK
 		// Set text position (20% of image width from the bottom right with margin)
 		margin := 10
 		point := fixed.Point26_6{
-			X: fixed.I(bounds.Dx() - len(text)*size - margin),
+			X: fixed.I(bounds.Dx() - margin),
 			Y: fixed.I(bounds.Dy() - margin),
 		}
 

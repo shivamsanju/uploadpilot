@@ -1,17 +1,17 @@
-import { Group, Paper, Stack, Title } from "@mantine/core";
-import { useViewportSize } from "@mantine/hooks";
+import { Group, Paper, Stack, Text } from '@mantine/core';
+import { useViewportSize } from '@mantine/hooks';
 import {
   IconBrandGolang,
   IconBrandJavascript,
   IconBrandPython,
   IconBrandReact,
   IconBrandTypescript,
-} from "@tabler/icons-react";
-import { FrameworkCard } from "./FrameworkCard";
-import { useState } from "react";
-import ReactUploaderPreviewPage from "./react";
-import GoIntegrationPage from "./go";
-import classes from "./getstarted.module.css";
+} from '@tabler/icons-react';
+import { useState } from 'react';
+import { FrameworkCard } from './FrameworkCard';
+import classes from './getstarted.module.css';
+import GoIntegrationPage from './go';
+import ReactUploaderPreviewPage from './react';
 
 const style = (width: number) => {
   if (width > 768) {
@@ -29,48 +29,48 @@ const style = (width: number) => {
 
   return {
     transform: `scale(${scale})`,
-    transformOrigin: "top left",
+    transformOrigin: 'top left',
   };
 };
 
 const frameworks = [
   {
-    name: "React",
+    name: 'React',
     icon: IconBrandReact,
   },
   {
-    name: "Go",
+    name: 'Go',
     icon: IconBrandGolang,
   },
   {
-    name: "Python",
+    name: 'Python',
     icon: IconBrandPython,
   },
   {
-    name: "JavaScript",
+    name: 'JavaScript',
     icon: IconBrandJavascript,
   },
   {
-    name: "TypeScript",
+    name: 'TypeScript',
     icon: IconBrandTypescript,
   },
 ];
 
 export const GetStartedPage = () => {
-  const [selectedFramework, setSelectedFramework] = useState("React");
+  const [selectedFramework, setSelectedFramework] = useState('React');
   const { width } = useViewportSize();
   const s = style(width);
 
   return (
     <Stack justify="center" align="center" pt="sm" mb={50}>
-      <Title order={4} c="dimmed">
+      <Text ta="center" fw={700} fz="25px" mb="sm">
         Choose your framework
-      </Title>
+      </Text>
       <Group justify="center" gap="xl" mb="md">
-        {frameworks.map((framework) => (
+        {frameworks.map(framework => (
           <Paper
             className={`${classes.frameworkCard} ${
-              selectedFramework === framework.name ? classes.selected : ""
+              selectedFramework === framework.name ? classes.selected : ''
             }`}
             key={framework.name}
             p="md"
@@ -86,11 +86,11 @@ export const GetStartedPage = () => {
           </Paper>
         ))}
       </Group>
-      {selectedFramework === "React" && <ReactUploaderPreviewPage style={s} />}
-      {selectedFramework === "Go" && <GoIntegrationPage style={s} />}
-      {selectedFramework === "Python" && <GoIntegrationPage style={s} />}
-      {selectedFramework === "JavaScript" && <GoIntegrationPage style={s} />}
-      {selectedFramework === "TypeScript" && <GoIntegrationPage style={s} />}
+      {selectedFramework === 'React' && <ReactUploaderPreviewPage style={s} />}
+      {selectedFramework === 'Go' && <GoIntegrationPage style={s} />}
+      {selectedFramework === 'Python' && <GoIntegrationPage style={s} />}
+      {selectedFramework === 'JavaScript' && <GoIntegrationPage style={s} />}
+      {selectedFramework === 'TypeScript' && <GoIntegrationPage style={s} />}
     </Stack>
   );
 };

@@ -1,6 +1,6 @@
-import { CodeHighlight } from "@mantine/code-highlight";
-import { Modal } from "@mantine/core";
-import React from "react";
+import { CodeHighlight } from '@mantine/code-highlight';
+import { Modal } from '@mantine/core';
+import React from 'react';
 
 type MetadataModalProps = {
   open: boolean;

@@ -1,25 +1,26 @@
 import {
-  createTheme,
-  TextInput,
-  Button,
-  Select,
-  Textarea,
-  TagsInput,
-  Badge,
-  NumberInput,
-  Text,
-  virtualColor,
-  MultiSelect,
-  Input,
-  PasswordInput,
   Anchor,
+  Badge,
   Burger,
-  Paper,
-  Switch,
-  SegmentedControl,
-  Loader,
+  Button,
   ColorInput,
-} from "@mantine/core";
+  createTheme,
+  Input,
+  Loader,
+  MultiSelect,
+  NumberInput,
+  Paper,
+  PasswordInput,
+  SegmentedControl,
+  Select,
+  Switch,
+  TagsInput,
+  Text,
+  Textarea,
+  TextInput,
+  virtualColor,
+} from '@mantine/core';
+import { DateInput } from '@mantine/dates';
 
 type Icolors = readonly [
   string,
@@ -32,7 +33,7 @@ type Icolors = readonly [
   string,
   string,
   string,
-  ...string[]
+  ...string[],
 ];
 
 // const magenta: Icolors = [
@@ -87,29 +88,29 @@ type Icolors = readonly [
 // ]
 
 const lightBlue: Icolors = [
-  "#e1f8ff",
-  "#cbedff",
-  "#9ad7ff",
-  "#64c1ff",
-  "#3aaefe",
-  "#20a2fe",
-  "#099dff",
-  "#0088e4",
-  "#0079cd",
-  "#0069b6",
+  '#e1f8ff',
+  '#cbedff',
+  '#9ad7ff',
+  '#64c1ff',
+  '#3aaefe',
+  '#20a2fe',
+  '#099dff',
+  '#0088e4',
+  '#0079cd',
+  '#0069b6',
 ];
 
 export const myAppTheme = createTheme({
-  primaryColor: "appcolor",
-  fontFamily: "Inter",
+  primaryColor: 'appcolor',
+  fontFamily: 'Inter',
   headings: {
-    fontFamily: "Inter",
+    fontFamily: 'Inter',
   },
   colors: {
     textColor: virtualColor({
-      name: "textColor",
-      dark: "#F3F5F7",
-      light: "#7a7a7b",
+      name: 'textColor',
+      dark: '#F3F5F7',
+      light: '#7a7a7b',
     }),
     appcolor: lightBlue,
   },
@@ -117,88 +118,93 @@ export const myAppTheme = createTheme({
   components: {
     TextInput: TextInput.extend({
       defaultProps: {
-        size: "xs",
-        bd: "none",
+        size: 'xs',
+        bd: 'none',
       },
     }),
     NumberInput: NumberInput.extend({
       defaultProps: {
-        size: "xs",
+        size: 'xs',
       },
     }),
     MultiSelect: MultiSelect.extend({
       defaultProps: {
-        size: "xs",
+        size: 'xs',
       },
     }),
     TagsInput: TagsInput.extend({
       defaultProps: {
-        size: "xs",
+        size: 'xs',
       },
     }),
     Select: Select.extend({
       defaultProps: {
-        size: "xs",
+        size: 'xs',
       },
     }),
     Textarea: Textarea.extend({
       defaultProps: {
-        size: "xs",
+        size: 'xs',
       },
     }),
     Input: Input.extend({
       defaultProps: {
-        size: "xs",
+        size: 'xs',
       },
     }),
     ColorInput: ColorInput.extend({
       defaultProps: {
-        size: "xs",
+        size: 'xs',
       },
     }),
     PasswordInput: PasswordInput.extend({
       defaultProps: {
-        size: "xs",
+        size: 'xs',
+      },
+    }),
+    DateInput: DateInput.extend({
+      defaultProps: {
+        size: 'xs',
       },
     }),
     Button: Button.extend({
       defaultProps: {
-        size: "xs",
+        size: 'xs',
         radius: 2,
       },
     }),
 
     Badge: Badge.extend({
       defaultProps: {
-        size: "xs",
-        variant: "light",
+        size: 'xs',
+        variant: 'light',
         radius: 2,
       },
     }),
     Switch: Switch.extend({
       defaultProps: {
-        size: "lg",
+        size: 'lg',
       },
     }),
     SegmentedControl: SegmentedControl.extend({
       defaultProps: {
-        size: "xs",
+        size: 'xs',
       },
     }),
     Text: Text.extend({
       defaultProps: {
-        size: "xs",
-        color: "textColor",
+        size: 'xs',
+        color: 'textColor',
       },
     }),
     Anchor: Anchor.extend({
       defaultProps: {
-        size: "xs",
+        size: 'xs',
       },
     }),
     Burger: Burger.extend({
       defaultProps: {
-        size: "xs",
+        size: 'xs',
       },
     }),
     Paper: Paper.extend({
@@ -206,13 +212,13 @@ export const myAppTheme = createTheme({
         radius: 0,
         style: {
           borderColor:
-            "light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-6))",
+            'light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-6))',
         },
       },
     }),
     Loader: Loader.extend({
       defaultProps: {
-        type: "dots",
+        type: 'dots',
       },
     }),
   },

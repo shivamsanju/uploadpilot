@@ -1,7 +1,7 @@
-import { Badge, Box, Group, Text, Title } from "@mantine/core";
-import UserMenu from "../UserMenu";
-import { useNavigate } from "react-router-dom";
-import { useViewportSize } from "@mantine/hooks";
+import { Badge, Box, Group, Text, Title } from '@mantine/core';
+import { useViewportSize } from '@mantine/hooks';
+import { useNavigate } from 'react-router-dom';
+import UserMenu from '../UserMenu';
 
 interface Props {
   burger?: React.ReactNode;
@@ -16,18 +16,18 @@ export function AdminHeader({ burger }: Props) {
       align="center"
       px="md"
       h="100%"
-      gap={width > 768 ? "xl" : "md"}
+      gap={width > 768 ? 'xl' : 'md'}
       wrap="nowrap"
     >
       {burger}
-      <Box onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
+      <Box onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
         <Group gap="md" align="center">
           <Title order={4} opacity={0.7}>
-            Upload Pilot{" "}
+            Upload Pilot{' '}
           </Title>
           <Badge
             variant="gradient"
-            gradient={{ from: "appcolor", to: "orange" }}
+            gradient={{ from: 'appcolor', to: 'orange' }}
           >
             beta
           </Badge>

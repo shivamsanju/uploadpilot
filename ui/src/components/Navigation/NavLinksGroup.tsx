@@ -1,5 +1,3 @@
-import { useState } from "react";
-import { IconChevronRight } from "@tabler/icons-react";
 import {
   Box,
   Collapse,
@@ -7,10 +5,12 @@ import {
   Text,
   ThemeIcon,
   UnstyledButton,
-} from "@mantine/core";
-import classes from "./NavLinksGroup.module.css";
-import { useNavigate } from "react-router-dom";
-import { useViewportSize } from "@mantine/hooks";
+} from '@mantine/core';
+import { useViewportSize } from '@mantine/hooks';
+import { IconChevronRight } from '@tabler/icons-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import classes from './NavLinksGroup.module.css';
 
 interface LinksGroupProps {
   icon: React.FC<any>;
@@ -38,13 +38,13 @@ export function LinksGroup({
   const hasLinks = Array.isArray(links);
   const [opened, setOpened] = useState(initiallyOpened || false);
 
-  const items = (hasLinks ? links : []).map((link) => (
-    <Text<"a">
+  const items = (hasLinks ? links : []).map(link => (
+    <Text<'a'>
       component="a"
       className={classes.link}
       href={link.link}
       key={link.label}
-      onClick={(event) => {
+      onClick={event => {
         if (width < 768) {
           toggle(false);
         }
@@ -58,7 +58,7 @@ export function LinksGroup({
 
   const handleClick = () => {
     if (hasLinks) {
-      setOpened((o) => !o);
+      setOpened(o => !o);
       return;
     }
     if (link) {
@@ -73,10 +73,10 @@ export function LinksGroup({
     <>
       <UnstyledButton
         onClick={handleClick}
-        className={`${active ? classes.active : ""} ${classes.control}`}
+        className={`${active ? classes.active : ''} ${classes.control}`}
       >
         <Group justify="space-between" gap={0}>
-          <Box style={{ display: "flex", alignItems: "center" }}>
+          <Box style={{ display: 'flex', alignItems: 'center' }}>
             <ThemeIcon variant="light" size={30}>
               <Icon size={18} />
             </ThemeIcon>
@@ -89,7 +89,7 @@ export function LinksGroup({
               className={classes.chevron}
               stroke={1.5}
               size={16}
-              style={{ transform: opened ? "rotate(-90deg)" : "none" }}
+              style={{ transform: opened ? 'rotate(-90deg)' : 'none' }}
             />
           )}
         </Group>

@@ -2,30 +2,37 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/phuslu/log"
 	commonutils "github.com/uploadpilot/go-core/common/utils"
 	"github.com/uploadpilot/go-core/db/pkg/models"
 	"github.com/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/manager/internal/msg"
+	"github.com/uploadpilot/manager/internal/svc/auth"
 	"github.com/uploadpilot/manager/internal/svc/upload"
+	"github.com/uploadpilot/manager/internal/svc/workspace"
 	"github.com/uploadpilot/manager/internal/utils"
 )
 
 type uploadHandler struct {
-	uploadSvc upload.Service
+	uploadSvc    *upload.Service
+	workspaceSvc *workspace.Service
+	authSvc      *auth.Service
 }
 
-func NewUploadHandler(uploadSvc *upload.Service) *uploadHandler {
+func NewUploadHandler(uploadSvc *upload.Service, workspaceSvc *workspace.Service, authSvc *auth.Service) *uploadHandler {
 	return &uploadHandler{
-		uploadSvc: *uploadSvc,
+		uploadSvc:    uploadSvc,
+		workspaceSvc: workspaceSvc,
+		authSvc:      authSvc,
 	}
 }
 
 func (h *uploadHandler) GetPaginatedUploads(
-	ctx context.Context,
+	r *http.Request,
 	params dto.WorkspaceParams,
 	query dto.PaginatedQuery,
 	body interface{},
@@ -35,7 +42,7 @@ func (h *uploadHandler) GetPaginatedUploads(
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	uploads, totalRecords, err := h.uploadSvc.GetAllUploads(ctx, params.WorkspaceID, paginationParams)
+	uploads, totalRecords, err := h.uploadSvc.GetAllUploads(r.Context(), params.WorkspaceID, paginationParams)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
@@ -59,46 +66,13 @@ func (h *uploadHandler) GetUploadDetailsByID(w http.ResponseWriter, r *http.Requ
 	render.JSON(w, r, details)
 }
 
-func (h *uploadHandler) CreateUpload(
-	ctx context.Context,
-	params dto.WorkspaceParams,
-	query interface{},
-	body dto.CreateUploadRequest,
-) (string, int, error) {
-	log.Info().Msgf("#sss upload: %+v", body)
-
-	var upload models.Upload
-	if err := commonutils.ConvertDTOToModel(&body, &upload); err != nil {
-		return "", http.StatusUnprocessableEntity, err
-	}
-	if err := h.uploadSvc.CreateUpload(ctx, params.WorkspaceID, &upload); err != nil {
-		return "", http.StatusBadRequest, err
-	}
-
-	return upload.ID, http.StatusOK, nil
-}
-
-func (h *uploadHandler) FinishUpload(
-	ctx context.Context,
-	params dto.UploadParams,
-	query interface{},
-	body dto.FinishUploadRequest,
-) (bool, int, error) {
-	err := h.uploadSvc.FinishUpload(ctx, params.WorkspaceID, params.UploadID, &body)
-	if err != nil {
-		return false, http.StatusBadRequest, err
-	}
-
-	return true, http.StatusOK, nil
-}
-
 func (h *uploadHandler) GetUploadURL(
-	ctx context.Context,
+	r *http.Request,
 	params dto.UploadParams,
 	query interface{},
 	body interface{},
 ) (string, int, error) {
-	url, err := h.uploadSvc.GetUploadSignedURL(ctx, params.WorkspaceID, params.UploadID)
+	url, err := h.uploadSvc.GetUploadSignedURL(r.Context(), params.WorkspaceID, params.UploadID)
 	if err != nil {
 		return "", http.StatusBadRequest, err
 	}
@@ -107,14 +81,66 @@ func (h *uploadHandler) GetUploadURL(
 }
 
 func (h *uploadHandler) ProcessUpload(
-	ctx context.Context,
+	r *http.Request,
 	params dto.UploadParams,
 	query interface{},
 	body interface{},
 ) (string, int, error) {
-	err := h.uploadSvc.ProcessUpload(ctx, params.WorkspaceID, params.UploadID)
+	statusCode, err := h.verifySubscription(r.Context(), params.WorkspaceID)
+	if err != nil {
+		return "", statusCode, err
+	}
+	err = h.uploadSvc.ProcessUpload(r.Context(), params.WorkspaceID, params.UploadID)
 	if err != nil {
 		return "", http.StatusBadRequest, err
 	}
 	return "OK", http.StatusOK, nil
+}
+
+// UPLOADER API
+func (h *uploadHandler) CreateUpload(
+	r *http.Request,
+	params dto.WorkspaceParams,
+	query interface{},
+	body dto.CreateUploadRequest,
+) (string, int, error) {
+	statusCode, err := h.verifySubscription(r.Context(), params.WorkspaceID)
+	if err != nil {
+		return "", statusCode, err
+	}
+	var upload models.Upload
+	if err := commonutils.ConvertDTOToModel(&body, &upload); err != nil {
+		return "", http.StatusUnprocessableEntity, err
+	}
+	if err := h.uploadSvc.CreateUpload(r.Context(), params.WorkspaceID, &upload); err != nil {
+		return "", http.StatusBadRequest, err
+	}
+
+	return upload.ID, http.StatusOK, nil
+}
+
+func (h *uploadHandler) FinishUpload(
+	r *http.Request,
+	params dto.UploadParams,
+	query interface{},
+	body dto.FinishUploadRequest,
+) (bool, int, error) {
+	statusCode, err := h.verifySubscription(r.Context(), params.WorkspaceID)
+	if err != nil {
+		return false, statusCode, err
+	}
+	err = h.uploadSvc.FinishUpload(r.Context(), params.WorkspaceID, params.UploadID, &body)
+	if err != nil {
+		return false, http.StatusBadRequest, err
+	}
+
+	return true, http.StatusOK, nil
+}
+
+func (h *uploadHandler) verifySubscription(ctx context.Context, workspaceID string) (int, error) {
+	sub, err := h.workspaceSvc.GetSubscription(ctx, workspaceID)
+	if err != nil || !sub.Active {
+		return http.StatusUnauthorized, errors.New(msg.ErrSubscriptionExpired)
+	}
+	return http.StatusOK, nil
 }

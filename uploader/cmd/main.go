@@ -29,7 +29,7 @@ func main() {
 
 	appConfig := config.GetAppConfig()
 	config.InitLogger(appConfig.Environment)
-	coreClient := clients.NewCoreServiceClient(appConfig.CoreServiceEndpoint, appConfig.CoreServiceAPIKey)
+	coreClient := clients.NewCoreServiceClient(appConfig.CoreServiceEndpoint)
 	svc := service.NewUploadService(coreClient)
 
 	srv, err := web.InitWebserver(svc)

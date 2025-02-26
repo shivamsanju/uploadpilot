@@ -1,55 +1,54 @@
-import { useForm } from "@mantine/form";
 import {
   Box,
   Button,
   Container,
   Group,
-  Paper,
-  ScrollArea,
   SimpleGrid,
-  Stepper,
+  Stack,
   TagsInput,
   Text,
   TextInput,
   Title,
-} from "@mantine/core";
+} from '@mantine/core';
+import { useForm } from '@mantine/form';
+import { IconSearch } from '@tabler/icons-react';
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   useCreateProcessorMutation,
   useGetAllWorkflowTemplates,
-} from "../../../apis/processors";
-import { useNavigate, useParams } from "react-router-dom";
-import { useState } from "react";
-import { ContainerOverlay } from "../../../components/Overlay";
-import { Template } from "./Template";
-import { ErrorCard } from "../../../components/ErrorCard/ErrorCard";
+} from '../../../apis/processors';
+import { ErrorCard } from '../../../components/ErrorCard/ErrorCard';
+import { ContainerOverlay } from '../../../components/Overlay';
+import { Template } from './Template';
 
 const NewprocessorPage = () => {
-  const [active, setActive] = useState(0);
+  const [activePage, setActivePage] = useState(0);
   const { workspaceId } = useParams();
   const navigate = useNavigate();
 
   const form = useForm({
     initialValues: {
-      name: "",
+      name: '',
       triggers: [],
       enabled: true,
-      templateKey: "",
+      templateKey: '',
     },
     validate: {
-      name: (value) => (value ? null : "Name is required"),
+      name: value => (value ? null : 'Name is required'),
     },
   });
 
   const { mutateAsync: createMutateAsync, isPending: isCreating } =
     useCreateProcessorMutation();
   const { isPending, templates, error } = useGetAllWorkflowTemplates(
-    workspaceId || ""
+    workspaceId || '',
   );
 
   const handleAdd = async (values: any) => {
     try {
       await createMutateAsync({
-        workspaceId: workspaceId || "",
+        workspaceId: workspaceId || '',
         processor: {
           workspaceId,
           name: values.name,
@@ -65,97 +64,127 @@ const NewprocessorPage = () => {
     }
   };
 
-  const nextStep = () => {
-    const val = form.validate();
-    if (val.hasErrors) {
-      return;
-    }
-    setActive((current) => (current < 3 ? current + 1 : current));
-  };
-
-  const prevStep = () => {
-    setActive((current) => (current > 0 ? current - 1 : current));
-  };
-
   const selectTemplate = (templateKey: string) => {
     if (templateKey === form.values.templateKey) {
-      form.setFieldValue("templateKey", "");
+      form.setFieldValue('templateKey', '');
     } else {
-      form.setFieldValue("templateKey", templateKey);
+      form.setFieldValue('templateKey', templateKey);
     }
   };
+
+  if (error) {
+    return <ErrorCard message={error?.message} title={'Error'} />;
+  }
 
   return (
     <Box mb={50}>
-      <Container>
-        <Group justify="center" mb="xl">
-          <Title order={3} opacity={0.7}>
-            New Processor
-          </Title>
-        </Group>
-        <Paper p="xl" withBorder>
-          <form onSubmit={form.onSubmit(handleAdd)}>
-            <Stepper size="xs" active={active}>
-              <Stepper.Step
-                label="Name"
-                description="Choose a name for your processor"
-              >
-                <TextInput
-                  mt="xl"
-                  withAsterisk
-                  label="Name"
-                  description="Name of the processor"
-                  type="name"
-                  placeholder="Enter a name"
-                  {...form.getInputProps("name")}
-                />
-              </Stepper.Step>
-              <Stepper.Step label="Trigger" description="Select triggers">
-                <TagsInput
-                  mt="xl"
-                  label="Triggers"
-                  description="Mime type to trigger the processor"
-                  placeholder="Add comma separated mime types"
-                  {...form.getInputProps("triggers")}
-                />
-              </Stepper.Step>
-              <Stepper.Step label="Workflow" description="Select a workflow">
-                <Text size="sm" mb="sm">
-                  Choose workflow from an prebuilt templates
-                </Text>
-                <ScrollArea scrollbarSize={6} h="55vh">
-                  {error && (
-                    <ErrorCard message={error?.message} title={"Error"} />
-                  )}
-                  <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xl">
-                    {templates &&
-                      templates.length > 0 &&
-                      templates.map((t: any) => (
-                        <Box onClick={() => selectTemplate(t.key)}>
-                          <Template
-                            template={t}
-                            selected={t.key === form.values.templateKey}
-                          />
-                        </Box>
-                      ))}
-                  </SimpleGrid>
-                </ScrollArea>
-              </Stepper.Step>
-            </Stepper>
-            <ContainerOverlay visible={isCreating || isPending} />
-            <Group justify="flex-end" mt={50}>
-              <Button
-                variant="default"
-                onClick={prevStep}
-                disabled={active === 0}
-              >
-                Back
-              </Button>
-              {active === 2 && <Button type="submit">Create</Button>}
-              {active < 2 && <Button onClick={nextStep}>Next</Button>}
+      <ContainerOverlay visible={isCreating || isPending} />
+
+      <Container mt="md">
+        <form onSubmit={form.onSubmit(handleAdd)}>
+          <Group justify="space-between" align="center" mb="lg">
+            <Box>
+              <Title order={3}>Create new processor</Title>
+            </Box>
+            <Group justify="flex-end">
+              {activePage === 0 ? (
+                <Button
+                  variant="default"
+                  onClick={() =>
+                    navigate(`/workspace/${workspaceId}/processors`)
+                  }
+                >
+                  Discard
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => setActivePage(activePage - 1)}
+                  variant="default"
+                >
+                  Back
+                </Button>
+              )}
+              {activePage === 0 && (
+                <Button onClick={() => setActivePage(activePage + 1)}>
+                  Next
+                </Button>
+              )}
+              {activePage === 1 && (
+                <Button
+                  type="submit"
+                  loading={isCreating}
+                  disabled={!form.isValid()}
+                >
+                  Create
+                </Button>
+              )}
             </Group>
-          </form>
-        </Paper>
+          </Group>
+          {activePage === 0 ? (
+            <Stack>
+              <TextInput
+                withAsterisk
+                label="Name"
+                description="Name of the processor"
+                type="name"
+                placeholder="Enter a name"
+                {...form.getInputProps('name')}
+              />
+              <TagsInput
+                label="Triggers"
+                description="Mime type to trigger the processor"
+                placeholder="Add comma separated mime types"
+                {...form.getInputProps('triggers')}
+              />
+            </Stack>
+          ) : (
+            <Stack>
+              <Text size="md" mt="md" fw={500}>
+                Choose workflow from an prebuilt templates
+              </Text>
+              <TextInput
+                placeholder="Search for templates"
+                leftSection={<IconSearch size={18} />}
+              />
+
+              <Box mb="sm" mt="sm">
+                <Text size="sm" mb="sm">
+                  Suggested templates
+                </Text>
+                <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xl">
+                  {templates &&
+                    templates.length > 0 &&
+                    templates.map((t: any) => (
+                      <Box onClick={() => selectTemplate(t.key)}>
+                        <Template
+                          template={t}
+                          selected={t.key === form.values.templateKey}
+                        />
+                      </Box>
+                    ))}
+                </SimpleGrid>
+              </Box>
+
+              {/* <Box mb="sm">
+                <Text size="sm" mt="md" mb="sm">
+                  Document templates
+                </Text>
+                <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="xl">
+                  {templates &&
+                    templates.length > 0 &&
+                    [].map((t: any) => (
+                      <Box onClick={() => selectTemplate(t.key)}>
+                        <Template
+                          template={t}
+                          selected={t.key === form.values.templateKey}
+                        />
+                      </Box>
+                    ))}
+                </SimpleGrid>
+              </Box> */}
+            </Stack>
+          )}
+        </form>
       </Container>
     </Box>
   );

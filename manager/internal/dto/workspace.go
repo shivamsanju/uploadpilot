@@ -34,5 +34,5 @@ type UploaderConfig struct {
 
 type Subscription struct {
 	Active    bool      `json:"active"`
-	ExpiredOn time.Time `json:"expiredOn"`
+	ExpiresAt time.Time `json:"expiresAt"`
 }

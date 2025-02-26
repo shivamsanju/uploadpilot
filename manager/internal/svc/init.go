@@ -1,7 +1,9 @@
 package svc
 
 import (
+	"github.com/uploadpilot/go-core/common/vault"
 	"github.com/uploadpilot/go-core/db/pkg/repo"
+	"github.com/uploadpilot/manager/internal/svc/auth"
 	"github.com/uploadpilot/manager/internal/svc/processor"
 	"github.com/uploadpilot/manager/internal/svc/upload"
 	"github.com/uploadpilot/manager/internal/svc/user"
@@ -13,18 +15,21 @@ type Services struct {
 	UploadService    *upload.Service
 	UserService      *user.Service
 	ProcessorService *processor.Service
+	AuthService      *auth.Service
 }
 
-func NewServices(repos *repo.Repositories) *Services {
+func NewServices(repos *repo.Repositories, kms vault.KMS) *Services {
 	processorSvc := processor.NewService(repos.ProcessorRepo)
 	workspaceSvc := workspace.NewService(repos.WorkspaceRepo, repos.WorkspaceConfigRepo, repos.WorkspaceUserRepo, repos.UserRepo)
 	userSvc := user.NewService(repos.UserRepo)
-	uploadSvc := upload.NewService(repos.UploadRepo, repos.WorkspaceRepo, repos.WorkspaceConfigRepo, repos.UserRepo, processorSvc)
+	authSvc := auth.NewService(repos.ApiKeyRepo, kms)
+	uploadSvc := upload.NewService(repos.UploadRepo, processorSvc)
 
 	return &Services{
 		WorkspaceService: workspaceSvc,
 		UploadService:    uploadSvc,
 		UserService:      userSvc,
 		ProcessorService: processorSvc,
+		AuthService:      authSvc,
 	}
 }

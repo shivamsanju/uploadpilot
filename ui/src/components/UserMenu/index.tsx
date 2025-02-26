@@ -1,33 +1,33 @@
 import {
   Avatar,
+  Button,
   Group,
   Menu,
-  UnstyledButton,
   Text,
-  Button,
-} from "@mantine/core";
+  UnstyledButton,
+} from '@mantine/core';
 import {
-  IconLogout,
   IconChevronDown,
-  IconSun,
+  IconLogout,
   IconStopwatch,
-} from "@tabler/icons-react";
-import { useNavigate } from "react-router-dom";
-import ThemeSwitcher from "../ThemeSwitcher";
-import { useGetSession } from "../../apis/user";
-import { getApiDomain } from "../../utils/config";
+  IconSun,
+} from '@tabler/icons-react';
+import { useNavigate } from 'react-router-dom';
+import { useGetSession } from '../../apis/user';
+import { getApiDomain } from '../../utils/config';
+import ThemeSwitcher from '../ThemeSwitcher';
 
 const UserButton = () => {
   const navigate = useNavigate();
   const { isPending, error, session } = useGetSession();
 
   const handleSignOut = async () => {
-    localStorage.removeItem("uploadpilottoken");
+    localStorage.removeItem('uploadpilottoken');
     window.location.href = getApiDomain() + `/auth/logout`;
   };
 
   if (error) {
-    navigate("/auth");
+    navigate('/auth');
   }
 
   if (isPending) {
@@ -48,7 +48,7 @@ const UserButton = () => {
       </Button>
       <Menu
         trigger="click"
-        transitionProps={{ transition: "pop" }}
+        transitionProps={{ transition: 'pop' }}
         width={200}
         position="bottom"
         trapFocus={false}
@@ -63,7 +63,7 @@ const UserButton = () => {
                 size={30}
               />
               <Text fw={500} size="sm" lh={1} mr={3} visibleFrom="md">
-                {session.name || session.firstName + " " + session.lastName}
+                {session.name || session.firstName + ' ' + session.lastName}
               </Text>
               <IconChevronDown size={12} stroke={1.5} />
             </Group>
@@ -75,7 +75,7 @@ const UserButton = () => {
             leftSection={<IconSun size={16} />}
             closeMenuOnClick={false}
           >
-            {" "}
+            {' '}
             <ThemeSwitcher />
           </Menu.Item>
           <Menu.Divider />

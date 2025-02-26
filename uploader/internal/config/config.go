@@ -17,7 +17,6 @@ type Config struct {
 
 	// CoreService
 	CoreServiceEndpoint string
-	CoreServiceAPIKey   string
 
 	// Tus
 	TusUploadBasePath   string
@@ -65,7 +64,6 @@ func BuildConfig() error {
 	appConfig.CompanionEndpoint = os.Getenv("COMPANION_ENDPOINT")
 	appConfig.UploaderEndpoint = os.Getenv("UPLOADER_ENDPOINT")
 	appConfig.CoreServiceEndpoint = os.Getenv("CORE_SERVICE_ENDPOINT")
-	appConfig.CoreServiceAPIKey = os.Getenv("CORE_SERVICE_API_KEY")
 	appConfig.S3AccessKey = os.Getenv("S3_ACCESS_KEY")
 	appConfig.S3SecretKey = os.Getenv("S3_SECRET_KEY")
 	appConfig.S3BucketName = os.Getenv("S3_BUCKET_NAME")

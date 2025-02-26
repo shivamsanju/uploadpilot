@@ -41,7 +41,7 @@ func BuildPaginationQuery(
 	if len(filter) > 0 && len(input.AllowedFilterFields) > 0 {
 		for _, f := range filter {
 			if slices.Contains(input.AllowedFilterFields, f.Field) {
-				query = query.Where(fmt.Sprintf("LOWER(%s) IN ?", f.Field), f.Value)
+				query = query.Where(fmt.Sprintf("%s IN ?", f.Field), f.Value)
 			}
 		}
 	}

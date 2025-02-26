@@ -31,8 +31,8 @@ func NewUploadService(c *clients.CoreServiceClient) *Service {
 	}
 }
 
-func (us *Service) GetUploaderConfig(ctx context.Context, workspaceID string) (*dto.UploaderConfig, error) {
-	cgf, err := us.coreSvcClient.GetUploaderConfig(ctx, workspaceID)
+func (us *Service) GetUploaderConfig(ctx context.Context, workspaceID string, headers http.Header) (*dto.UploaderConfig, error) {
+	cgf, err := us.coreSvcClient.GetUploaderConfig(ctx, workspaceID, headers)
 	if err != nil {
 		log.Error().Err(err).Str("workspace_id", workspaceID).Msg("failed to get uploader config")
 		return nil, err
@@ -40,10 +40,10 @@ func (us *Service) GetUploaderConfig(ctx context.Context, workspaceID string) (*
 	return cgf, nil
 }
 
-func (us *Service) GetTusdConfigForWorkspace(ctx context.Context, workspaceID string) (*tusd.Config, error) {
+func (us *Service) GetTusdConfigForWorkspace(ctx context.Context, workspaceID string, headers http.Header) (*tusd.Config, error) {
 	appConfig := config.GetAppConfig()
 
-	uploaderConfig, err := us.GetUploaderConfig(ctx, workspaceID)
+	uploaderConfig, err := us.GetUploaderConfig(ctx, workspaceID, headers)
 	if err != nil {
 		log.Error().Err(err).Str("workspace_id", workspaceID).Msg("failed to get uploader config")
 		return nil, err
@@ -202,7 +202,7 @@ func (us *Service) getPreUploadCallback(workspaceID string, uploaderConfig *dto.
 			StartedAt: time.Now(),
 		}
 
-		uploadID, err := us.coreSvcClient.CreateNewUpload(hook.Context, workspaceID, upload)
+		uploadID, err := us.coreSvcClient.CreateNewUpload(hook.Context, workspaceID, upload, hook.HTTPRequest.Header)
 		if err != nil {
 			log.Error().Str("workspace_id", workspaceID).Err(err).Msg("unable to create new upload")
 			return tusd.HTTPResponse{StatusCode: http.StatusInternalServerError}, tusd.FileInfoChanges{}, errors.New("some error occurred, please try again")
@@ -228,7 +228,7 @@ func (us *Service) getPreFinishCallback(workspaceID string) func(hook tusd.HookE
 		if err := us.coreSvcClient.FinishUpload(hook.Context, workspaceID, uploadID, &dto.Upload{
 			Status:     "Uploaded",
 			FinishedAt: time.Now(),
-		}); err != nil {
+		}, hook.HTTPRequest.Header); err != nil {
 			hook.Upload.StopUpload(tusd.HTTPResponse{StatusCode: http.StatusBadRequest})
 			log.Error().Str("workspace_id", workspaceID).Str("upload_id", uploadID).Err(err).Msg("unable to finish upload")
 			return tusd.HTTPResponse{StatusCode: http.StatusBadRequest}, nil

@@ -16,8 +16,9 @@ type UploaderConfig struct {
 	UseCompression         bool               `gorm:"column:use_compression default:true" json:"useCompression"`
 	UseFaultTolerantMode   bool               `gorm:"column:use_fault_tolerant_mode default:false" json:"useFaultTolerantMode"`
 	AllowedOrigins         dtypes.StringArray `gorm:"column:allowed_origins;type:text[]" json:"allowedOrigins"`
-	Workspace              Workspace          `gorm:"foreignKey:WorkspaceID;constraint:OnDelete:CASCADE" json:"-"`
-	At
+	Workspace              Workspace          `gorm:"foreignKey:workspace_id;constraint:OnDelete:CASCADE" json:"-"`
+	CreatedAtColumn
+	UpdatedAtColumn
 }
 
 func (u *UploaderConfig) TableName() string {

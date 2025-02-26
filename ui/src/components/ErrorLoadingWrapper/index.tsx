@@ -1,5 +1,5 @@
-import { AppLoader } from "../Loader/AppLoader";
-import { ErrorCard } from "../ErrorCard/ErrorCard";
+import { ErrorCard } from '../ErrorCard/ErrorCard';
+import { AppLoader } from '../Loader/AppLoader';
 
 type ErrorLoadingWrapperProps = {
   children: React.ReactNode;
@@ -12,7 +12,7 @@ export const ErrorLoadingWrapper: React.FC<ErrorLoadingWrapperProps> = ({
   children,
   isPending,
   error,
-  h = "50vh",
+  h = '50vh',
   w,
 }) => {
   return (

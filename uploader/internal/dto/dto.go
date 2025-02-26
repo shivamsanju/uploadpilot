@@ -27,11 +27,6 @@ type Upload struct {
 	StartedAt  time.Time              `json:"startedAt"`
 }
 
-type Subscription struct {
-	Active    bool      `json:"active"`
-	ExpiredOn time.Time `json:"expiredOn"`
-}
-
 type UploadRequestLog struct {
 	WorkspaceID string            `json:"workspaceId"`
 	Timestamp   time.Time         `json:"timestamp"`

@@ -1,19 +1,19 @@
-import { IconSearch } from "@tabler/icons-react";
 import {
   Box,
-  Group,
-  Text,
-  ThemeIcon,
-  ScrollArea,
-  TextInput,
-  Title,
   Button,
-} from "@mantine/core";
-import { useState, useEffect } from "react";
-import { useGetAllProcessingTasks } from "../../../apis/processors";
-import { useParams } from "react-router-dom";
-import classes from "./BlockSearch.module.css";
-import { getBlockIcon } from "../../../utils/blockicon";
+  Group,
+  ScrollArea,
+  Text,
+  TextInput,
+  ThemeIcon,
+  Title,
+} from '@mantine/core';
+import { IconSearch } from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useGetAllProcessingTasks } from '../../../apis/processors';
+import { getBlockIcon } from '../../../utils/blockicon';
+import classes from './BlockSearch.module.css';
 
 export const BlockSearch = ({
   processorId,
@@ -24,7 +24,7 @@ export const BlockSearch = ({
 }) => {
   const { workspaceId } = useParams();
   const { isPending, error, blocks } = useGetAllProcessingTasks(
-    workspaceId || ""
+    workspaceId || '',
   );
   const [filtered, setFiltered] = useState<any[]>(blocks || []);
 
@@ -35,7 +35,7 @@ export const BlockSearch = ({
     const filteredBlocks = blocks.filter(
       (c: any) =>
         c.name?.toLowerCase()?.includes(searchText.toLowerCase()) ||
-        c.description?.toLowerCase()?.includes(searchText.toLowerCase())
+        c.description?.toLowerCase()?.includes(searchText.toLowerCase()),
     );
 
     setFiltered(filteredBlocks);
@@ -53,11 +53,11 @@ export const BlockSearch = ({
 
     // Multiline text to insert
     const text = item?.workflow
-      ?.split("\n")
+      ?.split('\n')
       ?.map((line: string, index: number) =>
-        index === 0 ? line : baseIndentation + line
+        index === 0 ? line : baseIndentation + line,
       ) // preserve indentation for all lines except the first one
-      ?.join("\n");
+      ?.join('\n');
 
     const id = { major: 1, minor: 1 };
     const op = {
@@ -71,7 +71,7 @@ export const BlockSearch = ({
       text,
       forceMoveMarkers: true,
     };
-    editor.executeEdits("my-source", [op]);
+    editor.executeEdits('my-source', [op]);
     editor.focus();
   };
 
@@ -98,7 +98,7 @@ export const BlockSearch = ({
           onChange={handleSearch}
           autoFocus
           w={{
-            base: "100%",
+            base: '100%',
             md: 400,
           }}
           flex={{

@@ -11,9 +11,9 @@ import (
 	"github.com/markbates/goth/gothic"
 	"github.com/phuslu/log"
 	"github.com/uploadpilot/go-core/db/pkg/models"
-	"github.com/uploadpilot/manager/internal/auth"
 	"github.com/uploadpilot/manager/internal/config"
 	"github.com/uploadpilot/manager/internal/dto"
+	"github.com/uploadpilot/manager/internal/svc/auth"
 	"github.com/uploadpilot/manager/internal/svc/user"
 	"github.com/uploadpilot/manager/internal/utils"
 	"golang.org/x/net/context"
@@ -23,11 +23,13 @@ var TOKEN_EXPIRY_DURATION = time.Hour * 24 * 30
 
 type authHandler struct {
 	userSvc *user.Service
+	authSvc *auth.Service
 }
 
-func NewAuthHandler(userSvc *user.Service) *authHandler {
+func NewAuthHandler(userSvc *user.Service, authSvc *auth.Service) *authHandler {
 	return &authHandler{
 		userSvc: userSvc,
+		authSvc: authSvc,
 	}
 }
 
@@ -40,7 +42,7 @@ func (h *authHandler) Login(w http.ResponseWriter, r *http.Request) {
 			redirectWithError(w, r, fmt.Errorf("failed to get user"))
 			return
 		}
-		token, err := auth.GenerateToken(w, usr, TOKEN_EXPIRY_DURATION)
+		token, err := h.authSvc.GenerateJWTToken(w, usr, TOKEN_EXPIRY_DURATION)
 		if err != nil {
 			redirectWithError(w, r, err)
 			return
@@ -76,7 +78,7 @@ func (h *authHandler) HandleCallback(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	token, err := auth.GenerateToken(w, usr, TOKEN_EXPIRY_DURATION)
+	token, err := h.authSvc.GenerateJWTToken(w, usr, TOKEN_EXPIRY_DURATION)
 	if err != nil {
 		redirectWithError(w, r, err)
 		return
@@ -97,6 +99,41 @@ func (h *authHandler) LogoutProvider(w http.ResponseWriter, r *http.Request) {
 	gothic.Logout(w, r)
 	redirectUri := getLogoutRedirectURI()
 	http.Redirect(w, r, redirectUri, http.StatusSeeOther)
+}
+
+func (h *authHandler) GetAPIKeys(
+	r *http.Request, params interface{}, query interface{}, body interface{},
+) ([]models.APIKey, int, error) {
+	keys, err := h.authSvc.GetAllApiKeysForUser(r.Context())
+	if err != nil {
+		return nil, http.StatusInternalServerError, err
+	}
+	return keys, http.StatusOK, nil
+}
+
+func (h *authHandler) CreateAPIKey(
+	r *http.Request,
+	params interface{},
+	query interface{},
+	body dto.CreateApiKeyData,
+) (string, int, error) {
+	key, err := h.authSvc.CreateApiKey(r.Context(), &body)
+	if err != nil {
+		return "", http.StatusInternalServerError, err
+	}
+	return key, http.StatusOK, nil
+}
+
+func (h *authHandler) RevokeAPIKey(
+	r *http.Request,
+	params dto.ApiKeyParams,
+	query interface{},
+	body interface{},
+) (bool, int, error) {
+	if err := h.authSvc.RevokeApiKey(r.Context(), params.ApiKeyID); err != nil {
+		return false, http.StatusInternalServerError, err
+	}
+	return true, http.StatusOK, nil
 }
 
 func (h *authHandler) GetSession(w http.ResponseWriter, r *http.Request) {

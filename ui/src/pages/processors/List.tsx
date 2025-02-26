@@ -1,16 +1,4 @@
 import {
-  IconCircleCheck,
-  IconCircleOff,
-  IconDots,
-  IconTrash,
-  IconPlus,
-  IconSearch,
-  IconSettings,
-  IconActivity,
-  IconBolt,
-  IconRoute,
-} from "@tabler/icons-react";
-import {
   ActionIcon,
   Badge,
   Box,
@@ -21,30 +9,42 @@ import {
   Stack,
   Text,
   TextInput,
-} from "@mantine/core";
-import { useNavigate, useParams } from "react-router-dom";
-import { useCallback, useMemo, useState } from "react";
-import { DataTableColumn } from "mantine-datatable";
-import { UploadPilotDataTable } from "../../components/Table/Table";
-import { ErrorCard } from "../../components/ErrorCard/ErrorCard";
-import { showNotification } from "@mantine/notifications";
+} from '@mantine/core';
+import { useViewportSize } from '@mantine/hooks';
+import { showNotification } from '@mantine/notifications';
+import {
+  IconActivity,
+  IconBolt,
+  IconCancel,
+  IconCircleCheck,
+  IconDots,
+  IconPlus,
+  IconRoute,
+  IconSearch,
+  IconSettings,
+  IconTrash,
+} from '@tabler/icons-react';
+import { DataTableColumn } from 'mantine-datatable';
+import { useCallback, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   useDeleteProcessorMutation,
   useEnableDisableProcessorMutation,
   useGetProcessors,
-} from "../../apis/processors";
-import { timeAgo } from "../../utils/datetime";
-import { useViewportSize } from "@mantine/hooks";
-import { ContainerOverlay } from "../../components/Overlay";
-import { RefreshButton } from "../../components/Buttons/RefreshButton/RefreshButton";
-import { showConfirmationPopup } from "../../components/Popups/ConfirmPopup";
+} from '../../apis/processors';
+import { RefreshButton } from '../../components/Buttons/RefreshButton/RefreshButton';
+import { ErrorCard } from '../../components/ErrorCard/ErrorCard';
+import { ContainerOverlay } from '../../components/Overlay';
+import { showConfirmationPopup } from '../../components/Popups/ConfirmPopup';
+import { UploadPilotDataTable } from '../../components/Table/Table';
+import { timeAgo } from '../../utils/datetime';
 
 const ProcessorList = () => {
   const { width } = useViewportSize();
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
   const { workspaceId } = useParams();
   const { isPending, error, processors, invalidate } = useGetProcessors(
-    workspaceId || ""
+    workspaceId || '',
   );
   const { mutateAsync, isPending: isDeleting } = useDeleteProcessorMutation();
   const { mutateAsync: enableDisableProcessor, isPending: isEnabling } =
@@ -55,14 +55,14 @@ const ProcessorList = () => {
     async (processorId: string) => {
       if (
         !workspaceId ||
-        workspaceId === "" ||
+        workspaceId === '' ||
         !processorId ||
-        processorId === ""
+        processorId === ''
       ) {
         showNotification({
-          color: "red",
-          title: "Error",
-          message: "Workspace ID or Processor ID is not available",
+          color: 'red',
+          title: 'Error',
+          message: 'Workspace ID or Processor ID is not available',
         });
         return;
       }
@@ -73,29 +73,29 @@ const ProcessorList = () => {
         console.error(error);
       }
     },
-    [workspaceId, mutateAsync]
+    [workspaceId, mutateAsync],
   );
 
   const handleRemoveProcessorWithConfirmation = useCallback(
     (processorId: string) => {
       showConfirmationPopup({
         message:
-          "Are you sure you want to delete this processor? this is irreversible.",
+          'Are you sure you want to delete this processor? this is irreversible.',
         onOk: async () => {
           await handleRemoveProcessor(processorId);
         },
       });
     },
-    [handleRemoveProcessor]
+    [handleRemoveProcessor],
   );
   const handleBulkRemove = useCallback(async () => {
     if (selectedRecords.length > 0) {
       showConfirmationPopup({
         message:
-          "Are you sure you want to delete these processors? this is irreversible.",
+          'Are you sure you want to delete these processors? this is irreversible.',
         onOk: async () => {
           await Promise.all(
-            selectedRecords.map((record) => handleRemoveProcessor(record.id))
+            selectedRecords.map(record => handleRemoveProcessor(record.id)),
           );
           setSelectedRecords([]);
         },
@@ -107,14 +107,14 @@ const ProcessorList = () => {
     async (processorId: string, enabled: boolean) => {
       if (
         !workspaceId ||
-        workspaceId === "" ||
+        workspaceId === '' ||
         !processorId ||
-        processorId === ""
+        processorId === ''
       ) {
         showNotification({
-          color: "red",
-          title: "Error",
-          message: "Workspace ID or Processor ID is not available",
+          color: 'red',
+          title: 'Error',
+          message: 'Workspace ID or Processor ID is not available',
         });
         return;
       }
@@ -125,28 +125,28 @@ const ProcessorList = () => {
         console.error(error);
       }
     },
-    [workspaceId, enableDisableProcessor]
+    [workspaceId, enableDisableProcessor],
   );
 
   const handleBulkEnableDisable = useCallback(
     async (enabled: boolean) => {
       if (selectedRecords.length > 0) {
         await Promise.all(
-          selectedRecords.map((record) =>
-            handleEnableDisableProcessor(record.id, enabled)
-          )
+          selectedRecords.map(record =>
+            handleEnableDisableProcessor(record.id, enabled),
+          ),
         );
         setSelectedRecords([]);
       }
     },
-    [selectedRecords, handleEnableDisableProcessor]
+    [selectedRecords, handleEnableDisableProcessor],
   );
 
   const columns: DataTableColumn[] = useMemo(
     () => [
       {
-        accessor: "id",
-        title: "",
+        accessor: 'id',
+        title: '',
         width: 20,
         render: (item: any) => (
           <Stack justify="center">
@@ -155,8 +155,8 @@ const ProcessorList = () => {
         ),
       },
       {
-        accessor: "name",
-        title: "Name",
+        accessor: 'name',
+        title: 'Name',
         render: (item: any) => (
           <Group gap="sm">
             {/* <ThemeIcon
@@ -176,8 +176,8 @@ const ProcessorList = () => {
         ),
       },
       {
-        accessor: "triggers",
-        title: "Triggers",
+        accessor: 'triggers',
+        title: 'Triggers',
         hidden: width < 768,
         render: (item: any) => (
           <div>
@@ -198,7 +198,7 @@ const ProcessorList = () => {
                   )}
                 </>
               ) : (
-                "No Triggers"
+                'No Triggers'
               )}
             </Text>
             {/* <Text c="dimmed" fz="xs">
@@ -208,8 +208,8 @@ const ProcessorList = () => {
         ),
       },
       {
-        title: "Updated At",
-        accessor: "updatedAt",
+        title: 'Updated At',
+        accessor: 'updatedAt',
         hidden: width < 768,
         render: (params: any) => (
           <>
@@ -223,17 +223,17 @@ const ProcessorList = () => {
         ),
       },
       {
-        accessor: "enabled",
-        title: "Status",
+        accessor: 'enabled',
+        title: 'Status',
         hidden: width < 768,
         render: (item: any) => (
           <>
             <Badge
-              color={item?.enabled ? "green" : "red"}
+              color={item?.enabled ? 'green' : 'red'}
               size="sm"
               variant="outline"
             >
-              {item?.enabled ? "Enabled" : "Disabled"}
+              {item?.enabled ? 'Enabled' : 'Disabled'}
             </Badge>
           </>
         ),
@@ -254,13 +254,13 @@ const ProcessorList = () => {
       //     ),
       // },
       {
-        accessor: "actions",
-        title: "Actions",
-        textAlign: "right",
+        accessor: 'actions',
+        title: 'Actions',
+        textAlign: 'right',
         render: (item: any) => (
           <Group gap={0} justify="flex-end">
             <Menu
-              transitionProps={{ transition: "pop" }}
+              transitionProps={{ transition: 'pop' }}
               withArrow
               position="bottom-end"
               withinPortal
@@ -276,7 +276,7 @@ const ProcessorList = () => {
                   disabled={!item?.enabled}
                   onClick={() =>
                     navigate(
-                      `/workspace/${workspaceId}/processors/${item?.id}/workflow`
+                      `/workspace/${workspaceId}/processors/${item?.id}/workflow`,
                     )
                   }
                 >
@@ -287,7 +287,7 @@ const ProcessorList = () => {
                   disabled={!item?.enabled}
                   onClick={() =>
                     navigate(
-                      `/workspace/${workspaceId}/processors/${item?.id}/runs`
+                      `/workspace/${workspaceId}/processors/${item?.id}/runs`,
                     )
                   }
                 >
@@ -298,7 +298,7 @@ const ProcessorList = () => {
                   disabled={!item?.enabled}
                   onClick={() =>
                     navigate(
-                      `/workspace/${workspaceId}/processors/${item?.id}/settings`
+                      `/workspace/${workspaceId}/processors/${item?.id}/settings`,
                     )
                   }
                 >
@@ -307,7 +307,7 @@ const ProcessorList = () => {
                 <Menu.Item
                   leftSection={
                     item?.enabled ? (
-                      <IconCircleOff size={16} stroke={1.5} />
+                      <IconCancel size={16} stroke={1.5} />
                     ) : (
                       <IconCircleCheck size={16} stroke={1.5} />
                     )
@@ -316,7 +316,7 @@ const ProcessorList = () => {
                     handleEnableDisableProcessor(item.id, !item?.enabled)
                   }
                 >
-                  <Text>{item?.enabled ? "Disable" : "Enable"}</Text>
+                  <Text>{item?.enabled ? 'Disable' : 'Enable'}</Text>
                 </Menu.Item>
                 <Menu.Item
                   leftSection={<IconTrash size={16} stroke={1.5} />}
@@ -337,7 +337,7 @@ const ProcessorList = () => {
       width,
       navigate,
       workspaceId,
-    ]
+    ],
   );
 
   if (error) {
@@ -378,7 +378,7 @@ const ProcessorList = () => {
               </Button>
               <Button
                 variant="subtle"
-                leftSection={<IconCircleOff size={18} />}
+                leftSection={<IconCancel size={18} />}
                 onClick={() => handleBulkEnableDisable(false)}
               >
                 Disable
@@ -393,7 +393,7 @@ const ProcessorList = () => {
               <RefreshButton onClick={invalidate} />
             </Group>
             <TextInput
-              value={""}
+              value={''}
               // onChange={(e) => onSearchFilterChange(e.target.value)}
               placeholder="Search by name or status"
               leftSection={<IconSearch size={18} />}
@@ -401,9 +401,9 @@ const ProcessorList = () => {
             />
           </Group>
         }
-        onRowDoubleClick={(row) => {
+        onRowDoubleClick={row => {
           navigate(
-            `/workspace/${workspaceId}/processors/${row?.record?.id}/runs`
+            `/workspace/${workspaceId}/processors/${row?.record?.id}/runs`,
           );
         }}
         selectedRecords={selectedRecords}

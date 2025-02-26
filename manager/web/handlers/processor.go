@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -51,12 +50,12 @@ func (h *processorHandler) GetTemplates(w http.ResponseWriter, r *http.Request) 
 	render.JSON(w, r, templates)
 }
 
-func (h *processorHandler) CreateProcessor(ctx context.Context, params dto.WorkspaceParams, query interface{}, body dto.CreateProcessorRequest) (*string, int, error) {
+func (h *processorHandler) CreateProcessor(r *http.Request, params dto.WorkspaceParams, query interface{}, body dto.CreateProcessorRequest) (*string, int, error) {
 	var processor models.Processor
 	if err := commonutils.ConvertDTOToModel(&body, &processor); err != nil {
 		return nil, http.StatusUnprocessableEntity, err
 	}
-	if err := h.pSvc.CreateProcessor(ctx, params.WorkspaceID, &processor, &body.TemplateKey); err != nil {
+	if err := h.pSvc.CreateProcessor(r.Context(), params.WorkspaceID, &processor, &body.TemplateKey); err != nil {
 		return nil, http.StatusBadRequest, err
 	}
 

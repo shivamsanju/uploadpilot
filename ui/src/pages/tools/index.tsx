@@ -1,10 +1,19 @@
-import { Box, Title } from "@mantine/core";
-import { useParams } from "react-router-dom";
-import { AppLoader } from "../../components/Loader/AppLoader";
-import { ToolsGrid } from "./Grid";
+import {
+  ActionIcon,
+  Box,
+  Breadcrumbs,
+  Group,
+  Text,
+  Title,
+} from '@mantine/core';
+import { IconChevronLeft } from '@tabler/icons-react';
+import { NavLink, useNavigate, useParams } from 'react-router-dom';
+import { AppLoader } from '../../components/Loader/AppLoader';
+import { ToolsGrid } from './Grid';
 
 const ToolsPage = () => {
   const { workspaceId } = useParams();
+  const navigate = useNavigate();
 
   if (!workspaceId) {
     return <AppLoader h="70vh" />;
@@ -12,12 +21,23 @@ const ToolsPage = () => {
 
   return (
     <Box mb={50} mr="sm">
-      <Title order={3} opacity={0.7} mb="md">
-        Marketplace
-      </Title>
-      {/* <Text c="dimmed" mb="md" mt={2}>
-                Add more features and transformations to your files
-            </Text> */}
+      <Breadcrumbs separator=">">
+        <NavLink to="/" className="bredcrumb-link">
+          <Text>Workspaces</Text>
+        </NavLink>
+        <Text>Marketplace</Text>
+      </Breadcrumbs>
+      <Group mt="xs" mb="xl">
+        <ActionIcon
+          variant="default"
+          radius="xl"
+          size="sm"
+          onClick={() => navigate(`/`)}
+        >
+          <IconChevronLeft size={16} />
+        </ActionIcon>
+        <Title order={3}>Marketplace</Title>
+      </Group>
       <ToolsGrid />
     </Box>
   );

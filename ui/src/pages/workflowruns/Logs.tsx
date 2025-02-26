@@ -1,16 +1,14 @@
-import { CodeHighlight } from "@mantine/code-highlight";
-import { Modal } from "@mantine/core";
-import React from "react";
-import { RefreshButton } from "../../components/Buttons/RefreshButton/RefreshButton";
-import { ErrorLoadingWrapper } from "../../components/ErrorLoadingWrapper";
-import { useGetProcessorRunLogs } from "../../apis/processors";
+import { CodeHighlight } from '@mantine/code-highlight';
+import { Modal } from '@mantine/core';
+import React from 'react';
+import { useGetProcessorRunLogs } from '../../apis/processors';
+import { RefreshButton } from '../../components/Buttons/RefreshButton/RefreshButton';
+import { ErrorLoadingWrapper } from '../../components/ErrorLoadingWrapper';
 
 const formatLogs = (logs: any[]) => {
-  let str = "";
+  let str = '';
   for (const log of logs) {
-    str += `${log?.timestamp} | ${log?.eventType?.toUpperCase()} | ${
-      log?.details
-    }\n`;
+    str += `${log?.timestamp} | ${log?.eventType?.toUpperCase()} | ${log?.details}\n`;
   }
   return str;
 };
@@ -34,7 +32,7 @@ export const LogsModal: React.FC<LogsModalProps> = ({
     workspaceId,
     processorId,
     workflowId,
-    runId
+    runId,
   );
 
   return (
