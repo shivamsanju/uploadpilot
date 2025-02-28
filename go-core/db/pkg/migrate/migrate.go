@@ -11,17 +11,6 @@ func Migrate(db *driver.Driver) error {
 	}
 
 	if err := db.Orm.Exec(`
-DO $$ 
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'upload_log_level') THEN
-        CREATE TYPE upload_log_level AS ENUM ('info', 'warn', 'error');
-    END IF;
-END $$;
-`).Error; err != nil {
-		return err
-	}
-
-	if err := db.Orm.Exec(`
 	DO $$ 
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'allowed_sources') THEN
@@ -48,15 +37,14 @@ END $$;
 	}
 
 	if err := db.Orm.AutoMigrate(
-		&models.User{},
+		&models.Tenant{},
+		&models.Subscription{},
 		&models.Workspace{},
-		&models.UserWorkspace{},
-		&models.UploaderConfig{},
+		&models.WorkspaceConfig{},
 		&models.Upload{},
 		&models.Processor{},
-		&models.UploadLog{},
 		&models.APIKey{},
-		&models.APIKeyPerm{},
+		&models.APIKeyPermission{},
 		&models.Secret{},
 	); err != nil {
 		return err

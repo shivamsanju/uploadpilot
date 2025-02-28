@@ -86,14 +86,14 @@ export const BlockSearch = ({
       <Group justify="space-between" gap="sm" align="center" mb="md">
         <Box p="xs">
           <Title order={4} opacity={0.8}>
-            Add Tasks
+            Add activities
           </Title>
           <Text fz="xs" c="dimmed">
-            Search and select blocks
+            Search and select activities
           </Text>
         </Box>
         <TextInput
-          placeholder="Search blocks"
+          placeholder="Search activities"
           leftSection={<IconSearch size={18} stroke={1.5} />}
           onChange={handleSearch}
           autoFocus

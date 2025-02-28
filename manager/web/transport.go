@@ -15,16 +15,6 @@ import (
 	"github.com/uploadpilot/manager/internal/utils"
 )
 
-func WithMiddleware(handler http.HandlerFunc, middlewares ...func(http.Handler) http.Handler) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		finalHandler := http.Handler(handler)
-		for _, mw := range middlewares {
-			finalHandler = mw(finalHandler)
-		}
-		finalHandler.ServeHTTP(w, r)
-	}
-}
-
 func CreateJSONHandler[Params any, Query any, Body any, Result any](
 	h func(r *http.Request, params Params, query Query, body Body) (Result, int, error),
 ) http.HandlerFunc {

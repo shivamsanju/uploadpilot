@@ -1,4 +1,4 @@
-export type UploaderConfig = {
+export type WorkspaceConfig = {
   minFileSize?: number;
   maxFileSize?: number;
   minNumberOfFiles?: number;

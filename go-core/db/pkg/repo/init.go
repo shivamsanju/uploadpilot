@@ -3,27 +3,25 @@ package repo
 import "github.com/uploadpilot/go-core/db/pkg/driver"
 
 type Repositories struct {
-	UserRepo            *UserRepo
+	TenantRepo          *TenantRepo
+	SubscriptionRepo    *SubscriptionRepo
 	WorkspaceRepo       *WorkspaceRepo
 	WorkspaceConfigRepo *WorkspaceConfigRepo
-	WorkspaceUserRepo   *WorkspaceUserRepo
 	UploadRepo          *UploadRepo
-	UploadLogsRepo      *UploadLogsRepo
 	ProcessorRepo       *ProcessorRepo
-	ApiKeyRepo          *ApiKeyRepo
+	APIKeyRepo          *APIKeyRepo
 	SecretsRepo         *SecretRepo
 }
 
 func NewRepositories(driver *driver.Driver) *Repositories {
 	return &Repositories{
-		UserRepo:            NewUserRepo(driver),
+		TenantRepo:          NewTenantRepo(driver),
+		SubscriptionRepo:    NewSubscriptionRepo(driver),
 		WorkspaceRepo:       NewWorkspaceRepo(driver),
 		WorkspaceConfigRepo: NewWorkspaceConfigRepo(driver),
-		WorkspaceUserRepo:   NewWorkspaceUserRepo(driver),
 		UploadRepo:          NewUploadRepo(driver),
-		UploadLogsRepo:      NewUploadLogsRepo(driver),
 		ProcessorRepo:       NewProcessorRepo(driver),
-		ApiKeyRepo:          NewApiKeyRepo(driver),
+		APIKeyRepo:          NewAPIKeyRepo(driver),
 		SecretsRepo:         NewSecretRepo(driver),
 	}
 }

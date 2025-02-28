@@ -1,8 +1,11 @@
 import axios from 'axios';
+import { TENANT_ID_HEADER, TENANT_ID_KEY } from '../constants/tenancy';
 import { getApiDomain } from './config';
 
 const axiosInstance = axios.create({
   baseURL: getApiDomain(),
+  withCredentials: true,
+  withXSRFToken: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -11,12 +14,12 @@ const axiosInstance = axios.create({
 // Request Interceptor
 axiosInstance.interceptors.request.use(
   config => {
-    const token = localStorage.getItem('uploadpilottoken');
-    if (token) {
+    const tenantId = localStorage.getItem(TENANT_ID_KEY);
+    if (tenantId) {
       if (!config.headers) {
         config.headers = {};
       }
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers[TENANT_ID_HEADER] = tenantId;
     }
     return config;
   },
@@ -33,8 +36,8 @@ axiosInstance.interceptors.response.use(
   error => {
     if (error.response && error.response.status === 401) {
       console.error('Unauthorized! Redirecting to login...');
-      localStorage.removeItem('uploadpilottoken');
-      window.location.href = '/auth';
+      // localStorage.removeItem('uploadpilottoken');
+      // window.location.href = '/auth';
     }
     return Promise.reject(error);
   },

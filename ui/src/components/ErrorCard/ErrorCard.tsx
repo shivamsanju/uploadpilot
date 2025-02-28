@@ -9,7 +9,6 @@ import {
 } from '@mantine/core';
 import imageDark from '../../assets/images/error-dark.png';
 import imageLight from '../../assets/images/error-light.png';
-import classes from './Error.module.css';
 
 type ErrorCardProps = {
   title: string;
@@ -21,25 +20,21 @@ export const ErrorCard: React.FC<ErrorCardProps> = ({ title, message, h }) => {
   const refreshPage = () => window.location.reload();
   const { colorScheme } = useMantineColorScheme();
   return (
-    <Container className={classes.root}>
+    <Container p="sm">
       <Stack align="center" h={h}>
         <Image
-          h={300}
-          w={500}
+          alt="error"
+          h="300"
+          w="400"
           src={colorScheme === 'dark' ? imageDark : imageLight}
-          className={classes.mobileImage}
         />
-        <Title className={classes.title}>{title}</Title>
-        <Text c="dimmed" size="lg">
+        <Title order={1} fw="bolder" p={0}>
+          {title}
+        </Title>
+        <Text c="dimmed" size="md">
           {message}
         </Text>
-        <Button
-          variant="outline"
-          size="md"
-          mt="xl"
-          className={classes.control}
-          onClick={refreshPage}
-        >
+        <Button variant="outline" size="md" mt="sm" onClick={refreshPage}>
           Refresh the page
         </Button>
       </Stack>

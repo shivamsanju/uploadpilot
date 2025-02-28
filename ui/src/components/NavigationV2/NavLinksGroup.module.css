@@ -1,0 +1,57 @@
+.control {
+  font-weight: 500;
+  display: block;
+  width: 100%;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  color: light-dark(var(--mantine-color-gray-8), var(--mantine-color-dark-0));
+  font-size: var(--mantine-font-size-sm);
+
+  @mixin hover {
+    background-color: light-dark(
+      var(--mantine-color-gray-0),
+      var(--mantine-color-dark-7)
+    );
+    color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
+  }
+}
+
+.link {
+  font-weight: 500;
+  display: block;
+  text-decoration: none;
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  padding-left: var(--mantine-spacing-sm);
+  margin-left: var(--mantine-spacing-xl);
+  font-size: var(--mantine-font-size-sm);
+  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+  border-left: 1px solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+
+  @mixin hover {
+    background-color: light-dark(
+      var(--mantine-color-gray-0),
+      var(--mantine-color-dark-7)
+    );
+    color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
+  }
+}
+
+.chevron {
+  transition: transform 200ms ease;
+}
+
+.active {
+  color: var(--mantine-color-appcolor-filled);
+}
+
+.active:hover {
+  color: var(--mantine-color-appcolor-filled);
+}
+
+.label:hover {
+  color: var(--mantine-color-appcolor-filled);
+}
+
+.active .label:hover {
+  color: var(--mantine-color-appcolor-filled);
+}

@@ -1,38 +1,10 @@
 package dto
 
 import (
-	"time"
-
 	"github.com/uploadpilot/go-core/db/pkg/models"
 )
 
-type WorkspaceUser struct {
-	ID    string `json:"userId"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
-	Role  string `json:"role"`
-}
-
-type AddWorkspaceUser struct {
-	Email string          `json:"email" validate:"email,required"`
-	Role  models.UserRole `json:"role" validate:"required"`
-}
-
-type EditUserRole struct {
-	Role models.UserRole `json:"role" validate:"required"`
-}
-
-type WorkspaceNameID struct {
-	Name string `json:"name" validate:"required"`
-	ID   string `json:"id" validate:"required"`
-}
-
-type UploaderConfig struct {
-	models.UploaderConfig
+type WorkspaceConfig struct {
+	models.WorkspaceConfig
 	ChunkSize int64 `json:"chunkSize"`
-}
-
-type Subscription struct {
-	Active    bool      `json:"active"`
-	ExpiresAt time.Time `json:"expiresAt"`
 }

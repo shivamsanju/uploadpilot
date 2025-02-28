@@ -2,7 +2,7 @@ package models
 
 import "github.com/uploadpilot/go-core/db/pkg/dtypes"
 
-type UploaderConfig struct {
+type WorkspaceConfig struct {
 	WorkspaceID            string             `gorm:"column:workspace_id;primaryKey;type:uuid" json:"workspaceId"`
 	MaxFileSize            *int64             `gorm:"column:max_file_size" json:"maxFileSize"`
 	MinFileSize            *int64             `gorm:"column:min_file_size" json:"minFileSize"`
@@ -21,34 +21,28 @@ type UploaderConfig struct {
 	UpdatedAtColumn
 }
 
-func (u *UploaderConfig) TableName() string {
-	return "uploader_configs"
-}
-
-type AllowedSources string
-
-func (s AllowedSources) String() string {
-	return string(s)
+func (u *WorkspaceConfig) TableName() string {
+	return "workspace_config"
 }
 
 const (
-	FileUpload    AllowedSources = "FileUpload"
-	Audio         AllowedSources = "Audio"
-	Webcamera     AllowedSources = "Webcamera"
-	ScreenCapture AllowedSources = "ScreenCapture"
-	Box           AllowedSources = "Box"
-	Dropbox       AllowedSources = "Dropbox"
-	Facebook      AllowedSources = "Facebook"
-	GoogleDrive   AllowedSources = "GoogleDrive"
-	GooglePhotos  AllowedSources = "GooglePhotos"
-	Instagram     AllowedSources = "Instagram"
-	OneDrive      AllowedSources = "OneDrive"
-	Unsplash      AllowedSources = "Unsplash"
-	Url           AllowedSources = "Url"
-	Zoom          AllowedSources = "Zoom"
+	FileUpload    string = "FileUpload"
+	Audio         string = "Audio"
+	Webcamera     string = "Webcamera"
+	ScreenCapture string = "ScreenCapture"
+	Box           string = "Box"
+	Dropbox       string = "Dropbox"
+	Facebook      string = "Facebook"
+	GoogleDrive   string = "GoogleDrive"
+	GooglePhotos  string = "GooglePhotos"
+	Instagram     string = "Instagram"
+	OneDrive      string = "OneDrive"
+	Unsplash      string = "Unsplash"
+	Url           string = "Url"
+	Zoom          string = "Zoom"
 )
 
-var AllAllowedSources = []AllowedSources{
+var AllAllowedSources = dtypes.StringArray{
 	FileUpload,
 	Webcamera,
 	Audio,
@@ -63,4 +57,18 @@ var AllAllowedSources = []AllowedSources{
 	Unsplash,
 	Url,
 	Zoom,
+}
+
+var DefaultWorkspaceConfig = &WorkspaceConfig{
+	MaxFileSize:            nil,
+	MinFileSize:            nil,
+	MaxNumberOfFiles:       nil,
+	MinNumberOfFiles:       nil,
+	AllowedFileTypes:       nil,
+	AllowedSources:         []string{FileUpload, Webcamera, Audio, ScreenCapture},
+	RequiredMetadataFields: []string{},
+	AllowPauseAndResume:    true,
+	EnableImageEditing:     false,
+	UseCompression:         true,
+	UseFaultTolerantMode:   false,
 }

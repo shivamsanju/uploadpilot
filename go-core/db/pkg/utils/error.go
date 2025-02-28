@@ -1,26 +1,26 @@
 package dbutils
 
 import (
+	"context"
 	"errors"
 
 	"github.com/google/uuid"
+	"github.com/uploadpilot/go-core/db/pkg/errs"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
-func DBError(err error) error {
+func DBError(ctx context.Context, logger logger.Interface, err error) error {
 	if err == nil {
 		return nil
 	}
 
 	if errors.Is(err, gorm.ErrRecordNotFound) {
-		return errors.New("record not found")
+		return errs.ErrRecordNotFound
 	}
 
-	if errors.Is(err, gorm.ErrUnsupportedRelation) {
-		return errors.New("unknown err")
-	}
-
-	return errors.New("database error: " + err.Error())
+	logger.Error(ctx, "[db_error]", err)
+	return errs.ErrUnknownDBError
 }
 
 func GenerateUUID() string {

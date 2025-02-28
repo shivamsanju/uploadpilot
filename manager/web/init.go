@@ -12,7 +12,7 @@ import (
 
 func InitWebServer(services *svc.Services) (*http.Server, error) {
 	router := chi.NewRouter()
-	appMiddlewares := NewAppMiddlewares(services.AuthService)
+	appMiddlewares := NewAppMiddlewares(services.APIKeyService)
 
 	// App middlewares
 	router.Use(appMiddlewares.RecoveryMiddleware)

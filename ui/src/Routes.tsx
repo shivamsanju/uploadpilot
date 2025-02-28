@@ -1,5 +1,7 @@
 import AppLayout from './components/Layout/AppLayout';
+import AppLayoutV2 from './components/Layout/AppLayoutV2';
 import EmptyLayout from './components/Layout/EmptyLayout';
+import HeaderAuthNoTenancyLayout from './components/Layout/HeaderAuthNoTenancyLayout';
 import ProcessorLayout from './components/Layout/ProcessorLayout';
 import WorkspacesLayout from './components/Layout/WorkspaceLayout';
 import { NotFoundImage } from './components/NotFound';
@@ -7,6 +9,7 @@ import DashboardPage from './pages/analytics';
 import ApiKeyPage from './pages/apikeys';
 import CreateApiKeyPage from './pages/apikeys/add';
 import AuthPage from './pages/auth';
+import SocialAuthCallbackHandlerPage from './pages/auth/callback';
 import BillingsPage from './pages/billing';
 import ConfigurationPage from './pages/configuration';
 import ErrorQueryDisplay from './pages/error';
@@ -14,9 +17,10 @@ import { GetStartedPage } from './pages/getstarted';
 import ProcessorPage from './pages/processors';
 import NewprocessorPage from './pages/processors/Add';
 import ProcessorSettingsPage from './pages/processors/settings';
+import { TenantRegistrationPage } from './pages/tenancy/registration';
+import TenantSelectionPage from './pages/tenancy/selection';
 import ToolsPage from './pages/tools';
 import UploadsPage from './pages/uploads';
-import WorkspaceUsersPage from './pages/users';
 import WorkflowBuilderPage from './pages/wflowbuilder';
 import WorkflowRunsPage from './pages/workflowruns';
 import WorkspaceLandingPage from './pages/workspace';
@@ -33,6 +37,21 @@ const routes: Route[] = [
     path: '/auth',
     layout: EmptyLayout,
     element: <AuthPage />,
+  },
+  {
+    path: '/auth/callback/social',
+    layout: EmptyLayout,
+    element: <SocialAuthCallbackHandlerPage />,
+  },
+  {
+    path: '/register-tenant',
+    layout: HeaderAuthNoTenancyLayout,
+    element: <TenantRegistrationPage />,
+  },
+  {
+    path: '/tenants',
+    layout: HeaderAuthNoTenancyLayout,
+    element: <TenantSelectionPage />,
   },
   {
     path: '/error',
@@ -66,7 +85,7 @@ const routes: Route[] = [
   },
   {
     path: '/workspace/:workspaceId/uploads',
-    layout: AppLayout,
+    layout: AppLayoutV2,
     element: <UploadsPage />,
   },
   {
@@ -98,11 +117,6 @@ const routes: Route[] = [
     path: '/workspace/:workspaceId/processors/:processorId/settings',
     layout: ProcessorLayout,
     element: <ProcessorSettingsPage />,
-  },
-  {
-    path: '/workspace/:workspaceId/users',
-    layout: AppLayout,
-    element: <WorkspaceUsersPage />,
   },
   {
     path: '/workspace/:workspaceId/tools',

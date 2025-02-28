@@ -47,7 +47,7 @@ func (r *UploadRepo) GetAll(ctx context.Context, workspaceID string, paginationP
 	}
 
 	if err := query.Find(&uploads).Error; err != nil {
-		return nil, 0, dbutils.DBError(err)
+		return nil, 0, dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 
 	return uploads, totalRecords, nil
@@ -56,21 +56,21 @@ func (r *UploadRepo) GetAll(ctx context.Context, workspaceID string, paginationP
 func (r *UploadRepo) Get(ctx context.Context, uploadID string) (*models.Upload, error) {
 	var upload models.Upload
 	if err := r.db.Orm.WithContext(ctx).First(&upload, "id = ?", uploadID).Error; err != nil {
-		return nil, dbutils.DBError(err)
+		return nil, dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 	return &upload, nil
 }
 
 func (r *UploadRepo) Create(ctx context.Context, workspaceID string, upload *models.Upload) error {
 	if err := r.db.Orm.WithContext(ctx).Create(upload).Error; err != nil {
-		return dbutils.DBError(err)
+		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 	return nil
 }
 
 func (r *UploadRepo) Update(ctx context.Context, uploadID string, upload *models.Upload) error {
 	if err := r.db.Orm.WithContext(ctx).Save(upload).Error; err != nil {
-		return dbutils.DBError(err)
+		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 
 	return nil
@@ -78,7 +78,7 @@ func (r *UploadRepo) Update(ctx context.Context, uploadID string, upload *models
 
 func (r *UploadRepo) Delete(ctx context.Context, uploadID string) error {
 	if err := r.db.Orm.WithContext(ctx).Delete(&models.Upload{}, "id = ?", uploadID).Error; err != nil {
-		return dbutils.DBError(err)
+		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 
 	return nil
@@ -94,7 +94,7 @@ func (r *UploadRepo) SetStatus(ctx context.Context, uploadID string, status mode
 	}
 
 	if err := r.db.Orm.WithContext(ctx).Model(&models.Upload{}).Where("id = ?", uploadID).Updates(update).Error; err != nil {
-		return dbutils.DBError(err)
+		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 
 	return nil
@@ -115,7 +115,7 @@ func (r *UploadRepo) Patch(ctx context.Context, uploadID string, patchMap map[st
 	}
 
 	if err := r.db.Orm.WithContext(ctx).Model(&models.Upload{}).Where("id = ?", uploadID).Updates(patch).Error; err != nil {
-		return dbutils.DBError(err)
+		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 
 	return nil

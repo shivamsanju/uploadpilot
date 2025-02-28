@@ -31,7 +31,7 @@ func NewUploadService(c *clients.CoreServiceClient) *Service {
 	}
 }
 
-func (us *Service) GetUploaderConfig(ctx context.Context, workspaceID string, headers http.Header) (*dto.UploaderConfig, error) {
+func (us *Service) GetUploaderConfig(ctx context.Context, workspaceID string, headers http.Header) (*dto.WorkspaceConfig, error) {
 	cgf, err := us.coreSvcClient.GetUploaderConfig(ctx, workspaceID, headers)
 	if err != nil {
 		log.Error().Err(err).Str("workspace_id", workspaceID).Msg("failed to get uploader config")
@@ -99,7 +99,7 @@ func (us *Service) getStorageForWorkspace() (*tusd.StoreComposer, error) {
 	return composer, nil
 }
 
-func (us *Service) getCorsConfigForWorkspace(uploaderConfig *dto.UploaderConfig) (*tusd.CorsConfig, error) {
+func (us *Service) getCorsConfigForWorkspace(uploaderConfig *dto.WorkspaceConfig) (*tusd.CorsConfig, error) {
 	cf := &tusd.CorsConfig{
 		AllowCredentials: false,
 		Disable:          false,
@@ -164,7 +164,7 @@ func (us *Service) getFileTypeFromMetadata(metadata map[string]interface{}) (str
 	return fileType, nil
 }
 
-func (us *Service) getPreUploadCallback(workspaceID string, uploaderConfig *dto.UploaderConfig) func(tusd.HookEvent) (tusd.HTTPResponse, tusd.FileInfoChanges, error) {
+func (us *Service) getPreUploadCallback(workspaceID string, uploaderConfig *dto.WorkspaceConfig) func(tusd.HookEvent) (tusd.HTTPResponse, tusd.FileInfoChanges, error) {
 	return func(hook tusd.HookEvent) (tusd.HTTPResponse, tusd.FileInfoChanges, error) {
 		if err := us.logUploadRequest(&hook, workspaceID); err != nil {
 			log.Error().Str("workspace_id", workspaceID).Err(err).Msg("unable to log upload request")

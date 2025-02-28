@@ -1,31 +1,59 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
+import Session from 'supertokens-web-js/recipe/session';
 import axiosInstance from '../utils/axios';
 
-export const useGetSession = () => {
+export const useGetUserDetails = () => {
   const navigate = useNavigate();
 
+  const {
+    isPending,
+    error,
+    data: user,
+  } = useQuery({
+    queryKey: ['user'],
+    refetchInterval: 1200000,
+    queryFn: () => {
+      return axiosInstance
+        .get(`/user`)
+        .then(res => {
+          if (res.status !== 200) {
+            navigate('/auth');
+          }
+          return res.data;
+        })
+        .catch(() => {
+          navigate('/auth');
+        });
+    },
+  });
+
+  return { isPending, error, user };
+};
+
+export const useUpdateUser = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ['user'],
+    mutationFn: (data: Record<string, any>) => {
+      return axiosInstance.put(`/user`, data).then(res => res.data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user'] });
+    },
+  });
+};
+
+export const useGetSession = () => {
   const {
     isPending,
     error,
     data: session,
   } = useQuery({
     queryKey: ['session'],
-    refetchInterval: 1200000,
-    queryFn: () => {
-      return axiosInstance
-        .get(`/session`)
-        .then(res => {
-          if (res.status !== 200) {
-            localStorage.removeItem('uploadpilottoken');
-            navigate('/auth');
-          }
-          return res.data;
-        })
-        .catch(() => {
-          localStorage.removeItem('uploadpilottoken');
-          navigate('/auth');
-        });
+    queryFn: async () => {
+      return await Session.doesSessionExist();
     },
   });
 

@@ -19,7 +19,7 @@ import {
 import { useParams } from 'react-router-dom';
 import { Uploader } from 'uppy-react';
 import 'uppy-react/dist/style.css';
-import { useGetSession } from '../../../apis/user';
+import { useGetUserDetails } from '../../../apis/user';
 import { AppLoader } from '../../../components/Loader/AppLoader';
 import { getUploadApiDomain } from '../../../utils/config';
 import Settings from './Settings';
@@ -79,7 +79,7 @@ const uploadEndpoint = getUploadApiDomain();
 const ReactIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
   const settingsProps = useSettingsProps();
   const { workspaceId } = useParams();
-  const { isPending: isUserPending, session } = useGetSession();
+  const { isPending: isUserPending, user } = useGetUserDetails();
   const code = getCode(workspaceId as string, uploadEndpoint, settingsProps);
 
   if (!workspaceId || isUserPending) {
@@ -120,8 +120,8 @@ const ReactIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
                     uploadEndpoint={uploadEndpoint}
                     workspaceId={workspaceId}
                     metadata={{
-                      uploaderEmail: session.email,
-                      uploaderName: session.name || 'Unknown',
+                      uploaderEmail: user.email,
+                      uploaderName: user.name || 'User',
                     }}
                     {...settingsProps}
                     note="Test your uploader"

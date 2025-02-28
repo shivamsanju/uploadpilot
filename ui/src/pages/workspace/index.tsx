@@ -8,7 +8,7 @@ import {
   Title,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconCategory, IconCategoryPlus, IconPlus } from '@tabler/icons-react';
+import { IconDeviceLaptop, IconPlus } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -80,7 +80,7 @@ const WorkspaceLandingPage = () => {
               onClick={() => navigate(`/workspace/${workspace.id}/uploads`)}
             >
               <Group key={workspace.id} h="100%">
-                <IconCategory size={30} stroke={2} color="gray" />
+                <IconDeviceLaptop size={30} stroke={2} color="gray" />
                 <Text size="sm" fw="bold" opacity={0.7}>
                   {workspace.name}
                 </Text>
@@ -99,9 +99,8 @@ const WorkspaceLandingPage = () => {
         <form onSubmit={form.onSubmit(values => handleCreateWorkspace(values))}>
           <TextInput
             mb="xl"
+            withAsterisk
             label="Workspace name"
-            description="Name of the workspace"
-            leftSection={<IconCategoryPlus stroke={2} color="gray" />}
             placeholder="Enter a workspace name"
             {...form.getInputProps('name')}
           />

@@ -16,9 +16,10 @@ var (
 )
 
 type InfraOpts struct {
-	S3Opts       *S3Options
-	RedisOpts    *redis.Options
-	TemporalOpts *TemporalOptions
+	S3Opts          *S3Options
+	RedisOpts       *redis.Options
+	TemporalOpts    *TemporalOptions
+	SuperTokensOpts *SuperTokensOptions
 }
 
 func Init(opts *InfraOpts) error {
@@ -51,6 +52,14 @@ func Init(opts *InfraOpts) error {
 		TemporalClient = tc
 	} else {
 		log.Warn().Msg("Temporal client not initialized")
+	}
+
+	if opts.SuperTokensOpts != nil {
+		if err := InitSuperTokens(opts.SuperTokensOpts); err != nil {
+			return err
+		}
+	} else {
+		log.Warn().Msg("SuperTokens client not initialized")
 	}
 
 	return nil

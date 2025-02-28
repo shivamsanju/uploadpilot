@@ -114,7 +114,7 @@ export const myAppTheme = createTheme({
     }),
     appcolor: lightBlue,
   },
-  defaultRadius: 2,
+  defaultRadius: 'md',
   components: {
     TextInput: TextInput.extend({
       defaultProps: {
@@ -170,7 +170,7 @@ export const myAppTheme = createTheme({
     Button: Button.extend({
       defaultProps: {
         size: 'xs',
-        radius: 2,
+        radius: 'md',
       },
     }),
 
@@ -178,7 +178,7 @@ export const myAppTheme = createTheme({
       defaultProps: {
         size: 'xs',
         variant: 'light',
-        radius: 2,
+        radius: 'xl',
       },
     }),
     Switch: Switch.extend({
@@ -209,10 +209,10 @@ export const myAppTheme = createTheme({
     }),
     Paper: Paper.extend({
       defaultProps: {
-        radius: 0,
+        radius: 'md',
         style: {
           borderColor:
-            'light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-6))',
+            'light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-6))',
         },
       },
     }),

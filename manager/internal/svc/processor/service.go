@@ -56,7 +56,7 @@ func (s *Service) GetTemplates(ctx context.Context) []dto.ProcessorTemplate {
 }
 
 func (s *Service) CreateProcessor(ctx context.Context, workspaceID string, processor *models.Processor, templateKey *string) error {
-	user, err := utils.GetUserDetailsFromContext(ctx)
+	user, err := utils.GetSessionFromCtx(ctx)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (s *Service) DeleteProcessor(ctx context.Context, workspaceID, processorID 
 }
 
 func (s *Service) EnableDisableProcessor(ctx context.Context, workspaceID, processorID string, enabled bool) error {
-	user, err := utils.GetUserDetailsFromContext(ctx)
+	user, err := utils.GetSessionFromCtx(ctx)
 	if err != nil {
 		return err
 	}
@@ -110,7 +110,7 @@ func (s *Service) EnableDisableProcessor(ctx context.Context, workspaceID, proce
 }
 
 func (s *Service) EditNameAndTrigger(ctx context.Context, workspaceID, processorID string, update *dto.EditProcRequest) error {
-	user, err := utils.GetUserDetailsFromContext(ctx)
+	user, err := utils.GetSessionFromCtx(ctx)
 	if err != nil {
 		return err
 	}

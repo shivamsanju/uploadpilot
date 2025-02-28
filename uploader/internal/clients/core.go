@@ -56,7 +56,7 @@ func (c *CoreServiceClient) LogUploadRequest(ctx context.Context, workspaceID st
 	return nil
 }
 
-func (c *CoreServiceClient) GetUploaderConfig(ctx context.Context, workspaceID string, headers http.Header) (*dto.UploaderConfig, error) {
+func (c *CoreServiceClient) GetUploaderConfig(ctx context.Context, workspaceID string, headers http.Header) (*dto.WorkspaceConfig, error) {
 	configURI := fmt.Sprintf("/workspaces/%s/config", workspaceID)
 	resp, err := c.makeRequest(ctx, "GET", configURI, nil, headers)
 	if err != nil {
@@ -73,7 +73,7 @@ func (c *CoreServiceClient) GetUploaderConfig(ctx context.Context, workspaceID s
 		return nil, fmt.Errorf("%s", body)
 	}
 
-	var config dto.UploaderConfig
+	var config dto.WorkspaceConfig
 	err = json.Unmarshal(body, &config)
 	if err != nil {
 		return nil, err

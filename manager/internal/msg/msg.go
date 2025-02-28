@@ -1,16 +1,41 @@
 package msg
 
-var (
+// Common errors
+const (
+	ErrUnexpected = "oops! something went wrong. please try again"
+	ErrUnknown    = "there was an issue processing your request. please try again later"
+)
+
+// User
+const (
+	ErrUserInfoNotFoundInRequest = "user info not found in request"
+	ErrInvalidUserInfoInRequest  = "invalid user info in request"
+	ErrTenantIDNotFoundInRequest = "tenant id not found in request"
+	ErrInvalidTenantIDInRequest  = "invalid tenant id in request"
+	ErrEmailNotFoundInRequest    = "email not found in request"
+)
+
+// API request validation
+const (
+	ErrInvalidRequestBody     = "invalid request body. error: %s"
+	ErrInvalidRequestParams   = "invalid request params. error: %s"
+	ErrInvaliduestQueryParams = "invalid request query params. error: %s"
+)
+
+// API Key errors
+const (
+	ErrAPIKeyNotFoundInRequest = "api key not found in request"
+	ErrApiKeyCreateFailed      = "failed to create api key. please try again later"
+	ErrInvalidAPIKey           = "invalid api key"
+	ErrExpiredAPIKey           = "api key has expired"
+	ErrRevokedAPIKey           = "api key has been revoked"
+)
+
+const (
 	//Error
-	ErrUnknown = "there was an issue processing your request. please try again later"
 
 	// Structs
 	ErrFailedToMarshal = "failed to marshal value: %s"
-
-	// JWT
-	JWTSecretKeyNotSet = "secret key has not been set. call auth.Init() first"
-	InvalidToken       = "invalid jwt token"
-	TokenExpired       = "jwt token is expired"
 
 	// API
 	ValidationErr              = "validation error: %s"
@@ -49,14 +74,9 @@ var (
 	UploadAuthenticationFailed  = "upload authentication failed. reason: %s"
 
 	// Upload Status
-	FailedToCreateUpload = "failed to create upload. reason: %s"
-	UploadStarted        = "upload started"
-	UploadFailed         = "upload failed. reason: %s"
-	UploadComplete       = "upload completed"
-
-	// APIKey
-	ErrApiKeyCreateFailed  = "failed to create api key. please try again later"
-	ErrInvalidAPIKey       = "invalid api key"
-	ErrExpiredAPIKey       = "api key has expired"
+	FailedToCreateUpload   = "failed to create upload. reason: %s"
+	UploadStarted          = "upload started"
+	UploadFailed           = "upload failed. reason: %s"
+	UploadComplete         = "upload completed"
 	ErrSubscriptionExpired = "your subscription has expired. please renew your subscription to continue using uploadpilot"
 )

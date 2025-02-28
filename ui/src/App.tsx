@@ -9,10 +9,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import routes from './Routes';
 import { myAppTheme } from './style/theme';
+import { InitSupertokens } from './utils/supertokens';
 const queryClient = new QueryClient();
+
+InitSupertokens();
+
 function App() {
   return (
-    <MantineProvider theme={myAppTheme}>
+    <MantineProvider theme={myAppTheme} defaultColorScheme="dark">
       <ModalsProvider>
         <Notifications position="bottom-right" transitionDuration={500} />
         <QueryClientProvider client={queryClient}>

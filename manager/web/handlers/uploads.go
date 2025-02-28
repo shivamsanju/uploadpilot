@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"errors"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -10,8 +9,6 @@ import (
 	commonutils "github.com/uploadpilot/go-core/common/utils"
 	"github.com/uploadpilot/go-core/db/pkg/models"
 	"github.com/uploadpilot/manager/internal/dto"
-	"github.com/uploadpilot/manager/internal/msg"
-	"github.com/uploadpilot/manager/internal/svc/auth"
 	"github.com/uploadpilot/manager/internal/svc/upload"
 	"github.com/uploadpilot/manager/internal/svc/workspace"
 	"github.com/uploadpilot/manager/internal/utils"
@@ -20,14 +17,12 @@ import (
 type uploadHandler struct {
 	uploadSvc    *upload.Service
 	workspaceSvc *workspace.Service
-	authSvc      *auth.Service
 }
 
-func NewUploadHandler(uploadSvc *upload.Service, workspaceSvc *workspace.Service, authSvc *auth.Service) *uploadHandler {
+func NewUploadHandler(uploadSvc *upload.Service, workspaceSvc *workspace.Service) *uploadHandler {
 	return &uploadHandler{
 		uploadSvc:    uploadSvc,
 		workspaceSvc: workspaceSvc,
-		authSvc:      authSvc,
 	}
 }
 
@@ -138,9 +133,5 @@ func (h *uploadHandler) FinishUpload(
 }
 
 func (h *uploadHandler) verifySubscription(ctx context.Context, workspaceID string) (int, error) {
-	sub, err := h.workspaceSvc.GetSubscription(ctx, workspaceID)
-	if err != nil || !sub.Active {
-		return http.StatusUnauthorized, errors.New(msg.ErrSubscriptionExpired)
-	}
 	return http.StatusOK, nil
 }

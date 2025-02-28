@@ -2,7 +2,7 @@ package dto
 
 import "time"
 
-type UploaderConfig struct {
+type WorkspaceConfig struct {
 	MaxFileSize            *int64   `json:"maxFileSize"`
 	MaxNumberOfFiles       int64    `json:"maxNumberOfFiles"`
 	AllowedFileTypes       []string `json:"allowedFileTypes"`

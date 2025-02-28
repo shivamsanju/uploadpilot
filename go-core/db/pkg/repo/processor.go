@@ -27,7 +27,7 @@ func (r *ProcessorRepo) GetAll(ctx context.Context, workspaceID string) ([]model
 		Find(&processors).Error
 
 	if err != nil {
-		return nil, dbutils.DBError(err)
+		return nil, dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 
 	return processors, nil
@@ -39,7 +39,7 @@ func (r *ProcessorRepo) Get(ctx context.Context, processorID string) (*models.Pr
 		First(&processor, "id = ?", processorID).Error
 
 	if err != nil {
-		return nil, dbutils.DBError(err)
+		return nil, dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 
 	return &processor, nil
@@ -48,21 +48,21 @@ func (r *ProcessorRepo) Get(ctx context.Context, processorID string) (*models.Pr
 func (r *ProcessorRepo) Create(ctx context.Context, processor *models.Processor) error {
 	err := r.db.Orm.WithContext(ctx).Create(processor).Error
 	if err != nil {
-		return dbutils.DBError(err)
+		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 	return nil
 }
 
 func (r *ProcessorRepo) Patch(ctx context.Context, workspaceID, processorID string, patch map[string]interface{}) error {
 	if err := r.db.Orm.WithContext(ctx).Model(&models.Processor{}).Where("id = ?", processorID).Updates(patch).Error; err != nil {
-		return dbutils.DBError(err)
+		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 	return nil
 }
 
 func (r *ProcessorRepo) Delete(ctx context.Context, workspaceID, processorID string) error {
 	if err := r.db.Orm.WithContext(ctx).Delete(&models.Processor{}, "id = ?", processorID).Error; err != nil {
-		return dbutils.DBError(err)
+		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 	return nil
 }
@@ -72,7 +72,7 @@ func (r *ProcessorRepo) SaveWorkflow(ctx context.Context, workspaceID, processor
 		"workflow": workflow,
 	}
 	if err := r.db.Orm.WithContext(ctx).Model(&models.Processor{}).Where("id = ?", processorID).Updates(patch).Error; err != nil {
-		return dbutils.DBError(err)
+		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 	return nil
 }

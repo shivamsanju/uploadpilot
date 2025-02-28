@@ -1,22 +1,18 @@
 package dto
 
-type UserContext struct {
-	UserID string `json:"id"`
-	Name   string `json:"name"`
-	Email  string `json:"email"`
+var UserAttributesKey = "userAttributes"
+
+type UserAttributes struct {
+	Name   string `json:"name,omitempty"`
+	Avatar string `json:"avatar,omitempty"`
+	Theme  string `json:"theme,omitempty"`
 }
 
-type SessionResponse struct {
-	Name           string `json:"name"`
-	Email          string `json:"email"`
-	AvatarURL      string `json:"avatarUrl"`
-	TrialExpiresIn int64  `json:"trialExpiresIn"`
+type UserDetailsResponse struct {
+	Email        string            `json:"email"`
+	Name         string            `json:"name,omitempty"`
+	Avatar       *string           `json:"avatar,omitempty"`
+	Theme        *string           `json:"theme,omitempty"`
+	Tenants      map[string]string `json:"tenants,omitempty"`
+	ActiveTenant *string           `json:"activeTenant,omitempty"`
 }
-
-type ContextKey string
-
-const (
-	UserIDContextKey ContextKey = "id"
-	EmailContextKey  ContextKey = "email"
-	NameContextKey   ContextKey = "name"
-)

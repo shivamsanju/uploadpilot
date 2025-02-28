@@ -12,7 +12,7 @@ export const ErrorLoadingWrapper: React.FC<ErrorLoadingWrapperProps> = ({
   children,
   isPending,
   error,
-  h = '50vh',
+  h = '70vh',
   w,
 }) => {
   return (

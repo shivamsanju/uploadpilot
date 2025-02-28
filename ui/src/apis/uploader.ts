@@ -1,6 +1,6 @@
 import { notifications } from '@mantine/notifications';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { UploaderConfig } from '../types/uploader';
+import { WorkspaceConfig } from '../types/uploader';
 import axiosInstance from '../utils/axios';
 
 export const useGetUploaderConfig = (workspaceId: string) => {
@@ -39,7 +39,7 @@ export const useUpdateUploaderConfigMutation = () => {
       config,
     }: {
       workspaceId: string;
-      config: UploaderConfig;
+      config: WorkspaceConfig;
     }) => {
       return axiosInstance
         .put(`/workspaces/${workspaceId}/config`, config)

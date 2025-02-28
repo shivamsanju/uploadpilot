@@ -47,7 +47,7 @@ func BuildPaginationQuery(
 	}
 
 	if err := query.Count(&totalRecords).Error; err != nil {
-		return nil, 0, false, DBError(err)
+		return nil, 0, false, err
 	}
 
 	if input.PaginationParams.Sort.Field != "" && input.PaginationParams.Sort.Order != "" {

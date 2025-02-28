@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/joho/godotenv"
 )
@@ -18,8 +19,9 @@ var (
 	RedisPassword         string
 	RedisTLS              bool
 	DatabaseName          string
+	SelfEndpoint          string
 	FrontendURI           string
-	AllowedOrigins        string
+	AllowedOrigins        []string
 	JWTSecretKey          string
 	GoogleClientID        string
 	GoogleClientSecret    string
@@ -40,6 +42,10 @@ var (
 	TemporalNamespace string
 	TemporalHostPort  string
 	TemporalAPIKey    string
+
+	// SuperTokens
+	SuperTokensEndpoint string
+	SupertokensAPIKey   string
 )
 
 func Init() error {
@@ -72,6 +78,7 @@ func Init() error {
 	RedisPassword = os.Getenv("REDIS_PASS")
 	RedisTLS = os.Getenv("REDIS_TLS") == "true"
 	FrontendURI = os.Getenv("FRONTEND_URI")
+	SelfEndpoint = os.Getenv("SELF_ENDPOINT")
 	DatabaseName = os.Getenv("APP_NAME") + "db"
 	JWTSecretKey = os.Getenv("JWT_SECRET_KEY")
 	GoogleClientID = os.Getenv("GOOGLE_CLIENT_ID")
@@ -84,7 +91,7 @@ func Init() error {
 	S3SecretKey = os.Getenv("S3_SECRET_KEY")
 	S3BucketName = os.Getenv("S3_BUCKET_NAME")
 	S3Region = os.Getenv("S3_REGION")
-	AllowedOrigins = os.Getenv("ALLOWED_ORIGINS")
+	AllowedOrigins = strings.Split(os.Getenv("ALLOWED_ORIGINS"), ",")
 	ApiKeyEncryptionKey = os.Getenv("API_KEY_ENCRYPTION_KEY")
 	ApiKeyEncryptionSalt = os.Getenv("API_KEY_ENCRYPTION_SALT")
 	SecretsEncryptionKey = os.Getenv("SECRETS_ENCRYPTION_KEY")
@@ -94,6 +101,10 @@ func Init() error {
 	TemporalNamespace = os.Getenv("TEMPORAL_NAMESPACE")
 	TemporalHostPort = os.Getenv("TEMPORAL_HOST_PORT")
 	TemporalAPIKey = os.Getenv("TEMPORAL_API_KEY")
+
+	// SuperTokens
+	SuperTokensEndpoint = os.Getenv("SUPER_TOKENS_ENDPOINT")
+	SupertokensAPIKey = os.Getenv("SUPER_TOKENS_API_KEY")
 
 	return nil
 }

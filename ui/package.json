@@ -27,6 +27,8 @@
     "react-router-dom": "^6.2.1",
     "react-scripts": "5.0.1",
     "recharts": "^2.15.0",
+    "supertokens-auth-react": "^0.48.0",
+    "supertokens-web-js": "^0.14.0",
     "uppy-react": "1.0.44",
     "uuidv4": "^6.2.13",
     "yaml": "^2.7.0"

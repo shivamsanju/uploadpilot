@@ -2,8 +2,9 @@ package web
 
 import (
 	"github.com/go-chi/chi/v5"
+	"github.com/supertokens/supertokens-golang/recipe/session"
+	"github.com/supertokens/supertokens-golang/supertokens"
 	"github.com/uploadpilot/manager/internal/svc"
-	"github.com/uploadpilot/manager/internal/svc/auth"
 	"github.com/uploadpilot/manager/web/handlers"
 )
 
@@ -11,86 +12,84 @@ func Routes(services *svc.Services, middlewares *Middlewares) *chi.Mux {
 	router := chi.NewRouter()
 
 	// Handlers for uploads
-	authHandler := handlers.NewAuthHandler(services.UserService, services.AuthService)
-	workspaceHandler := handlers.NewWorkspaceHandler(services.WorkspaceService, services.AuthService)
-	uploadHandler := handlers.NewUploadHandler(services.UploadService, services.WorkspaceService, services.AuthService)
+	userHandler := handlers.NewUserHandler()
+	tenantHandler := handlers.NewTenantHandler(services.TenantService)
+	authHandler := handlers.NewAPIKeyHandler(services.APIKeyService)
+	workspaceHandler := handlers.NewWorkspaceHandler(services.WorkspaceService)
+	uploadHandler := handlers.NewUploadHandler(services.UploadService, services.WorkspaceService)
 	procHandler := handlers.NewProcessorsHandler(services.ProcessorService)
 
-	// Auth routes
-	router.Group(func(r chi.Router) {
-		r.Route("/auth", func(r chi.Router) {
-			r.Get("/{provider}/authorize", authHandler.Login)
-			r.Get("/{provider}/callback", authHandler.HandleCallback)
-			r.Get("/logout", authHandler.Logout)
-			r.Get("/logout/{provider}", authHandler.LogoutProvider)
-		})
-	})
+	router.Use(supertokens.Middleware)
 
 	// Protected routes
 	router.Group(func(r chi.Router) {
-		// Session
-		r.Get("/session", WithMiddleware(authHandler.GetSession, middlewares.AccountAuthMiddleware(auth.CanReadAcc, auth.CanManageAcc)))
+		r.Use(middlewares.CorsMiddleware)
+
+		// User
+		r.Route("/user", func(r chi.Router) {
+			r.Get("/", session.VerifySession(nil, CreateJSONHandler(userHandler.GetUserDetails)))
+			r.Put("/", session.VerifySession(nil, CreateJSONHandler(userHandler.UpdateUserDetails)))
+
+		})
+
+		// Tenants
+		r.Route("/tenants", func(r chi.Router) {
+			r.Post("/", session.VerifySession(nil, CreateJSONHandler(tenantHandler.OnboardTenant)))
+			r.Put("/active", session.VerifySession(nil, CreateJSONHandler(tenantHandler.SetActiveTenant)))
+		})
 
 		// ApiKeys
 		r.Route("/api-keys", func(r chi.Router) {
-			r.Get("/", WithMiddleware(CreateJSONHandler(authHandler.GetAPIKeys), middlewares.JWTOnlyAuthMiddleware))
-			r.Post("/", WithMiddleware(CreateJSONHandler(authHandler.CreateAPIKey), middlewares.JWTOnlyAuthMiddleware))
+
+			r.Get("/", middlewares.CheckPermissions(CreateJSONHandler(authHandler.GetAPIKeys), BearerTenantReadAccess))
+			r.Post("/", middlewares.CheckPermissions(CreateJSONHandler(authHandler.CreateAPIKey), BearerTenantReadAccess))
 			r.Route("/{apiKeyId}", func(r chi.Router) {
-				r.Post("/revoke", WithMiddleware(CreateJSONHandler(authHandler.RevokeAPIKey), middlewares.JWTOnlyAuthMiddleware))
+				r.Post("/revoke", middlewares.CheckPermissions(CreateJSONHandler(authHandler.RevokeAPIKey), BearerTenantReadAccess))
 			})
 		})
 
 		// Workspaces
 		r.Route("/workspaces", func(r chi.Router) {
-			r.Get("/", WithMiddleware(workspaceHandler.GetAllWorkspaces, middlewares.AccountAuthMiddleware(auth.CanReadAcc, auth.CanManageAcc)))
-			r.Post("/", WithMiddleware(workspaceHandler.CreateWorkspace, middlewares.AccountAuthMiddleware(auth.CanManageAcc)))
+
+			r.Get("/", middlewares.CheckPermissions(workspaceHandler.GetAllWorkspaces, BearerTenantReadAccess))
+			r.Post("/", middlewares.CheckPermissions(workspaceHandler.CreateWorkspace, BearerTenantReadAccess))
 
 			// Single workspace
 			r.Route("/{workspaceId}", func(r chi.Router) {
-				r.Get("/config", WithMiddleware(workspaceHandler.GetUploaderConfig, middlewares.WorkspaceAuthMiddleware(auth.CanRead, auth.CanManage, auth.CanUpload)))
-				r.Put("/config", WithMiddleware(workspaceHandler.UpdateUploaderConfig, middlewares.WorkspaceAuthMiddleware(auth.CanManage)))
-				r.Get("/allowedSources", WithMiddleware(CreateJSONHandler(workspaceHandler.GetAllAllowedSources), middlewares.WorkspaceAuthMiddleware(auth.CanRead, auth.CanManage, auth.CanUpload)))
-				r.Get("/subscription", WithMiddleware(CreateJSONHandler(workspaceHandler.GetSubscription), middlewares.WorkspaceAuthMiddleware(auth.CanRead, auth.CanManage, auth.CanUpload)))
 
-				// Users
-				r.Route("/users", func(r chi.Router) {
-					r.Get("/", WithMiddleware(workspaceHandler.GetAllUsersInWorkspace, middlewares.WorkspaceAuthMiddleware(auth.CanRead, auth.CanManage)))
-					r.Post("/", WithMiddleware(workspaceHandler.AddUserToWorkspace, middlewares.WorkspaceAuthMiddleware(auth.CanManage)))
-					r.Route("/{userId}", func(r chi.Router) {
-						r.Put("/", WithMiddleware(workspaceHandler.EditUser, middlewares.WorkspaceAuthMiddleware(auth.CanManage)))
-						r.Delete("/", WithMiddleware(workspaceHandler.RemoveUserFromWorkspace, middlewares.WorkspaceAuthMiddleware(auth.CanManage)))
-					})
-				})
+				r.Get("/config", middlewares.CheckPermissions(workspaceHandler.GetWorkspaceConfig, BearerTenantReadAccess))
+				r.Put("/config", middlewares.CheckPermissions(workspaceHandler.SetWorkspaceConfig, BearerTenantReadAccess))
+				r.Get("/allowedSources", middlewares.CheckPermissions(CreateJSONHandler(workspaceHandler.GetAllAllowedSources), BearerTenantReadAccess))
 
 				// Uploads
 				r.Route("/uploads", func(r chi.Router) {
-					r.Get("/", WithMiddleware(CreateJSONHandler(uploadHandler.GetPaginatedUploads), middlewares.WorkspaceAuthMiddleware(auth.CanRead, auth.CanManage)))
-					r.Post("/", WithMiddleware(CreateJSONHandler(uploadHandler.CreateUpload), middlewares.WorkspaceAuthMiddleware(auth.CanUpload)))
+					r.Get("/", middlewares.CheckPermissions(CreateJSONHandler(uploadHandler.GetPaginatedUploads), BearerTenantReadAccess))
+					r.Post("/", middlewares.CheckPermissions(CreateJSONHandler(uploadHandler.CreateUpload), BearerTenantReadAccess))
 					r.Post("/log", CreateJSONHandler(workspaceHandler.LogUpload))
 
 					r.Route("/{uploadId}", func(r chi.Router) {
-						r.Get("/", WithMiddleware(uploadHandler.GetUploadDetailsByID, middlewares.WorkspaceAuthMiddleware(auth.CanRead, auth.CanManage)))
-						r.Post("/finish", WithMiddleware(CreateJSONHandler(uploadHandler.FinishUpload), middlewares.WorkspaceAuthMiddleware(auth.CanUpload, auth.CanManage)))
-						r.Get("/download", WithMiddleware(CreateJSONHandler(uploadHandler.GetUploadURL), middlewares.WorkspaceAuthMiddleware(auth.CanRead, auth.CanManage)))
-						r.Post("/process", WithMiddleware(CreateJSONHandler(uploadHandler.ProcessUpload), middlewares.WorkspaceAuthMiddleware(auth.CanManage)))
+						r.Get("/", middlewares.CheckPermissions(uploadHandler.GetUploadDetailsByID, BearerTenantReadAccess))
+						r.Post("/finish", middlewares.CheckPermissions(CreateJSONHandler(uploadHandler.FinishUpload), BearerTenantReadAccess))
+						r.Get("/download", middlewares.CheckPermissions(CreateJSONHandler(uploadHandler.GetUploadURL), BearerTenantReadAccess))
+						r.Post("/process", middlewares.CheckPermissions(CreateJSONHandler(uploadHandler.ProcessUpload), BearerTenantReadAccess))
 					})
 				})
 
 				// processors
 				r.Route("/processors", func(r chi.Router) {
-					r.Get("/", WithMiddleware(procHandler.GetProcessors, middlewares.WorkspaceAuthMiddleware(auth.CanRead, auth.CanManage)))
-					r.Post("/", WithMiddleware(CreateJSONHandler(procHandler.CreateProcessor), middlewares.WorkspaceAuthMiddleware(auth.CanManage)))
-					r.Get("/tasks", WithMiddleware(procHandler.GetAllTasks, middlewares.WorkspaceAuthMiddleware(auth.CanRead, auth.CanManage)))
-					r.Get("/templates", WithMiddleware(procHandler.GetTemplates, middlewares.WorkspaceAuthMiddleware(auth.CanRead, auth.CanManage)))
+					r.Get("/", middlewares.CheckPermissions(procHandler.GetProcessors, BearerTenantReadAccess))
+					r.Post("/", middlewares.CheckPermissions(CreateJSONHandler(procHandler.CreateProcessor), BearerTenantReadAccess))
+					r.Get("/tasks", middlewares.CheckPermissions(procHandler.GetAllTasks, BearerTenantReadAccess))
+					r.Get("/templates", middlewares.CheckPermissions(procHandler.GetTemplates, BearerTenantReadAccess))
 					r.Route("/{processorId}", func(r chi.Router) {
-						r.Get("/", WithMiddleware(procHandler.GetProcessorDetailsByID, middlewares.WorkspaceAuthMiddleware(auth.CanRead, auth.CanManage)))
-						r.Put("/", WithMiddleware(procHandler.UpdateProcessor, middlewares.WorkspaceAuthMiddleware(auth.CanManage)))
-						r.Delete("/", WithMiddleware(procHandler.DeleteProcessor, middlewares.WorkspaceAuthMiddleware(auth.CanManage)))
-						r.Put("/enable", WithMiddleware(procHandler.EnableProcessor, middlewares.WorkspaceAuthMiddleware(auth.CanManage)))
-						r.Put("/disable", WithMiddleware(procHandler.DisableProcessor, middlewares.WorkspaceAuthMiddleware(auth.CanManage)))
-						r.Put("/workflow", WithMiddleware(procHandler.UpdateWorkflow, middlewares.WorkspaceAuthMiddleware(auth.CanManage)))
-						r.Get("/runs", WithMiddleware(procHandler.GetWorkflowRuns, middlewares.WorkspaceAuthMiddleware(auth.CanRead, auth.CanManage)))
-						r.Get("/logs", WithMiddleware(procHandler.GetWorkflowLogs, middlewares.WorkspaceAuthMiddleware(auth.CanRead, auth.CanManage)))
+						r.Get("/", middlewares.CheckPermissions(procHandler.GetProcessorDetailsByID, BearerTenantReadAccess))
+						r.Put("/", middlewares.CheckPermissions(procHandler.UpdateProcessor, BearerTenantReadAccess))
+						r.Delete("/", middlewares.CheckPermissions(procHandler.DeleteProcessor, BearerTenantReadAccess))
+						r.Put("/enable", middlewares.CheckPermissions(procHandler.EnableProcessor, BearerTenantReadAccess))
+						r.Put("/disable", middlewares.CheckPermissions(procHandler.DisableProcessor, BearerTenantReadAccess))
+						r.Put("/workflow", middlewares.CheckPermissions(procHandler.UpdateWorkflow, BearerTenantReadAccess))
+						r.Get("/runs", middlewares.CheckPermissions(procHandler.GetWorkflowRuns, BearerTenantReadAccess))
+						r.Get("/logs", middlewares.CheckPermissions(procHandler.GetWorkflowLogs, BearerTenantReadAccess))
 					})
 				})
 			})

@@ -21,7 +21,6 @@ import (
 	"github.com/uploadpilot/manager/internal/config"
 	"github.com/uploadpilot/manager/internal/infra"
 	"github.com/uploadpilot/manager/internal/svc"
-	"github.com/uploadpilot/manager/internal/svc/auth"
 	"github.com/uploadpilot/manager/web"
 )
 
@@ -90,23 +89,42 @@ func initialize() (*http.Server, error) {
 		HostPort:  config.TemporalHostPort,
 		APIKey:    config.TemporalAPIKey,
 	}
+
+	superTokensOpts := &infra.SuperTokensOptions{
+		ConnectionURI:   config.SuperTokensEndpoint,
+		APIKey:          config.SupertokensAPIKey,
+		AppName:         config.AppName,
+		APIBasePath:     "/auth",
+		WebsiteBasePath: "/auth",
+		APIDomain:       config.SelfEndpoint,
+		WebsiteDomain:   config.FrontendURI,
+		Providers: []infra.Provider{
+			{
+				Key:          "google",
+				ClientID:     config.GoogleClientID,
+				ClientSecret: config.GoogleClientSecret,
+			},
+			{
+				Key:          "github",
+				ClientID:     config.GithubClientID,
+				ClientSecret: config.GithubClientSecret,
+			},
+		},
+	}
+
 	if config.RedisTLS {
 		redisOpts.TLSConfig = &tls.Config{}
 	}
 
 	err := infra.Init(&infra.InfraOpts{
-		S3Opts:       s3Opts,
-		RedisOpts:    redisOpts,
-		TemporalOpts: temporalOpts,
+		S3Opts:          s3Opts,
+		RedisOpts:       redisOpts,
+		TemporalOpts:    temporalOpts,
+		SuperTokensOpts: superTokensOpts,
 	})
 
 	if err != nil {
 		return nil, fmt.Errorf("infra initialization failed: %w", err)
-	}
-
-	// Initialize authentication
-	if err := auth.InitJWTSessionStore(config.JWTSecretKey); err != nil {
-		return nil, fmt.Errorf("auth initialization failed: %w", err)
 	}
 
 	// Initialize database

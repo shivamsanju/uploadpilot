@@ -19,18 +19,18 @@ func NewWorkspaceConfigRepo(db *driver.Driver) *WorkspaceConfigRepo {
 }
 
 // Config methods
-func (r *WorkspaceConfigRepo) GetConfig(ctx context.Context, workspaceID string) (*models.UploaderConfig, error) {
-	var config models.UploaderConfig
+func (r *WorkspaceConfigRepo) GetConfig(ctx context.Context, workspaceID string) (*models.WorkspaceConfig, error) {
+	var config models.WorkspaceConfig
 	if err := r.db.Orm.WithContext(ctx).Omit("Workspace").Where("workspace_id = ?", workspaceID).
 		First(&config).Error; err != nil {
-		return nil, dbutils.DBError(err)
+		return nil, dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 	return &config, nil
 }
 
-func (r *WorkspaceConfigRepo) SetConfig(ctx context.Context, config *models.UploaderConfig) error {
+func (r *WorkspaceConfigRepo) SetConfig(ctx context.Context, config *models.WorkspaceConfig) error {
 	if err := r.db.Orm.WithContext(ctx).Save(config).Error; err != nil {
-		return dbutils.DBError(err)
+		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 	return nil
 }

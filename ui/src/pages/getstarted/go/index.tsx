@@ -3,19 +3,12 @@ import '@mantine/code-highlight/styles.css';
 import { MantineStyleProp, Paper, Stack, Text, Timeline } from '@mantine/core';
 import { IconBrandNpm, IconCode, IconConfetti } from '@tabler/icons-react';
 import { useParams } from 'react-router-dom';
-import { useGetSession } from '../../../apis/user';
-import { AppLoader } from '../../../components/Loader/AppLoader';
 import { getUploadApiDomain } from '../../../utils/config';
 
 const uploadEndpoint = getUploadApiDomain();
 
 const GoIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
   const { workspaceId } = useParams();
-  const { isPending: isUserPending } = useGetSession();
-
-  if (!workspaceId || isUserPending) {
-    return <AppLoader h="50vh" />;
-  }
 
   return (
     <Stack justify="center" align="center" pt="sm" mb={50}>

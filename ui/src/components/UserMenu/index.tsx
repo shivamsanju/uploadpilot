@@ -1,30 +1,18 @@
-import {
-  Avatar,
-  Button,
-  Group,
-  Menu,
-  Text,
-  UnstyledButton,
-} from '@mantine/core';
+import { Avatar, Group, Menu, Text, UnstyledButton } from '@mantine/core';
 import {
   IconChevronDown,
   IconLogout,
-  IconStopwatch,
   IconSun,
+  IconSwitch,
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
-import { useGetSession } from '../../apis/user';
-import { getApiDomain } from '../../utils/config';
+import { handleSignout } from '../../apis/auth';
+import { useGetUserDetails } from '../../apis/user';
 import ThemeSwitcher from '../ThemeSwitcher';
 
 const UserButton = () => {
   const navigate = useNavigate();
-  const { isPending, error, session } = useGetSession();
-
-  const handleSignOut = async () => {
-    localStorage.removeItem('uploadpilottoken');
-    window.location.href = getApiDomain() + `/auth/logout`;
-  };
+  const { isPending, error, user } = useGetUserDetails();
 
   if (error) {
     navigate('/auth');
@@ -34,18 +22,8 @@ const UserButton = () => {
     return <></>;
   }
 
-  return session.email || session.name ? (
+  return user.email || user.name ? (
     <Group gap="md" align="center">
-      <Button
-        color="#ff6700"
-        variant="light"
-        radius="sm"
-        mr="40"
-        leftSection={<IconStopwatch />}
-        visibleFrom="md"
-      >
-        Trial expires in {Math.round((session?.trialExpiresIn || 0) / 24)} days
-      </Button>
       <Menu
         trigger="click"
         transitionProps={{ transition: 'pop' }}
@@ -57,13 +35,13 @@ const UserButton = () => {
           <UnstyledButton>
             <Group gap={7}>
               <Avatar
-                src={session.avatarUrl}
-                alt={session.name[0]}
+                src={user.avatar}
+                alt={user.name ? user.name[0] : user.email[0]}
                 radius="xl"
                 size={30}
               />
               <Text fw={500} size="sm" lh={1} mr={3} visibleFrom="md">
-                {session.name || session.firstName + ' ' + session.lastName}
+                {user.name}
               </Text>
               <IconChevronDown size={12} stroke={1.5} />
             </Group>
@@ -78,11 +56,17 @@ const UserButton = () => {
             {' '}
             <ThemeSwitcher />
           </Menu.Item>
+          <Menu.Item
+            leftSection={<IconSwitch size={16} />}
+            onClick={() => navigate('/tenants')}
+          >
+            <Text size="sm">Switch Tenant</Text>
+          </Menu.Item>
           <Menu.Divider />
           <Menu.Item
             c="red"
             leftSection={<IconLogout size={16} />}
-            onClick={handleSignOut}
+            onClick={handleSignout}
           >
             <Text size="sm">Logout</Text>
           </Menu.Item>

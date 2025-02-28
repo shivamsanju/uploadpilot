@@ -8,7 +8,6 @@ import {
   Switch,
   TagsInput,
   Text,
-  Transition,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
@@ -18,11 +17,11 @@ import { useGetAllAllowedSources } from '../../apis/workspace';
 import { DiscardButton } from '../../components/Buttons/DiscardButton';
 import { SaveButton } from '../../components/Buttons/SaveButton';
 import { ContainerOverlay } from '../../components/Overlay';
-import { UploaderConfig } from '../../types/uploader';
+import { WorkspaceConfig } from '../../types/uploader';
 import classes from './Form.module.css';
 
 type NewUploaderConfigProps = {
-  config: UploaderConfig;
+  config: WorkspaceConfig;
 };
 
 const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
@@ -33,7 +32,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
   const { mutateAsync, isPending: isPendingMutation } =
     useUpdateUploaderConfigMutation();
 
-  const form = useForm<UploaderConfig>({
+  const form = useForm<WorkspaceConfig>({
     initialValues: {
       ...config,
       allowedFileTypes: config?.allowedFileTypes || [],
@@ -238,21 +237,11 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
           </Stack>
         </SimpleGrid>
       </Paper>
-      <Transition
-        mounted={form.isDirty()}
-        transition="fade-up"
-        duration={400}
-        timingFunction="ease"
-      >
-        {styles => (
-          <div style={styles}>
-            <Group justify="center" gap="md" mt="xl">
-              <DiscardButton type="reset" />
-              <SaveButton type="submit" />
-            </Group>
-          </div>
-        )}
-      </Transition>
+
+      <Group justify="flex-end" gap="md" mt="xl">
+        <DiscardButton type="reset" />
+        <SaveButton type="submit" />
+      </Group>
     </form>
   );
 };

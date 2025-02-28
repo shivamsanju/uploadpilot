@@ -7,20 +7,17 @@ import (
 	"github.com/go-chi/render"
 	"github.com/uploadpilot/go-core/db/pkg/models"
 	"github.com/uploadpilot/manager/internal/dto"
-	"github.com/uploadpilot/manager/internal/svc/auth"
 	"github.com/uploadpilot/manager/internal/svc/workspace"
 	"github.com/uploadpilot/manager/internal/utils"
 )
 
 type workspaceHandler struct {
 	workspaceSvc *workspace.Service
-	authSvc      *auth.Service
 }
 
-func NewWorkspaceHandler(workspaceSvc *workspace.Service, authSvc *auth.Service) *workspaceHandler {
+func NewWorkspaceHandler(workspaceSvc *workspace.Service) *workspaceHandler {
 	return &workspaceHandler{
 		workspaceSvc: workspaceSvc,
-		authSvc:      authSvc,
 	}
 }
 
@@ -40,13 +37,7 @@ func (h *workspaceHandler) CreateWorkspace(w http.ResponseWriter, r *http.Reques
 }
 
 func (h *workspaceHandler) GetAllWorkspaces(w http.ResponseWriter, r *http.Request) {
-	user, err := utils.GetUserDetailsFromContext(r.Context())
-
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-	workspaces, err := h.workspaceSvc.GetWorkspaces(r.Context(), user.UserID)
+	workspaces, err := h.workspaceSvc.GetAllWorkspaces(r.Context())
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -54,68 +45,9 @@ func (h *workspaceHandler) GetAllWorkspaces(w http.ResponseWriter, r *http.Reque
 	render.JSON(w, r, workspaces)
 }
 
-func (h *workspaceHandler) AddUserToWorkspace(w http.ResponseWriter, r *http.Request) {
+func (h *workspaceHandler) GetWorkspaceConfig(w http.ResponseWriter, r *http.Request) {
 	workspaceID := chi.URLParam(r, "workspaceId")
-
-	addRequest := &dto.AddWorkspaceUser{}
-	if err := render.DecodeJSON(r.Body, addRequest); err != nil {
-		utils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	err := h.workspaceSvc.AddUserToWorkspace(r.Context(), workspaceID, addRequest)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-	render.JSON(w, r, nil)
-}
-
-func (h *workspaceHandler) RemoveUserFromWorkspace(w http.ResponseWriter, r *http.Request) {
-	workspaceID := chi.URLParam(r, "workspaceId")
-	userID := chi.URLParam(r, "userId")
-
-	err := h.workspaceSvc.RemoveUserFromWorkspace(r.Context(), workspaceID, userID)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-
-	render.JSON(w, r, true)
-}
-
-func (h *workspaceHandler) EditUser(w http.ResponseWriter, r *http.Request) {
-	workspaceID := chi.URLParam(r, "workspaceId")
-	userID := chi.URLParam(r, "userId")
-
-	body := &dto.EditUserRole{}
-	if err := render.DecodeJSON(r.Body, body); err != nil {
-		utils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	err := h.workspaceSvc.ChangeUserRoleInWorkspace(r.Context(), workspaceID, userID, body.Role)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-
-	render.JSON(w, r, true)
-}
-
-func (h *workspaceHandler) GetAllUsersInWorkspace(w http.ResponseWriter, r *http.Request) {
-	workspaceID := chi.URLParam(r, "workspaceId")
-	users, err := h.workspaceSvc.GetWorkspaceUsers(r.Context(), workspaceID)
-	if err != nil {
-		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-	render.JSON(w, r, users)
-}
-
-func (h *workspaceHandler) GetUploaderConfig(w http.ResponseWriter, r *http.Request) {
-	workspaceID := chi.URLParam(r, "workspaceId")
-	uploaderConfig, err := h.workspaceSvc.GetUploaderConfig(r.Context(), workspaceID)
+	uploaderConfig, err := h.workspaceSvc.GetWorkspaceConfig(r.Context(), workspaceID)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -123,16 +55,16 @@ func (h *workspaceHandler) GetUploaderConfig(w http.ResponseWriter, r *http.Requ
 	render.JSON(w, r, uploaderConfig)
 }
 
-func (h *workspaceHandler) UpdateUploaderConfig(w http.ResponseWriter, r *http.Request) {
+func (h *workspaceHandler) SetWorkspaceConfig(w http.ResponseWriter, r *http.Request) {
 	workspaceID := chi.URLParam(r, "workspaceId")
 
-	uploaderConfig := &models.UploaderConfig{}
+	uploaderConfig := &models.WorkspaceConfig{}
 	if err := render.DecodeJSON(r.Body, uploaderConfig); err != nil {
 		utils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	err := h.workspaceSvc.SetUploaderConfig(r.Context(), workspaceID, uploaderConfig)
+	err := h.workspaceSvc.SetWorkspaceConfig(r.Context(), workspaceID, uploaderConfig)
 	if err != nil {
 		utils.HandleHttpError(w, r, http.StatusBadRequest, err)
 		return
@@ -140,19 +72,9 @@ func (h *workspaceHandler) UpdateUploaderConfig(w http.ResponseWriter, r *http.R
 	render.JSON(w, r, nil)
 }
 
-func (h *workspaceHandler) GetSubscription(
-	r *http.Request, params dto.WorkspaceParams, query interface{}, body interface{},
-) (*dto.Subscription, int, error) {
-	sub, err := h.workspaceSvc.GetSubscription(r.Context(), params.WorkspaceID)
-	if err != nil {
-		return nil, http.StatusBadRequest, err
-	}
-	return sub, http.StatusOK, nil
-}
-
 func (h *workspaceHandler) GetAllAllowedSources(
 	r *http.Request, params dto.WorkspaceParams, query interface{}, body interface{},
-) ([]models.AllowedSources, int, error) {
+) ([]string, int, error) {
 	return models.AllAllowedSources, http.StatusOK, nil
 }
 

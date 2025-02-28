@@ -4,37 +4,69 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"slices"
+	"strings"
 	"time"
 
-	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/phuslu/log"
+	"github.com/supertokens/supertokens-golang/recipe/emailpassword"
+	"github.com/supertokens/supertokens-golang/recipe/session"
+	"github.com/supertokens/supertokens-golang/recipe/thirdparty"
+	"github.com/supertokens/supertokens-golang/recipe/usermetadata"
+	"github.com/supertokens/supertokens-golang/supertokens"
 	"github.com/uploadpilot/manager/internal/config"
 	"github.com/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/manager/internal/msg"
-	"github.com/uploadpilot/manager/internal/svc/auth"
+	"github.com/uploadpilot/manager/internal/svc/apikey"
 	"github.com/uploadpilot/manager/internal/utils"
 )
 
 type Middlewares struct {
-	authSvc *auth.Service
+	apiKeySvc *apikey.Service
 }
 
-func NewAppMiddlewares(authSvc *auth.Service) *Middlewares {
-	return &Middlewares{authSvc: authSvc}
+func NewAppMiddlewares(apiKeySvc *apikey.Service) *Middlewares {
+	return &Middlewares{
+		apiKeySvc: apiKeySvc,
+	}
+}
+
+func (m *Middlewares) RecoveryMiddleware(next http.Handler) http.Handler {
+	return middleware.Recoverer(next)
+}
+
+func (m *Middlewares) RequestIDMiddleware(next http.Handler) http.Handler {
+	return middleware.RequestID(next)
+}
+
+func (m *Middlewares) RequestTimeoutMiddleware(timeout time.Duration) func(http.Handler) http.Handler {
+	return middleware.Timeout(timeout)
 }
 
 func (m *Middlewares) CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(response http.ResponseWriter, r *http.Request) {
-		response.Header().Set("Access-Control-Allow-Origin", config.AllowedOrigins)
-		response.Header().Set("Access-Control-Allow-Credentials", "true")
-		if r.Method == "OPTIONS" {
-			response.Header().Set("Access-Control-Allow-Methods", "*")
-			response.Header().Set("Access-Control-Allow-Headers", "*")
-			response.Write([]byte(""))
-		} else {
-			next.ServeHTTP(response, r)
+		origin := r.Header.Get("Origin")
+
+		// Validate and set allowed origins
+		if origin != "" && slices.Contains(config.AllowedOrigins, origin) {
+			response.Header().Set("Access-Control-Allow-Origin", origin) // Dynamically set origin
+			response.Header().Set("Access-Control-Allow-Credentials", "true")
 		}
+
+		response.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
+		response.Header().Set("Access-Control-Allow-Headers", strings.Join(
+			append([]string{"Content-Type", "X-Api-Key", "X-Tenant-Id"}, supertokens.GetAllCORSHeaders()...),
+			",",
+		))
+
+		// Handle preflight requests
+		if r.Method == "OPTIONS" {
+			response.WriteHeader(http.StatusNoContent) // No content needed for preflight
+			return                                     // Return early to avoid calling next handler
+		}
+
+		next.ServeHTTP(response, r)
 	})
 }
 
@@ -67,104 +99,97 @@ func (m *Middlewares) LoggerMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (m *Middlewares) AccountAuthMiddleware(perms ...auth.AccountPerm) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			var claims dto.UserClaims
-			apiKey := r.Header.Get("X-Api-Key")
-			jwtToken := r.Header.Get("Authorization")
-
-			if apiKey == "" && jwtToken == "" {
-				utils.HandleHttpError(w, r, http.StatusUnauthorized, errors.New("authorization header is required"))
-				return
-			}
-
-			if apiKey != "" {
-				akc, err := m.authSvc.ValidateAPIKeyAccountPerm(r.Context(), apiKey)
-				if err != nil {
-					utils.HandleHttpError(w, r, http.StatusUnauthorized, err)
-					return
-				}
-				claims = *akc.UserClaims
-			} else {
-				jwtc, err := m.authSvc.ValidateJWTToken(jwtToken)
-				if err != nil {
-					utils.HandleHttpError(w, r, http.StatusUnauthorized, err)
-					return
-				}
-				claims = *jwtc.UserClaims
-			}
-
-			next.ServeHTTP(w, r.WithContext(m.prepareContext(r, &claims)))
-		})
-	}
-}
-
-func (m *Middlewares) WorkspaceAuthMiddleware(perms ...auth.WorkspacePerm) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			workspaceID := chi.URLParam(r, "workspaceId")
-			if workspaceID == "" {
-				utils.HandleHttpError(w, r, http.StatusBadRequest, errors.New("workspaceId is required"))
-				return
-			}
-
-			apiKey := r.Header.Get("X-Api-Key")
-			jwtToken := r.Header.Get("Authorization")
-
-			if apiKey == "" && jwtToken == "" {
-				utils.HandleHttpError(w, r, http.StatusUnauthorized, errors.New("authorization header is required"))
-				return
-			}
-			var claims dto.UserClaims
-			if apiKey != "" {
-				akc, err := m.authSvc.ValidateAPIKeyWorkspacePerm(r.Context(), apiKey, workspaceID, perms...)
-				if err != nil {
-					utils.HandleHttpError(w, r, http.StatusUnauthorized, errors.New(msg.ErrInvalidAPIKey))
-					return
-				}
-				claims = *akc.UserClaims
-			} else {
-				jwtc, err := m.authSvc.ValidateJWTToken(jwtToken)
-				if err != nil {
-					utils.HandleHttpError(w, r, http.StatusUnauthorized, err)
-					return
-				}
-				claims = *jwtc.UserClaims
-			}
-
-			next.ServeHTTP(w, r.WithContext(m.prepareContext(r, &claims)))
-		})
-	}
-}
-
-func (m *Middlewares) JWTOnlyAuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		token := r.Header.Get("Authorization")
-		claims, err := m.authSvc.ValidateJWTToken(token)
+func (m *Middlewares) CheckPermissions(h http.HandlerFunc, perm APIPermission) http.HandlerFunc {
+	return m.checkPermissionsHelper(func(w http.ResponseWriter, r *http.Request) {
+		ctx, err := m.addSessionToCtx(r)
 		if err != nil {
 			utils.HandleHttpError(w, r, http.StatusUnauthorized, err)
 			return
 		}
-		next.ServeHTTP(w, r.WithContext(m.prepareContext(r, claims.UserClaims)))
+		h(w, r.WithContext(ctx))
+	}, perm)
+}
+
+func (m *Middlewares) checkPermissionsHelper(h http.HandlerFunc, perm APIPermission) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		failed := true
+		for _, authType := range perm.AllowedAuthTypes {
+			switch authType {
+			case APIAuthTypeAPIKey:
+				apiKey := utils.GetAPIKeyFromReq(r)
+				if apiKey == "" {
+					continue
+				}
+				// If we have an api key, it should be correct
+				if err := m.apiKeySvc.ValidateAPIKey(r.Context(), apiKey, perm.Permissions...); err != nil {
+					log.Error().Err(err).Msg("failed to validate api key")
+					failed = true
+				} else {
+					failed = false
+				}
+			case APIAuthTypeBearer:
+				session.VerifySession(nil, h)(w, r)
+				return
+			}
+		}
+
+		if failed {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		h(w, r)
 	})
+
 }
 
-func (m *Middlewares) RecoveryMiddleware(next http.Handler) http.Handler {
-	return middleware.Recoverer(next)
-}
+func (m *Middlewares) addSessionToCtx(r *http.Request) (context.Context, error) {
+	var sess dto.Session
 
-func (m *Middlewares) RequestIDMiddleware(next http.Handler) http.Handler {
-	return middleware.RequestID(next)
-}
+	sessionContainer := session.GetSessionFromRequestContext(r.Context())
+	userID := sessionContainer.GetUserID()
+	if userID == "" {
+		return nil, errors.New(msg.ErrUserInfoNotFoundInRequest)
+	}
+	sess.UserID = userID
 
-func (m *Middlewares) RequestTimeoutMiddleware(timeout time.Duration) func(http.Handler) http.Handler {
-	return middleware.Timeout(timeout)
-}
+	tpusr, err := thirdparty.GetUserByID(userID)
+	if err == nil && tpusr != nil {
+		sess.Email = tpusr.Email
+	} else {
+		epusr, err := emailpassword.GetUserByID(userID)
+		if err == nil && epusr != nil {
+			sess.Email = epusr.Email
+		} else {
+			return nil, errors.New(msg.ErrUserInfoNotFoundInRequest)
+		}
+	}
 
-func (m *Middlewares) prepareContext(r *http.Request, claims *dto.UserClaims) context.Context {
-	ctx := context.WithValue(r.Context(), dto.UserIDContextKey, claims.UserID)
-	ctx = context.WithValue(ctx, dto.EmailContextKey, claims.Email)
-	ctx = context.WithValue(ctx, dto.NameContextKey, claims.Name)
-	return ctx
+	metadata, err := usermetadata.GetUserMetadata(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	reqTenantID := utils.GetTenantIDFromReq(r)
+	log.Debug().Msgf("reqTenantID: %s", reqTenantID)
+	if reqTenantID == "" {
+		return nil, errors.New(msg.ErrTenantIDNotFoundInRequest)
+	}
+	tenants, err := utils.GetUserTenantsFromMetadata(metadata)
+	if err != nil {
+		log.Error().Err(err).Msg("unable to get user tenants")
+		return nil, err
+	}
+
+	tenant, hasAcess := tenants[reqTenantID]
+	if !hasAcess {
+		return nil, errors.New(msg.ErrInvalidTenantIDInRequest)
+	}
+
+	sess.TenantID = tenant.ID
+	sess.Metadata = metadata
+
+	ctx := context.WithValue(r.Context(), dto.SessionCtxKey, sess)
+
+	return ctx, nil
 }
