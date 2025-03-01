@@ -1,46 +1,28 @@
-import {
-  ActionIcon,
-  Box,
-  Breadcrumbs,
-  Group,
-  Text,
-  Title,
-} from '@mantine/core';
-import { IconChevronLeft } from '@tabler/icons-react';
-import { NavLink, useNavigate, useParams } from 'react-router-dom';
-import { AppLoader } from '../../components/Loader/AppLoader';
-import WorkflowsList from './List';
+import { Box, Group, Title } from '@mantine/core';
+import { IconDeviceAirtag } from '@tabler/icons-react';
+import { useEffect } from 'react';
+import { useSetBreadcrumbs } from '../../hooks/breadcrumb';
+import ProcessorsList from './List';
 
-const WorkflowsPage = () => {
-  const { workspaceId } = useParams();
-  const navigate = useNavigate();
+const ProcessorsPage = () => {
+  const setBreadcrumbs = useSetBreadcrumbs();
 
-  if (!workspaceId) {
-    return <AppLoader h="70vh" />;
-  }
+  useEffect(() => {
+    setBreadcrumbs([
+      { label: 'Workspaces', path: '/' },
+      { label: 'Processors' },
+    ]);
+  }, [setBreadcrumbs]);
 
   return (
     <Box mb={50}>
-      <Breadcrumbs separator=">">
-        <NavLink to="/" className="bredcrumb-link">
-          <Text>Workspaces</Text>
-        </NavLink>
-        <Text>Processors</Text>
-      </Breadcrumbs>
-      <Group mt="xs" mb="xl">
-        <ActionIcon
-          variant="default"
-          radius="xl"
-          size="sm"
-          onClick={() => navigate(`/`)}
-        >
-          <IconChevronLeft size={16} />
-        </ActionIcon>
+      <Group mb="xl">
+        <IconDeviceAirtag size={24} />
         <Title order={3}>Processors</Title>
       </Group>
-      <WorkflowsList />
+      <ProcessorsList />
     </Box>
   );
 };
 
-export default WorkflowsPage;
+export default ProcessorsPage;

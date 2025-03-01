@@ -1,24 +1,16 @@
 import { LineChart } from '@mantine/charts';
-import {
-  ActionIcon,
-  Box,
-  Breadcrumbs,
-  Group,
-  Paper,
-  SimpleGrid,
-  Text,
-  Title,
-} from '@mantine/core';
+import { Box, Group, Paper, SimpleGrid, Text, Title } from '@mantine/core';
 import {
   IconArrowDownRight,
   IconArrowUpRight,
-  IconChevronLeft,
   IconCircleCheck,
   IconExclamationCircle,
+  IconGauge,
   IconNumber,
   IconServer2,
 } from '@tabler/icons-react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useSetBreadcrumbs } from '../../hooks/breadcrumb';
 import classes from './dashboard.module.css';
 
 const icons = {
@@ -51,7 +43,15 @@ const data2 = [
 ];
 
 const DashboardPage = () => {
-  const navigate = useNavigate();
+  const setBreadcrumbs = useSetBreadcrumbs();
+
+  useEffect(() => {
+    setBreadcrumbs([
+      { label: 'Workspaces', path: '/' },
+      { label: 'Analytics' },
+    ]);
+  }, [setBreadcrumbs]);
+
   const stats = data.map(stat => {
     const Icon = icons[stat.icon];
     const DiffIcon = stat.diff > 0 ? IconArrowUpRight : IconArrowDownRight;
@@ -87,21 +87,8 @@ const DashboardPage = () => {
 
   return (
     <Box mb={50}>
-      <Breadcrumbs separator=">">
-        <NavLink to="/" className="bredcrumb-link">
-          <Text>Workspaces</Text>
-        </NavLink>
-        <Text>Analytics</Text>
-      </Breadcrumbs>
-      <Group mt="xs" mb="xl">
-        <ActionIcon
-          variant="default"
-          radius="xl"
-          size="sm"
-          onClick={() => navigate(`/`)}
-        >
-          <IconChevronLeft size={16} />
-        </ActionIcon>
+      <Group mb="xl">
+        <IconGauge size={24} />
         <Title order={3}>Analytics</Title>
       </Group>
       <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }}>{stats}</SimpleGrid>

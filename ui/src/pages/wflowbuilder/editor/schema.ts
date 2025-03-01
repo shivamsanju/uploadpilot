@@ -129,7 +129,7 @@ const schema = {
   },
 };
 
-export const validateYaml = (content: string): string | null => {
+export const validateWorkflowContent = (content: string): string | null => {
   try {
     const formattedContent = content.replace(/\t/g, '  ');
     const parsedData = parse(formattedContent) as unknown;

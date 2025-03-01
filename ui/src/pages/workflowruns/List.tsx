@@ -6,7 +6,6 @@ import {
   Group,
   Menu,
   Modal,
-  Stack,
   Text,
   TextInput,
   Title,
@@ -59,7 +58,7 @@ const ProcessorRunsList = () => {
 
   const handleBulkProcess = async () => {
     showConfirmationPopup({
-      message: 'Are you sure you want to start processing for these uploads?',
+      message: 'Are you sure you want to trigger processing for these uploads?',
       onOk: async () => {
         try {
           await Promise.all(
@@ -95,29 +94,6 @@ const ProcessorRunsList = () => {
   const columns: DataTableColumn[] = useMemo(
     () => [
       {
-        accessor: 'id',
-        title: '',
-        width: 20,
-        render: (item: any) => (
-          <Stack justify="center">
-            <IconBolt size={16} stroke={1.5} />
-          </Stack>
-        ),
-      },
-      {
-        accessor: 'status',
-        title: 'Status',
-        render: (item: any) => (
-          <Badge
-            variant="subtle"
-            color={statusConfig[item?.status?.toLowerCase() || '']}
-            size="sm"
-          >
-            {item?.status}
-          </Badge>
-        ),
-      },
-      {
         accessor: 'runId',
         title: 'Run ID',
       },
@@ -143,19 +119,27 @@ const ProcessorRunsList = () => {
           return '-';
         },
       },
-      // {
-      //   title: "Workflow Time",
-      //   accessor: "workflowTimeMillis",
-      //   hidden: width < 768,
-      //   render: (item: any) =>
-      //     formatMilliseconds(item?.workflowTimeMillis || 0),
-      // },
       {
         title: 'Execution Time',
         accessor: 'executionTimeMillis',
+        textAlign: 'center',
         hidden: width < 768,
         render: (item: any) =>
           formatMilliseconds(item?.executionTimeMillis || 0),
+      },
+      {
+        accessor: 'status',
+        title: 'Status',
+        textAlign: 'center',
+        render: (item: any) => (
+          <Badge
+            variant="subtle"
+            color={statusConfig[item?.status?.toLowerCase() || '']}
+            size="sm"
+          >
+            {item?.status}
+          </Badge>
+        ),
       },
       {
         accessor: 'actions',

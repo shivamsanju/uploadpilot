@@ -1,18 +1,25 @@
 .control {
+  cursor: pointer;
   font-weight: 500;
   display: block;
-  width: 100%;
-  padding: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
-  color: light-dark(var(--mantine-color-gray-8), var(--mantine-color-dark-0));
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+  margin: var(--mantine-spacing-xs) var(--mantine-spacing-sm);
+  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
   font-size: var(--mantine-font-size-sm);
+  border-radius: var(--mantine-radius-md);
+}
 
-  @mixin hover {
-    background-color: light-dark(
-      var(--mantine-color-gray-0),
-      var(--mantine-color-dark-7)
-    );
-    color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
-  }
+.control:hover {
+  background-color: light-dark(
+    var(--mantine-color-gray-0),
+    var(--mantine-color-dark-7)
+  );
+  color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
+}
+
+.collapsed {
+  margin-left: 6px;
+  margin-right: 6px;
 }
 
 .link {
@@ -26,14 +33,6 @@
   color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
   border-left: 1px solid
     light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
-
-  @mixin hover {
-    background-color: light-dark(
-      var(--mantine-color-gray-0),
-      var(--mantine-color-dark-7)
-    );
-    color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
-  }
 }
 
 .chevron {
@@ -41,17 +40,8 @@
 }
 
 .active {
-  color: var(--mantine-color-appcolor-filled);
-}
-
-.active:hover {
-  color: var(--mantine-color-appcolor-filled);
-}
-
-.label:hover {
-  color: var(--mantine-color-appcolor-filled);
-}
-
-.active .label:hover {
-  color: var(--mantine-color-appcolor-filled);
+  background-color: light-dark(
+    var(--mantine-color-gray-0),
+    var(--mantine-color-dark-7)
+  );
 }

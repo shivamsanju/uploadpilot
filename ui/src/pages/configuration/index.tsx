@@ -1,20 +1,22 @@
-import {
-  ActionIcon,
-  Box,
-  Breadcrumbs,
-  Group,
-  Text,
-  Title,
-} from '@mantine/core';
-import { IconChevronLeft } from '@tabler/icons-react';
-import { NavLink, useNavigate, useParams } from 'react-router-dom';
+import { Box, Group, Title } from '@mantine/core';
+import { IconAdjustments } from '@tabler/icons-react';
+import { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { useGetUploaderConfig } from '../../apis/uploader';
 import { ErrorLoadingWrapper } from '../../components/ErrorLoadingWrapper';
+import { useSetBreadcrumbs } from '../../hooks/breadcrumb';
 import UploaderConfigForm from './Config';
 
 const ConfigurationPage = () => {
   const { workspaceId } = useParams();
-  const navigate = useNavigate();
+  const setBreadcrumbs = useSetBreadcrumbs();
+
+  useEffect(() => {
+    setBreadcrumbs([
+      { label: 'Workspaces', path: '/' },
+      { label: 'Configuration' },
+    ]);
+  }, [setBreadcrumbs]);
 
   let { isPending, error, config } = useGetUploaderConfig(
     workspaceId as string,
@@ -25,29 +27,17 @@ const ConfigurationPage = () => {
   }
 
   return (
-    <ErrorLoadingWrapper error={error} isPending={isPending}>
-      <Breadcrumbs separator=">">
-        <NavLink to="/" className="bredcrumb-link">
-          <Text>Workspaces</Text>
-        </NavLink>
-        <Text>Configuration</Text>
-      </Breadcrumbs>
-      <Group mt="xs" mb="xl">
-        <ActionIcon
-          variant="default"
-          radius="xl"
-          size="sm"
-          onClick={() => navigate(`/`)}
-        >
-          <IconChevronLeft size={16} />
-        </ActionIcon>
-        <Title order={3}>Configuration</Title>
-      </Group>
-
-      <Box mb={50}>
-        <UploaderConfigForm config={config} />
-      </Box>
-    </ErrorLoadingWrapper>
+    <Box mb={50}>
+      <ErrorLoadingWrapper error={error} isPending={isPending}>
+        <Group mb="xl">
+          <IconAdjustments size={24} />
+          <Title order={3}>Configuration</Title>
+        </Group>
+        <Box>
+          <UploaderConfigForm config={config} />
+        </Box>
+      </ErrorLoadingWrapper>
+    </Box>
   );
 };
 

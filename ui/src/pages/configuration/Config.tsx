@@ -2,7 +2,6 @@ import {
   Group,
   MultiSelect,
   NumberInput,
-  Paper,
   SimpleGrid,
   Stack,
   Switch,
@@ -83,164 +82,138 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
       onReset={handleResetButton}
     >
       <ContainerOverlay visible={isPending || isPendingMutation} />
-      <Paper withBorder p="sm" mb={50}>
-        <SimpleGrid cols={{ base: 1, xl: 2 }}>
-          <Stack p="md">
-            {/* Allowed input sources */}
-            <MultiSelect
-              label="Allowed input sources"
-              description="Allowed input sources for your uploader"
-              placeholder="Select allowed input sources"
-              data={allowedSources || []}
-              {...form.getInputProps('allowedSources')}
-              disabled={isPending}
-              searchable
+      <SimpleGrid cols={{ base: 1, xl: 2 }} spacing="50">
+        <Stack gap="xl">
+          {/* Allowed input sources */}
+          <MultiSelect
+            label="Allowed input sources"
+            placeholder="Select allowed input sources"
+            data={allowedSources || []}
+            {...form.getInputProps('allowedSources')}
+            disabled={isPending}
+            searchable
+          />
+
+          {/* Max file size */}
+          <NumberInput
+            label="Max file size"
+            placeholder="Enter maximum file size in bytes"
+            {...form.getInputProps('maxFileSize')}
+            min={0}
+          />
+
+          {/* Max number of files */}
+          <NumberInput
+            label="Max number of files"
+            placeholder="Specify the maximum number of files allowed"
+            {...form.getInputProps('maxNumberOfFiles')}
+            min={1}
+          />
+        </Stack>
+        <Stack gap="xl">
+          {/* Allowed file types */}
+          <TagsInput
+            label="Allowed mime types"
+            placeholder="Comma separated mime types"
+            {...form.getInputProps('allowedFileTypes')}
+            min={0}
+          />
+
+          {/*Auth Endpoint */}
+          <TagsInput
+            label="Allowed origins"
+            placeholder="Comma separated origins"
+            {...form.getInputProps('allowedOrigins')}
+            min={0}
+          />
+          <TagsInput
+            label="Required metadata fields"
+            placeholder="Comma separated fields"
+            {...form.getInputProps('requiredMetadataFields')}
+            min={0}
+          />
+        </Stack>
+      </SimpleGrid>
+      <SimpleGrid cols={{ sm: 1, lg: 2 }} spacing="50" mt="xl">
+        <Stack gap="xl">
+          <Group justify="space-between" className={classes.item}>
+            <div>
+              <Text size="sm">Allow pause and resume</Text>
+              <Text c="dimmed">
+                Toggle to allow pause and resume in the uploader
+              </Text>
+            </div>
+            <Switch
+              className={classes.cusomSwitch}
+              onLabel="ON"
+              offLabel="OFF"
+              checked={form.values.allowPauseAndResume}
+              onChange={e =>
+                form.setFieldValue('allowPauseAndResume', e.target.checked)
+              }
             />
-            {/* Min file size */}
-            {/* <NumberInput
-              label="Min file size"
-              description="Enter minimum file size in bytes"
-              {...form.getInputProps("minFileSize")}
-              min={0}
-            /> */}
+          </Group>
 
-            {/* Max file size */}
-            <NumberInput
-              label="Max file size"
-              description="Enter maximum file size in bytes"
-              placeholder="Enter maximum file size in bytes"
-              {...form.getInputProps('maxFileSize')}
-              min={0}
+          <Group justify="space-between" className={classes.item}>
+            <div>
+              <Text size="sm">Enable image editing</Text>
+              <Text c="dimmed">
+                Toggle to enable image editing in the uploader ui
+              </Text>
+            </div>
+            <Switch
+              className={classes.cusomSwitch}
+              onLabel="ON"
+              offLabel="OFF"
+              checked={form.values.enableImageEditing}
+              onChange={e =>
+                form.setFieldValue('enableImageEditing', e.target.checked)
+              }
             />
-
-            {/* Min number of files */}
-            {/* <NumberInput
-              label="Min number of files"
-              description="Specify the minimum number of files required"
-              {...form.getInputProps("minNumberOfFiles")}
-              min={0}
-            /> */}
-
-            {/* Max number of files */}
-            <NumberInput
-              label="Max number of files"
-              description="Specify the maximum number of files allowed"
-              placeholder="Specify the maximum number of files allowed"
-              {...form.getInputProps('maxNumberOfFiles')}
-              min={1}
+          </Group>
+        </Stack>
+        <Stack gap="xl">
+          <Group justify="space-between" className={classes.item}>
+            <div>
+              <Text size="sm">Use compression</Text>
+              <Text c="dimmed">
+                Toggle to enable compression while uploading files
+              </Text>
+            </div>
+            <Switch
+              className={classes.cusomSwitch}
+              onLabel="ON"
+              offLabel="OFF"
+              checked={form.values.useCompression}
+              onChange={e =>
+                form.setFieldValue('useCompression', e.target.checked)
+              }
             />
-          </Stack>
-          <Stack p="md">
-            {/* Allowed file types */}
-            <TagsInput
-              label="Allowed mime types"
-              description="Allowed mime types for your uploader"
-              placeholder="Comma separated mime types"
-              {...form.getInputProps('allowedFileTypes')}
-              min={0}
+          </Group>
+
+          <Group justify="space-between" className={classes.item}>
+            <div>
+              <Text size="sm">Use fault tolerant mode</Text>
+              <Text c="dimmed">
+                Fault tolerant mode allows to recover from browser crashes
+              </Text>
+            </div>
+            <Switch
+              className={classes.cusomSwitch}
+              onLabel="ON"
+              offLabel="OFF"
+              checked={form.values.useFaultTolerantMode}
+              onChange={e =>
+                form.setFieldValue('useFaultTolerantMode', e.target.checked)
+              }
             />
+          </Group>
+        </Stack>
+      </SimpleGrid>
 
-            {/*Auth Endpoint */}
-            <TagsInput
-              label="Allowed origins"
-              description="Allowed origins for your uploader"
-              placeholder="Comma separated origins"
-              {...form.getInputProps('allowedOrigins')}
-              min={0}
-            />
-            <TagsInput
-              label="Required metadata fields"
-              placeholder="Comma separated fields"
-              description="Required metadata fields for your uploader"
-              {...form.getInputProps('requiredMetadataFields')}
-              min={0}
-            />
-          </Stack>
-        </SimpleGrid>
-      </Paper>
-      {/* <Title order={5} opacity={0.7} mb="sm" >Uploader Settings</Title> */}
-      <Paper withBorder p="sm">
-        <SimpleGrid cols={{ sm: 1, lg: 2 }}>
-          <Stack p="md">
-            <Group justify="space-between" className={classes.item}>
-              <div>
-                <Text size="sm">Allow pause and resume</Text>
-                <Text c="dimmed">
-                  Toggle to allow pause and resume in the uploader
-                </Text>
-              </div>
-              <Switch
-                className={classes.cusomSwitch}
-                onLabel="ON"
-                offLabel="OFF"
-                checked={form.values.allowPauseAndResume}
-                onChange={e =>
-                  form.setFieldValue('allowPauseAndResume', e.target.checked)
-                }
-              />
-            </Group>
-
-            <Group justify="space-between" className={classes.item}>
-              <div>
-                <Text size="sm">Enable image editing</Text>
-                <Text c="dimmed">
-                  Toggle to enable image editing in the uploader ui
-                </Text>
-              </div>
-              <Switch
-                className={classes.cusomSwitch}
-                onLabel="ON"
-                offLabel="OFF"
-                checked={form.values.enableImageEditing}
-                onChange={e =>
-                  form.setFieldValue('enableImageEditing', e.target.checked)
-                }
-              />
-            </Group>
-          </Stack>
-          <Stack p="md">
-            <Group justify="space-between" className={classes.item}>
-              <div>
-                <Text size="sm">Use compression</Text>
-                <Text c="dimmed">
-                  Toggle to enable compression while uploading files
-                </Text>
-              </div>
-              <Switch
-                className={classes.cusomSwitch}
-                onLabel="ON"
-                offLabel="OFF"
-                checked={form.values.useCompression}
-                onChange={e =>
-                  form.setFieldValue('useCompression', e.target.checked)
-                }
-              />
-            </Group>
-
-            <Group justify="space-between" className={classes.item}>
-              <div>
-                <Text size="sm">Use fault tolerant mode</Text>
-                <Text c="dimmed">
-                  Fault tolerant mode allows to recover from browser crashes
-                </Text>
-              </div>
-              <Switch
-                className={classes.cusomSwitch}
-                onLabel="ON"
-                offLabel="OFF"
-                checked={form.values.useFaultTolerantMode}
-                onChange={e =>
-                  form.setFieldValue('useFaultTolerantMode', e.target.checked)
-                }
-              />
-            </Group>
-          </Stack>
-        </SimpleGrid>
-      </Paper>
-
-      <Group justify="flex-end" gap="md" mt="xl">
+      <Group gap="md" mt="50">
         <DiscardButton type="reset" />
-        <SaveButton type="submit" />
+        <SaveButton type="submit" variant="white" />
       </Group>
     </form>
   );

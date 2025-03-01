@@ -1,22 +1,6 @@
-.block {
-  cursor: pointer;
-  border-radius: var(--mantine-radius-sm);
-  transition: all 0.2s ease-in-out;
-}
-
-.block:hover,
-.block:focus,
-.focused {
-  background-color: light-dark(
-    var(--mantine-color-gray-0),
+.blockItem {
+  border-color: light-dark(
+    var(--mantine-color-gray-4),
     var(--mantine-color-dark-8)
   );
-}
-
-.addBtn {
-  opacity: 0;
-}
-.block:hover .addBtn,
-.block:focus .addBtn {
-  opacity: 1;
 }

@@ -62,18 +62,19 @@ type Icolors = readonly [
 //   "#b07100",
 // ]
 
-// const white: Icolors = [
-//   "#f5f5f5",
-//   "#e7e7e7",
-//   "#cdcdcd",
-//   "#b2b2b2",
-//   "#9a9a9a",
-//   "#8b8b8b",
-//   "#848484",
-//   "#717171",
-//   "#656565",
-//   "#575757"
-// ]
+const white: Icolors = [
+  '#ffffff',
+  '#fafafa',
+  '#e8e8e8',
+  '#d3d3d3',
+  '#bfbfbf',
+  '#b0b0b0',
+  '#a9a9a9',
+  '#989898',
+  '#8c8c8c',
+  '#7e7e7e',
+];
+
 // const blue: Icolors = [
 //   "#e2f7ff",
 //   "#ceeaff",
@@ -87,18 +88,18 @@ type Icolors = readonly [
 //   "#005eab"
 // ]
 
-const lightBlue: Icolors = [
-  '#e1f8ff',
-  '#cbedff',
-  '#9ad7ff',
-  '#64c1ff',
-  '#3aaefe',
-  '#20a2fe',
-  '#099dff',
-  '#0088e4',
-  '#0079cd',
-  '#0069b6',
-];
+// const lightBlue: Icolors = [
+//   '#e1f8ff',
+//   '#cbedff',
+//   '#9ad7ff',
+//   '#64c1ff',
+//   '#3aaefe',
+//   '#20a2fe',
+//   '#099dff',
+//   '#0088e4',
+//   '#0079cd',
+//   '#0069b6',
+// ];
 
 export const myAppTheme = createTheme({
   primaryColor: 'appcolor',
@@ -112,7 +113,7 @@ export const myAppTheme = createTheme({
       dark: '#F3F5F7',
       light: '#7a7a7b',
     }),
-    appcolor: lightBlue,
+    appcolor: white,
   },
   defaultRadius: 'md',
   components: {

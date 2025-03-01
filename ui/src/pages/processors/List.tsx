@@ -5,7 +5,6 @@ import {
   Group,
   Menu,
   Pill,
-  Stack,
   Text,
   TextInput,
   ThemeIcon,
@@ -13,14 +12,13 @@ import {
 import { useViewportSize } from '@mantine/hooks';
 import { showNotification } from '@mantine/notifications';
 import {
-  IconActivity,
   IconAlertCircle,
   IconBolt,
   IconCancel,
   IconCircleCheck,
   IconDots,
+  IconFileStack,
   IconPlus,
-  IconRoute,
   IconSearch,
   IconSettings,
   IconTrash,
@@ -35,15 +33,19 @@ import {
 } from '../../apis/processors';
 import { RefreshButton } from '../../components/Buttons/RefreshButton/RefreshButton';
 import { ErrorCard } from '../../components/ErrorCard/ErrorCard';
+import { AppLoader } from '../../components/Loader/AppLoader';
 import { ContainerOverlay } from '../../components/Overlay';
 import { showConfirmationPopup } from '../../components/Popups/ConfirmPopup';
 import { UploadPilotDataTable } from '../../components/Table/Table';
 import { timeAgo } from '../../utils/datetime';
 
 const ProcessorList = () => {
-  const { width } = useViewportSize();
-  const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
   const { workspaceId } = useParams();
+  const { width } = useViewportSize();
+
+  const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
+  const [search, setSearch] = useState<string>('');
+
   const { isPending, error, processors, invalidate } = useGetProcessors(
     workspaceId || '',
   );
@@ -146,35 +148,8 @@ const ProcessorList = () => {
   const columns: DataTableColumn[] = useMemo(
     () => [
       {
-        accessor: 'id',
-        title: '',
-        width: 20,
-        render: (item: any) => (
-          <Stack justify="center">
-            <IconRoute size={16} stroke={1.5} />
-          </Stack>
-        ),
-      },
-      {
         accessor: 'name',
         title: 'Name',
-        render: (item: any) => (
-          <Group gap="sm">
-            {/* <ThemeIcon
-              size={20}
-              radius={20}
-              variant="light"
-              color={item?.enabled ? "appcolor" : "gray"}
-            >
-              {item?.enabled ? (
-                <IconRoute size={16} />
-              ) : (
-                <IconRouteOff size={16} />
-              )}
-            </ThemeIcon> */}
-            <div>{item.name}</div>
-          </Group>
-        ),
       },
       {
         accessor: 'triggers',
@@ -202,9 +177,6 @@ const ProcessorList = () => {
                 'No Triggers'
               )}
             </Text>
-            {/* <Text c="dimmed" fz="xs">
-              Triggers
-            </Text> */}
           </div>
         ),
       },
@@ -213,14 +185,9 @@ const ProcessorList = () => {
         accessor: 'updatedAt',
         hidden: width < 768,
         render: (params: any) => (
-          <>
-            <Text fz="sm">
-              {params?.updatedAt && timeAgo.format(new Date(params?.updatedAt))}
-            </Text>
-            {/* <Text fz="xs" c="dimmed">
-              Last Updated
-            </Text> */}
-          </>
+          <Text fz="sm">
+            {params?.updatedAt && timeAgo.format(new Date(params?.updatedAt))}
+          </Text>
         ),
       },
       {
@@ -240,25 +207,11 @@ const ProcessorList = () => {
           </Group>
         ),
       },
-      // {
-      //     accessor: 'goto',
-      //     title: 'goto',
-      //     textAlign: 'right',
-      //     hidden: width < 768,
-      //     render: (item: any) => (
-      //         <ActionIcon
-      //             variant="light"
-      //             size="lg"
-      //             onClick={() => navigate(`/workspace/${workspaceId}/processors/${item?.id}`)}
-      //         >
-      //             <IconChevronRight />
-      //         </ActionIcon>
-      //     ),
-      // },
       {
         accessor: 'actions',
         title: 'Actions',
         textAlign: 'right',
+        width: 100,
         render: (item: any) => (
           <Group gap={0} justify="flex-end">
             <Menu
@@ -274,7 +227,7 @@ const ProcessorList = () => {
               </Menu.Target>
               <Menu.Dropdown>
                 <Menu.Item
-                  leftSection={<IconActivity size={16} stroke={1.5} />}
+                  leftSection={<IconFileStack size={16} stroke={1.5} />}
                   disabled={!item?.enabled}
                   onClick={() =>
                     navigate(
@@ -345,6 +298,9 @@ const ProcessorList = () => {
   if (error) {
     return <ErrorCard title="Error" message={error.message} h="70vh" />;
   }
+  if (isPending) {
+    return <AppLoader h="70vh" />;
+  }
 
   return (
     <Box mr="md">
@@ -395,11 +351,11 @@ const ProcessorList = () => {
               <RefreshButton onClick={invalidate} />
             </Group>
             <TextInput
-              value={''}
-              // onChange={(e) => onSearchFilterChange(e.target.value)}
-              placeholder="Search by name or status"
-              leftSection={<IconSearch size={18} />}
-              variant="subtle"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search (min 3 characters)"
+              rightSection={<IconSearch size={18} />}
+              variant="outline"
             />
           </Group>
         }

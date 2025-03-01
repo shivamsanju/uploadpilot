@@ -1,4 +1,4 @@
-import { Box, Divider, Stack } from '@mantine/core';
+import { Box, Stack } from '@mantine/core';
 import { useDebouncedState } from '@mantine/hooks';
 import { IconDatabaseOff } from '@tabler/icons-react';
 import { DataTable, DataTableProps } from 'mantine-datatable';
@@ -12,8 +12,8 @@ export type TableProps = {
 export const UploadPilotDataTable: React.FC<TableProps> = props => {
   return (
     <Stack gap={2}>
-      {props.menuBar && <Box>{props.menuBar}</Box>}
-      <Divider p={0} m={0} mt="2" />
+      {props.menuBar && <Box mb="4">{props.menuBar}</Box>}
+      {/* <Divider p={0} m={0} mt="2" /> */}
       <DataTable
         backgroundColor="transparent"
         selectionCheckboxProps={{

@@ -35,7 +35,7 @@ export function AdminHeader({ burger }: Props) {
         {width > 768 && <Text c="dimmed">Set your uploads on autopilot</Text>}
       </Box>
       <Box style={{ flex: 1 }} />
-      <UserMenu />
+      <UserMenu collapsed={false} />
     </Group>
   );
 }

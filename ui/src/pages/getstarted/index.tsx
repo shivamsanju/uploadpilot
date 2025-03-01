@@ -7,7 +7,8 @@ import {
   IconBrandReact,
   IconBrandTypescript,
 } from '@tabler/icons-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useSetBreadcrumbs } from '../../hooks/breadcrumb';
 import { FrameworkCard } from './FrameworkCard';
 import classes from './getstarted.module.css';
 import GoIntegrationPage from './go';
@@ -57,9 +58,15 @@ const frameworks = [
 ];
 
 export const GetStartedPage = () => {
-  const [selectedFramework, setSelectedFramework] = useState('React');
   const { width } = useViewportSize();
+  const setBreadcrumbs = useSetBreadcrumbs();
+  const [selectedFramework, setSelectedFramework] = useState('React');
+
   const s = style(width);
+
+  useEffect(() => {
+    setBreadcrumbs([]);
+  }, [setBreadcrumbs]);
 
   return (
     <Stack justify="center" align="center" pt="sm" mb={50}>

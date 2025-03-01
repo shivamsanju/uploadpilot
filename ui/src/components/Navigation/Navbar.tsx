@@ -1,6 +1,8 @@
-import { ScrollArea } from '@mantine/core';
+import { Box, ScrollArea } from '@mantine/core';
 import { FC, ReactNode, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import { MenuButton } from '../MenuButton/MenuButton';
+import UserButton from '../UserMenu';
 import classes from './Navbar.module.css';
 import { LinksGroup } from './NavLinksGroup';
 
@@ -19,10 +21,12 @@ type NavItem = {
 };
 
 const NavBar = ({
+  collapsed,
   toggle,
   items,
   footer,
 }: {
+  collapsed: boolean;
   toggle: React.Dispatch<React.SetStateAction<boolean>>;
   items: NavItem[];
   footer?: ReactNode;
@@ -36,16 +40,20 @@ const NavBar = ({
         key={item.label}
         active={isActive(pathname, item)}
         toggle={toggle}
+        collapsed={collapsed}
       />
     ));
-  }, [items, pathname, toggle]);
+  }, [items, pathname, toggle, collapsed]);
 
   return (
     <nav className={classes.navbar}>
-      <ScrollArea className={classes.links}>
-        <div className={classes.linksInner}>{links}</div>
-      </ScrollArea>
-      {footer && <div className={classes.footer}>{footer}</div>}
+      <Box mb="lg">
+        <MenuButton toggle={toggle} collapsed={collapsed} />
+      </Box>
+      <ScrollArea className={classes.links}>{links}</ScrollArea>
+      <Box px={collapsed ? 0 : 'sm'} mb="xs">
+        <UserButton collapsed={collapsed} />
+      </Box>
     </nav>
   );
 };

@@ -1,29 +1,27 @@
-import {
-  ActionIcon,
-  Box,
-  Breadcrumbs,
-  Button,
-  Group,
-  Paper,
-  TagsInput,
-  Text,
-  TextInput,
-  Title,
-} from '@mantine/core';
+import { Box, Button, Group, TagsInput, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
-import { IconChevronLeft } from '@tabler/icons-react';
+import { IconSettings } from '@tabler/icons-react';
 import { useEffect } from 'react';
-import { NavLink, useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import {
   useGetProcessor,
   useUpdateProcessorMutation,
 } from '../../../apis/processors';
 import { ErrorCard } from '../../../components/ErrorCard/ErrorCard';
 import { ContainerOverlay } from '../../../components/Overlay';
+import { useSetBreadcrumbs } from '../../../hooks/breadcrumb';
 
 const ProcessorSettingsPage = () => {
   const { workspaceId, processorId } = useParams();
-  const navigate = useNavigate();
+  const setBreadcrumbs = useSetBreadcrumbs();
+
+  useEffect(() => {
+    setBreadcrumbs([
+      { label: 'Workspaces', path: '/' },
+      { label: 'Processors', path: `/workspace/${workspaceId}/processors` },
+      { label: 'Settings' },
+    ]);
+  }, [setBreadcrumbs, workspaceId]);
 
   const form = useForm({
     initialValues: {
@@ -77,54 +75,35 @@ const ProcessorSettingsPage = () => {
 
   return (
     <Box mb={50}>
-      <Breadcrumbs separator=">">
-        <NavLink to="/" className="bredcrumb-link">
-          <Text>Workspaces</Text>
-        </NavLink>
-        <NavLink
-          to={`/workspace/${workspaceId}/processors`}
-          className="bredcrumb-link"
-        >
-          <Text>Processors</Text>
-        </NavLink>
-        <Text>{processorId}</Text>
-      </Breadcrumbs>
-      <Group mt="xs" mb="xl">
-        <ActionIcon
-          variant="default"
-          radius="xl"
-          size="sm"
-          onClick={() => navigate(`/workspace/${workspaceId}/processors`)}
-        >
-          <IconChevronLeft size={16} />
-        </ActionIcon>
+      <Group mb="xl">
+        <IconSettings size={24} />
         <Title order={3}>Settings</Title>
       </Group>
-      <Paper p="xl" withBorder>
-        <ContainerOverlay visible={isCreating || isPending} />
-        <form onSubmit={form.onSubmit(handleUpdate)}>
-          <TextInput
-            mt="xl"
-            withAsterisk
-            label="Name"
-            description="Name of the processor"
-            type="name"
-            placeholder="Enter a name"
-            {...form.getInputProps('name')}
-          />
-          <TagsInput
-            mt="xl"
-            label="Trigger"
-            description="File type to trigger the processor"
-            placeholder="Enter comma separated file type"
-            {...form.getInputProps('triggers')}
-            min={0}
-          />
-          <Group justify="flex-end" mt={50}>
-            <Button type="submit">Update</Button>
-          </Group>
-        </form>
-      </Paper>
+      <ContainerOverlay visible={isCreating || isPending} />
+      <form onSubmit={form.onSubmit(handleUpdate)}>
+        <TextInput
+          mt="xl"
+          withAsterisk
+          label="Name"
+          description="Name of the processor"
+          type="name"
+          placeholder="Enter a name"
+          {...form.getInputProps('name')}
+        />
+        <TagsInput
+          mt="xl"
+          label="Trigger"
+          description="File type to trigger the processor"
+          placeholder="Enter comma separated file type"
+          {...form.getInputProps('triggers')}
+          min={0}
+        />
+        <Group mt={50}>
+          <Button type="submit" variant="white">
+            Update
+          </Button>
+        </Group>
+      </form>
     </Box>
   );
 };

@@ -21,6 +21,7 @@ import { Uploader } from 'uppy-react';
 import 'uppy-react/dist/style.css';
 import { useGetUserDetails } from '../../../apis/user';
 import { AppLoader } from '../../../components/Loader/AppLoader';
+import { TENANT_ID_KEY } from '../../../constants/tenancy';
 import { getUploadApiDomain } from '../../../utils/config';
 import Settings from './Settings';
 import { useSettingsProps } from './SettingsProps';
@@ -123,12 +124,11 @@ const ReactIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
                       uploaderEmail: user.email,
                       uploaderName: user.name || 'User',
                     }}
+                    headers={{
+                      'X-Tenant-Id': localStorage.getItem(TENANT_ID_KEY) || '',
+                    }}
                     {...settingsProps}
                     note="Test your uploader"
-                    headers={{
-                      Authorization:
-                        'Bearer ' + localStorage.getItem('uploadpilottoken'),
-                    }}
                   />
                 </Group>
               </Grid.Col>

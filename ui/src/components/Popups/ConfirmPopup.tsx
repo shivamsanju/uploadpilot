@@ -1,6 +1,6 @@
-import { Group, Text } from '@mantine/core';
+import { Alert, Stack, Text } from '@mantine/core';
 import { modals } from '@mantine/modals';
-import { IconAlertTriangle } from '@tabler/icons-react';
+import { IconInfoCircle } from '@tabler/icons-react';
 
 type AlertPopupProps = {
   message?: string;
@@ -13,21 +13,24 @@ export const showConfirmationPopup = ({
   onCancel = () => {},
 }: AlertPopupProps) => {
   modals.openConfirmModal({
-    title: (
-      <Group c="orange">
-        <IconAlertTriangle stroke={2} size={20} />
-        Confirm action
-      </Group>
-    ),
     children: (
-      <Text c="dimmed" size="sm">
-        {message || 'Are you sure you want to perform this action?'}
-      </Text>
+      <Stack align="center">
+        <Alert
+          color="orange"
+          variant="light"
+          icon={<IconInfoCircle size={30} />}
+        >
+          <Text size="sm" c="orange">
+            {message || 'Are you sure you want to perform this action?'}
+          </Text>
+        </Alert>
+      </Stack>
     ),
     labels: { confirm: 'OK', cancel: 'Cancel' },
     onConfirm: () => onOk(),
     onCancel: () => onCancel(),
     withCloseButton: false,
     closeOnClickOutside: false,
+    confirmProps: { variant: 'white' },
   });
 };

@@ -11,7 +11,7 @@
   background-color: #1e1e1e !important;
 }
 
-.bredcrumb-link {
+.breadcrumb-link {
   text-decoration: none;
   color: light-dark(
     var(--mantine-color-appcolor-7),
@@ -19,10 +19,14 @@
   );
 }
 
-.bredcrumb-link:hover {
+.breadcrumb-link:hover {
   text-decoration: underline;
 }
 
 .mantine-Checkbox-input {
   cursor: pointer !important;
+}
+
+[data-variant='white'] .mantine-Button-inner {
+  color: #212121 !important;
 }

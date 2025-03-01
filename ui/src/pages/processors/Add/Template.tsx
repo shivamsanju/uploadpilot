@@ -6,7 +6,7 @@ import {
   ThemeIcon,
   useMantineTheme,
 } from '@mantine/core';
-import { IconActivity } from '@tabler/icons-react';
+import { IconFileStack } from '@tabler/icons-react';
 import classes from './Utils.module.css';
 
 type Props = {
@@ -31,7 +31,7 @@ export const Template: React.FC<Props> = ({ template, selected }) => {
       <Box className={classes.cardTitle}>
         <Group p={0} m={0} align="center" wrap="nowrap">
           <ThemeIcon size={30} radius="xl" variant="light">
-            <IconActivity
+            <IconFileStack
               size={20}
               stroke={2}
               color={theme.colors.appcolor[6]}

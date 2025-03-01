@@ -4,46 +4,43 @@ import {
   useMantineColorScheme,
   useMantineTheme,
 } from '@mantine/core';
-import { IconBolt, IconFileStack, IconSettings } from '@tabler/icons-react';
-import { useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import {
+  IconCreditCardFilled,
+  IconDeviceLaptop,
+  IconKey,
+} from '@tabler/icons-react';
+import { useState } from 'react';
 import { Header } from '../Header';
 import NavBar from '../Navigation/Navbar';
 import SessionManager from '../SessionManager/SessionManager';
 import TenancyManager from '../Tenancy/TenancyManager';
 
-const ProcessorLayout: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+const navItems = [
+  {
+    label: 'Workspaces',
+    icon: IconDeviceLaptop,
+    link: `/`,
+  },
+  {
+    label: 'Billing',
+    icon: IconCreditCardFilled,
+    link: `/billing`,
+  },
+  {
+    label: 'API Keys',
+    icon: IconKey,
+    link: `/api-keys`,
+  },
+];
+
+const HomeLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [opened, toggle] = useState(true);
   const { colorScheme } = useMantineColorScheme();
   const theme = useMantineTheme();
-  const { workspaceId, processorId } = useParams();
 
   const bg = colorScheme === 'dark' ? '#121212' : theme.colors.gray[0];
   const appShellBorderColor =
     colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[2];
-
-  const navItems = useMemo(
-    () => [
-      {
-        label: 'Workflow',
-        icon: IconFileStack,
-        link: `/workspace/${workspaceId}/processors/${processorId}/workflow`,
-      },
-      {
-        label: 'Runs',
-        icon: IconBolt,
-        link: `/workspace/${workspaceId}/processors/${processorId}/runs`,
-      },
-      {
-        label: 'Settings',
-        icon: IconSettings,
-        link: `/workspace/${workspaceId}/processors/${processorId}/settings`,
-      },
-    ],
-    [workspaceId, processorId],
-  );
 
   return (
     <SessionManager>
@@ -80,4 +77,4 @@ const ProcessorLayout: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-export default ProcessorLayout;
+export default HomeLayout;

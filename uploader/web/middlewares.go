@@ -11,10 +11,12 @@ import (
 
 func AllowAllCorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(response http.ResponseWriter, r *http.Request) {
-		response.Header().Set("Access-Control-Allow-Origin", "*")
+		origin := r.Header.Get("Origin")
+		headerKeys := r.Header.Get("Access-Control-Request-Headers")
+		response.Header().Set("Access-Control-Allow-Origin", origin)
 		response.Header().Set("Access-Control-Allow-Credentials", "true")
-		response.Header().Set("Access-Control-Allow-Methods", "*")
-		response.Header().Set("Access-Control-Allow-Headers", "*")
+		response.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS")
+		response.Header().Set("Access-Control-Allow-Headers", headerKeys)
 
 		// Handle preflight requests properly
 		if r.Method == "OPTIONS" {

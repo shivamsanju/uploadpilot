@@ -1,5 +1,5 @@
 import {
-  IconCube3dSphere,
+  IconCubeSend,
   IconFileTextSpark,
   IconWebhook,
 } from '@tabler/icons-react';
@@ -15,6 +15,6 @@ export const getBlockIcon = (key: string, size?: number): ReactNode => {
   return IconComponent ? (
     <IconComponent size={size} />
   ) : (
-    <IconCube3dSphere size={size} />
+    <IconCubeSend size={size} />
   );
 };

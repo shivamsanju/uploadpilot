@@ -1,16 +1,18 @@
-import { Avatar, Group, Menu, Text, UnstyledButton } from '@mantine/core';
 import {
-  IconChevronDown,
-  IconLogout,
-  IconSun,
-  IconSwitch,
-} from '@tabler/icons-react';
+  Avatar,
+  Box,
+  Group,
+  Menu,
+  Text,
+  Transition,
+  UnstyledButton,
+} from '@mantine/core';
+import { IconChevronRight, IconLogout, IconSwitch } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { handleSignout } from '../../apis/auth';
 import { useGetUserDetails } from '../../apis/user';
-import ThemeSwitcher from '../ThemeSwitcher';
 
-const UserButton = () => {
+const UserButton = ({ collapsed }: { collapsed: boolean }) => {
   const navigate = useNavigate();
   const { isPending, error, user } = useGetUserDetails();
 
@@ -23,56 +25,75 @@ const UserButton = () => {
   }
 
   return user.email || user.name ? (
-    <Group gap="md" align="center">
-      <Menu
-        trigger="click"
-        transitionProps={{ transition: 'pop' }}
-        width={200}
-        position="bottom"
-        trapFocus={false}
-      >
-        <Menu.Target>
-          <UnstyledButton>
-            <Group gap={7}>
+    <Menu
+      trigger="click"
+      transitionProps={{ transition: 'pop' }}
+      position="right-end"
+      trapFocus={false}
+    >
+      <Menu.Target>
+        <UnstyledButton w="100%">
+          <Group justify="space-between" wrap="nowrap">
+            <Group gap={7} wrap="nowrap">
               <Avatar
-                src={user.avatar}
+                src={
+                  user.avatar ||
+                  'https://raw.githubusercontent.com/mantinedev/mantine/master/.demo/avatars/avatar-1.png'
+                }
                 alt={user.name ? user.name[0] : user.email[0]}
                 radius="xl"
                 size={30}
               />
-              <Text fw={500} size="sm" lh={1} mr={3} visibleFrom="md">
-                {user.name}
-              </Text>
-              <IconChevronDown size={12} stroke={1.5} />
-            </Group>
-          </UnstyledButton>
-        </Menu.Target>
+              <Transition
+                mounted={!collapsed}
+                transition="fade"
+                duration={200}
+                timingFunction="ease"
+              >
+                {styles =>
+                  collapsed ? (
+                    <></>
+                  ) : (
+                    <Box style={{ ...styles }}>
+                      <Text size="sm" fw={500} lineClamp={1}>
+                        {user.name || 'User'}
+                      </Text>
 
-        <Menu.Dropdown>
-          <Menu.Item
-            leftSection={<IconSun size={16} />}
-            closeMenuOnClick={false}
-          >
-            {' '}
-            <ThemeSwitcher />
-          </Menu.Item>
-          <Menu.Item
-            leftSection={<IconSwitch size={16} />}
-            onClick={() => navigate('/tenants')}
-          >
-            <Text size="sm">Switch Tenant</Text>
-          </Menu.Item>
-          <Menu.Divider />
-          <Menu.Item
-            c="red"
-            leftSection={<IconLogout size={16} />}
-            onClick={handleSignout}
-          >
-            <Text size="sm">Logout</Text>
-          </Menu.Item>
-        </Menu.Dropdown>
-      </Menu>
-    </Group>
+                      <Text c="dimmed" size="xs" lineClamp={1}>
+                        {user.email}
+                      </Text>
+                    </Box>
+                  )
+                }
+              </Transition>
+            </Group>
+
+            <IconChevronRight size={12} stroke={1.5} />
+          </Group>
+        </UnstyledButton>
+      </Menu.Target>
+
+      <Menu.Dropdown>
+        {/* <Menu.Item leftSection={<IconSun size={16} />} closeMenuOnClick={false}>
+          {' '}
+          <ThemeSwitcher />
+        </Menu.Item> */}
+        <Menu.Item
+          leftSection={<IconSwitch size={16} />}
+          onClick={() => navigate('/tenants')}
+        >
+          <Text size="xs">Switch Tenant</Text>
+        </Menu.Item>
+        <Menu.Divider />
+        <Menu.Item
+          c="red"
+          leftSection={<IconLogout size={16} />}
+          onClick={handleSignout}
+        >
+          <Text size="xs">Logout</Text>
+        </Menu.Item>
+      </Menu.Dropdown>
+    </Menu>
   ) : (
     <></>
   );

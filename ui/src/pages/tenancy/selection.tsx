@@ -2,17 +2,19 @@ import {
   Button,
   Container,
   Group,
-  Paper,
+  Stack,
   Text,
   TextInput,
+  UnstyledButton,
 } from '@mantine/core';
-import { IconPlus, IconSearch, IconUserPin } from '@tabler/icons-react';
+import { IconPlus, IconSearch } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSetActiveTenant } from '../../apis/tenant';
 import { useGetUserDetails } from '../../apis/user';
 import { ErrorCard } from '../../components/ErrorCard/ErrorCard';
 import { AppLoader } from '../../components/Loader/AppLoader';
+import { TenantInfoCard } from '../../components/TenantInfo';
 import { TENANT_ID_KEY } from '../../constants/tenancy';
 
 const TenantSelectionPage = () => {
@@ -56,8 +58,12 @@ const TenantSelectionPage = () => {
         <Text size="lg" fw={500}>
           Select a Tenant
         </Text>
-        <Button leftSection={<IconPlus size={16} />} onClick={addNewTenant}>
-          New Tenant
+        <Button
+          leftSection={<IconPlus size={16} />}
+          onClick={addNewTenant}
+          variant="subtle"
+        >
+          Register New Tenant
         </Button>
       </Group>
 
@@ -69,35 +75,22 @@ const TenantSelectionPage = () => {
         onChange={event => setSearch(event.currentTarget.value)}
       />
 
-      {filteredTenants.map((tenant, index) => (
-        <Paper
-          mt="md"
-          radius="md"
-          withBorder
-          py="xs"
-          px="md"
-          key={index}
-          onClick={() => selectTenant(tenant)}
-          style={{
-            cursor: 'pointer',
-            '&:hover': {
-              backgroundColor: 'light-dark(#f5f5f5, #1e1e1e) !important',
-            },
-          }}
-        >
-          <Group align="center">
-            <IconUserPin size={20} />
-            <Text size="md" fw="bold" opacity={0.8}>
-              {tenants[tenant]}
-            </Text>
-          </Group>
-        </Paper>
-      ))}
-      {filteredTenants.length === 0 && (
-        <Text size="md" mt="md" c="dimmed">
-          No tenants found
-        </Text>
-      )}
+      <Stack p={0} m={0} mt="md" gap="sm">
+        {filteredTenants.map((tenant, index) => (
+          <UnstyledButton onClick={() => selectTenant(tenant)}>
+            <TenantInfoCard
+              key={index}
+              tenantName={tenants[tenant]}
+              tenantId={tenant}
+            />
+          </UnstyledButton>
+        ))}
+        {filteredTenants.length === 0 && (
+          <Text size="md" mt="md" c="dimmed">
+            No tenants found
+          </Text>
+        )}
+      </Stack>
     </Container>
   );
 };

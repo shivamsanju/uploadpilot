@@ -24,7 +24,7 @@ func NewCoreServiceClient(baseUri string) *CoreServiceClient {
 	}
 }
 
-func (c *CoreServiceClient) LogUploadRequest(ctx context.Context, workspaceID string, data map[string]string) error {
+func (c *CoreServiceClient) LogUploadRequest(ctx context.Context, originalReq *http.Request, workspaceID string, data map[string]string) error {
 	logURI := fmt.Sprintf("/workspaces/%s/uploads/log", workspaceID)
 
 	log := &dto.UploadRequestLog{
@@ -38,7 +38,7 @@ func (c *CoreServiceClient) LogUploadRequest(ctx context.Context, workspaceID st
 		return err
 	}
 
-	resp, err := c.makeRequest(ctx, "POST", logURI, bytes.NewReader(body), nil)
+	resp, err := c.makeRequest(ctx, originalReq, "POST", logURI, bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
@@ -56,9 +56,9 @@ func (c *CoreServiceClient) LogUploadRequest(ctx context.Context, workspaceID st
 	return nil
 }
 
-func (c *CoreServiceClient) GetUploaderConfig(ctx context.Context, workspaceID string, headers http.Header) (*dto.WorkspaceConfig, error) {
+func (c *CoreServiceClient) GetUploaderConfig(ctx context.Context, originalReq *http.Request, workspaceID string) (*dto.WorkspaceConfig, error) {
 	configURI := fmt.Sprintf("/workspaces/%s/config", workspaceID)
-	resp, err := c.makeRequest(ctx, "GET", configURI, nil, headers)
+	resp, err := c.makeRequest(ctx, originalReq, "GET", configURI, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -82,8 +82,8 @@ func (c *CoreServiceClient) GetUploaderConfig(ctx context.Context, workspaceID s
 	return &config, nil
 }
 
-func (c *CoreServiceClient) CreateNewUpload(ctx context.Context, workspaceID string, upload *dto.Upload, headers http.Header) (string, error) {
-	uploadID, err := c.createUpload(ctx, workspaceID, upload, headers)
+func (c *CoreServiceClient) CreateNewUpload(ctx context.Context, originalReq *http.Request, workspaceID string, upload *dto.Upload) (string, error) {
+	uploadID, err := c.createUpload(ctx, originalReq, workspaceID, upload)
 	if err != nil {
 		return "", err
 	}
@@ -91,17 +91,17 @@ func (c *CoreServiceClient) CreateNewUpload(ctx context.Context, workspaceID str
 	return uploadID, nil
 }
 
-func (c *CoreServiceClient) FinishUpload(ctx context.Context, workspaceID string, uploadID string, upload *dto.Upload, headers http.Header) error {
-	return c.patchUpload(ctx, workspaceID, uploadID, upload, headers)
+func (c *CoreServiceClient) FinishUpload(ctx context.Context, originalReq *http.Request, workspaceID string, uploadID string, upload *dto.Upload) error {
+	return c.patchUpload(ctx, originalReq, workspaceID, uploadID, upload)
 }
 
-func (c *CoreServiceClient) patchUpload(ctx context.Context, workspaceID string, uploadID string, upload *dto.Upload, headers http.Header) error {
+func (c *CoreServiceClient) patchUpload(ctx context.Context, originalReq *http.Request, workspaceID string, uploadID string, upload *dto.Upload) error {
 	finishUploadURI := fmt.Sprintf("/workspaces/%s/uploads/%s/finish", workspaceID, uploadID)
 	body, err := json.Marshal(upload)
 	if err != nil {
 		return err
 	}
-	resp, err := c.makeRequest(ctx, "POST", finishUploadURI, bytes.NewReader(body), headers)
+	resp, err := c.makeRequest(ctx, originalReq, "POST", finishUploadURI, bytes.NewReader(body))
 	if err != nil {
 		return err
 	}
@@ -119,13 +119,13 @@ func (c *CoreServiceClient) patchUpload(ctx context.Context, workspaceID string,
 	return nil
 }
 
-func (c *CoreServiceClient) createUpload(ctx context.Context, workspaceID string, upload *dto.Upload, headers http.Header) (string, error) {
+func (c *CoreServiceClient) createUpload(ctx context.Context, originalReq *http.Request, workspaceID string, upload *dto.Upload) (string, error) {
 	createUploadURI := fmt.Sprintf("/workspaces/%s/uploads", workspaceID)
 	body, err := json.Marshal(upload)
 	if err != nil {
 		return "", err
 	}
-	resp, err := c.makeRequest(ctx, "POST", createUploadURI, bytes.NewReader(body), headers)
+	resp, err := c.makeRequest(ctx, originalReq, "POST", createUploadURI, bytes.NewReader(body))
 	if err != nil {
 		return "", err
 	}
@@ -149,22 +149,24 @@ func (c *CoreServiceClient) createUpload(ctx context.Context, workspaceID string
 	return uploadID, nil
 }
 
-func (c *CoreServiceClient) makeRequest(ctx context.Context, method, endpoint string,
-	body io.Reader, headers http.Header) (*http.Response, error) {
+func (c *CoreServiceClient) makeRequest(ctx context.Context, originReq *http.Request, method, endpoint string,
+	body io.Reader) (*http.Response, error) {
 	url := fmt.Sprintf("%s%s", c.baseUri, endpoint)
 	req, err := http.NewRequestWithContext(ctx, method, url, body)
 	if err != nil {
 		return nil, err
 	}
 
-	authHeader := headers.Get("Authorization")
-	if authHeader != "" {
-		req.Header.Set("Authorization", authHeader)
-	}
-
-	apiKey := headers.Get("X-Api-Key")
+	apiKey := req.Header.Get("X-Api-Key")
 	if apiKey != "" {
 		req.Header.Set("X-Api-Key", apiKey)
+	}
+
+	req.Header.Set("X-Tenant-Id", originReq.Header.Get("X-Tenant-Id"))
+
+	// copy all cookies from originalReq
+	for _, cookie := range originReq.Cookies() {
+		req.AddCookie(cookie)
 	}
 
 	return c.httpClient.Do(req)

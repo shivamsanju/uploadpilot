@@ -1,31 +1,38 @@
-import { Anchor, Breadcrumbs } from '@mantine/core';
-import { Link, useLocation } from 'react-router-dom';
+import { Breadcrumbs, Group, Text } from '@mantine/core';
+import { IconArrowLeft } from '@tabler/icons-react';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useBreadcrumbs } from '../../context/BreadcrumbContext';
 
-const Breadcrumb = () => {
-  const location = useLocation();
+export const BreadcrumbsComponent = () => {
+  const navigate = useNavigate();
+  const { breadcrumbs } = useBreadcrumbs();
 
-  const pathParts = location.pathname.split('/').filter(Boolean);
+  if (breadcrumbs.length === 0) {
+    return <></>;
+  }
 
-  const breadcrumbItems = pathParts.map((part, index) => {
-    const href = `/${pathParts.slice(0, index + 1).join('/')}`;
-
-    const title = part.charAt(0).toUpperCase() + part.slice(1);
-
-    return (
-      <Anchor key={index} component={Link} to={href}>
-        {title}
-      </Anchor>
-    );
-  });
-
-  const items = [
-    <Anchor key="home" component={Link} to="/">
-      Home
-    </Anchor>,
-    ...breadcrumbItems,
-  ];
-
-  return <Breadcrumbs>{items}</Breadcrumbs>;
+  return (
+    <Group mb="lg">
+      <IconArrowLeft
+        size={18}
+        onClick={() => navigate(-1)}
+        style={{ cursor: 'pointer' }}
+      />
+      <Breadcrumbs separator="/">
+        {breadcrumbs.map((breadcrumb, index) =>
+          breadcrumb.path ? (
+            <NavLink
+              key={index}
+              to={breadcrumb.path}
+              className="breadcrumb-link"
+            >
+              <Text>{breadcrumb.label}</Text>
+            </NavLink>
+          ) : (
+            <Text key={index}>{breadcrumb.label}</Text>
+          ),
+        )}
+      </Breadcrumbs>
+    </Group>
+  );
 };
-
-export default Breadcrumb;

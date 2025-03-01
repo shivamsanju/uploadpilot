@@ -1,101 +1,92 @@
 import {
-  ActionIcon,
   AppShell,
   ScrollArea,
   useMantineColorScheme,
   useMantineTheme,
 } from '@mantine/core';
 import {
-  IconCreditCardFilled,
-  IconDeviceLaptop,
-  IconKey,
-  IconMenu2,
-  IconUser,
+  IconAdjustments,
+  IconCircles,
+  IconCloudUpload,
+  IconGauge,
+  IconRoute,
 } from '@tabler/icons-react';
 import { useMemo, useState } from 'react';
-import { AdminHeader } from '../Header/Header';
+import { useParams } from 'react-router-dom';
+import { Header } from '../Header';
 import NavBar from '../Navigation/Navbar';
 import SessionManager from '../SessionManager/SessionManager';
 import TenancyManager from '../Tenancy/TenancyManager';
 
-const WorkspacesLayout: React.FC<{ children: React.ReactNode }> = ({
+const WorkspaceLayout: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [opened, toggle] = useState(true);
   const { colorScheme } = useMantineColorScheme();
   const theme = useMantineTheme();
+  const { workspaceId } = useParams();
 
-  const bg = colorScheme === 'dark' ? '#141414' : theme.colors.gray[0];
-
+  const bg = colorScheme === 'dark' ? '#121212' : theme.colors.gray[0];
   const appShellBorderColor =
-    colorScheme === 'dark' ? theme.colors.dark[6] : theme.colors.gray[2];
-
-  const headerNavBg = colorScheme === 'dark' ? '#161616' : '#fff';
+    colorScheme === 'dark' ? theme.colors.dark[8] : theme.colors.gray[2];
 
   const navItems = useMemo(
     () => [
       {
-        label: 'Workspaces',
-        icon: IconDeviceLaptop,
-        link: `/`,
+        label: 'Get Started',
+        icon: IconCircles,
+        link: `/workspace/${workspaceId}`,
       },
       {
-        label: 'Billing',
-        icon: IconCreditCardFilled,
-        link: `/billing`,
+        label: 'Uploads',
+        icon: IconCloudUpload,
+        link: `/workspace/${workspaceId}/uploads`,
       },
       {
-        label: 'API Keys',
-        icon: IconKey,
-        link: `/api-keys`,
+        label: 'Processors',
+        icon: IconRoute,
+        link: `/workspace/${workspaceId}/processors`,
       },
       {
-        label: 'Profile',
-        icon: IconUser,
-        link: `/profile`,
+        label: 'Configuration',
+        icon: IconAdjustments,
+        link: `/workspace/${workspaceId}/configuration`,
+      },
+      {
+        label: 'Analytics',
+        icon: IconGauge,
+        link: `/workspace/${workspaceId}/analytics`,
       },
     ],
-    [],
+    [workspaceId],
   );
 
   return (
     <SessionManager>
       <TenancyManager>
         <AppShell
-          header={{ height: '7vh' }}
           navbar={{
-            width: 250,
+            width: opened ? 250 : 75,
             breakpoint: 'sm',
-            collapsed: { mobile: opened, desktop: !opened },
+            collapsed: { mobile: opened },
           }}
           padding="md"
           transitionDuration={500}
           transitionTimingFunction="ease"
         >
-          <AppShell.Header
-            style={{ borderColor: appShellBorderColor }}
-            bg={headerNavBg}
-          >
-            <AdminHeader
-              burger={
-                <ActionIcon
-                  variant="default"
-                  size="lg"
-                  onClick={() => toggle(o => !o)}
-                >
-                  <IconMenu2 color="gray" />
-                </ActionIcon>
-              }
-            />
-          </AppShell.Header>
           <AppShell.Navbar
-            style={{ borderColor: appShellBorderColor }}
-            bg={headerNavBg}
+            withBorder
+            style={{
+              borderColor: appShellBorderColor,
+              transition: 'width 0.2s ease',
+            }}
+            bg={bg}
           >
-            <NavBar toggle={toggle} items={navItems} />
+            <NavBar collapsed={!opened} toggle={toggle} items={navItems} />
           </AppShell.Navbar>
           <AppShell.Main bg={bg} m={0} pr={0}>
-            <ScrollArea scrollbarSize={6} h="93vh" pr="md">
+            <ScrollArea scrollbarSize={6} h="100vh" px="md">
+              <Header />
               {children}
             </ScrollArea>
           </AppShell.Main>
@@ -105,4 +96,4 @@ const WorkspacesLayout: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-export default WorkspacesLayout;
+export default WorkspaceLayout;

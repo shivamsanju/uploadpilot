@@ -1,11 +1,4 @@
-import {
-  Box,
-  Collapse,
-  Group,
-  Text,
-  ThemeIcon,
-  UnstyledButton,
-} from '@mantine/core';
+import { Box, Collapse, Group, Text, Transition } from '@mantine/core';
 import { useViewportSize } from '@mantine/hooks';
 import { IconChevronRight } from '@tabler/icons-react';
 import { useState } from 'react';
@@ -21,6 +14,7 @@ interface LinksGroupProps {
   active?: boolean;
   isWorkspaceChild?: boolean;
   toggle: React.Dispatch<React.SetStateAction<boolean>>;
+  collapsed: boolean;
 }
 
 export function LinksGroup({
@@ -31,6 +25,7 @@ export function LinksGroup({
   link,
   active,
   toggle,
+  collapsed,
 }: LinksGroupProps) {
   const navigate = useNavigate();
   const { width } = useViewportSize();
@@ -71,29 +66,40 @@ export function LinksGroup({
 
   return (
     <>
-      <UnstyledButton
+      <Group
+        justify="space-between"
+        gap={0}
         onClick={handleClick}
-        className={`${active ? classes.active : ''} ${classes.control}`}
+        className={`${active ? classes.active : ''} ${classes.control} ${collapsed ? classes.collapsed : ''}`}
       >
-        <Group justify="space-between" gap={0}>
-          <Box style={{ display: 'flex', alignItems: 'center' }}>
-            <ThemeIcon variant="light" size={30}>
-              <Icon size={18} />
-            </ThemeIcon>
-            <Box ml="md" className={`${classes.label}`}>
-              {label}
-            </Box>
-          </Box>
-          {hasLinks && (
-            <IconChevronRight
-              className={classes.chevron}
-              stroke={1.5}
-              size={16}
-              style={{ transform: opened ? 'rotate(-90deg)' : 'none' }}
-            />
-          )}
+        <Group align="center" gap="md" wrap="nowrap">
+          <Icon size={18} />
+          <Transition
+            mounted={!collapsed}
+            transition="fade"
+            duration={200}
+            timingFunction="ease"
+          >
+            {styles =>
+              collapsed ? (
+                <></>
+              ) : (
+                <Box className={`${classes.label}`} style={{ ...styles }}>
+                  {label}
+                </Box>
+              )
+            }
+          </Transition>
         </Group>
-      </UnstyledButton>
+        {hasLinks && (
+          <IconChevronRight
+            className={classes.chevron}
+            stroke={1.5}
+            size={16}
+            style={{ transform: opened ? 'rotate(-90deg)' : 'none' }}
+          />
+        )}
+      </Group>
       {hasLinks ? <Collapse in={opened}>{items}</Collapse> : null}
     </>
   );

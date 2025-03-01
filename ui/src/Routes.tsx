@@ -1,9 +1,8 @@
-import AppLayout from './components/Layout/AppLayout';
-import AppLayoutV2 from './components/Layout/AppLayoutV2';
 import EmptyLayout from './components/Layout/EmptyLayout';
 import HeaderAuthNoTenancyLayout from './components/Layout/HeaderAuthNoTenancyLayout';
+import HomeLayout from './components/Layout/HomeLayout';
 import ProcessorLayout from './components/Layout/ProcessorLayout';
-import WorkspacesLayout from './components/Layout/WorkspaceLayout';
+import WorkspaceLayout from './components/Layout/WorkspaceLayout';
 import { NotFoundImage } from './components/NotFound';
 import DashboardPage from './pages/analytics';
 import ApiKeyPage from './pages/apikeys';
@@ -19,7 +18,6 @@ import NewprocessorPage from './pages/processors/Add';
 import ProcessorSettingsPage from './pages/processors/settings';
 import { TenantRegistrationPage } from './pages/tenancy/registration';
 import TenantSelectionPage from './pages/tenancy/selection';
-import ToolsPage from './pages/tools';
 import UploadsPage from './pages/uploads';
 import WorkflowBuilderPage from './pages/wflowbuilder';
 import WorkflowRunsPage from './pages/workflowruns';
@@ -60,47 +58,47 @@ const routes: Route[] = [
   },
   {
     path: '/',
-    layout: WorkspacesLayout,
+    layout: HomeLayout,
     element: <WorkspaceLandingPage />,
   },
   {
     path: '/billing',
-    layout: WorkspacesLayout,
+    layout: HomeLayout,
     element: <BillingsPage />,
   },
   {
     path: '/api-keys',
-    layout: WorkspacesLayout,
+    layout: HomeLayout,
     element: <ApiKeyPage />,
   },
   {
     path: '/api-keys/new',
-    layout: WorkspacesLayout,
+    layout: HomeLayout,
     element: <CreateApiKeyPage />,
   },
   {
     path: '/workspace/:workspaceId',
-    layout: AppLayout,
+    layout: WorkspaceLayout,
     element: <GetStartedPage />,
   },
   {
     path: '/workspace/:workspaceId/uploads',
-    layout: AppLayoutV2,
+    layout: WorkspaceLayout,
     element: <UploadsPage />,
   },
   {
     path: '/workspace/:workspaceId/configuration',
-    layout: AppLayout,
+    layout: WorkspaceLayout,
     element: <ConfigurationPage />,
   },
   {
     path: '/workspace/:workspaceId/processors',
-    layout: AppLayout,
+    layout: WorkspaceLayout,
     element: <ProcessorPage />,
   },
   {
     path: '/workspace/:workspaceId/processors/new',
-    layout: AppLayout,
+    layout: WorkspaceLayout,
     element: <NewprocessorPage />,
   },
   {
@@ -118,20 +116,16 @@ const routes: Route[] = [
     layout: ProcessorLayout,
     element: <ProcessorSettingsPage />,
   },
-  {
-    path: '/workspace/:workspaceId/tools',
-    layout: AppLayout,
-    element: <ToolsPage />,
-  },
+
   {
     path: '/workspace/:workspaceId/analytics',
-    layout: AppLayout,
+    layout: WorkspaceLayout,
     element: <DashboardPage />,
   },
   {
     path: '*',
     element: <NotFoundImage />,
-    layout: WorkspacesLayout,
+    layout: HomeLayout,
   },
 ];
 

@@ -1,48 +1,27 @@
-import Editor, { Monaco, OnMount } from '@monaco-editor/react';
-import React, { useState } from 'react';
-
 import {
-  Box,
+  Alert,
   Group,
-  LoadingOverlay,
   Text,
-  Title,
   Tooltip,
   useMantineColorScheme,
 } from '@mantine/core';
+import Editor, { Monaco } from '@monaco-editor/react';
 import { IconAlertCircle, IconCircleCheck } from '@tabler/icons-react';
-import { useUpdateProcessorWorkflowMutation } from '../../../apis/processors';
-import { DiscardButton } from '../../../components/Buttons/DiscardButton';
-import { SaveButton } from '../../../components/Buttons/SaveButton';
-import { showConfirmationPopup } from '../../../components/Popups/ConfirmPopup';
-import { validateYaml } from './schema';
+import React, { useEffect, useState } from 'react';
+import { validateWorkflowContent } from './schema';
 
 type Props = {
-  workspaceId: string;
-  processor: any;
-  editor: any;
-  setEditor: any;
+  workflowContent: string;
+  setWorkflowContent: React.Dispatch<React.SetStateAction<string>>;
 };
 
 export const WorkflowYamlEditor: React.FC<Props> = ({
-  processor,
-  workspaceId,
-  setEditor,
-  editor,
+  workflowContent,
+  setWorkflowContent,
 }) => {
-  const err = validateYaml(processor?.workflow || '');
-  const [yamlContent, setYamlContent] = useState<string>(
-    processor?.workflow || '',
-  );
-  const [error, setError] = useState<string | null>(err);
+  const [error, setError] = useState<string | null>('');
   const [initialLoad, setInitialLoad] = useState(true);
   const { colorScheme } = useMantineColorScheme();
-
-  const { mutateAsync, isPending } = useUpdateProcessorWorkflowMutation();
-
-  const editorMount: OnMount = editorL => {
-    setEditor(editorL);
-  };
 
   const handleEditorDidMount = (monaco: Monaco) => {
     monaco.editor.defineTheme('myCustomThemeDark', {
@@ -56,88 +35,23 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
     setInitialLoad(false);
   };
 
-  const saveYaml = async () => {
-    try {
-      await mutateAsync({
-        workspaceId,
-        processorId: processor?.id,
-        workflow: yamlContent?.replace(/\t/g, '  '),
-      });
-    } catch (error: any) {
-      setError(error?.response?.data?.message || error.message);
-    }
-  };
-
-  const discardChanges = () => {
-    showConfirmationPopup({
-      message:
-        'Are you sure you want to discard the changes? this is irreversible.',
-      onOk: () => {
-        setYamlContent(processor?.workflow || '');
-      },
-    });
-  };
+  useEffect(() => {
+    setError(validateWorkflowContent(workflowContent || ''));
+  }, [workflowContent]);
 
   return (
-    <Box>
-      <LoadingOverlay
-        visible={isPending || initialLoad}
-        overlayProps={{ backgroundOpacity: 0 }}
-        zIndex={1000}
-      />
-      <Group justify="space-between" align="center" p="xs">
-        <Box w="65%">
-          <Title order={4} opacity={0.8}>
-            Steps
-          </Title>
-          <Group
-            align="center"
-            gap={2}
-            c={error ? 'red' : 'dimmed'}
-            p={0}
-            pt={2}
-            wrap="nowrap"
-          >
-            <Box w="12">
-              {error ? (
-                <IconAlertCircle size="12" />
-              ) : (
-                <IconCircleCheck size="12" />
-              )}
-            </Box>
-            <Tooltip
-              multiline
-              w={500}
-              maw="90vw"
-              label={error || 'Everything looks good'}
-              color={error ? 'red' : 'dimmed'}
-            >
-              <Text size="xs" lineClamp={1}>
-                {error || 'Everything looks good'}
-              </Text>
-            </Tooltip>
-          </Group>
-        </Box>
-        <Group gap="md">
-          <DiscardButton onClick={discardChanges} />
-          <SaveButton onClick={saveYaml} />
-        </Group>
-      </Group>
-
+    <>
       <Editor
-        loading={false}
+        loading={initialLoad}
         beforeMount={handleEditorDidMount}
-        onMount={editorMount}
         theme={colorScheme === 'dark' ? 'myCustomThemeDark' : 'vs'}
         language="yaml"
         height="70vh"
         defaultLanguage="yaml"
-        value={yamlContent}
+        value={workflowContent}
         onChange={(value: any) => {
           if (typeof value === 'string') {
-            setYamlContent(value);
-            const err = validateYaml(value);
-            setError(err);
+            setWorkflowContent(value);
           }
         }}
         options={{
@@ -151,6 +65,32 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
           rulers: [],
         }}
       />
-    </Box>
+      <Alert color={error ? 'red' : 'green'} radius={0} p="xs">
+        <Tooltip.Floating
+          label={error || 'Workflow content is valid'}
+          multiline
+          maw="700"
+        >
+          <Group
+            p={0}
+            m={0}
+            align="center"
+            gap="xs"
+            c={error ? 'red' : 'green'}
+            wrap="nowrap"
+          >
+            {error ? (
+              <IconAlertCircle size={16} stroke={1.5} />
+            ) : (
+              <IconCircleCheck size={16} stroke={1.5} />
+            )}
+
+            <Text lineClamp={1} w="95%">
+              {error || 'Workflow content is valid'}
+            </Text>
+          </Group>
+        </Tooltip.Floating>
+      </Alert>
+    </>
   );
 };

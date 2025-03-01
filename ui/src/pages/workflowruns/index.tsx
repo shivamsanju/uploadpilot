@@ -1,50 +1,29 @@
-import {
-  ActionIcon,
-  Box,
-  Breadcrumbs,
-  Group,
-  Text,
-  Title,
-} from '@mantine/core';
-import { IconChevronLeft } from '@tabler/icons-react';
-import { NavLink, useNavigate, useParams } from 'react-router-dom';
-import { AppLoader } from '../../components/Loader/AppLoader';
-import WorkflowRunsList from './List';
+import { Box, Group, Title } from '@mantine/core';
+import { IconBolt } from '@tabler/icons-react';
+import { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { useSetBreadcrumbs } from '../../hooks/breadcrumb';
+import ProcessorRunsList from './List';
 
 const WorkflowRunsPage = () => {
-  const { workspaceId, processorId } = useParams();
-  const navigate = useNavigate();
+  const { workspaceId } = useParams();
+  const setBreadcrumbs = useSetBreadcrumbs();
 
-  if (!workspaceId) {
-    return <AppLoader h="70vh" />;
-  }
+  useEffect(() => {
+    setBreadcrumbs([
+      { label: 'Workspaces', path: '/' },
+      { label: 'Processors', path: `/workspace/${workspaceId}/processors` },
+      { label: 'Runs' },
+    ]);
+  }, [setBreadcrumbs, workspaceId]);
 
   return (
-    <Box mb="30">
-      <Breadcrumbs separator=">">
-        <NavLink to="/" className="bredcrumb-link">
-          <Text>Workspaces</Text>
-        </NavLink>
-        <NavLink
-          to={`/workspace/${workspaceId}/processors`}
-          className="bredcrumb-link"
-        >
-          <Text>Processors</Text>
-        </NavLink>
-        <Text>{processorId}</Text>
-      </Breadcrumbs>
-      <Group mt="xs" mb="xl">
-        <ActionIcon
-          variant="default"
-          radius="xl"
-          size="sm"
-          onClick={() => navigate(`/workspace/${workspaceId}/processors`)}
-        >
-          <IconChevronLeft size={16} />
-        </ActionIcon>
-        <Title order={3}>Workflow runs</Title>
+    <Box mb={50}>
+      <Group mb="xl">
+        <IconBolt size={24} />
+        <Title order={3}>Runs</Title>
       </Group>
-      <WorkflowRunsList />
+      <ProcessorRunsList />
     </Box>
   );
 };

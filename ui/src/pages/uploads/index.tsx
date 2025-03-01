@@ -1,51 +1,31 @@
-import {
-  ActionIcon,
-  Alert,
-  Badge,
-  Box,
-  Breadcrumbs,
-  Group,
-  Text,
-  Title,
-} from '@mantine/core';
+import { Alert, Badge, Box, Group, Title } from '@mantine/core';
 import { useLocalStorage } from '@mantine/hooks';
-import { IconChevronLeft, IconInfoCircle } from '@tabler/icons-react';
-import { useState } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { IconCloudUpload, IconInfoCircle } from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
+import { useSetBreadcrumbs } from '../../hooks/breadcrumb';
 import UploadList from './List';
 
 const UploadsPage = () => {
   const [totalRecords, setTotalRecords] = useState(0);
-  const navigate = useNavigate();
+  const setBreadcrumbs = useSetBreadcrumbs();
   const [alert, setAlert] = useLocalStorage({
     key: 'alert',
     defaultValue: 1,
     getInitialValueInEffect: false,
   });
 
+  useEffect(() => {
+    setBreadcrumbs([{ label: 'Workspaces', path: '/' }, { label: 'Uploads' }]);
+  }, [setBreadcrumbs]);
+
   return (
     <Box>
-      <Breadcrumbs separator=">">
-        <NavLink to="/" className="bredcrumb-link">
-          <Text>Workspaces</Text>
-        </NavLink>
-        <Text>Uploads</Text>
-      </Breadcrumbs>
-      <Group mt="xs" mb="xl">
-        <ActionIcon
-          variant="default"
-          radius="xl"
-          size="sm"
-          onClick={() => navigate(`/`)}
-        >
-          <IconChevronLeft size={16} />
-        </ActionIcon>
-        <Group align="center" gap="xs" h="10%">
-          <Title order={3}>Uploads</Title>
-          <Badge variant="outline" radius="xl">
-            {totalRecords}
-          </Badge>
-        </Group>
+      <Group mb="xl">
+        <IconCloudUpload size={24} />
+        <Title order={3}>Uploads</Title>
+        <Badge variant="outline" radius="xl">
+          {totalRecords}
+        </Badge>
       </Group>
 
       {alert === 1 && (
