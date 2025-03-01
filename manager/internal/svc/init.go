@@ -1,13 +1,13 @@
 package svc
 
 import (
-	"github.com/uploadpilot/go-core/common/vault"
-	"github.com/uploadpilot/go-core/db/pkg/repo"
+	"github.com/uploadpilot/manager/internal/db/repo"
 	"github.com/uploadpilot/manager/internal/svc/apikey"
 	"github.com/uploadpilot/manager/internal/svc/processor"
 	"github.com/uploadpilot/manager/internal/svc/tenant"
 	"github.com/uploadpilot/manager/internal/svc/upload"
 	"github.com/uploadpilot/manager/internal/svc/workspace"
+	"github.com/uploadpilot/manager/internal/vault"
 )
 
 type Services struct {

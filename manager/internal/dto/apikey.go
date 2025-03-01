@@ -3,8 +3,8 @@ package dto
 import (
 	"time"
 
-	"github.com/uploadpilot/go-core/db/pkg/dtypes"
-	"github.com/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/manager/internal/db/dtypes"
+	"github.com/uploadpilot/manager/internal/db/models"
 )
 
 type UserClaims struct {

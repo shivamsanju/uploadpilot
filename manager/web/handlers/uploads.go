@@ -6,8 +6,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	commonutils "github.com/uploadpilot/go-core/common/utils"
-	"github.com/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/manager/internal/db/models"
 	"github.com/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/manager/internal/svc/upload"
 	"github.com/uploadpilot/manager/internal/svc/workspace"
@@ -104,7 +103,7 @@ func (h *uploadHandler) CreateUpload(
 		return "", statusCode, err
 	}
 	var upload models.Upload
-	if err := commonutils.ConvertDTOToModel(&body, &upload); err != nil {
+	if err := utils.ConvertDTOToModel(&body, &upload); err != nil {
 		return "", http.StatusUnprocessableEntity, err
 	}
 	if err := h.uploadSvc.CreateUpload(r.Context(), params.WorkspaceID, &upload); err != nil {

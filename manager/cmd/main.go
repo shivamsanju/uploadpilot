@@ -14,13 +14,13 @@ import (
 	"github.com/phuslu/log"
 
 	"github.com/redis/go-redis/v9"
-	"github.com/uploadpilot/go-core/common/vault"
-	"github.com/uploadpilot/go-core/db/pkg/driver"
-	cacheplugins "github.com/uploadpilot/go-core/db/pkg/plugins/cache"
-	"github.com/uploadpilot/go-core/db/pkg/repo"
 	"github.com/uploadpilot/manager/internal/config"
+	"github.com/uploadpilot/manager/internal/db/driver"
+	cacheplugins "github.com/uploadpilot/manager/internal/db/plugins/cache"
+	"github.com/uploadpilot/manager/internal/db/repo"
 	"github.com/uploadpilot/manager/internal/infra"
 	"github.com/uploadpilot/manager/internal/svc"
+	"github.com/uploadpilot/manager/internal/vault"
 	"github.com/uploadpilot/manager/web"
 )
 

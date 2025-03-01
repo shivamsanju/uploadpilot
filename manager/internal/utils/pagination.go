@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/manager/internal/db/models"
 	"github.com/uploadpilot/manager/internal/dto"
 )
 

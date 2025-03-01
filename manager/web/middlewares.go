@@ -171,7 +171,6 @@ func (m *Middlewares) addSessionToCtx(r *http.Request) (context.Context, error) 
 	}
 
 	reqTenantID := utils.GetTenantIDFromReq(r)
-	log.Debug().Msgf("reqTenantID: %s", reqTenantID)
 	if reqTenantID == "" {
 		return nil, errors.New(msg.ErrTenantIDNotFoundInRequest)
 	}

@@ -28,7 +28,7 @@ if [ -z "$DOCKER_HUB_USERNAME" ]; then
 fi
 
 # List of image names and corresponding Dockerfiles
-IMAGES=("manager" "momentum" "uploader")
+IMAGES=("manager" "agent")
 
 
 # Iterate over each image and build/push

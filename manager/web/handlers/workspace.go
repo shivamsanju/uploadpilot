@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/manager/internal/db/models"
 	"github.com/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/manager/internal/svc/workspace"
 	"github.com/uploadpilot/manager/internal/utils"

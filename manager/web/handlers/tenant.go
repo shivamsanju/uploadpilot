@@ -5,10 +5,10 @@ import (
 
 	"github.com/supertokens/supertokens-golang/recipe/session"
 	"github.com/supertokens/supertokens-golang/recipe/usermetadata"
-	commonutils "github.com/uploadpilot/go-core/common/utils"
-	"github.com/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/manager/internal/db/models"
 	"github.com/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/manager/internal/svc/tenant"
+	"github.com/uploadpilot/manager/internal/utils"
 )
 
 type tenantHandler struct {
@@ -28,7 +28,7 @@ func (h *tenantHandler) OnboardTenant(
 	body dto.TenantOnboardingRequest,
 ) (*string, int, error) {
 	var tenant models.Tenant
-	if err := commonutils.ConvertDTOToModel(&body, &tenant); err != nil {
+	if err := utils.ConvertDTOToModel(&body, &tenant); err != nil {
 		return nil, http.StatusUnprocessableEntity, err
 	}
 	tenant.Metadata = map[string]interface{}{

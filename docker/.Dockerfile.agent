@@ -1,0 +1,27 @@
+FROM golang:1.23.2 AS builder
+
+WORKDIR /app
+
+COPY ./agent/go.mod ./agent/go.sum /app/agent/
+
+COPY ./go-common /app/go-common
+
+WORKDIR /app/agent
+
+RUN go mod download
+
+COPY ./agent .
+
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /app/main ./cmd
+
+
+######################### STAGE 2 #########################
+FROM alpine:latest
+
+WORKDIR /root/
+
+COPY --from=builder /app/main .
+
+EXPOSE 8081
+
+CMD ["./main"]

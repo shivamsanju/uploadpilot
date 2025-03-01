@@ -9,15 +9,15 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/phuslu/log"
-	"github.com/uploadpilot/go-core/common/activitycatalog"
-	"github.com/uploadpilot/go-core/common/validator"
-	"github.com/uploadpilot/go-core/db/pkg/models"
-	"github.com/uploadpilot/go-core/db/pkg/repo"
-	"github.com/uploadpilot/go-core/dsl"
+	"github.com/uploadpilot/go-common/workflow/catalog"
+	"github.com/uploadpilot/go-common/workflow/dsl"
+	"github.com/uploadpilot/manager/internal/db/models"
+	"github.com/uploadpilot/manager/internal/db/repo"
 	"github.com/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/manager/internal/infra"
 	"github.com/uploadpilot/manager/internal/svc/processor/templates"
 	"github.com/uploadpilot/manager/internal/utils"
+	"github.com/uploadpilot/manager/internal/validator"
 	"go.temporal.io/api/enums/v1"
 	"go.temporal.io/api/workflowservice/v1"
 	"go.temporal.io/sdk/client"
@@ -119,9 +119,9 @@ func (s *Service) EditNameAndTrigger(ctx context.Context, workspaceID, processor
 	return s.procRepo.Patch(ctx, workspaceID, processorID, patch)
 }
 
-func (s *Service) GetAllTasks(ctx context.Context) []activitycatalog.ActivityMetadata {
-	var tsks []activitycatalog.ActivityMetadata
-	for _, task := range activitycatalog.ActivityCatalog {
+func (s *Service) GetAllTasks(ctx context.Context) []catalog.ActivityMetadata {
+	var tsks []catalog.ActivityMetadata
+	for _, task := range catalog.ActivityCatalog {
 		tsks = append(tsks, *task)
 	}
 	return tsks
@@ -146,10 +146,8 @@ func (s *Service) TriggerWorkflows(ctx context.Context, workspaceID string, uplo
 				doTrigger = true
 			}
 			if !doTrigger {
-				log.Debug().Msgf("Skipping workflow for processor %s", processor.Name)
 				continue
 			}
-			log.Debug().Msgf("Triggering workflow for processor %s", processor.Name)
 			_, err := s.TriggerWorkflow(ctx, upload, processor.Workflow, workspaceID, processor.ID)
 			if err != nil {
 				return err

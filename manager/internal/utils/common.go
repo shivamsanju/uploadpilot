@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	"github.com/mitchellh/mapstructure"
-	"github.com/phuslu/log"
 	"github.com/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/manager/internal/msg"
 )
@@ -19,7 +18,6 @@ func GetSessionFromCtx(ctx context.Context) (*dto.Session, error) {
 		return nil, errors.New(msg.ErrUserInfoNotFoundInRequest)
 	}
 
-	log.Debug().Msgf("user info %+v", value)
 	userInfo, ok := value.(dto.Session)
 	if !ok {
 		return nil, errors.New(msg.ErrInvalidUserInfoInRequest)

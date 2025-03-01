@@ -5,8 +5,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	commonutils "github.com/uploadpilot/go-core/common/utils"
-	"github.com/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/manager/internal/db/models"
 	"github.com/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/manager/internal/svc/processor"
 	"github.com/uploadpilot/manager/internal/utils"
@@ -52,7 +51,7 @@ func (h *processorHandler) GetTemplates(w http.ResponseWriter, r *http.Request) 
 
 func (h *processorHandler) CreateProcessor(r *http.Request, params dto.WorkspaceParams, query interface{}, body dto.CreateProcessorRequest) (*string, int, error) {
 	var processor models.Processor
-	if err := commonutils.ConvertDTOToModel(&body, &processor); err != nil {
+	if err := utils.ConvertDTOToModel(&body, &processor); err != nil {
 		return nil, http.StatusUnprocessableEntity, err
 	}
 	if err := h.pSvc.CreateProcessor(r.Context(), params.WorkspaceID, &processor, &body.TemplateKey); err != nil {

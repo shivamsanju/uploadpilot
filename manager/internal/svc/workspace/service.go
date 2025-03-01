@@ -3,8 +3,8 @@ package workspace
 import (
 	"context"
 
-	"github.com/uploadpilot/go-core/db/pkg/models"
-	"github.com/uploadpilot/go-core/db/pkg/repo"
+	"github.com/uploadpilot/manager/internal/db/models"
+	"github.com/uploadpilot/manager/internal/db/repo"
 	"github.com/uploadpilot/manager/internal/utils"
 )
 

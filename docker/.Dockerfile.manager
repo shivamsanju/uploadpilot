@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY ./manager/go.mod ./manager/go.sum /app/manager/
 
-COPY ./go-core /app/go-core
+COPY ./go-common /app/go-common
 
 WORKDIR /app/manager
 

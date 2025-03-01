@@ -4,8 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/phuslu/log"
-	"github.com/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/manager/internal/db/models"
 	"github.com/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/manager/internal/svc/apikey"
 )
@@ -38,7 +37,6 @@ func (h *apiKeyHandler) CreateAPIKey(
 	query interface{},
 	body dto.CreateApiKeyData,
 ) (string, int, error) {
-	log.Debug().Msgf("creating api key with data %+v", body)
 	key, err := h.apiKeySvc.CreateAPIKey(r.Context(), &body)
 	if err != nil {
 		return "", http.StatusInternalServerError, err

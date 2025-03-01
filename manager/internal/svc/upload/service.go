@@ -6,9 +6,9 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/phuslu/log"
-	"github.com/uploadpilot/go-core/db/pkg/models"
-	"github.com/uploadpilot/go-core/db/pkg/repo"
 	"github.com/uploadpilot/manager/internal/config"
+	"github.com/uploadpilot/manager/internal/db/models"
+	"github.com/uploadpilot/manager/internal/db/repo"
 	"github.com/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/manager/internal/infra"
 	"github.com/uploadpilot/manager/internal/svc/processor"

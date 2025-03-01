@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/uploadpilot/go-core/db/pkg/dtypes"
+	"github.com/uploadpilot/manager/internal/db/dtypes"
 )
 
 type CreateProcessorRequest struct {

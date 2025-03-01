@@ -9,15 +9,14 @@ import (
 	"time"
 
 	"github.com/phuslu/log"
-	commonutils "github.com/uploadpilot/go-core/common/utils"
-	"github.com/uploadpilot/go-core/common/vault"
-	"github.com/uploadpilot/go-core/db/pkg/errs"
-	"github.com/uploadpilot/go-core/db/pkg/models"
-	"github.com/uploadpilot/go-core/db/pkg/repo"
 	"github.com/uploadpilot/manager/internal/config"
+	"github.com/uploadpilot/manager/internal/db/errs"
+	"github.com/uploadpilot/manager/internal/db/models"
+	"github.com/uploadpilot/manager/internal/db/repo"
 	"github.com/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/manager/internal/msg"
 	"github.com/uploadpilot/manager/internal/utils"
+	"github.com/uploadpilot/manager/internal/vault"
 )
 
 type Service struct {
@@ -51,7 +50,7 @@ func (s *Service) CreateAPIKey(ctx context.Context, data *dto.CreateApiKeyData) 
 	if err != nil {
 		return "", err
 	}
-	newKey := "up-" + commonutils.GenerateRandomAlphaNumericString(64) + data.ExpiresAt.Format("20060102150405")
+	newKey := "up-" + utils.GenerateRandomAlphaNumericString(64) + data.ExpiresAt.Format("20060102150405")
 
 	hashedKey, err := s.kms.Hash(newKey, s.apiKeySalt)
 	if err != nil {

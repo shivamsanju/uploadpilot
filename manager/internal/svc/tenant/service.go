@@ -6,8 +6,8 @@ import (
 
 	"github.com/supertokens/supertokens-golang/recipe/session"
 	"github.com/supertokens/supertokens-golang/recipe/usermetadata"
-	"github.com/uploadpilot/go-core/db/pkg/models"
-	"github.com/uploadpilot/go-core/db/pkg/repo"
+	"github.com/uploadpilot/manager/internal/db/models"
+	"github.com/uploadpilot/manager/internal/db/repo"
 	"github.com/uploadpilot/manager/internal/dto"
 	"github.com/uploadpilot/manager/internal/msg"
 	"github.com/uploadpilot/manager/internal/utils"

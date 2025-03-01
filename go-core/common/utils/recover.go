@@ -1,9 +1,0 @@
-package commonutils
-
-import "log"
-
-func Recover() {
-	if r := recover(); r != nil {
-		log.Fatalf("recovered from panic: %s", r)
-	}
-}

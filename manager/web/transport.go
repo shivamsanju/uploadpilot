@@ -11,8 +11,8 @@ import (
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
 	"github.com/mitchellh/mapstructure"
-	vald "github.com/uploadpilot/go-core/common/validator"
 	"github.com/uploadpilot/manager/internal/utils"
+	vald "github.com/uploadpilot/manager/internal/validator"
 )
 
 func CreateJSONHandler[Params any, Query any, Body any, Result any](

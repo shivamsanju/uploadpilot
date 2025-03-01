@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"github.com/uploadpilot/go-core/db/pkg/models"
+	"github.com/uploadpilot/manager/internal/db/models"
 )
 
 type WorkspaceConfig struct {
