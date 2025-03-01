@@ -167,7 +167,7 @@ func (s *Service) TriggerWorkflow(ctx context.Context, upload *models.Upload, ya
 
 	workflowOptions := client.StartWorkflowOptions{
 		ID:        uuid.New().String(),
-		TaskQueue: "dsl",
+		TaskQueue: "queue1",
 		TypedSearchAttributes: temporal.NewSearchAttributes(
 			temporal.NewSearchAttributeKeyKeyword("processorId").ValueSet(processorID),
 		),

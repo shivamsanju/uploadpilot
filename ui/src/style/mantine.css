@@ -1,6 +1,8 @@
-/* For dark mode bg body*/
-:root[data-mantine-color-scheme='dark'] {
-  --mantine-color-body: #151515 !important;
+:root {
+  --mantine-color-body: light-dark(
+    var(--mantine-color-gray-1),
+    #121212
+  ) !important;
 }
 
 :root[data-mantine-color-scheme='dark'] * {
@@ -8,7 +10,15 @@
 }
 
 [data-mantine-color-scheme='dark'] .mantine-Notifications-notification {
-  background-color: #1e1e1e !important;
+  background-color: #242424 !important;
+}
+
+.mantine-AppShell-navbar {
+  transition: all 0.2s ease-in-out;
+  border-color: light-dark(
+    var(--mantine-color-gray-1),
+    var(--mantine-color-dark-7)
+  ) !important;
 }
 
 .breadcrumb-link {

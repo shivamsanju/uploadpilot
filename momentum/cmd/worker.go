@@ -15,7 +15,7 @@ import (
 	"go.temporal.io/sdk/worker"
 )
 
-func startWorker() {
+func startWorker(taskQueue string) {
 	// Initialize config
 	if err := config.BuildConfig(); err != nil {
 		log.Fatalln("Unable to initialize config.", err)
@@ -42,7 +42,9 @@ func startWorker() {
 	}
 	defer infra.TemporalClient.Close()
 
-	w := worker.New(infra.TemporalClient, "dsl", worker.Options{})
+	w := worker.New(infra.TemporalClient, taskQueue, worker.Options{
+		Identity: taskQueue + "-worker",
+	})
 	w.RegisterWorkflow(dsl.SimpleDSLWorkflow)
 
 	// Register all activities
@@ -60,8 +62,11 @@ func main() {
 	// Channel to handle OS interrupt signals
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt)
+	taskQueues := []string{"queue1", "queue2", "queue3"}
 
-	go startWorker()
+	for _, taskQueue := range taskQueues {
+		go startWorker(taskQueue)
+	}
 
 	// Start a dummy HTTP server
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {

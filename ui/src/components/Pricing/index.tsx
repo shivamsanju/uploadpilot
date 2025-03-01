@@ -1,9 +1,9 @@
 import {
   Button,
-  Card,
   Container,
   Group,
   List,
+  Paper,
   SimpleGrid,
   Text,
   ThemeIcon,
@@ -29,9 +29,10 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
   const { name, price, description, features, highlighted, buttonText } = plan;
 
   return (
-    <Card
+    <Paper
+      withBorder
       className={`${classes.card} ${highlighted ? classes.highlighted : ''}`}
-      padding="xl"
+      p="xl"
     >
       <div className={classes.planHeader}>
         <Text fz="xl" fw={700} className={classes.planName}>
@@ -47,15 +48,23 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       </div>
 
       <Group justify="center" className={classes.priceGroup}>
-        <Text fz="xl" span fw={700}>
-          $
-        </Text>
-        <Text fz="50" fw={700} span>
-          {price}
-        </Text>
-        <Text fz="sm" c={highlighted ? 'white' : 'dimmed'} span>
-          /month
-        </Text>
+        {price === 'custom' ? (
+          <Text fz="30" span fw={700} size="sm">
+            Custom
+          </Text>
+        ) : (
+          <>
+            <Text fz="xl" span fw={700}>
+              $
+            </Text>
+            <Text fz="50" fw={700} span>
+              {price}
+            </Text>
+            <Text fz="sm" c={highlighted ? 'white' : 'dimmed'} span>
+              /month
+            </Text>
+          </>
+        )}
       </Group>
 
       <List spacing="sm" size="sm" center className={classes.featuresList}>
@@ -83,19 +92,19 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       <Button
         fullWidth
         size="md"
-        variant={highlighted ? 'white' : 'light'}
-        className={classes.button}
+        variant={'light'}
+        className={`${highlighted ? classes.highlightedButton : ''} ${classes.button}`}
       >
         {buttonText}
       </Button>
-    </Card>
+    </Paper>
   );
 }
 
 export function PricingSection() {
   const plans: PricingPlan[] = [
     {
-      name: 'Starter',
+      name: 'Free',
       price: '0',
       description: 'Perfect for side projects and small teams',
       buttonText: 'Get Started',
@@ -109,8 +118,8 @@ export function PricingSection() {
       ],
     },
     {
-      name: 'Professional',
-      price: '29',
+      name: 'Standard',
+      price: '299',
       description: 'Ideal for growing businesses',
       buttonText: 'Start Free Trial',
       highlighted: true,
@@ -125,7 +134,7 @@ export function PricingSection() {
     },
     {
       name: 'Enterprise',
-      price: '99',
+      price: 'custom',
       description: 'For large-scale applications',
       buttonText: 'Contact Sales',
       features: [
