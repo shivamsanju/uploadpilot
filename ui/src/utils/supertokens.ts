@@ -5,14 +5,15 @@ import ThirdParty, {
   Github,
   Google,
 } from 'supertokens-auth-react/recipe/thirdparty';
+import { getApiDomain, getWebsiteDomain } from './config';
 
 export const InitSupertokens = () => {
   SuperTokens.init({
     appInfo: {
       // learn more about this on https://supertokens.com/docs/references/app-info
       appName: 'Upload Pilot',
-      apiDomain: 'http://localhost:8080',
-      websiteDomain: 'http://localhost:3000',
+      apiDomain: getApiDomain(),
+      websiteDomain: getWebsiteDomain(),
       apiBasePath: '/auth',
       websiteBasePath: '/auth',
     },
