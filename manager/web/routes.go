@@ -79,7 +79,7 @@ func Routes(services *svc.Services, middlewares *Middlewares) *chi.Mux {
 				r.Route("/processors", func(r chi.Router) {
 					r.Get("/", middlewares.CheckPermissions(procHandler.GetProcessors, BearerTenantReadAccess))
 					r.Post("/", middlewares.CheckPermissions(CreateJSONHandler(procHandler.CreateProcessor), BearerTenantReadAccess))
-					r.Get("/tasks", middlewares.CheckPermissions(procHandler.GetAllTasks, BearerTenantReadAccess))
+					r.Get("/activities", middlewares.CheckPermissions(procHandler.GetAllActivities, BearerTenantReadAccess))
 					r.Get("/templates", middlewares.CheckPermissions(procHandler.GetTemplates, BearerTenantReadAccess))
 					r.Route("/{processorId}", func(r chi.Router) {
 						r.Get("/", middlewares.CheckPermissions(procHandler.GetProcessorDetailsByID, BearerTenantReadAccess))

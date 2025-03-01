@@ -7,15 +7,15 @@ import (
 )
 
 type CreateProcessorRequest struct {
-	Name        string             `json:"name" validate:"required,max=25"`
+	Name        string             `json:"name" validate:"required,min=3,max=25,alphanumspace"`
 	WorkspaceID string             `json:"workspaceId" validate:"required,uuid"`
-	Triggers    dtypes.StringArray `json:"triggers"`
+	Triggers    dtypes.StringArray `json:"triggers" validate:"required,max=500"`
 	TemplateKey string             `json:"templateKey"`
 }
 
 type EditProcRequest struct {
-	Name     string             `json:"name"`
-	Triggers dtypes.StringArray `json:"triggers"`
+	Name     string             `json:"name" validate:"required,min=3,max=25,alphanumspace"`
+	Triggers dtypes.StringArray `json:"triggers" validate:"required,max=500"`
 }
 
 type EnableDisableProcessorRequest struct {

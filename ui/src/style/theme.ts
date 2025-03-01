@@ -1,3 +1,4 @@
+import { CodeHighlight } from '@mantine/code-highlight';
 import {
   Anchor,
   Badge,
@@ -18,6 +19,8 @@ import {
   Text,
   Textarea,
   TextInput,
+  Tooltip,
+  TooltipFloating,
   virtualColor,
 } from '@mantine/core';
 import { DateInput } from '@mantine/dates';
@@ -172,6 +175,7 @@ export const myAppTheme = createTheme({
       defaultProps: {
         size: 'xs',
         radius: 'md',
+        variant: 'white',
       },
     }),
 
@@ -220,6 +224,25 @@ export const myAppTheme = createTheme({
     Loader: Loader.extend({
       defaultProps: {
         type: 'dots',
+      },
+    }),
+    CodeHighlight: CodeHighlight.extend({
+      defaultProps: {
+        bg: 'light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-8))',
+        copiedLabel: 'Copied',
+        copyLabel: 'Copy',
+      },
+    }),
+    Tooltip: Tooltip.extend({
+      defaultProps: {
+        fs: 'xs',
+        bg: 'light-dark(var(--mantine-color-dark-8), var(--mantine-color-dark-2))',
+      },
+    }),
+    TooltipFloating: TooltipFloating.extend({
+      defaultProps: {
+        fs: 'xs',
+        bg: 'light-dark(var(--mantine-color-dark-8), var(--mantine-color-dark-2))',
       },
     }),
   },

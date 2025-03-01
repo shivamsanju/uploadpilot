@@ -3,7 +3,6 @@ package dto
 import (
 	"time"
 
-	"github.com/uploadpilot/manager/internal/db/dtypes"
 	"github.com/uploadpilot/manager/internal/db/models"
 )
 
@@ -18,11 +17,18 @@ type APIKeyPerm struct {
 	Perm      models.APIKeyPermissionType
 }
 
+type WorkspaceApiPerm struct {
+	ID     string `json:"id"`
+	Read   bool   `json:"read"`
+	Manage bool   `json:"manage"`
+	Upload bool   `json:"upload"`
+}
 type CreateApiKeyData struct {
-	Name        string                    `json:"name" validate:"required,max=20"`
-	ExpiresAt   time.Time                 `json:"expiresAt" validate:"required,future"`
-	Scopes      dtypes.StringArray        `json:"scopes"`
-	Permissions []models.APIKeyPermission `json:"permissions"`
+	Name           string             `json:"name" validate:"required,min=3,max=25,alphanumspace"`
+	ExpiresAt      time.Time          `json:"expiresAt" validate:"required,future"`
+	TenantRead     bool               `json:"tenantRead"`
+	TenantManage   bool               `json:"tenantManage"`
+	WorkspacePerms []WorkspaceApiPerm `json:"workspacePerms"`
 }
 
 type ApiKeyLimitedDetails struct {

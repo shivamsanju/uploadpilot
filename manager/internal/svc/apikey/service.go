@@ -3,6 +3,7 @@ package apikey
 import (
 	"context"
 	"errors"
+	"fmt"
 	"slices"
 	"strconv"
 	"strings"
@@ -46,10 +47,16 @@ func (s *Service) GetAPIKeyInfo(ctx context.Context, key string) (*models.APIKey
 }
 
 func (s *Service) CreateAPIKey(ctx context.Context, data *dto.CreateApiKeyData) (string, error) {
-	user, err := utils.GetSessionFromCtx(ctx)
+	session, err := utils.GetSessionFromCtx(ctx)
 	if err != nil {
 		return "", err
 	}
+
+	perms, scope, err := s.getScopeAndPerm(session, data)
+	if err != nil {
+		return "", err
+	}
+
 	newKey := "up-" + utils.GenerateRandomAlphaNumericString(64) + data.ExpiresAt.Format("20060102150405")
 
 	hashedKey, err := s.kms.Hash(newKey, s.apiKeySalt)
@@ -60,11 +67,11 @@ func (s *Service) CreateAPIKey(ctx context.Context, data *dto.CreateApiKeyData) 
 
 	apiKey := &models.APIKey{
 		Name:        data.Name,
-		UserID:      user.UserID,
+		UserID:      session.UserID,
 		ApiKeyHash:  hashedKey,
 		ExpiresAt:   &data.ExpiresAt,
-		Scopes:      data.Scopes,
-		Permissions: data.Permissions,
+		Scopes:      scope,
+		Permissions: perms,
 	}
 
 	if err := s.apiKeyRepo.CreateApiKey(ctx, apiKey); err != nil {
@@ -153,4 +160,64 @@ func (s *Service) verifyAPIKeyPermissions(apiKey *models.APIKey, perms ...dto.AP
 		}
 	}
 	return true
+}
+
+func (s *Service) getScopeAndPerm(session *dto.Session, data *dto.CreateApiKeyData) ([]models.APIKeyPermission, []string, error) {
+	scopes := make(map[string]struct{})
+	var perms []models.APIKeyPermission
+
+	if data.TenantRead {
+		scopes[fmt.Sprintf("%s:%s", models.APIPermResourceTypeTenant, models.APIKeyPermissionTypeRead)] = struct{}{}
+		perms = append(perms, models.APIKeyPermission{
+			ResourceID:   session.TenantID,
+			ResourceType: models.APIPermResourceTypeTenant,
+			Permission:   models.APIKeyPermissionTypeRead,
+		})
+	}
+	if data.TenantManage {
+		scopes[fmt.Sprintf("%s:%s", models.APIPermResourceTypeTenant, models.APIKeyPermissionTypeManage)] = struct{}{}
+		perms = append(perms, models.APIKeyPermission{
+			ResourceID:   session.TenantID,
+			ResourceType: models.APIPermResourceTypeTenant,
+			Permission:   models.APIKeyPermissionTypeManage,
+		})
+	}
+
+	for _, perm := range data.WorkspacePerms {
+		if perm.Read {
+			scopes[fmt.Sprintf("%s:%s", models.APIPermResourceTypeWorkspace, models.APIKeyPermissionTypeRead)] = struct{}{}
+			perms = append(perms, models.APIKeyPermission{
+				ResourceID:   perm.ID,
+				ResourceType: models.APIPermResourceTypeWorkspace,
+				Permission:   models.APIKeyPermissionTypeRead,
+			})
+		}
+		if perm.Manage {
+			scopes[fmt.Sprintf("%s:%s", models.APIPermResourceTypeWorkspace, models.APIKeyPermissionTypeManage)] = struct{}{}
+			perms = append(perms, models.APIKeyPermission{
+				ResourceID:   perm.ID,
+				ResourceType: models.APIPermResourceTypeWorkspace,
+				Permission:   models.APIKeyPermissionTypeManage,
+			})
+		}
+		if perm.Upload {
+			scopes[fmt.Sprintf("%s:%s", models.APIPermResourceTypeWorkspace, models.APIKeyPermissionTypeUpload)] = struct{}{}
+			perms = append(perms, models.APIKeyPermission{
+				ResourceID:   perm.ID,
+				ResourceType: models.APIPermResourceTypeWorkspace,
+				Permission:   models.APIKeyPermissionTypeUpload,
+			})
+		}
+	}
+
+	if len(scopes) == 0 {
+		return nil, nil, errors.New(msg.ErrNoScopeInAPIKeyCreateRequest)
+	}
+
+	scopesSlice := make([]string, 0, len(scopes))
+	for k := range scopes {
+		scopesSlice = append(scopesSlice, k)
+	}
+
+	return perms, scopesSlice, nil
 }

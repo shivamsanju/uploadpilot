@@ -119,7 +119,7 @@ func (s *Service) EditNameAndTrigger(ctx context.Context, workspaceID, processor
 	return s.procRepo.Patch(ctx, workspaceID, processorID, patch)
 }
 
-func (s *Service) GetAllTasks(ctx context.Context) []catalog.ActivityMetadata {
+func (s *Service) GetAllActivities(ctx context.Context) []catalog.ActivityMetadata {
 	var tsks []catalog.ActivityMetadata
 	for _, task := range catalog.ActivityCatalog {
 		tsks = append(tsks, *task)

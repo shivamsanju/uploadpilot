@@ -21,8 +21,8 @@ type ApiKeyParams struct {
 type PaginatedQuery struct {
 	Offset              string `json:"offset" validate:"omitempty,integer"`
 	Limit               string `json:"limit" validate:"omitempty,integer"`
-	Search              string `json:"search,omitempty" validate:"omitempty"`
+	Search              string `json:"search,omitempty" validate:"omitempty,max=100"`
 	CaseSensitiveSearch string `json:"caseSensitiveSearch,omitempty"`
-	Filter              string `json:"filter,omitempty" validate:"omitempty,keyvaluepairs"`
+	Filter              string `json:"filter,omitempty" validate:"omitempty,keyvaluepairs,max=300"`
 	Sort                string `json:"sort,omitempty" validate:"omitempty,sort"`
 }

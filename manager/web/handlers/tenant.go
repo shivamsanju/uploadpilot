@@ -31,10 +31,6 @@ func (h *tenantHandler) OnboardTenant(
 	if err := utils.ConvertDTOToModel(&body, &tenant); err != nil {
 		return nil, http.StatusUnprocessableEntity, err
 	}
-	tenant.Metadata = map[string]interface{}{
-		"companyName": body.CompanyName,
-		"role":        body.Role,
-	}
 	if err := h.tenantSvc.OnboardTenant(r.Context(), &tenant); err != nil {
 		return nil, http.StatusBadRequest, err
 	}

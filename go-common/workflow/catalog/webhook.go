@@ -13,10 +13,10 @@ with the following headers:
   `,
 	Workflow: `
 - activity:
-  key: uniqueKeyLessThan20Chars
-  input: inputActivityKey
-  uses : Webhook@1.0
-  with:
-    url: "https://example.com/webhook"
+    key: uniqueKeyLessThan20Chars
+    input: inputActivityKey
+    uses : Webhook@1.0
+    with:
+      url: "https://example.com/webhook"
 `,
 }

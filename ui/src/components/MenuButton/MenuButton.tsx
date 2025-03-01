@@ -1,16 +1,23 @@
-import { Group, ThemeIcon, Title, Transition } from '@mantine/core';
+import {
+  Group,
+  ThemeIcon,
+  Title,
+  Transition,
+  UnstyledButton,
+} from '@mantine/core';
 import { IconMenu4 } from '@tabler/icons-react';
+import { useNavigate } from 'react-router-dom';
+import { useNavbar } from '../../context/NavbarContext';
 
-type Props = {
-  toggle: React.Dispatch<React.SetStateAction<boolean>>;
-  collapsed: boolean;
-};
+type Props = {};
 
-export const MenuButton: React.FC<Props> = ({ toggle, collapsed }) => {
+export const MenuButton: React.FC<Props> = () => {
+  const { toggle, opened } = useNavbar();
+  const navigate = useNavigate();
   return (
     <Group align="center" gap="sm" justify="center" wrap="nowrap">
       <ThemeIcon
-        onClick={() => toggle(prev => !prev)}
+        onClick={toggle}
         variant="subtle"
         style={{ cursor: 'pointer' }}
         opacity={0.9}
@@ -18,18 +25,25 @@ export const MenuButton: React.FC<Props> = ({ toggle, collapsed }) => {
         <IconMenu4 size={22} />
       </ThemeIcon>
       <Transition
-        mounted={!collapsed}
+        mounted={opened}
         transition="fade"
         duration={200}
         timingFunction="ease"
       >
         {styles =>
-          collapsed ? (
-            <></>
+          opened ? (
+            <UnstyledButton onClick={() => navigate('/')}>
+              <Title
+                order={3}
+                style={{ ...styles }}
+                opacity={0.9}
+                lineClamp={1}
+              >
+                Upload Pilot
+              </Title>
+            </UnstyledButton>
           ) : (
-            <Title order={3} style={{ ...styles }} opacity={0.9} lineClamp={1}>
-              Upload Pilot
-            </Title>
+            <></>
           )
         }
       </Transition>

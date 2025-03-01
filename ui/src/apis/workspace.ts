@@ -1,5 +1,6 @@
 import { notifications } from '@mantine/notifications';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { CreateWorkspaceData } from '../types/workspace';
 import axiosInstance from '../utils/axios';
 
 export const useGetWorkspaces = () => {
@@ -20,10 +21,8 @@ export const useCreateWorkspaceMutation = () => {
 
   return useMutation({
     mutationKey: ['workspaces'],
-    mutationFn: (name: string) =>
-      axiosInstance
-        .post('/workspaces', { name, tags: ['default'] })
-        .then(res => res.data),
+    mutationFn: (data: CreateWorkspaceData) =>
+      axiosInstance.post('/workspaces', data).then(res => res.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       notifications.show({

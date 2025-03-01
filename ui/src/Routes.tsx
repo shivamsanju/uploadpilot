@@ -22,6 +22,7 @@ import UploadsPage from './pages/uploads';
 import WorkflowBuilderPage from './pages/wflowbuilder';
 import WorkflowRunsPage from './pages/workflowruns';
 import WorkspaceLandingPage from './pages/workspace';
+import CreateWorkspacePage from './pages/workspace/add';
 
 type Route = {
   path: string;
@@ -37,7 +38,7 @@ const routes: Route[] = [
     element: <AuthPage />,
   },
   {
-    path: '/auth/callback/social',
+    path: '/auth/callback/:provider',
     layout: EmptyLayout,
     element: <SocialAuthCallbackHandlerPage />,
   },
@@ -60,6 +61,11 @@ const routes: Route[] = [
     path: '/',
     layout: HomeLayout,
     element: <WorkspaceLandingPage />,
+  },
+  {
+    path: '/workspace/new',
+    layout: HomeLayout,
+    element: <CreateWorkspacePage />,
   },
   {
     path: '/billing',

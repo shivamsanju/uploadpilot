@@ -10,12 +10,12 @@ import {
 import { IconIndentIncrease, IconSearch } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useGetAllProcessingTasks } from '../../../apis/processors';
+import { useGetAllProcessingActivities } from '../../../apis/processors';
 import classes from './BlockSearch.module.css';
 
 export const BlockSearch = () => {
   const { workspaceId } = useParams();
-  const { isPending, error, blocks } = useGetAllProcessingTasks(
+  const { isPending, error, blocks } = useGetAllProcessingActivities(
     workspaceId || '',
   );
   const [filtered, setFiltered] = useState<any[]>(blocks || []);
@@ -48,8 +48,8 @@ export const BlockSearch = () => {
         onChange={handleSearch}
         autoFocus
       />
-      <ScrollArea h="64vh" scrollbarSize={5}>
-        <Accordion chevronPosition="right">
+      <ScrollArea h="67vh" scrollbarSize={5}>
+        <Accordion chevronPosition="right" maw="100%">
           {filtered?.length > 0 &&
             filtered.map((item: any, index: number) => (
               <Accordion.Item
@@ -60,7 +60,7 @@ export const BlockSearch = () => {
                 <Accordion.Control icon={<IconIndentIncrease size={18} />}>
                   <Block {...item} />
                 </Accordion.Control>
-                <Accordion.Panel>
+                <Accordion.Panel maw="100%">
                   <BlockDescription {...item} />
                 </Accordion.Panel>
               </Accordion.Item>
@@ -94,6 +94,7 @@ export const BlockDescription = ({ description, workflow }: any) => {
         {description}
       </Text>
       <CodeHighlight
+        maw="100%"
         code={workflow}
         language="yaml"
         copyLabel="Copy"

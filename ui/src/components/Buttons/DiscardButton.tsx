@@ -13,7 +13,7 @@ export const DiscardButton: React.FC<
 > = props => (
   <Button
     leftSection={<IconRestore size={18} {...props.iconProps} />}
-    variant="default"
+    variant="outline"
     c="dimmed"
     {...props}
   >

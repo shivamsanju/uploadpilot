@@ -1,6 +1,7 @@
 import { Box, ScrollArea } from '@mantine/core';
 import { FC, ReactNode, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import { useNavbar } from '../../context/NavbarContext';
 import { MenuButton } from '../MenuButton/MenuButton';
 import UserButton from '../UserMenu';
 import classes from './Navbar.module.css';
@@ -21,17 +22,14 @@ type NavItem = {
 };
 
 const NavBar = ({
-  collapsed,
-  toggle,
   items,
   footer,
 }: {
-  collapsed: boolean;
-  toggle: React.Dispatch<React.SetStateAction<boolean>>;
   items: NavItem[];
   footer?: ReactNode;
 }) => {
   const { pathname } = useLocation();
+  const { opened } = useNavbar();
 
   const links = useMemo(() => {
     return items.map(item => (
@@ -39,20 +37,19 @@ const NavBar = ({
         {...item}
         key={item.label}
         active={isActive(pathname, item)}
-        toggle={toggle}
-        collapsed={collapsed}
+        collapsed={!opened}
       />
     ));
-  }, [items, pathname, toggle, collapsed]);
+  }, [items, pathname, opened]);
 
   return (
     <nav className={classes.navbar}>
       <Box mb="lg">
-        <MenuButton toggle={toggle} collapsed={collapsed} />
+        <MenuButton />
       </Box>
       <ScrollArea className={classes.links}>{links}</ScrollArea>
-      <Box px={collapsed ? 0 : 'sm'} mb="xs">
-        <UserButton collapsed={collapsed} />
+      <Box px={opened ? 'sm' : 0} mb="xs">
+        <UserButton collapsed={!opened} />
       </Box>
     </nav>
   );

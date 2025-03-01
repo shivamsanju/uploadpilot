@@ -13,6 +13,10 @@
   background-color: #242424 !important;
 }
 
+[data-mantine-color-scheme='dark'] .mantine-CodeHighlight-root {
+  border-radius: var(--mantine-radius-md) !important;
+}
+
 .mantine-AppShell-navbar {
   transition: all 0.2s ease-in-out;
   border-color: light-dark(

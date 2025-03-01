@@ -66,9 +66,9 @@ var ImageAddWatermarkActivityV1_0 = &ActivityMetadata{
     key: uniqueKeyLessThan20Chars
     uses: ImageAddWatermark@v1.0
     with:
+      size: 40
       text: "Watermark"
       opacity: 0.5
-	  size: 40
 `,
 }
 

@@ -3,6 +3,7 @@ import { useViewportSize } from '@mantine/hooks';
 import { IconChevronRight } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useNavbar } from '../../context/NavbarContext';
 import classes from './NavLinksGroup.module.css';
 
 interface LinksGroupProps {
@@ -13,7 +14,6 @@ interface LinksGroupProps {
   link?: string;
   active?: boolean;
   isWorkspaceChild?: boolean;
-  toggle: React.Dispatch<React.SetStateAction<boolean>>;
   collapsed: boolean;
 }
 
@@ -24,11 +24,10 @@ export function LinksGroup({
   links,
   link,
   active,
-  toggle,
-  collapsed,
 }: LinksGroupProps) {
   const navigate = useNavigate();
   const { width } = useViewportSize();
+  const { toggle, opened: navbarOpen } = useNavbar();
 
   const hasLinks = Array.isArray(links);
   const [opened, setOpened] = useState(initiallyOpened || false);
@@ -41,7 +40,7 @@ export function LinksGroup({
       key={link.label}
       onClick={event => {
         if (width < 768) {
-          toggle(false);
+          toggle();
         }
         event.preventDefault();
         navigate(link.link);
@@ -60,7 +59,7 @@ export function LinksGroup({
       navigate(link);
     }
     if (width < 768) {
-      toggle(true);
+      toggle();
     }
   };
 
@@ -70,23 +69,23 @@ export function LinksGroup({
         justify="space-between"
         gap={0}
         onClick={handleClick}
-        className={`${active ? classes.active : ''} ${classes.control} ${collapsed ? classes.collapsed : ''}`}
+        className={`${active ? classes.active : ''} ${classes.control} ${!navbarOpen ? classes.collapsed : ''}`}
       >
         <Group align="center" gap="md" wrap="nowrap">
           <Icon size={18} />
           <Transition
-            mounted={!collapsed}
+            mounted={navbarOpen}
             transition="fade"
             duration={200}
             timingFunction="ease"
           >
             {styles =>
-              collapsed ? (
-                <></>
-              ) : (
+              navbarOpen ? (
                 <Box className={`${classes.label}`} style={{ ...styles }}>
                   {label}
                 </Box>
+              ) : (
+                <></>
               )
             }
           </Transition>

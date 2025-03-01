@@ -22,7 +22,8 @@ func NewWorkspaceRepo(db *driver.Driver) *WorkspaceRepo {
 func (r *WorkspaceRepo) Get(ctx context.Context, workspaceID string) (*models.Workspace, error) {
 	var workspace models.Workspace
 	if err := r.db.Orm.WithContext(ctx).Where("id = ?", workspaceID).
-		Select("id, name", "description", "tags").
+		Select("id, name", "description", "tags", "created_at").
+		Order("created_at DESC").
 		First(&workspace).Error; err != nil {
 		return nil, dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
@@ -32,7 +33,8 @@ func (r *WorkspaceRepo) Get(ctx context.Context, workspaceID string) (*models.Wo
 func (r *WorkspaceRepo) GetAll(ctx context.Context, tenantID string) ([]models.Workspace, error) {
 	var workspaces []models.Workspace
 	if err := r.db.Orm.WithContext(ctx).Where("tenant_id = ?", tenantID).
-		Select("id, name", "description", "tags").
+		Select("id, name", "description", "tags", "created_at").
+		Order("created_at DESC").
 		Find(&workspaces).Error; err != nil {
 		return nil, dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}

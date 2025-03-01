@@ -1,8 +1,13 @@
 package infra
 
 import (
+	"errors"
+	"fmt"
+	"strings"
+
 	"github.com/supertokens/supertokens-golang/recipe/dashboard"
 	"github.com/supertokens/supertokens-golang/recipe/emailpassword"
+	"github.com/supertokens/supertokens-golang/recipe/emailpassword/epmodels"
 	"github.com/supertokens/supertokens-golang/recipe/emailverification"
 	"github.com/supertokens/supertokens-golang/recipe/emailverification/evmodels"
 	"github.com/supertokens/supertokens-golang/recipe/session"
@@ -63,77 +68,135 @@ func InitSuperTokens(opts *SuperTokensOptions) error {
 		RecipeList: []supertokens.Recipe{
 			dashboard.Init(nil),
 			usermetadata.Init(nil),
-			emailpassword.Init(nil),
 			emailverification.Init(evmodels.TypeInput{
 				Mode: evmodels.ModeOptional,
+			}),
+			emailpassword.Init(&epmodels.TypeInput{
+				Override: &epmodels.OverrideStruct{
+					Functions: func(originalImplementation epmodels.RecipeInterface) epmodels.RecipeInterface {
+						ogSignUp := *originalImplementation.SignUp
+
+						(*originalImplementation.SignUp) = func(email string, password string, tenantId string, userContext *map[string]interface{}) (epmodels.SignUpResponse, error) {
+							existingUsers, err := thirdparty.GetUsersByEmail(tenantId, email)
+							if err != nil {
+								return epmodels.SignUpResponse{}, err
+							}
+
+							if len(existingUsers) > 0 {
+								firstMethod := existingUsers[0].ThirdParty.ID
+								return epmodels.SignUpResponse{}, errors.New("cannot sign up as email already exists:" + firstMethod)
+							}
+
+							return ogSignUp(email, password, tenantId, userContext)
+						}
+
+						return originalImplementation
+					},
+					APIs: func(originalImplementation epmodels.APIInterface) epmodels.APIInterface {
+						ogSignUpPOST := *originalImplementation.SignUpPOST
+
+						(*originalImplementation.SignUpPOST) = func(formFields []epmodels.TypeFormField, tenantId string, options epmodels.APIOptions, userContext supertokens.UserContext) (epmodels.SignUpPOSTResponse, error) {
+
+							resp, err := ogSignUpPOST(formFields, tenantId, options, userContext)
+
+							if err != nil && strings.Split(err.Error(), ":")[0] == "cannot sign up as email already exists" {
+								// this error was thrown from our function override above.
+								// so we send a useful message to the user
+								errParts := strings.Split(err.Error(), ":")
+								existingMethod := "emailpassword"
+								if (len(errParts)) > 1 {
+									existingMethod = errParts[1]
+								}
+								return epmodels.SignUpPOSTResponse{
+									GeneralError: &supertokens.GeneralErrorResponse{
+										Message: fmt.Sprintf("Seems like you already have an account with another method: '%s'. Please use that instead.", existingMethod),
+									},
+								}, nil
+							}
+
+							return resp, err
+						}
+
+						return originalImplementation
+					},
+				},
 			}),
 			thirdparty.Init(&tpmodels.TypeInput{
 				SignInAndUpFeature: tpmodels.TypeInputSignInAndUp{
 					Providers: providers,
 				},
-				// Override: &tpmodels.OverrideStruct{
-				// 	Functions: func(originalImplementation tpmodels.RecipeInterface) tpmodels.RecipeInterface {
-				// 		ogSignInUp := *originalImplementation.SignInUp
+				Override: &tpmodels.OverrideStruct{
+					Functions: func(originalImplementation tpmodels.RecipeInterface) tpmodels.RecipeInterface {
+						ogSignInUp := *originalImplementation.SignInUp
 
-				// 		(*originalImplementation.SignInUp) = func(thirdPartyID string, thirdPartyUserID string, email string, oAuthTokens map[string]interface{}, rawUserInfoFromProvider tpmodels.TypeRawUserInfoFromProvider, tenantId string, userContext *map[string]interface{}) (tpmodels.SignInUpResponse, error) {
-				// 			existingUsers, err := thirdparty.GetUsersByEmail(tenantId, email)
-				// 			if err != nil {
-				// 				return tpmodels.SignInUpResponse{}, err
-				// 			}
+						(*originalImplementation.SignInUp) = func(thirdPartyID string, thirdPartyUserID string, email string, oAuthTokens map[string]interface{}, rawUserInfoFromProvider tpmodels.TypeRawUserInfoFromProvider, tenantId string, userContext *map[string]interface{}) (tpmodels.SignInUpResponse, error) {
+							existingUsers, err := thirdparty.GetUsersByEmail(tenantId, email)
+							if err != nil {
+								return tpmodels.SignInUpResponse{}, err
+							}
 
-				// 			emailPasswordExistingUser, err := passwordless.GetUserByEmail(tenantId, email)
-				// 			if err != nil {
-				// 				return tpmodels.SignInUpResponse{}, err
-				// 			}
+							emailPasswordExistingUser, err := emailpassword.GetUserByEmail(tenantId, email)
+							if err != nil {
+								return tpmodels.SignInUpResponse{}, err
+							}
 
-				// 			if emailPasswordExistingUser != nil {
-				// 				return tpmodels.SignInUpResponse{}, errors.New("cannot sign up as email already exists")
-				// 			}
+							if emailPasswordExistingUser != nil {
+								return tpmodels.SignInUpResponse{}, errors.New("cannot sign up as email already exists:" + "emailpassword")
+							}
 
-				// 			if len(existingUsers) == 0 {
-				// 				// this means this email is new so we allow sign up
-				// 				return ogSignInUp(thirdPartyID, thirdPartyUserID, email, oAuthTokens, rawUserInfoFromProvider, tenantId, userContext)
-				// 			}
+							if len(existingUsers) == 0 {
+								// this means this email is new so we allow sign up
+								return ogSignInUp(thirdPartyID, thirdPartyUserID, email, oAuthTokens, rawUserInfoFromProvider, tenantId, userContext)
+							}
 
-				// 			isSignIn := false
-				// 			for _, user := range existingUsers {
-				// 				if user.ThirdParty.ID == thirdPartyID && user.ThirdParty.UserID == thirdPartyUserID {
-				// 					// this means we are trying to sign in with the same social login. So we allow it
-				// 					isSignIn = true
-				// 				}
-				// 			}
-				// 			if isSignIn {
-				// 				return ogSignInUp(thirdPartyID, thirdPartyUserID, email, oAuthTokens, rawUserInfoFromProvider, tenantId, userContext)
-				// 			}
-				// 			return tpmodels.SignInUpResponse{}, errors.New("cannot sign up as email already exists")
-				// 		}
+							isSignIn := false
+							existingMethod := ""
+							for _, user := range existingUsers {
+								if user.ThirdParty.ID == thirdPartyID && user.ThirdParty.UserID == thirdPartyUserID {
+									// this means we are trying to sign in with the same social login. So we allow it
+									isSignIn = true
+								} else {
+									existingMethod = user.ThirdParty.ID
+									break
+								}
+							}
+							if isSignIn {
+								return ogSignInUp(thirdPartyID, thirdPartyUserID, email, oAuthTokens, rawUserInfoFromProvider, tenantId, userContext)
+							}
+							return tpmodels.SignInUpResponse{}, errors.New("cannot sign up as email already exists:" + existingMethod)
+						}
 
-				// 		return originalImplementation
-				// 	},
+						return originalImplementation
+					},
 
-				// 	APIs: func(originalImplementation tpmodels.APIInterface) tpmodels.APIInterface {
-				// 		originalSignInUpPOST := *originalImplementation.SignInUpPOST
+					APIs: func(originalImplementation tpmodels.APIInterface) tpmodels.APIInterface {
+						originalSignInUpPOST := *originalImplementation.SignInUpPOST
 
-				// 		(*originalImplementation.SignInUpPOST) = func(provider *tpmodels.TypeProvider, input tpmodels.TypeSignInUpInput, tenantId string, options tpmodels.APIOptions, userContext *map[string]interface{}) (tpmodels.SignInUpPOSTResponse, error) {
+						(*originalImplementation.SignInUpPOST) = func(provider *tpmodels.TypeProvider, input tpmodels.TypeSignInUpInput, tenantId string, options tpmodels.APIOptions, userContext *map[string]interface{}) (tpmodels.SignInUpPOSTResponse, error) {
 
-				// 			resp, err := originalSignInUpPOST(provider, input, tenantId, options, userContext)
+							resp, err := originalSignInUpPOST(provider, input, tenantId, options, userContext)
 
-				// 			if err != nil && err.Error() == "cannot sign up as email already exists" {
-				// 				// this error was thrown from our function override above.
-				// 				// so we send a useful message to the user
-				// 				return tpmodels.SignInUpPOSTResponse{
-				// 					GeneralError: &supertokens.GeneralErrorResponse{
-				// 						Message: "Seems like you already have an account with another method. Please use that instead.",
-				// 					},
-				// 				}, nil
-				// 			}
+							if err != nil && strings.Split(err.Error(), ":")[0] == "cannot sign up as email already exists" {
+								// this error was thrown from our function override above.
+								// so we send a useful message to the user
+								errParts := strings.Split(err.Error(), ":")
+								existingMethod := "emailpassword"
+								if (len(errParts)) > 1 {
+									existingMethod = errParts[1]
+								}
+								return tpmodels.SignInUpPOSTResponse{
+									GeneralError: &supertokens.GeneralErrorResponse{
+										Message: fmt.Sprintf("Seems like you already have an account with another method: '%s'. Please use that instead.", existingMethod),
+									},
+								}, nil
+							}
 
-				// 			return resp, err
-				// 		}
+							return resp, err
+						}
 
-				// 		return originalImplementation
-				// 	},
-				// },
+						return originalImplementation
+					},
+				},
 			}),
 			session.Init(nil),
 		},

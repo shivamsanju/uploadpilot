@@ -1,69 +1,27 @@
-import {
-  Button,
-  Group,
-  Modal,
-  Paper,
-  Text,
-  TextInput,
-  Title,
-} from '@mantine/core';
-import { useForm } from '@mantine/form';
-import { IconDeviceLaptop, IconPlus } from '@tabler/icons-react';
-import { useState } from 'react';
+import { Group, Paper, Title } from '@mantine/core';
+import { IconPlus } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
-import {
-  useCreateWorkspaceMutation,
-  useGetWorkspaces,
-} from '../../apis/workspace';
+import { useGetWorkspaces } from '../../apis/workspace';
 import { ErrorLoadingWrapper } from '../../components/ErrorLoadingWrapper';
+import { WorkspaceCard } from '../../components/WorkspaceCard';
 import classes from './Workspace.module.css';
 
 const WorkspaceLandingPage = () => {
-  const [opened, toggle] = useState(false);
   const { isPending, error, workspaces } = useGetWorkspaces();
-  const { mutateAsync, isPending: isCreating } = useCreateWorkspaceMutation();
   const navigate = useNavigate();
 
-  const form = useForm({
-    initialValues: {
-      name: '',
-      tags: [],
-    },
-    validate: {
-      name: value => {
-        if (!value.trim()) {
-          return 'Workspace name is required';
-        }
-        if (value.trim().length > 20 || value.trim().length < 2) {
-          return 'Workspace name must be between 2 and 20 characters';
-        }
-        return null;
-      },
-    },
-    validateInputOnChange: true,
-  });
-
-  const handleCreateWorkspace = async (values: any) => {
-    try {
-      const id = await mutateAsync(values.name);
-      navigate(`/workspace/${id}/uploads`);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   return (
-    <ErrorLoadingWrapper error={error} isPending={isPending || isCreating}>
+    <ErrorLoadingWrapper error={error} isPending={isPending}>
       <Group align="center" gap="xs" h="10%">
         <Title order={3}>Workspaces</Title>
       </Group>
       <Group mb="50" align="center" mt="lg">
         <Paper
           withBorder
-          p="md"
-          radius="md"
+          h="200"
+          w={{ base: '100%', md: '400' }}
           className={classes.wsItemAdd}
-          onClick={() => toggle(true)}
+          onClick={() => navigate('/workspace/new')}
         >
           <Group justify="center" h="100%">
             <IconPlus size={30} stroke={2} color="gray" />
@@ -71,44 +29,16 @@ const WorkspaceLandingPage = () => {
         </Paper>
         {workspaces?.length > 0 &&
           workspaces.map((workspace: any) => (
-            <Paper
-              withBorder
-              p="md"
-              radius="md"
-              key={workspace.id}
-              className={classes.wsItem}
-              onClick={() => navigate(`/workspace/${workspace.id}/uploads`)}
-            >
-              <Group key={workspace.id} h="100%">
-                <IconDeviceLaptop size={30} stroke={2} color="gray" />
-                <Text size="sm" fw="bold" opacity={0.7}>
-                  {workspace.name}
-                </Text>
-              </Group>
-            </Paper>
+            <WorkspaceCard
+              id={workspace.id}
+              name={workspace.name}
+              description={workspace.description}
+              uploads={4031}
+              storage={24.2}
+              tags={workspace.tags || []}
+            />
           ))}
       </Group>
-      <Modal
-        title="Create new workspace"
-        size="lg"
-        padding="xl"
-        transitionProps={{ transition: 'pop' }}
-        opened={opened}
-        onClose={() => toggle(false)}
-      >
-        <form onSubmit={form.onSubmit(values => handleCreateWorkspace(values))}>
-          <TextInput
-            mb="xl"
-            withAsterisk
-            label="Workspace name"
-            placeholder="Enter a workspace name"
-            {...form.getInputProps('name')}
-          />
-          <Group justify="flex-end">
-            <Button type="submit">Create</Button>
-          </Group>
-        </form>
-      </Modal>
     </ErrorLoadingWrapper>
   );
 };

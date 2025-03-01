@@ -89,7 +89,7 @@ const NewprocessorPage = () => {
             <Group justify="flex-end">
               {activePage === 0 ? (
                 <Button
-                  variant="default"
+                  variant="outline"
                   onClick={() =>
                     navigate(`/workspace/${workspaceId}/processors`)
                   }
@@ -99,7 +99,7 @@ const NewprocessorPage = () => {
               ) : (
                 <Button
                   onClick={() => setActivePage(activePage - 1)}
-                  variant="default"
+                  variant="outline"
                 >
                   Back
                 </Button>

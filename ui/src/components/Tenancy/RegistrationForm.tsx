@@ -2,9 +2,6 @@ import {
   Box,
   Button,
   Group,
-  Image,
-  Select,
-  SimpleGrid,
   Stack,
   Textarea,
   TextInput,
@@ -13,9 +10,8 @@ import {
 import { useForm } from '@mantine/form';
 import { useNavigate } from 'react-router-dom';
 import { useOnboardTenant } from '../../apis/tenant';
-import onboardingSvg from '../../assets/images/onboarding.svg';
 import { TenantOnboardingRequest } from '../../types/tenant';
-import { FullScreenOverlay } from '../Overlay';
+import { ContainerOverlay } from '../Overlay';
 
 export const TenantRegistrationForm = ({
   enableCancel,
@@ -32,7 +28,6 @@ export const TenantRegistrationForm = ({
       companyName: '',
       role: '',
     },
-
     validate: {
       name: value => {
         if (!value.trim()) {
@@ -51,10 +46,8 @@ export const TenantRegistrationForm = ({
       contactEmail: value => (/^\S+@\S+$/.test(value) ? null : 'Invalid email'),
       phone: value =>
         value && !/^\+?\d{7,15}$/.test(value) ? 'Invalid phone number' : null,
-      companyName: value => (value ? null : 'Company name is required'),
-      role: value => (value ? null : 'Role is required'),
     },
-    validateInputOnChange: true,
+    validateInputOnBlur: true,
   });
 
   const navigate = useNavigate();
@@ -70,89 +63,66 @@ export const TenantRegistrationForm = ({
   };
 
   return (
-    <Box>
-      <Group justify="center">
-        <Title order={2} mt="xl" mb="xl">
-          Tenant Registration
-        </Title>
-      </Group>
-      <FullScreenOverlay visible={isPending} />
-      <SimpleGrid cols={{ base: 1, md: 2 }} px="xl" pb="xl" spacing="100">
-        <Stack align="flex-end" justify="center" visibleFrom="md">
-          <Image src={onboardingSvg} h={500} w={500} />
-        </Stack>
-        <form onSubmit={form.onSubmit(handleSubmit)}>
-          <Stack gap="sm" mx="xl" p={0}>
-            <TextInput
-              maw="400"
-              label="Tenant Name"
-              placeholder="Create a unique name for your tenant"
-              {...form.getInputProps('name')}
-              required
-            />
+    <>
+      <ContainerOverlay visible={isPending} />
 
-            <TextInput
-              maw="400"
-              label="Contact Email"
-              placeholder="We will use this email to contact you"
-              {...form.getInputProps('contactEmail')}
-              required
-            />
+      <Stack align="center">
+        <Box>
+          <Title order={2} mb="xl">
+            Tenant Registration
+          </Title>
+          <form onSubmit={form.onSubmit(handleSubmit)}>
+            <Stack gap="xl" w={{ base: '100%', md: '500' }}>
+              <TextInput
+                label="Tenant Name"
+                placeholder="Create a unique name for your tenant"
+                {...form.getInputProps('name')}
+                required
+              />
 
-            <TextInput
-              maw="400"
-              label="Phone (With country code)"
-              {...form.getInputProps('phone')}
-              placeholder="+1234567890"
-              required
-            />
+              <TextInput
+                label="Contact Email"
+                placeholder="We will use this email to contact you"
+                {...form.getInputProps('contactEmail')}
+                required
+              />
 
-            <TextInput
-              maw="400"
-              label="Company Name"
-              placeholder="Your company name"
-              {...form.getInputProps('companyName')}
-              required
-            />
+              <TextInput
+                label="Phone (With country code)"
+                {...form.getInputProps('phone')}
+                placeholder="+1234567890"
+                required
+              />
 
-            <Select
-              maw="400"
-              label="Role"
-              placeholder="Your role in the company"
-              {...form.getInputProps('role')}
-              required
-              data={[
-                { value: 'c-suite', label: 'C-Suite (CEO, CTO, etc.)' },
-                { value: 'vp', label: 'VP (Vice President)' },
-                { value: 'developer', label: 'Developer' },
-              ]}
-            />
+              <TextInput
+                label="Industry"
+                placeholder="Your industry"
+                {...form.getInputProps('industry')}
+              />
 
-            <TextInput
-              maw="400"
-              label="Industry"
-              placeholder="Your industry"
-              {...form.getInputProps('industry')}
-            />
+              <Textarea
+                label="Address"
+                placeholder="Your company address"
+                {...form.getInputProps('address')}
+              />
 
-            <Textarea
-              maw="400"
-              label="Address"
-              placeholder="Your company address"
-              {...form.getInputProps('address')}
-            />
-
-            <Group mt="md" gap="sm">
-              {enableCancel && (
-                <Button variant="default" onClick={() => navigate('/tenants')}>
-                  Back
+              <Group mt="md" gap="sm">
+                {enableCancel && (
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate('/tenants')}
+                  >
+                    Back
+                  </Button>
+                )}
+                <Button type="submit" variant="white">
+                  Submit
                 </Button>
-              )}
-              <Button type="submit">Submit</Button>
-            </Group>
-          </Stack>
-        </form>
-      </SimpleGrid>
-    </Box>
+              </Group>
+            </Stack>
+          </form>
+        </Box>
+      </Stack>
+    </>
   );
 };

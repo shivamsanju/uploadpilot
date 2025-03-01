@@ -1,3 +1,4 @@
+import { Box } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { useGetUserDetails } from '../../apis/user';
 import { TENANT_ID_KEY } from '../../constants/tenancy';
@@ -20,7 +21,11 @@ const TenancyManager: React.FC<{ children: React.ReactNode }> = ({
   }
 
   if (!user?.tenants || Object.keys(user.tenants).length === 0) {
-    return <TenantRegistrationForm />;
+    return (
+      <Box mt="40">
+        <TenantRegistrationForm />
+      </Box>
+    );
   }
 
   if (!user?.activeTenant) {

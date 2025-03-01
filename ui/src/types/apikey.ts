@@ -8,17 +8,17 @@ export type APIKey = {
   expiresAt: Date;
 };
 
-export type APIKeyPerm = {
-  workspaceName: string;
-  workspaceId: string;
-  canRead: boolean;
-  canManage: boolean;
-  canUpload: boolean;
+export type APIWorkspacePerm = {
+  id: string;
+  read: boolean;
+  manage: boolean;
+  upload: boolean;
 };
+
 export type CreateApiKeyData = {
   name: string;
   expiresAt: Date;
-  canManageAcc: boolean;
-  canReadAcc: boolean;
-  permissions: APIKeyPerm[];
+  tenantRead: boolean;
+  tenantManage: boolean;
+  workspacePerms: APIWorkspacePerm[];
 };

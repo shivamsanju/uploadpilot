@@ -17,6 +17,7 @@ import {
   IconCircleCheck,
   IconDots,
   IconKey,
+  IconKeyOff,
   IconPlus,
   IconSearch,
 } from '@tabler/icons-react';
@@ -67,10 +68,15 @@ const WorkspaceApiKeyList = () => {
       {
         accessor: 'id',
         title: '',
-        width: 20,
+        width: 50,
+        hidden: width < 768,
         render: (item: any) => (
           <Stack justify="center">
-            <IconKey size={16} stroke={1.5} />
+            {item.revokedAt ? (
+              <IconKeyOff size={16} stroke={1.5} />
+            ) : (
+              <IconKey size={16} stroke={1.5} />
+            )}
           </Stack>
         ),
       },
@@ -82,47 +88,45 @@ const WorkspaceApiKeyList = () => {
       {
         accessor: 'expiresAt',
         title: 'Expires At',
+        textAlign: 'center',
+        hidden: width < 768,
         render: (item: any) => new Date(item.expiresAt).toLocaleDateString(),
       },
       {
         accessor: 'createdAt',
         title: 'Created At',
+        textAlign: 'center',
+        hidden: width < 768,
         render: (item: any) => new Date(item.createdAt).toLocaleString(),
       },
       {
-        accessor: 'createdBy',
-        title: 'Owner',
+        accessor: 'revokedAt',
+        title: 'Revoked At',
+        textAlign: 'center',
         hidden: width < 768,
+        render: (item: any) =>
+          item.revokedAt && new Date(item.revokedAt).toLocaleString(),
       },
       {
         accessor: 'revoked',
         title: 'Status',
+        textAlign: 'center',
         render: (item: any) => {
           const expired = new Date(item.expiresAt).getTime() < Date.now();
           return (
-            <Group align="center" gap="0">
+            <Group align="center" gap="0" justify="center">
               <ThemeIcon
                 variant="subtle"
-                color={item.revoked || expired ? 'red' : 'green'}
+                color={item.revokedAt || expired ? 'red' : 'green'}
               >
-                {item.revoked || expired ? (
+                {item.revokedAt || expired ? (
                   <IconAlertCircle size={18} stroke={1.5} />
                 ) : (
                   <IconCircleCheck size={18} stroke={1.5} />
                 )}
               </ThemeIcon>
-              {item.revoked ? 'Revoked' : expired ? 'Expired' : 'Active'}
+              {item.revokedAt ? 'Revoked' : expired ? 'Expired' : 'Active'}
             </Group>
-            // <Badge
-            //   variant="subtle"
-            //   color={item.revoked || expired ? 'red' : 'green'}
-            // >
-            //   {item.revoked || expired
-            //     ? 'Revoked'
-            //     : expired
-            //       ? 'Expired'
-            //       : 'Active'}
-            // </Badge>
           );
         },
       },

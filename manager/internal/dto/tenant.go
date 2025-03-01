@@ -1,13 +1,11 @@
 package dto
 
 type TenantOnboardingRequest struct {
-	Name         string `json:"name" validate:"required,min=3,max=25,alphanum"`
+	Name         string `json:"name" validate:"required,min=3,max=25,alphanumspace"`
 	ContactEmail string `json:"contactEmail" validate:"required,email"`
-	Phone        string `json:"phone"`
-	Address      string `json:"address"`
-	Industry     string `json:"industry"`
-	CompanyName  string `json:"companyName"`
-	Role         string `json:"role" validate:"required"`
+	Phone        string `json:"phone" validate:"max=20"`
+	Address      string `json:"address" validate:"max=500"`
+	Industry     string `json:"industry" validate:"max=50,alphanumspace"`
 }
 
 var UserMetadataTenantKey = "tenants"

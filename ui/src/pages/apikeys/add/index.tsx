@@ -28,15 +28,17 @@ type Props = {};
 
 const CreateApiKeyPage: React.FC<Props> = () => {
   const { isPending, error, workspaces } = useGetWorkspaces();
+  const wsMap = new Map(workspaces?.map((ws: any) => [ws.id, ws.name]));
+
   const navigate = useNavigate();
 
   const form = useForm<CreateApiKeyData>({
     initialValues: {
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       name: '',
-      canManageAcc: false,
-      canReadAcc: false,
-      permissions: [],
+      tenantRead: false,
+      tenantManage: false,
+      workspacePerms: [],
     },
     validate: {
       expiresAt: value => {
@@ -91,21 +93,19 @@ const CreateApiKeyPage: React.FC<Props> = () => {
   };
 
   const onChangeWs = (wsIds: string[]) => {
-    const wsMap = new Map(workspaces?.map((ws: any) => [ws.id, ws.name]));
     const oldPermissionsMap = new Map(
-      form.values.permissions.map((p: any) => [p.workspaceId, p]),
+      form.values.workspacePerms.map((p: any) => [p.id, p]),
     );
 
     form.setFieldValue(
-      'permissions',
+      'workspacePerms',
       wsIds.map(
         id =>
           oldPermissionsMap.get(id) || {
-            workspaceId: id,
-            workspaceName: wsMap.get(id),
-            canRead: false,
-            canManage: false,
-            canUpload: false,
+            id: id,
+            read: false,
+            manage: false,
+            upload: false,
           },
       ),
     );
@@ -141,15 +141,15 @@ const CreateApiKeyPage: React.FC<Props> = () => {
               {...form.getInputProps('expiresAt')}
             />
             <Text size="md" fw={500} mt="xl">
-              Account level permissions
+              Tenant level permissions
             </Text>
             <Checkbox
-              label="Can read account information (list workspaces, profile etc...)"
-              {...form.getInputProps('canReadAcc')}
+              label="Read access"
+              {...form.getInputProps('tenantRead')}
             />
             <Checkbox
-              label="Can manage account information (list workspaces, profile etc...)"
-              {...form.getInputProps('canManageAcc')}
+              label="Manage access"
+              {...form.getInputProps('tenantManage')}
             />
             <Text size="md" fw={500} mt="xl">
               Workspace level permissions
@@ -165,7 +165,6 @@ const CreateApiKeyPage: React.FC<Props> = () => {
                 })) || []
               }
               label="Workspaces"
-              description="The workspaces this api key has access to"
               placeholder="Select workspaces"
               onChange={onChangeWs}
             />
@@ -176,7 +175,7 @@ const CreateApiKeyPage: React.FC<Props> = () => {
                     <th style={{ textAlign: 'left', padding: '10px' }}>
                       Workspace
                     </th>
-                    {['Can Manage', 'Can Read', 'Can Upload'].map(
+                    {['Can upload', 'Can read', 'Can manage'].map(
                       (label, i) => (
                         <th
                           key={i}
@@ -184,16 +183,16 @@ const CreateApiKeyPage: React.FC<Props> = () => {
                         >
                           <Checkbox
                             label={label}
-                            checked={form.values.permissions.every(
-                              (p: any) => p[label.replace('Can ', 'can')],
+                            checked={form.values.workspacePerms.every(
+                              (p: any) => p[label.replace('Can ', '')],
                             )}
                             onChange={e => {
                               const checked = e.currentTarget.checked;
                               form.setFieldValue(
-                                'permissions',
-                                form.values.permissions.map((p: any) => ({
+                                'workspacePerms',
+                                form.values.workspacePerms.map((p: any) => ({
                                   ...p,
-                                  [label.replace('Can ', 'can')]: checked,
+                                  [label.replace('Can ', '')]: checked,
                                 })),
                               );
                             }}
@@ -204,26 +203,32 @@ const CreateApiKeyPage: React.FC<Props> = () => {
                   </tr>
                 </Table.Thead>
                 <Table.Tbody>
-                  {form.values.permissions.map((perm: any, index: number) => (
-                    <tr key={perm.workspaceId}>
-                      <td style={{ padding: '10px' }}>{perm.workspaceName}</td>
-                      {['canManage', 'canRead', 'canUpload'].map((field, i) => (
-                        <td
-                          key={i}
-                          style={{ textAlign: 'center', padding: '10px' }}
-                        >
-                          <Checkbox
-                            {...form.getInputProps(
-                              `permissions.${index}.${field}`,
-                            )}
-                            checked={
-                              (form.values.permissions[index] as any)[field]
-                            }
-                          />
+                  {form.values.workspacePerms.map(
+                    (perm: any, index: number) => (
+                      <tr key={perm.id}>
+                        <td style={{ padding: '10px' }}>
+                          {wsMap.get(perm.id) as string}
                         </td>
-                      ))}
-                    </tr>
-                  ))}
+                        {['upload', 'read', 'manage'].map((field, i) => (
+                          <td
+                            key={i}
+                            style={{ textAlign: 'center', padding: '10px' }}
+                          >
+                            <Checkbox
+                              {...form.getInputProps(
+                                `workspacePerms.${index}.${field}`,
+                              )}
+                              checked={
+                                (form.values.workspacePerms[index] as any)[
+                                  field
+                                ]
+                              }
+                            />
+                          </td>
+                        ))}
+                      </tr>
+                    ),
+                  )}
                 </Table.Tbody>
               </Table>
             </Stack>

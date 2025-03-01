@@ -1,4 +1,4 @@
-import { Avatar, Group, Paper, Text } from '@mantine/core';
+import { Avatar, Badge, Group, Paper, Text } from '@mantine/core';
 import classes from './TenantInfo.module.css';
 type Props = {
   tenantId: string;
@@ -16,13 +16,13 @@ export const TenantInfoCard: React.FC<Props> = ({ tenantId, tenantName }) => {
             radius="md"
           />
           <div>
-            <Text fz="lg" fw={700} c="dimmed">
+            <Text fz="lg" fw={700}>
               {tenantName}
             </Text>
 
-            <Text fz="xs" c="dimmed">
+            <Badge size="xs" variant="light" color="#EED202">
               Free Plan
-            </Text>
+            </Badge>
           </div>
         </Group>
       </Group>

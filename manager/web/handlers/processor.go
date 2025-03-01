@@ -135,8 +135,8 @@ func (h *processorHandler) DisableProcessor(w http.ResponseWriter, r *http.Reque
 	render.JSON(w, r, true)
 }
 
-func (h *processorHandler) GetAllTasks(w http.ResponseWriter, r *http.Request) {
-	render.JSON(w, r, h.pSvc.GetAllTasks(r.Context()))
+func (h *processorHandler) GetAllActivities(w http.ResponseWriter, r *http.Request) {
+	render.JSON(w, r, h.pSvc.GetAllActivities(r.Context()))
 }
 
 func (h *processorHandler) GetWorkflowRuns(w http.ResponseWriter, r *http.Request) {

@@ -43,11 +43,21 @@ func IsSortValid(fl validator.FieldLevel) bool {
 	return match
 }
 
+func IsAlphaNumSpace(fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+	if value == "" {
+		return true // Allow empty values
+	}
+	pattern := `^[a-zA-Z0-9 ]+$`
+	match, _ := regexp.MatchString(pattern, value)
+	return match
+}
 func NewValidator() *validator.Validate {
 	validate := validator.New()
 	validate.RegisterValidation("integer", IsInteger)
 	validate.RegisterValidation("future", IsFutureTime)
 	validate.RegisterValidation("keyvaluepairs", IsKeyValuePairs)
 	validate.RegisterValidation("sort", IsSortValid)
+	validate.RegisterValidation("alphanumspace", IsAlphaNumSpace)
 	return validate
 }

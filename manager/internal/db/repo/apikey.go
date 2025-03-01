@@ -62,8 +62,8 @@ func (r *APIKeyRepo) GetAllApiKeys(ctx context.Context, userID string) ([]models
 	if err := r.db.Orm.WithContext(ctx).
 		Select("id", "name", "user_id", "created_at", "expires_at", "revoked_at", "revoked_by").
 		Order(clause.OrderBy{Columns: []clause.OrderByColumn{
-			{Column: clause.Column{Name: "created_at"}, Desc: true},
 			{Column: clause.Column{Name: "revoked_at"}, Desc: true},
+			{Column: clause.Column{Name: "created_at"}, Desc: true},
 		}}).
 		Find(&apiKeys, "user_id = ?", userID).
 		Error; err != nil {

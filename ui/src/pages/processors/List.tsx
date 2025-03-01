@@ -174,7 +174,7 @@ const ProcessorList = () => {
                   )}
                 </>
               ) : (
-                'No Triggers'
+                ''
               )}
             </Text>
           </div>
@@ -184,6 +184,7 @@ const ProcessorList = () => {
         title: 'Updated At',
         accessor: 'updatedAt',
         hidden: width < 768,
+        textAlign: 'center',
         render: (params: any) => (
           <Text fz="sm">
             {params?.updatedAt && timeAgo.format(new Date(params?.updatedAt))}
@@ -193,9 +194,10 @@ const ProcessorList = () => {
       {
         accessor: 'enabled',
         title: 'Status',
+        textAlign: 'center',
         hidden: width < 768,
         render: (item: any) => (
-          <Group align="center" gap="0">
+          <Group align="center" gap="0" justify="center">
             <ThemeIcon variant="subtle" color={item.enabled ? 'green' : 'red'}>
               {!item.enabled ? (
                 <IconAlertCircle size={18} stroke={1.5} />

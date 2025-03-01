@@ -142,7 +142,7 @@ export const handleSocialLogin = async (provider: string) => {
 
       // This is where Google should redirect the user back after login or error.
       // This URL goes on the Google's dashboard as well.
-      frontendRedirectURI: getWebsiteDomain() + '/auth/callback/social',
+      frontendRedirectURI: getWebsiteDomain() + `/auth/callback/${provider}`,
     });
 
     /*
@@ -162,12 +162,11 @@ export const handleSocialLogin = async (provider: string) => {
   }
 };
 
-export const handleSocialLoginCallback = async () => {
+export const handleSocialLoginCallback = async (provider?: string) => {
   try {
     const response = await signInAndUp();
-
+    console.log({ response });
     if (response.status === 'OK') {
-      console.log(response.user);
       if (
         response.createdNewRecipeUser &&
         response.user.loginMethods.length === 1
@@ -182,6 +181,7 @@ export const handleSocialLoginCallback = async () => {
       // about what went wrong. It can also contain a support code which users
       // can tell you so you know why their sign in / up was not allowed.
       window.alert(response.reason);
+      window.location.assign('/auth'); // redirect back to login page
     } else {
       // SuperTokens requires that the third party provider
       // gives an email for the user. If that's not the case, sign up / in
@@ -190,7 +190,7 @@ export const handleSocialLoginCallback = async () => {
       // As a hack to solve this, you can override the backend functions to create a fake email for the user.
 
       window.alert(
-        'No email provided by social login. Please use another form of login',
+        `No email provided by ${provider} login. Please use another form of login`,
       );
       window.location.assign('/auth'); // redirect back to login page
     }
@@ -202,5 +202,6 @@ export const handleSocialLoginCallback = async () => {
     } else {
       window.alert('Oops! Something went wrong.');
     }
+    window.location.assign('/auth'); // redirect back to login page
   }
 };

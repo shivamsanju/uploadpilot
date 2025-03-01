@@ -9,9 +9,9 @@ var ExtractPDFContentV1_0 = &ActivityMetadata{
 	This feature is particularly useful for text analysis, data extraction, and document processing workflows.`,
 	Workflow: `
 - activity:
-  key: uniqueKeyLessThan20Chars
-  uses: ExtractPDFContent@v1.0
-  with:
-    includeImages: true
+    key: uniqueKeyLessThan20Chars
+    uses: ExtractPDFContent@v1.0
+    with:
+      includeImages: true
 `,
 }

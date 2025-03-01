@@ -24,11 +24,12 @@ const (
 
 // API Key errors
 const (
-	ErrAPIKeyNotFoundInRequest = "api key not found in request"
-	ErrApiKeyCreateFailed      = "failed to create api key. please try again later"
-	ErrInvalidAPIKey           = "invalid api key"
-	ErrExpiredAPIKey           = "api key has expired"
-	ErrRevokedAPIKey           = "api key has been revoked"
+	ErrNoScopeInAPIKeyCreateRequest = "no scope in api key create request"
+	ErrAPIKeyNotFoundInRequest      = "api key not found in request"
+	ErrApiKeyCreateFailed           = "failed to create api key. please try again later"
+	ErrInvalidAPIKey                = "invalid api key"
+	ErrExpiredAPIKey                = "api key has expired"
+	ErrRevokedAPIKey                = "api key has been revoked"
 )
 
 const (

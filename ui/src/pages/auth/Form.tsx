@@ -80,7 +80,7 @@ export const AuthenticationForm = (props: PaperProps) => {
 
       <Group grow mb="md" mt="md">
         <Button
-          variant="default"
+          variant="outline"
           radius="xl"
           leftSection={<Image src={GoogleIcon} width={20} height={20} />}
           onClick={() => handleSocialLogin('google')}
@@ -89,7 +89,7 @@ export const AuthenticationForm = (props: PaperProps) => {
           Google
         </Button>
         <Button
-          variant="default"
+          variant="outline"
           radius="xl"
           leftSection={<Image src={GithubIcon} width={20} height={20} />}
           onClick={() => handleSocialLogin('github')}
