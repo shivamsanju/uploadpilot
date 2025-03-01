@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/phuslu/log"
 	"github.com/supertokens/supertokens-golang/recipe/emailpassword"
@@ -112,7 +113,6 @@ func (m *Middlewares) CheckPermissions(h http.HandlerFunc, perm APIPermission) h
 
 func (m *Middlewares) checkPermissionsHelper(h http.HandlerFunc, perm APIPermission) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		failed := true
 		for _, authType := range perm.AllowedAuthTypes {
 			switch authType {
 			case APIAuthTypeAPIKey:
@@ -121,24 +121,33 @@ func (m *Middlewares) checkPermissionsHelper(h http.HandlerFunc, perm APIPermiss
 					continue
 				}
 				// If we have an api key, it should be correct
-				if err := m.apiKeySvc.ValidateAPIKey(r.Context(), apiKey, perm.Permissions...); err != nil {
-					log.Error().Err(err).Msg("failed to validate api key")
-					failed = true
-				} else {
-					failed = false
+				workspaceID := chi.URLParam(r, "workspaceId")
+				tenantID := r.Header.Get("X-Tenant-Id")
+				for i, _ := range perm.Permissions {
+					if perm.Permissions[i].ResouceID == "<workspaceId>" {
+						perm.Permissions[i].ResouceID = workspaceID
+					}
+					if perm.Permissions[i].ResouceID == "<tenantId>" {
+						perm.Permissions[i].ResouceID = tenantID
+					}
 				}
+				log.Debug().Interface("requested_permissions", perm.Permissions).Msg("verifying api key permissions")
+				apiKeyDetails, err := m.apiKeySvc.ValidateAPIKey(r.Context(), apiKey, perm.Permissions...)
+				if err != nil {
+					log.Error().Err(err).Msg("failed to validate api key")
+					w.WriteHeader(http.StatusUnauthorized)
+					return
+				}
+				r.Header.Set("X-Api-Key-UserId", apiKeyDetails.UserID)
+				r.Header.Set("X-Tenant-Id", apiKeyDetails.TenantID)
+				h(w, r)
+				return
 			case APIAuthTypeBearer:
 				session.VerifySession(nil, h)(w, r)
 				return
 			}
 		}
-
-		if failed {
-			w.WriteHeader(http.StatusUnauthorized)
-			return
-		}
-
-		h(w, r)
+		w.WriteHeader(http.StatusUnauthorized)
 	})
 
 }
@@ -146,18 +155,26 @@ func (m *Middlewares) checkPermissionsHelper(h http.HandlerFunc, perm APIPermiss
 func (m *Middlewares) addSessionToCtx(r *http.Request) (context.Context, error) {
 	var sess dto.Session
 
-	sessionContainer := session.GetSessionFromRequestContext(r.Context())
-	userID := sessionContainer.GetUserID()
-	if userID == "" {
-		return nil, errors.New(msg.ErrUserInfoNotFoundInRequest)
+	if r.Header.Get("X-Api-Key") != "" {
+		if r.Header.Get("X-Api-Key-UserId") != "" {
+			sess.UserID = r.Header.Get("X-Api-Key-UserId")
+		} else {
+			return nil, errors.New(msg.ErrUserInfoNotFoundInRequest)
+		}
+	} else {
+		sessionContainer := session.GetSessionFromRequestContext(r.Context())
+		userID := sessionContainer.GetUserID()
+		if userID == "" {
+			return nil, errors.New(msg.ErrUserInfoNotFoundInRequest)
+		}
+		sess.UserID = userID
 	}
-	sess.UserID = userID
 
-	tpusr, err := thirdparty.GetUserByID(userID)
+	tpusr, err := thirdparty.GetUserByID(sess.UserID)
 	if err == nil && tpusr != nil {
 		sess.Email = tpusr.Email
 	} else {
-		epusr, err := emailpassword.GetUserByID(userID)
+		epusr, err := emailpassword.GetUserByID(sess.UserID)
 		if err == nil && epusr != nil {
 			sess.Email = epusr.Email
 		} else {
@@ -165,7 +182,7 @@ func (m *Middlewares) addSessionToCtx(r *http.Request) (context.Context, error) 
 		}
 	}
 
-	metadata, err := usermetadata.GetUserMetadata(userID)
+	metadata, err := usermetadata.GetUserMetadata(sess.UserID)
 	if err != nil {
 		return nil, err
 	}

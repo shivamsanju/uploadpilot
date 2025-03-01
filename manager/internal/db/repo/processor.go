@@ -21,7 +21,7 @@ func NewProcessorRepo(db *driver.Driver) *ProcessorRepo {
 func (r *ProcessorRepo) GetAll(ctx context.Context, workspaceID string) ([]models.Processor, error) {
 	var processors []models.Processor
 	err := r.db.Orm.WithContext(ctx).
-		Select("id", "name", "triggers", "enabled", "updated_at").
+		Select("id", "name", "triggers", "enabled", "workflow", "updated_at").
 		Where("workspace_id = ?", workspaceID).
 		Order("enabled desc, updated_at desc").
 		Find(&processors).Error

@@ -41,55 +41,55 @@ func Routes(services *svc.Services, middlewares *Middlewares) *chi.Mux {
 		// ApiKeys
 		r.Route("/api-keys", func(r chi.Router) {
 
-			r.Get("/", middlewares.CheckPermissions(CreateJSONHandler(authHandler.GetAPIKeys), BearerTenantReadAccess))
-			r.Post("/", middlewares.CheckPermissions(CreateJSONHandler(authHandler.CreateAPIKey), BearerTenantReadAccess))
+			r.Get("/", middlewares.CheckPermissions(CreateJSONHandler(authHandler.GetAPIKeys), TenantReadAccess))
+			r.Post("/", middlewares.CheckPermissions(CreateJSONHandler(authHandler.CreateAPIKey), TenantReadAccess))
 			r.Route("/{apiKeyId}", func(r chi.Router) {
-				r.Post("/revoke", middlewares.CheckPermissions(CreateJSONHandler(authHandler.RevokeAPIKey), BearerTenantReadAccess))
+				r.Post("/revoke", middlewares.CheckPermissions(CreateJSONHandler(authHandler.RevokeAPIKey), TenantReadAccess))
 			})
 		})
 
 		// Workspaces
 		r.Route("/workspaces", func(r chi.Router) {
 
-			r.Get("/", middlewares.CheckPermissions(workspaceHandler.GetAllWorkspaces, BearerTenantReadAccess))
-			r.Post("/", middlewares.CheckPermissions(workspaceHandler.CreateWorkspace, BearerTenantReadAccess))
+			r.Get("/", middlewares.CheckPermissions(workspaceHandler.GetAllWorkspaces, TenantReadAccess))
+			r.Post("/", middlewares.CheckPermissions(workspaceHandler.CreateWorkspace, TenantReadAccess))
 
 			// Single workspace
 			r.Route("/{workspaceId}", func(r chi.Router) {
 
-				r.Get("/config", middlewares.CheckPermissions(workspaceHandler.GetWorkspaceConfig, BearerTenantReadAccess))
-				r.Put("/config", middlewares.CheckPermissions(workspaceHandler.SetWorkspaceConfig, BearerTenantReadAccess))
-				r.Get("/allowedSources", middlewares.CheckPermissions(CreateJSONHandler(workspaceHandler.GetAllAllowedSources), BearerTenantReadAccess))
+				r.Get("/config", middlewares.CheckPermissions(workspaceHandler.GetWorkspaceConfig, WorkspaceUploadAccess))
+				r.Put("/config", middlewares.CheckPermissions(workspaceHandler.SetWorkspaceConfig, TenantReadAccess))
+				r.Get("/allowedSources", middlewares.CheckPermissions(CreateJSONHandler(workspaceHandler.GetAllAllowedSources), WorkspaceUploadAccess))
 
 				// Uploads
 				r.Route("/uploads", func(r chi.Router) {
-					r.Get("/", middlewares.CheckPermissions(CreateJSONHandler(uploadHandler.GetPaginatedUploads), BearerTenantReadAccess))
-					r.Post("/", middlewares.CheckPermissions(CreateJSONHandler(uploadHandler.CreateUpload), BearerTenantReadAccess))
+					r.Get("/", middlewares.CheckPermissions(CreateJSONHandler(uploadHandler.GetPaginatedUploads), TenantReadAccess))
+					r.Post("/", middlewares.CheckPermissions(CreateJSONHandler(uploadHandler.CreateUpload), WorkspaceUploadAccess))
 					r.Post("/log", CreateJSONHandler(workspaceHandler.LogUpload))
 
 					r.Route("/{uploadId}", func(r chi.Router) {
-						r.Get("/", middlewares.CheckPermissions(uploadHandler.GetUploadDetailsByID, BearerTenantReadAccess))
-						r.Post("/finish", middlewares.CheckPermissions(CreateJSONHandler(uploadHandler.FinishUpload), BearerTenantReadAccess))
-						r.Get("/download", middlewares.CheckPermissions(CreateJSONHandler(uploadHandler.GetUploadURL), BearerTenantReadAccess))
-						r.Post("/process", middlewares.CheckPermissions(CreateJSONHandler(uploadHandler.ProcessUpload), BearerTenantReadAccess))
+						r.Get("/", middlewares.CheckPermissions(uploadHandler.GetUploadDetailsByID, TenantReadAccess))
+						r.Post("/finish", middlewares.CheckPermissions(CreateJSONHandler(uploadHandler.FinishUpload), WorkspaceUploadAccess))
+						r.Get("/download", middlewares.CheckPermissions(CreateJSONHandler(uploadHandler.GetUploadURL), TenantReadAccess))
+						r.Post("/process", middlewares.CheckPermissions(CreateJSONHandler(uploadHandler.ProcessUpload), TenantReadAccess))
 					})
 				})
 
 				// processors
 				r.Route("/processors", func(r chi.Router) {
-					r.Get("/", middlewares.CheckPermissions(procHandler.GetProcessors, BearerTenantReadAccess))
-					r.Post("/", middlewares.CheckPermissions(CreateJSONHandler(procHandler.CreateProcessor), BearerTenantReadAccess))
-					r.Get("/activities", middlewares.CheckPermissions(procHandler.GetAllActivities, BearerTenantReadAccess))
-					r.Get("/templates", middlewares.CheckPermissions(procHandler.GetTemplates, BearerTenantReadAccess))
+					r.Get("/", middlewares.CheckPermissions(procHandler.GetProcessors, TenantReadAccess))
+					r.Post("/", middlewares.CheckPermissions(CreateJSONHandler(procHandler.CreateProcessor), TenantReadAccess))
+					r.Get("/activities", middlewares.CheckPermissions(procHandler.GetAllActivities, TenantReadAccess))
+					r.Get("/templates", middlewares.CheckPermissions(procHandler.GetTemplates, TenantReadAccess))
 					r.Route("/{processorId}", func(r chi.Router) {
-						r.Get("/", middlewares.CheckPermissions(procHandler.GetProcessorDetailsByID, BearerTenantReadAccess))
-						r.Put("/", middlewares.CheckPermissions(procHandler.UpdateProcessor, BearerTenantReadAccess))
-						r.Delete("/", middlewares.CheckPermissions(procHandler.DeleteProcessor, BearerTenantReadAccess))
-						r.Put("/enable", middlewares.CheckPermissions(procHandler.EnableProcessor, BearerTenantReadAccess))
-						r.Put("/disable", middlewares.CheckPermissions(procHandler.DisableProcessor, BearerTenantReadAccess))
-						r.Put("/workflow", middlewares.CheckPermissions(procHandler.UpdateWorkflow, BearerTenantReadAccess))
-						r.Get("/runs", middlewares.CheckPermissions(procHandler.GetWorkflowRuns, BearerTenantReadAccess))
-						r.Get("/logs", middlewares.CheckPermissions(procHandler.GetWorkflowLogs, BearerTenantReadAccess))
+						r.Get("/", middlewares.CheckPermissions(procHandler.GetProcessorDetailsByID, TenantReadAccess))
+						r.Put("/", middlewares.CheckPermissions(procHandler.UpdateProcessor, TenantReadAccess))
+						r.Delete("/", middlewares.CheckPermissions(procHandler.DeleteProcessor, TenantReadAccess))
+						r.Put("/enable", middlewares.CheckPermissions(procHandler.EnableProcessor, TenantReadAccess))
+						r.Put("/disable", middlewares.CheckPermissions(procHandler.DisableProcessor, TenantReadAccess))
+						r.Put("/workflow", middlewares.CheckPermissions(procHandler.UpdateWorkflow, TenantReadAccess))
+						r.Get("/runs", middlewares.CheckPermissions(procHandler.GetWorkflowRuns, TenantReadAccess))
+						r.Get("/logs", middlewares.CheckPermissions(procHandler.GetWorkflowLogs, TenantReadAccess))
 					})
 				})
 			})

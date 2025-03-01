@@ -42,8 +42,8 @@ func (s *Service) GetAllAPIKeysForUser(ctx context.Context) ([]models.APIKey, er
 	return s.apiKeyRepo.GetAllApiKeys(ctx, user.UserID)
 }
 
-func (s *Service) GetAPIKeyInfo(ctx context.Context, key string) (*models.APIKey, error) {
-	return s.apiKeyRepo.GetApiKeyDetails(ctx, key)
+func (s *Service) GetAPIKeyInfo(ctx context.Context, id string) (*models.APIKey, error) {
+	return s.apiKeyRepo.GetApiKeyDetailsByID(ctx, id)
 }
 
 func (s *Service) CreateAPIKey(ctx context.Context, data *dto.CreateApiKeyData) (string, error) {
@@ -68,6 +68,7 @@ func (s *Service) CreateAPIKey(ctx context.Context, data *dto.CreateApiKeyData) 
 	apiKey := &models.APIKey{
 		Name:        data.Name,
 		UserID:      session.UserID,
+		TenantID:    session.TenantID,
 		ApiKeyHash:  hashedKey,
 		ExpiresAt:   &data.ExpiresAt,
 		Scopes:      scope,
@@ -99,40 +100,42 @@ func (s *Service) RevokeAPIKey(ctx context.Context, id string) error {
 	return s.apiKeyRepo.Update(ctx, apiKey)
 }
 
-func (s *Service) ValidateAPIKey(ctx context.Context, apiKey string, perms ...dto.APIKeyPerm) error {
+func (s *Service) ValidateAPIKey(ctx context.Context, apiKey string, perms ...dto.APIKeyPerm) (*models.APIKey, error) {
 	if ok := s.isValidAPIKeyFormat(apiKey); !ok {
-		return errors.New(msg.ErrInvalidAPIKey)
+		return nil, errors.New(msg.ErrInvalidAPIKey)
 	}
 
 	apiKeyHash, err := s.kms.Hash(apiKey, s.apiKeySalt)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to hash api key")
-		return errors.New(msg.ErrUnexpected)
+		return nil, errors.New(msg.ErrUnexpected)
 	}
 
 	apiKeyDetails, err := s.apiKeyRepo.GetApiKeyDetails(ctx, apiKeyHash)
 	if err != nil {
 		if errors.Is(err, errs.ErrRecordNotFound) {
-			return errors.New(msg.ErrInvalidAPIKey)
+			return nil, errors.New(msg.ErrInvalidAPIKey)
 		}
-		return errors.New(msg.ErrUnexpected)
+		return nil, errors.New(msg.ErrUnexpected)
 	}
 
 	if apiKeyDetails.RevokedAt != nil && apiKeyDetails.RevokedAt.Before(time.Now()) {
-		return errors.New(msg.ErrRevokedAPIKey)
+		log.Debug().Str("api_key", apiKey).Msg("api key revoked")
+		return nil, errors.New(msg.ErrRevokedAPIKey)
 	}
 
 	if apiKeyDetails.ExpiresAt != nil && apiKeyDetails.ExpiresAt.Before(time.Now()) {
-		return errors.New(msg.ErrExpiredAPIKey)
+		log.Debug().Str("api_key", apiKey).Msg("api key expired")
+		return nil, errors.New(msg.ErrExpiredAPIKey)
 	}
 
 	hasPerm := s.verifyAPIKeyPermissions(apiKeyDetails, perms...)
 
 	if !hasPerm {
-		return errors.New(msg.ErrInvalidAPIKey)
+		return nil, errors.New(msg.ErrInvalidAPIKey)
 	}
 
-	return nil
+	return apiKeyDetails, nil
 }
 
 func (s *Service) isValidAPIKeyFormat(apiKey string) bool {
@@ -154,12 +157,14 @@ func (s *Service) verifyAPIKeyPermissions(apiKey *models.APIKey, perms ...dto.AP
 			return false
 		}
 		for _, apiPerm := range apiKey.Permissions {
+			log.Debug().Str("Got", fmt.Sprintf("%s:%s", apiPerm.ResourceID, apiPerm.Permission)).Str("Expected", fmt.Sprintf("%s:%s", perm.ResouceID, perm.Perm)).Msg("verifying api key permissions")
+
 			if perm.ResouceID == apiPerm.ResourceID && perm.Perm == apiPerm.Permission {
 				return true
 			}
 		}
 	}
-	return true
+	return false
 }
 
 func (s *Service) getScopeAndPerm(session *dto.Session, data *dto.CreateApiKeyData) ([]models.APIKeyPermission, []string, error) {

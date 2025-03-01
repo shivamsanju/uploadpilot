@@ -143,11 +143,12 @@ func (s *Service) TriggerWorkflows(ctx context.Context, workspaceID string, uplo
 					}
 				}
 			} else {
-				doTrigger = true
+				doTrigger = false
 			}
 			if !doTrigger {
 				continue
 			}
+			log.Debug().Msgf("Triggering processor: %s, Workflow: %s", processor.Name, processor.Workflow)
 			_, err := s.TriggerWorkflow(ctx, upload, processor.Workflow, workspaceID, processor.ID)
 			if err != nil {
 				return err

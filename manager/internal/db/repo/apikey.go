@@ -39,7 +39,7 @@ func (r *APIKeyRepo) GetApiKeyDetailsByID(ctx context.Context, id string) (*mode
 func (r *APIKeyRepo) GetApiKeyLimitedDetailsByID(ctx context.Context, id string) (*models.APIKey, error) {
 	var apiKey models.APIKey
 	if err := r.db.Orm.WithContext(ctx).
-		Preload("APIKeyPermission").
+		Preload("Permissions").
 		Select("id", "name", "user_id", "created_at", "expires_at", "revoked_at", "revoked_by").
 		First(&apiKey, "id = ?", id).Error; err != nil {
 		return nil, dbutils.DBError(ctx, r.db.Orm.Logger, err)
@@ -50,7 +50,7 @@ func (r *APIKeyRepo) GetApiKeyLimitedDetailsByID(ctx context.Context, id string)
 func (r *APIKeyRepo) GetApiKeyDetails(ctx context.Context, hash string) (*models.APIKey, error) {
 	var apiKey models.APIKey
 	if err := r.db.Orm.WithContext(ctx).
-		Preload("APIKeyPermission").
+		Preload("Permissions").
 		First(&apiKey, "api_key_hash = ?", hash).Error; err != nil {
 		return nil, dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}

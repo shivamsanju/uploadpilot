@@ -31,34 +31,34 @@ func NewUploadService(c *clients.CoreServiceClient) *Service {
 	}
 }
 
-func (us *Service) GetUploaderConfig(ctx context.Context, originalReq *http.Request, workspaceID string) (*dto.WorkspaceConfig, error) {
-	cgf, err := us.coreSvcClient.GetUploaderConfig(ctx, originalReq, workspaceID)
+func (us *Service) GetUploaderConfig(ctx context.Context, originalReq *http.Request, workspaceID string) (*dto.WorkspaceConfig, int, error) {
+	cgf, statusCode, err := us.coreSvcClient.GetUploaderConfig(ctx, originalReq, workspaceID)
 	if err != nil {
 		log.Error().Err(err).Str("workspace_id", workspaceID).Msg("failed to get uploader config")
-		return nil, err
+		return nil, statusCode, err
 	}
-	return cgf, nil
+	return cgf, statusCode, nil
 }
 
-func (us *Service) GetTusdConfigForWorkspace(ctx context.Context, originalReq *http.Request, workspaceID string) (*tusd.Config, error) {
+func (us *Service) GetTusdConfigForWorkspace(ctx context.Context, originalReq *http.Request, workspaceID string) (*tusd.Config, int, error) {
 	appConfig := config.GetAppConfig()
 
-	uploaderConfig, err := us.GetUploaderConfig(ctx, originalReq, workspaceID)
+	uploaderConfig, statusCode, err := us.GetUploaderConfig(ctx, originalReq, workspaceID)
 	if err != nil {
 		log.Error().Err(err).Str("workspace_id", workspaceID).Msg("failed to get uploader config")
-		return nil, err
+		return nil, statusCode, err
 	}
 
 	corsCfg, err := us.getCorsConfigForWorkspace(uploaderConfig)
 	if err != nil {
 		log.Error().Err(err).Str("workspace_id", workspaceID).Msg("failed to get cors config")
-		return nil, err
+		return nil, statusCode, err
 	}
 
 	composer, err := us.getStorageForWorkspace()
 	if err != nil {
 		log.Error().Err(err).Str("workspace_id", workspaceID).Msg("failed to get storage for workspace")
-		return nil, err
+		return nil, statusCode, err
 	}
 
 	handlerConfig := tusd.Config{
@@ -76,7 +76,7 @@ func (us *Service) GetTusdConfigForWorkspace(ctx context.Context, originalReq *h
 		handlerConfig.MaxSize = *uploaderConfig.MaxFileSize
 	}
 
-	return &handlerConfig, nil
+	return &handlerConfig, statusCode, nil
 }
 
 // TUSD configs
@@ -139,7 +139,7 @@ func (us *Service) extractMetadataFromTusdEvent(hook *tusd.HookEvent) (map[strin
 	return metadata, nil
 }
 
-func (us *Service) logUploadRequest(hook *tusd.HookEvent, originalReq *http.Request, workspaceID string) error {
+func (us *Service) logUploadRequest(hook *tusd.HookEvent, originalReq *http.Request, workspaceID string) (int, error) {
 	data := map[string]string{}
 	for k, v := range hook.HTTPRequest.Header {
 		data[k] = strings.Join(v, ",")
@@ -166,9 +166,9 @@ func (us *Service) getFileTypeFromMetadata(metadata map[string]interface{}) (str
 
 func (us *Service) getPreUploadCallback(originalReq *http.Request, workspaceID string, uploaderConfig *dto.WorkspaceConfig) func(tusd.HookEvent) (tusd.HTTPResponse, tusd.FileInfoChanges, error) {
 	return func(hook tusd.HookEvent) (tusd.HTTPResponse, tusd.FileInfoChanges, error) {
-		if err := us.logUploadRequest(&hook, originalReq, workspaceID); err != nil {
+		if statusCode, err := us.logUploadRequest(&hook, originalReq, workspaceID); err != nil {
 			log.Error().Str("workspace_id", workspaceID).Err(err).Msg("unable to log upload request")
-			return tusd.HTTPResponse{StatusCode: http.StatusInternalServerError}, tusd.FileInfoChanges{}, errors.New("some error occurred, please try again")
+			return tusd.HTTPResponse{StatusCode: statusCode}, tusd.FileInfoChanges{}, errors.New("some error occurred, please try again")
 		}
 		metadata, err := us.extractMetadataFromTusdEvent(&hook)
 		if err != nil {
@@ -202,10 +202,10 @@ func (us *Service) getPreUploadCallback(originalReq *http.Request, workspaceID s
 			StartedAt: time.Now(),
 		}
 
-		uploadID, err := us.coreSvcClient.CreateNewUpload(hook.Context, originalReq, workspaceID, upload)
+		uploadID, statusCode, err := us.coreSvcClient.CreateNewUpload(hook.Context, originalReq, workspaceID, upload)
 		if err != nil {
 			log.Error().Str("workspace_id", workspaceID).Err(err).Msg("unable to create new upload")
-			return tusd.HTTPResponse{StatusCode: http.StatusInternalServerError}, tusd.FileInfoChanges{}, errors.New("some error occurred, please try again")
+			return tusd.HTTPResponse{StatusCode: statusCode}, tusd.FileInfoChanges{}, errors.New("some error occurred, please try again")
 		}
 
 		hook.Upload.MetaData["upload_id"] = upload.ID
@@ -225,13 +225,13 @@ func (us *Service) getPreFinishCallback(originalReq *http.Request, workspaceID s
 			return tusd.HTTPResponse{StatusCode: http.StatusBadRequest}, nil
 		}
 
-		if err := us.coreSvcClient.FinishUpload(hook.Context, originalReq, workspaceID, uploadID, &dto.Upload{
+		if statusCode, err := us.coreSvcClient.FinishUpload(hook.Context, originalReq, workspaceID, uploadID, &dto.Upload{
 			Status:     "Uploaded",
 			FinishedAt: time.Now(),
 		}); err != nil {
-			hook.Upload.StopUpload(tusd.HTTPResponse{StatusCode: http.StatusBadRequest})
+			hook.Upload.StopUpload(tusd.HTTPResponse{StatusCode: statusCode})
 			log.Error().Str("workspace_id", workspaceID).Str("upload_id", uploadID).Err(err).Msg("unable to finish upload")
-			return tusd.HTTPResponse{StatusCode: http.StatusBadRequest}, nil
+			return tusd.HTTPResponse{StatusCode: statusCode}, nil
 		}
 		return tusd.HTTPResponse{StatusCode: http.StatusNoContent}, nil
 	}

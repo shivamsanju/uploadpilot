@@ -18,7 +18,7 @@ type ErrorResponse struct {
 
 func HandleHttpError(w http.ResponseWriter, r *http.Request, statusCode int, err error) {
 	reqID := middleware.GetReqID(r.Context())
-	log.Error().Err(err).Str("request_id", reqID).Msg("request failed")
+	log.Error().Err(err).Str("request_id", reqID).Int("status_code", statusCode).Msg("request failed")
 	render.Status(r, statusCode)
 	render.JSON(w, r, &ErrorResponse{
 		RequestID: reqID,

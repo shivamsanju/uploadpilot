@@ -44,9 +44,9 @@ func (h *handler) GetUploaderConfig(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cfg, err := h.uploadSvc.GetUploaderConfig(r.Context(), r, workspaceID)
+	cfg, statusCode, err := h.uploadSvc.GetUploaderConfig(r.Context(), r, workspaceID)
 	if err != nil {
-		HandleHttpError(w, r, http.StatusBadRequest, err)
+		HandleHttpError(w, r, statusCode, err)
 		return
 	}
 
@@ -62,9 +62,9 @@ func (h *handler) GetUploadHandler() http.Handler {
 			return
 		}
 
-		handlerConfig, err := h.uploadSvc.GetTusdConfigForWorkspace(r.Context(), r, workspaceID)
+		handlerConfig, statusCode, err := h.uploadSvc.GetTusdConfigForWorkspace(r.Context(), r, workspaceID)
 		if err != nil {
-			HandleHttpError(w, r, http.StatusBadRequest, err)
+			HandleHttpError(w, r, statusCode, err)
 			return
 		}
 		handlerConfig.Logger = slog.New(config.NewLogHandler())
