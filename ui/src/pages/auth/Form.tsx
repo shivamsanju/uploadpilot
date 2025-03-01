@@ -182,7 +182,7 @@ export const AuthenticationForm = (props: PaperProps) => {
               ? 'Already have an account? Login'
               : "Don't have an account? Register"}
           </Anchor>
-          <Button type="submit" radius="xl">
+          <Button type="submit" radius="xl" variant="white">
             {upperFirst(type)}
           </Button>
         </Group>
