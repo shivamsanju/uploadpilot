@@ -1,4 +1,4 @@
-import { Group, Paper, Title } from '@mantine/core';
+import { Box, Group, Paper, Title } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { useGetWorkspaces } from '../../apis/workspace';
@@ -12,15 +12,14 @@ const WorkspaceLandingPage = () => {
 
   return (
     <ErrorLoadingWrapper error={error} isPending={isPending}>
-      <Group align="center" gap="xs" h="10%">
+      <Group align="center" gap="xs" h="10%" mb={30}>
         <Title order={3}>Workspaces</Title>
       </Group>
-      <Group mb="50" align="center" mt="lg">
+      <Box mb="lg" className={classes.wscontainer}>
         <Paper
           withBorder
           h="200"
-          w={{ base: '100%', md: '400' }}
-          className={classes.wsItemAdd}
+          className={classes.wsitem}
           onClick={() => navigate('/workspace/new')}
         >
           <Group justify="center" h="100%">
@@ -29,16 +28,18 @@ const WorkspaceLandingPage = () => {
         </Paper>
         {workspaces?.length > 0 &&
           workspaces.map((workspace: any) => (
-            <WorkspaceCard
-              id={workspace.id}
-              name={workspace.name}
-              description={workspace.description}
-              uploads={4031}
-              storage={24.2}
-              tags={workspace.tags || []}
-            />
+            <Box className={classes.wsitem} key={workspace.id}>
+              <WorkspaceCard
+                id={workspace.id}
+                name={workspace.name}
+                description={workspace.description}
+                uploads={4031}
+                storage={24.2}
+                tags={workspace.tags || []}
+              />
+            </Box>
           ))}
-      </Group>
+      </Box>
     </ErrorLoadingWrapper>
   );
 };

@@ -1,28 +1,11 @@
-.wsForm {
-  width: 40vw;
-
-  @media (max-width: 768px) {
-    width: 80vw;
-  }
+.wscontainer {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  align-items: start;
 }
 
-.wsItemAdd {
-  height: 65px;
-  width: 300px;
-  cursor: pointer;
-  border-style: dashed;
-}
-
-.wsItem {
-  cursor: pointer;
-  height: 65px;
-  width: 300px;
-}
-
-.wsItem:hover,
-.wsItemAdd:hover {
-  background-color: light-dark(
-    var(--mantine-color-gray-1),
-    var(--mantine-color-dark-9)
-  );
+.wsitem {
+  display: flex;
+  flex-direction: column;
 }

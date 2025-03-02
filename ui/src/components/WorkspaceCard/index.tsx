@@ -1,5 +1,5 @@
 import { ActionIcon, Group, Paper, Stack, Text, Title } from '@mantine/core';
-import { IconChevronRightPipe, IconDeviceLaptop } from '@tabler/icons-react';
+import { IconChevronRight, IconDeviceLaptop } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 
 type Props = {
@@ -22,7 +22,7 @@ export const WorkspaceCard: React.FC<Props> = ({
   const navigate = useNavigate();
 
   return (
-    <Paper withBorder w={{ base: '100%', md: '400px' }} h={200}>
+    <Paper withBorder h={200}>
       <Stack h="100%" justify="space-between" gap={0}>
         <Stack
           gap="xs"
@@ -65,10 +65,11 @@ export const WorkspaceCard: React.FC<Props> = ({
             </Text>
           </Group>
           <ActionIcon
+            c="dimmed"
             variant="outline"
             onClick={() => navigate(`/workspace/${id}`)}
           >
-            <IconChevronRightPipe size={20} />
+            <IconChevronRight size={20} />
           </ActionIcon>
         </Group>
       </Stack>
