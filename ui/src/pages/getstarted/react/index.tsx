@@ -1,27 +1,33 @@
 import { CodeHighlight } from '@mantine/code-highlight';
 import '@mantine/code-highlight/styles.css';
 import {
+  ActionIcon,
   Box,
+  Button,
   Grid,
   Group,
   MantineStyleProp,
   Paper,
+  PasswordInput,
   Stack,
   Text,
   Timeline,
+  Tooltip,
 } from '@mantine/core';
 import {
   IconBrandNpm,
   IconCode,
   IconConfetti,
   IconEditCircle,
+  IconKey,
 } from '@tabler/icons-react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Uploader } from 'uppy-react';
 import 'uppy-react/dist/style.css';
 import { useGetUserDetails } from '../../../apis/user';
 import { AppLoader } from '../../../components/Loader/AppLoader';
-import { TENANT_ID_KEY } from '../../../constants/tenancy';
+import { TEMP_API_KEY, TENANT_ID_KEY } from '../../../constants/tenancy';
 import { getUploadApiDomain } from '../../../utils/config';
 import Settings from './Settings';
 import { useSettingsProps } from './SettingsProps';
@@ -79,6 +85,8 @@ const uploadEndpoint = getUploadApiDomain();
 
 const ReactIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
   const settingsProps = useSettingsProps();
+  const [apiKey, setApiKey] = useState('');
+  const [changeApiKey, setChangeApiKey] = useState(false);
   const { workspaceId } = useParams();
   const { isPending: isUserPending, user } = useGetUserDetails();
   const code = getCode(workspaceId as string, uploadEndpoint, settingsProps);
@@ -102,6 +110,17 @@ const ReactIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
           <Paper>
             <Grid>
               <Grid.Col span={12}>
+                <Group justify="flex-end" p={0} m={0} mr="md">
+                  <ActionIcon
+                    variant="subtle"
+                    c="dimmed"
+                    onClick={() => setChangeApiKey(!changeApiKey)}
+                  >
+                    <Tooltip label="Change API Key">
+                      <IconKey size={16} />
+                    </Tooltip>
+                  </ActionIcon>
+                </Group>
                 <Group
                   mx="sm"
                   mt="xs"
@@ -117,19 +136,41 @@ const ReactIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
                     borderRadius: '20px',
                   }}
                 >
-                  <Uploader
-                    uploadEndpoint={uploadEndpoint}
-                    workspaceId={workspaceId}
-                    metadata={{
-                      uploaderEmail: user.email,
-                      uploaderName: user.name || 'User',
-                    }}
-                    headers={{
-                      'X-Tenant-Id': localStorage.getItem(TENANT_ID_KEY) || '',
-                    }}
-                    {...settingsProps}
-                    note="Test your uploader"
-                  />
+                  {sessionStorage.getItem(TEMP_API_KEY) && !changeApiKey ? (
+                    <Uploader
+                      uploadEndpoint={uploadEndpoint}
+                      workspaceId={workspaceId}
+                      metadata={{
+                        uploaderEmail: user.email,
+                        uploaderName: user.name || 'User',
+                      }}
+                      headers={{
+                        'X-Tenant-Id':
+                          sessionStorage.getItem(TENANT_ID_KEY) || '',
+                        'X-Api-Key': sessionStorage.getItem(TEMP_API_KEY) || '',
+                      }}
+                      {...settingsProps}
+                      note="Test your uploader"
+                    />
+                  ) : (
+                    <Box w="90%">
+                      <PasswordInput
+                        label="Please enter your API key"
+                        placeholder="Please enter your API key"
+                        required
+                        onChange={event => setApiKey(event.target.value)}
+                      />
+                      <Button
+                        mt="md"
+                        onClick={() => {
+                          sessionStorage.setItem(TEMP_API_KEY, apiKey);
+                          window.location.reload();
+                        }}
+                      >
+                        Submit
+                      </Button>
+                    </Box>
+                  )}
                 </Group>
               </Grid.Col>
               <Grid.Col span={12}>

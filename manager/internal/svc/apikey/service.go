@@ -139,7 +139,11 @@ func (s *Service) ValidateAPIKey(ctx context.Context, apiKey string, perms ...dt
 }
 
 func (s *Service) isValidAPIKeyFormat(apiKey string) bool {
-	if apiKey == "" && !strings.HasPrefix(apiKey, "up-") {
+	if apiKey == "" || !strings.HasPrefix(apiKey, "up-") {
+		return false
+	}
+
+	if len(apiKey) < 14 || len(apiKey) > 74 {
 		return false
 	}
 
