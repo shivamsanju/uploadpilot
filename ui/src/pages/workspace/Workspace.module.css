@@ -1,6 +1,6 @@
 .wscontainer {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   gap: 16px;
   align-items: start;
 }
@@ -8,4 +8,18 @@
 .wsitem {
   display: flex;
   flex-direction: column;
+  transition: all 0.1s ease-in-out;
+}
+
+.wsItemAdd {
+  border-style: dashed;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.1s ease-in-out;
+}
+
+.wsItemAdd:hover {
+  border-color: var(--mantine-color-dark-4) !important;
 }

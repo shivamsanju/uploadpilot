@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>S3 Presigned Upload</title>
+  </head>
+  <body>
+    <h2>Upload File to S3</h2>
+    <input type="file" id="fileInput" multiple />
+    <button onclick="uploadFile()">Upload</button>
+    <p id="status"></p>
+
+    <script>
+      async function uploadFile() {
+        const fileInput = document.getElementById("fileInput");
+        const status = document.getElementById("status");
+
+        if (fileInput.files.length === 0) {
+          status.innerText = "Please select a file.";
+          return;
+        }
+
+        const file = fileInput.files[0];
+
+        // Step 1: Get the presigned URL
+        status.innerText = "Requesting upload URL...";
+        const response = await fetch(
+          "http://localhost:8080/sign_post" + "?content-length=" + file.size
+        );
+        if (!response.ok) {
+          status.innerText = "Failed to get upload URL.";
+          return;
+        }
+
+        const data = await response.json();
+        const uploadUrl = data;
+        // const formData = new FormData();
+        // const formData2 = new FormData();
+        // Object.entries(data.Values).forEach(([key, value]) => {
+        //   formData.append(key, value);
+        // });
+        // Object.entries(data.Values).forEach(([key, value]) => {
+        //   formData2.append(key, value);
+        // });
+
+        // // Append the file to be uploaded
+        // formData.append("file", file);
+        // formData2.append("file", fileInput.files[1]);
+
+        // Step 2: Upload the file to S3
+        status.innerText = "Uploading file...";
+        try {
+          const uploadResponse = await fetch(uploadUrl, {
+            method: "PUT",
+            body: fileInput.files[0],
+            headers: {
+              "Content-Type": file.type,
+              "if-none-match": "*",
+            },
+          });
+
+          if (uploadResponse.ok) {
+            status.innerText = "Upload successful!";
+          } else {
+            status.innerText = "Upload failed.";
+          }
+        } catch (e) {
+          console.log(e);
+          status.innerText = "Upload failed." + e;
+        }
+        try {
+          const uploadResponse = await fetch(uploadUrl, {
+            method: "PUT",
+            body: fileInput.files[1],
+            headers: {
+              "Content-Type": file.type,
+              "if-none-match": "*",
+            },
+          });
+
+          if (uploadResponse.ok) {
+            status.innerText = "Upload successful!";
+          } else {
+            status.innerText = "Upload failed.";
+          }
+        } catch (e) {
+          console.log(e);
+          status.innerText = "Upload failed." + e;
+        }
+      }
+    </script>
+  </body>
+</html>

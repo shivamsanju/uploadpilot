@@ -1,0 +1,78 @@
+package repo
+
+import (
+	"context"
+
+	"github.com/uploadpilot/core/internal/db/driver"
+	"github.com/uploadpilot/core/internal/db/models"
+	dbutils "github.com/uploadpilot/core/internal/db/utils"
+)
+
+type ProcessorRepo struct {
+	db *driver.Driver
+}
+
+func NewProcessorRepo(db *driver.Driver) *ProcessorRepo {
+	return &ProcessorRepo{
+		db: db,
+	}
+}
+
+func (r *ProcessorRepo) GetAll(ctx context.Context, workspaceID string) ([]models.Processor, error) {
+	var processors []models.Processor
+	err := r.db.Orm.WithContext(ctx).
+		Select("id", "name", "triggers", "enabled", "workflow", "updated_at").
+		Where("workspace_id = ?", workspaceID).
+		Order("enabled desc, updated_at desc").
+		Find(&processors).Error
+
+	if err != nil {
+		return nil, dbutils.DBError(ctx, r.db.Orm.Logger, err)
+	}
+
+	return processors, nil
+}
+
+func (r *ProcessorRepo) Get(ctx context.Context, processorID string) (*models.Processor, error) {
+	var processor models.Processor
+	err := r.db.Orm.WithContext(ctx).
+		First(&processor, "id = ?", processorID).Error
+
+	if err != nil {
+		return nil, dbutils.DBError(ctx, r.db.Orm.Logger, err)
+	}
+
+	return &processor, nil
+}
+
+func (r *ProcessorRepo) Create(ctx context.Context, processor *models.Processor) error {
+	err := r.db.Orm.WithContext(ctx).Create(processor).Error
+	if err != nil {
+		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
+	}
+	return nil
+}
+
+func (r *ProcessorRepo) Patch(ctx context.Context, workspaceID, processorID string, patch map[string]interface{}) error {
+	if err := r.db.Orm.WithContext(ctx).Model(&models.Processor{}).Where("id = ?", processorID).Updates(patch).Error; err != nil {
+		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
+	}
+	return nil
+}
+
+func (r *ProcessorRepo) Delete(ctx context.Context, workspaceID, processorID string) error {
+	if err := r.db.Orm.WithContext(ctx).Delete(&models.Processor{}, "id = ?", processorID).Error; err != nil {
+		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
+	}
+	return nil
+}
+
+func (r *ProcessorRepo) SaveWorkflow(ctx context.Context, workspaceID, processorID string, workflow string) error {
+	patch := map[string]interface{}{
+		"workflow": workflow,
+	}
+	if err := r.db.Orm.WithContext(ctx).Model(&models.Processor{}).Where("id = ?", processorID).Updates(patch).Error; err != nil {
+		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
+	}
+	return nil
+}

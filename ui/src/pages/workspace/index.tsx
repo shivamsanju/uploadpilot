@@ -18,13 +18,11 @@ const WorkspaceLandingPage = () => {
       <Box mb="lg" className={classes.wscontainer}>
         <Paper
           withBorder
-          h="200"
-          className={classes.wsitem}
+          h="80"
+          className={classes.wsItemAdd}
           onClick={() => navigate('/workspace/new')}
         >
-          <Group justify="center" h="100%">
-            <IconPlus size={30} stroke={2} color="gray" />
-          </Group>
+          <IconPlus size={30} stroke={2} color="gray" />
         </Paper>
         {workspaces?.length > 0 &&
           workspaces.map((workspace: any) => (

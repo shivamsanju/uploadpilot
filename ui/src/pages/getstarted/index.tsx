@@ -1,4 +1,4 @@
-import { Group, Paper, Stack, Text } from '@mantine/core';
+import { ActionIcon, Group, Stack, Text } from '@mantine/core';
 import { useViewportSize } from '@mantine/hooks';
 import {
   IconBrandGolang,
@@ -9,7 +9,6 @@ import {
 } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useSetBreadcrumbs } from '../../hooks/breadcrumb';
-import { FrameworkCard } from './FrameworkCard';
 import classes from './getstarted.module.css';
 import GoIntegrationPage from './go';
 import ReactUploaderPreviewPage from './react';
@@ -55,6 +54,46 @@ const frameworks = [
     name: 'TypeScript',
     icon: IconBrandTypescript,
   },
+  {
+    name: 'React',
+    icon: IconBrandReact,
+  },
+  {
+    name: 'Go',
+    icon: IconBrandGolang,
+  },
+  {
+    name: 'Python',
+    icon: IconBrandPython,
+  },
+  {
+    name: 'JavaScript',
+    icon: IconBrandJavascript,
+  },
+  {
+    name: 'TypeScript',
+    icon: IconBrandTypescript,
+  },
+  {
+    name: 'React',
+    icon: IconBrandReact,
+  },
+  {
+    name: 'Go',
+    icon: IconBrandGolang,
+  },
+  {
+    name: 'Python',
+    icon: IconBrandPython,
+  },
+  {
+    name: 'JavaScript',
+    icon: IconBrandJavascript,
+  },
+  {
+    name: 'TypeScript',
+    icon: IconBrandTypescript,
+  },
 ];
 
 export const GetStartedPage = () => {
@@ -73,24 +112,23 @@ export const GetStartedPage = () => {
       <Text ta="center" fw={700} fz="25px" mb="sm">
         Choose your framework
       </Text>
-      <Group justify="center" gap="xl" mb="md">
+      <Group justify="center" gap="xl" mb="md" w="50%">
         {frameworks.map(framework => (
-          <Paper
-            className={`${classes.frameworkCard} ${
-              selectedFramework === framework.name ? classes.selected : ''
-            }`}
+          <ActionIcon
             key={framework.name}
-            p="md"
-            withBorder
+            size="60"
+            p="sm"
+            radius="xl"
+            variant={
+              selectedFramework === framework.name ? 'filled' : 'outline'
+            }
             onClick={() => setSelectedFramework(framework.name)}
+            className={
+              selectedFramework === framework.name ? classes.selected : ''
+            }
           >
-            <FrameworkCard
-              framework={framework.name}
-              Icon={framework.icon}
-              h="100%"
-              w="100px"
-            />
-          </Paper>
+            {<framework.icon size={30} />}
+          </ActionIcon>
         ))}
       </Group>
       {selectedFramework === 'React' && <ReactUploaderPreviewPage style={s} />}
