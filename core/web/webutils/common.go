@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/mitchellh/mapstructure"
+	"github.com/supertokens/supertokens-golang/recipe/emailpassword"
+	"github.com/supertokens/supertokens-golang/recipe/thirdparty"
 	"github.com/uploadpilot/core/internal/dto"
 	"github.com/uploadpilot/core/internal/msg"
 )
@@ -18,12 +21,26 @@ func GetSessionFromCtx(ctx context.Context) (*dto.Session, error) {
 		return nil, errors.New(msg.ErrUserInfoNotFoundInRequest)
 	}
 
-	userInfo, ok := value.(dto.Session)
+	userInfo, ok := value.(*dto.Session)
 	if !ok {
 		return nil, errors.New(msg.ErrInvalidUserInfoInRequest)
 	}
 
-	return &userInfo, nil
+	return userInfo, nil
+}
+
+func GetEmailFromUserID(userID string) (string, error) {
+	tpusr, err := thirdparty.GetUserByID(userID)
+	if err == nil && tpusr != nil {
+		return tpusr.Email, nil
+	}
+
+	epusr, err := emailpassword.GetUserByID(userID)
+	if err == nil && epusr != nil {
+		return epusr.Email, nil
+	}
+
+	return "", errors.New(msg.ErrUserInfoNotFoundInRequest)
 }
 
 func GetStatusLabel(status int) string {
@@ -46,7 +63,7 @@ func GetAPIKeyFromReq(r *http.Request) string {
 }
 
 func GetTenantIDFromReq(r *http.Request) string {
-	return r.Header.Get("X-Tenant-Id")
+	return chi.URLParam(r, "tenantId")
 }
 
 func GetUserTenantsFromMetadata(metadata map[string]interface{}) (map[string]dto.TenantMetadata, error) {

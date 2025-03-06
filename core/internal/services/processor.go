@@ -68,7 +68,7 @@ func (s *ProcessorService) CreateProcessor(ctx context.Context, workspaceID stri
 		templateKey = new(string)
 		*templateKey = "sample"
 	}
-	sampleWflow, err := os.ReadFile("./internal/svc/processor/templates/" + *templateKey + ".yaml")
+	sampleWflow, err := os.ReadFile("./internal/templates/" + *templateKey + ".yaml")
 	if err != nil {
 		return err
 	}

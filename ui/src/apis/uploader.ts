@@ -1,7 +1,7 @@
 import { notifications } from '@mantine/notifications';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { WorkspaceConfig } from '../types/uploader';
-import axiosInstance from '../utils/axios';
+import { axiosTenantInstance } from '../utils/axios';
 
 export const useGetUploaderConfig = (workspaceId: string) => {
   const queryClient = useQueryClient();
@@ -15,7 +15,7 @@ export const useGetUploaderConfig = (workspaceId: string) => {
       if (!workspaceId) {
         return Promise.reject(new Error('workspaceId is required'));
       }
-      return axiosInstance
+      return axiosTenantInstance
         .get(`/workspaces/${workspaceId}/config`)
         .then(res => res.data);
     },
@@ -41,7 +41,7 @@ export const useUpdateUploaderConfigMutation = () => {
       workspaceId: string;
       config: WorkspaceConfig;
     }) => {
-      return axiosInstance
+      return axiosTenantInstance
         .put(`/workspaces/${workspaceId}/config`, config)
         .then(res => res.data);
     },

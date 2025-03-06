@@ -1,4 +1,5 @@
 import {
+  Button,
   Group,
   MultiSelect,
   NumberInput,
@@ -13,8 +14,6 @@ import { showNotification } from '@mantine/notifications';
 import { useParams } from 'react-router-dom';
 import { useUpdateUploaderConfigMutation } from '../../apis/uploader';
 import { useGetAllAllowedSources } from '../../apis/workspace';
-import { DiscardButton } from '../../components/Buttons/DiscardButton';
-import { SaveButton } from '../../components/Buttons/SaveButton';
 import { ContainerOverlay } from '../../components/Overlay';
 import { WorkspaceConfig } from '../../types/uploader';
 import classes from './Form.module.css';
@@ -212,8 +211,10 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
       </SimpleGrid>
 
       <Group gap="md" mt="50">
-        <DiscardButton type="reset" />
-        <SaveButton type="submit" variant="white" />
+        <Button variant="outline" type="reset">
+          Reset
+        </Button>
+        <Button type="submit">Save</Button>
       </Group>
     </form>
   );

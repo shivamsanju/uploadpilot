@@ -1,7 +1,8 @@
 import { notifications } from '@mantine/notifications';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { APIKey, type CreateApiKeyData } from '../types/apikey';
-import axiosInstance from '../utils/axios';
+import { axiosTenantInstance } from '../utils/axios';
+import { getTenantId } from '../utils/config';
 
 export const useGetApiKeys = () => {
   const queryClient = useQueryClient();
@@ -12,7 +13,13 @@ export const useGetApiKeys = () => {
   } = useQuery<APIKey[]>({
     queryKey: ['apikeys'],
     queryFn: () => {
-      return axiosInstance.get(`/api-keys`).then(res => res.data);
+      const tenantId = getTenantId();
+      if (!tenantId) {
+        return Promise.reject(new Error('tenantId is required'));
+      }
+      return axiosTenantInstance
+        .get(`/tenants/${tenantId}/api-keys`)
+        .then(res => res.data);
     },
   });
 
@@ -28,7 +35,13 @@ export const useCreateApiKeyMutation = () => {
   return useMutation({
     mutationKey: ['ApiKeys'],
     mutationFn: ({ data }: { data: CreateApiKeyData }) => {
-      return axiosInstance.post(`/api-keys`, data).then(res => res.data);
+      const tenantId = getTenantId();
+      if (!tenantId) {
+        return Promise.reject(new Error('tenantId is required'));
+      }
+      return axiosTenantInstance
+        .post(`/tenants/${tenantId}/api-keys`, data)
+        .then(res => res.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['apikeys'] });
@@ -54,7 +67,13 @@ export const useRevokeApiKeyMutation = () => {
   return useMutation({
     mutationKey: ['apikeys'],
     mutationFn: ({ id }: { id: string }) => {
-      return axiosInstance.post(`/api-keys/${id}/revoke`).then(res => res.data);
+      const tenantId = getTenantId();
+      if (!tenantId) {
+        return Promise.reject(new Error('tenantId is required'));
+      }
+      return axiosTenantInstance
+        .post(`/tenants/${tenantId}/api-keys/${id}/revoke`)
+        .then(res => res.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['apikeys'] });

@@ -25,33 +25,33 @@ func NewWorkspaceService(accessManager *rbac.AccessManager, wsRepo *repo.Workspa
 	}
 }
 
-func (s *WorkspaceService) GetAllWorkspaces(ctx context.Context) ([]models.Workspace, error) {
+func (s *WorkspaceService) GetAllWorkspaces(ctx context.Context, tenantID string) ([]models.Workspace, error) {
 	session, err := webutils.GetSessionFromCtx(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	access, err := s.acm.GetSubjectTenantAccess(session.UserID, session.TenantID)
+	access, err := s.acm.GetSubjectTenantAccess(session.UserID, tenantID)
 	if err != nil {
 		return nil, err
 	}
 
 	log.Debug().Interface("access", access).Msg("access")
 
-	workspaces, err := s.wsRepo.GetAll(ctx, session.TenantID)
+	workspaces, err := s.wsRepo.GetAll(ctx, tenantID)
 	if err != nil {
 		return nil, err
 	}
 	return workspaces, nil
 }
 
-func (s *WorkspaceService) GetWorkspaceInfo(ctx context.Context, workspaceID string) (*models.Workspace, error) {
+func (s *WorkspaceService) GetWorkspaceInfo(ctx context.Context, tenantID, workspaceID string) (*models.Workspace, error) {
 	session, err := webutils.GetSessionFromCtx(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	if !s.acm.CheckAccess(session.UserID, session.TenantID, workspaceID, rbac.Reader) {
+	if !s.acm.CheckAccess(session.UserID, tenantID, workspaceID, rbac.Reader) {
 		return nil, err
 	}
 
@@ -62,47 +62,47 @@ func (s *WorkspaceService) GetWorkspaceInfo(ctx context.Context, workspaceID str
 	return ws, nil
 }
 
-func (s *WorkspaceService) CreateWorkspace(ctx context.Context, workspace *models.Workspace) error {
+func (s *WorkspaceService) CreateWorkspace(ctx context.Context, tenantID string, workspace *models.Workspace) error {
 	session, err := webutils.GetSessionFromCtx(ctx)
 	if err != nil {
 		return err
 	}
 
-	if !s.acm.CheckAccess(session.UserID, session.TenantID, "*", rbac.Admin) {
+	if !s.acm.CheckAccess(session.UserID, tenantID, "*", rbac.Admin) {
 		return err
 	}
 
-	if err := s.acm.AddAccess(session.UserID, session.TenantID, workspace.ID, rbac.Admin); err != nil {
+	if err := s.acm.AddAccess(session.UserID, tenantID, workspace.ID, rbac.Admin); err != nil {
 		return err
 	}
 
 	workspace.CreatedBy = session.UserID
 	workspace.UpdatedBy = session.UserID
-	workspace.TenantID = session.TenantID
+	workspace.TenantID = tenantID
 	err = s.wsRepo.Create(ctx, workspace)
 	return err
 }
 
-func (s *WorkspaceService) DeleteWorkspace(ctx context.Context, workspaceID string) error {
+func (s *WorkspaceService) DeleteWorkspace(ctx context.Context, tenantID, workspaceID string) error {
 	session, err := webutils.GetSessionFromCtx(ctx)
 	if err != nil {
 		return err
 	}
 
-	if !s.acm.CheckAccess(session.UserID, session.TenantID, workspaceID, rbac.Admin) {
+	if !s.acm.CheckAccess(session.UserID, tenantID, workspaceID, rbac.Admin) {
 		return err
 	}
 
 	return s.wsRepo.Delete(ctx, workspaceID)
 }
 
-func (s *WorkspaceService) GetWorkspaceConfig(ctx context.Context, workspaceID string) (*models.WorkspaceConfig, error) {
+func (s *WorkspaceService) GetWorkspaceConfig(ctx context.Context, tenantID, workspaceID string) (*models.WorkspaceConfig, error) {
 	session, err := webutils.GetSessionFromCtx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	hascess := s.acm.CheckAccess(session.UserID, session.TenantID, workspaceID, rbac.Reader)
-	log.Debug().Str("UserID", session.UserID).Str("TenantID", session.TenantID).Str("WorkspaceID", workspaceID).Bool("hascess", hascess).Msg("GetWorkspaceConfig")
+	hascess := s.acm.CheckAccess(session.UserID, tenantID, workspaceID, rbac.Reader)
+	log.Debug().Str("UserID", session.UserID).Str("TenantID", tenantID).Str("WorkspaceID", workspaceID).Bool("hascess", hascess).Msg("GetWorkspaceConfig")
 	if !hascess {
 		return nil, fmt.Errorf("access denied")
 	}
@@ -113,7 +113,7 @@ func (s *WorkspaceService) GetWorkspaceConfig(ctx context.Context, workspaceID s
 	return config, nil
 }
 
-func (s *WorkspaceService) SetWorkspaceConfig(ctx context.Context, workspaceID string, config *models.WorkspaceConfig) error {
+func (s *WorkspaceService) SetWorkspaceConfig(ctx context.Context, tenantID, workspaceID string, config *models.WorkspaceConfig) error {
 	config.WorkspaceID = workspaceID
 	err := s.wsConfigRepo.SetConfig(ctx, config)
 	if err != nil {

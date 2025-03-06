@@ -3,13 +3,11 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
 	"github.com/jinzhu/copier"
+	"github.com/uploadpilot/core/internal/activities/catalog"
 	"github.com/uploadpilot/core/internal/db/models"
 	"github.com/uploadpilot/core/internal/dto"
 	"github.com/uploadpilot/core/internal/services"
-	"github.com/uploadpilot/core/web/webutils"
 )
 
 type processorHandler struct {
@@ -22,32 +20,27 @@ func NewProcessorsHandler(pSvc *services.ProcessorService) *processorHandler {
 	}
 }
 
-func (h *processorHandler) GetProcessors(w http.ResponseWriter, r *http.Request) {
-	workspaceID := chi.URLParam(r, "workspaceId")
-
-	processors, err := h.pSvc.GetAllProcessorsInWorkspace(r.Context(), workspaceID)
+func (h *processorHandler) GetProcessors(r *http.Request, params dto.WorkspaceParams, query, body interface{}) ([]models.Processor, int, error) {
+	processors, err := h.pSvc.GetAllProcessorsInWorkspace(r.Context(), params.WorkspaceID)
 	if err != nil {
-		webutils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
+		return nil, http.StatusBadRequest, err
 	}
 
-	render.JSON(w, r, processors)
+	return processors, http.StatusOK, nil
 }
 
-func (h *processorHandler) GetProcessorDetailsByID(w http.ResponseWriter, r *http.Request) {
-	processorID := chi.URLParam(r, "processorId")
-
-	processor, err := h.pSvc.GetProcessor(r.Context(), processorID)
+func (h *processorHandler) GetProcessorDetailsByID(r *http.Request, params dto.ProcessorParams, query, body interface{}) (*models.Processor, int, error) {
+	processor, err := h.pSvc.GetProcessor(r.Context(), params.ProcessorID)
 	if err != nil {
-		webutils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
+		return nil, http.StatusBadRequest, err
 	}
 
-	render.JSON(w, r, processor)
+	return processor, http.StatusOK, nil
 }
-func (h *processorHandler) GetTemplates(w http.ResponseWriter, r *http.Request) {
+
+func (h *processorHandler) GetTemplates(r *http.Request, params dto.WorkspaceParams, query, body interface{}) ([]dto.ProcessorTemplate, int, error) {
 	templates := h.pSvc.GetTemplates(r.Context())
-	render.JSON(w, r, templates)
+	return templates, http.StatusOK, nil
 }
 
 func (h *processorHandler) CreateProcessor(r *http.Request, params dto.WorkspaceParams, query interface{}, body dto.CreateProcessorRequest) (*string, int, error) {
@@ -62,101 +55,63 @@ func (h *processorHandler) CreateProcessor(r *http.Request, params dto.Workspace
 	return &processor.ID, http.StatusOK, nil
 }
 
-func (h *processorHandler) UpdateProcessor(w http.ResponseWriter, r *http.Request) {
-	processorID := chi.URLParam(r, "processorId")
-	workspaceID := chi.URLParam(r, "workspaceId")
-
-	processor := &dto.EditProcRequest{}
-	if err := render.DecodeJSON(r.Body, processor); err != nil {
-		webutils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	err := h.pSvc.EditNameAndTrigger(r.Context(), workspaceID, processorID, processor)
+func (h *processorHandler) UpdateProcessor(r *http.Request, params dto.ProcessorParams, query interface{}, body dto.EditProcRequest) (*string, int, error) {
+	err := h.pSvc.EditNameAndTrigger(r.Context(), params.WorkspaceID, params.ProcessorID, &body)
 	if err != nil {
-		webutils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
+		return nil, http.StatusBadRequest, err
 	}
-
-	render.JSON(w, r, true)
+	return nil, http.StatusOK, nil
 }
 
-func (h *processorHandler) DeleteProcessor(w http.ResponseWriter, r *http.Request) {
-	processorID := chi.URLParam(r, "processorId")
-	workspaceID := chi.URLParam(r, "workspaceId")
-
-	if err := h.pSvc.DeleteProcessor(r.Context(), workspaceID, processorID); err != nil {
-		webutils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
+func (h *processorHandler) DeleteProcessor(r *http.Request, params dto.ProcessorParams, query, body interface{}) (bool, int, error) {
+	if err := h.pSvc.DeleteProcessor(r.Context(), params.WorkspaceID, params.ProcessorID); err != nil {
+		return false, http.StatusBadRequest, err
 	}
-
-	render.JSON(w, r, true)
+	return true, http.StatusOK, nil
 }
 
-func (h *processorHandler) UpdateWorkflow(w http.ResponseWriter, r *http.Request) {
-	processorID := chi.URLParam(r, "processorId")
-	workspaceID := chi.URLParam(r, "workspaceId")
-
-	workflow := &dto.WorkflowUpdate{}
-	if err := render.DecodeJSON(r.Body, workflow); err != nil {
-		webutils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
-		return
+func (h *processorHandler) UpdateWorkflow(r *http.Request, params dto.ProcessorParams, query interface{}, body dto.WorkflowUpdate) (bool, int, error) {
+	if err := h.pSvc.UpdateWorkflow(r.Context(), params.WorkspaceID, params.ProcessorID, body.Workflow); err != nil {
+		return false, http.StatusBadRequest, err
 	}
-	if err := h.pSvc.UpdateWorkflow(r.Context(), workspaceID, processorID, workflow.Workflow); err != nil {
-		webutils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
-	}
-
-	render.JSON(w, r, true)
+	return true, http.StatusOK, nil
 }
 
-func (h *processorHandler) EnableProcessor(w http.ResponseWriter, r *http.Request) {
-	processorID := chi.URLParam(r, "processorId")
-	workspaceID := chi.URLParam(r, "workspaceId")
-
-	err := h.pSvc.EnableDisableProcessor(r.Context(), workspaceID, processorID, true)
+func (h *processorHandler) EnableProcessor(r *http.Request, params dto.ProcessorParams, query, body interface{}) (bool, int, error) {
+	err := h.pSvc.EnableDisableProcessor(r.Context(), params.WorkspaceID, params.ProcessorID, true)
 	if err != nil {
-		webutils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
+		return false, http.StatusBadRequest, err
 	}
 
-	render.JSON(w, r, true)
+	return true, http.StatusOK, nil
 }
 
-func (h *processorHandler) DisableProcessor(w http.ResponseWriter, r *http.Request) {
-	processorID := chi.URLParam(r, "processorId")
-	workspaceID := chi.URLParam(r, "workspaceId")
-
-	err := h.pSvc.EnableDisableProcessor(r.Context(), workspaceID, processorID, false)
+func (h *processorHandler) DisableProcessor(r *http.Request, params dto.ProcessorParams, query, body interface{}) (bool, int, error) {
+	err := h.pSvc.EnableDisableProcessor(r.Context(), params.WorkspaceID, params.ProcessorID, false)
 	if err != nil {
-		webutils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
+		return false, http.StatusBadRequest, err
 	}
 
-	render.JSON(w, r, true)
+	return true, http.StatusOK, nil
 }
 
-func (h *processorHandler) GetAllActivities(w http.ResponseWriter, r *http.Request) {
-	render.JSON(w, r, h.pSvc.GetAllActivities(r.Context()))
+func (h *processorHandler) GetAllActivities(r *http.Request, params dto.ProcessorParams, query, body interface{}) ([]catalog.ActivityMetadata, int, error) {
+	return h.pSvc.GetAllActivities(r.Context()), http.StatusOK, nil
 }
 
-func (h *processorHandler) GetWorkflowRuns(w http.ResponseWriter, r *http.Request) {
-	processorID := chi.URLParam(r, "processorId")
-	runs, err := h.pSvc.GetWorkflowRuns(r.Context(), processorID)
+func (h *processorHandler) GetWorkflowRuns(r *http.Request, params dto.ProcessorParams, query, body interface{}) ([]dto.WorkflowRun, int, error) {
+	runs, err := h.pSvc.GetWorkflowRuns(r.Context(), params.ProcessorID)
 	if err != nil {
-		webutils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
+		return nil, http.StatusBadRequest, err
 	}
-	render.JSON(w, r, runs)
+	return runs, http.StatusOK, nil
 }
 
-func (h *processorHandler) GetWorkflowLogs(w http.ResponseWriter, r *http.Request) {
-	workflowID := r.URL.Query().Get("workflowId")
-	runID := r.URL.Query().Get("runId")
-	details, err := h.pSvc.GetWorkflowHistory(r.Context(), workflowID, runID)
+func (h *processorHandler) GetWorkflowLogs(r *http.Request, params dto.WorkflowRunParams, query, body interface{}) ([]dto.WorkflowRunLogs, int, error) {
+	details, err := h.pSvc.GetWorkflowHistory(r.Context(), params.WorkflowID, params.RunID)
 	if err != nil {
-		webutils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
+		return nil, http.StatusBadRequest, err
 	}
-	render.JSON(w, r, details)
+
+	return details, http.StatusOK, nil
 }

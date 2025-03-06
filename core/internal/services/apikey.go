@@ -35,25 +35,25 @@ func NewAPIKeyService(apiKeyRepo *repo.APIKeyRepo, kms vault.KMS) *APIKeyService
 	}
 }
 
-func (s *APIKeyService) GetAllAPIKeysForUser(ctx context.Context) ([]models.APIKey, error) {
+func (s *APIKeyService) GetAllAPIKeysForUser(ctx context.Context, tenantID string) ([]models.APIKey, error) {
 	user, err := webutils.GetSessionFromCtx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return s.apiKeyRepo.GetAllApiKeys(ctx, user.UserID)
+	return s.apiKeyRepo.GetAllApiKeys(ctx, user.UserID, tenantID)
 }
 
 func (s *APIKeyService) GetAPIKeyInfo(ctx context.Context, id string) (*models.APIKey, error) {
 	return s.apiKeyRepo.GetApiKeyDetailsByID(ctx, id)
 }
 
-func (s *APIKeyService) CreateAPIKey(ctx context.Context, data *dto.CreateApiKeyData) (string, error) {
+func (s *APIKeyService) CreateAPIKey(ctx context.Context, tenantID string, data *dto.CreateApiKeyData) (string, error) {
 	session, err := webutils.GetSessionFromCtx(ctx)
 	if err != nil {
 		return "", err
 	}
 
-	perms, scope, err := s.getScopeAndPerm(session, data)
+	perms, scope, err := s.getScopeAndPerm(tenantID, session, data)
 	if err != nil {
 		return "", err
 	}
@@ -69,7 +69,7 @@ func (s *APIKeyService) CreateAPIKey(ctx context.Context, data *dto.CreateApiKey
 	apiKey := &models.APIKey{
 		Name:        data.Name,
 		UserID:      session.UserID,
-		TenantID:    session.TenantID,
+		TenantID:    tenantID,
 		ApiKeyHash:  hashedKey,
 		ExpiresAt:   &data.ExpiresAt,
 		Scopes:      scope,
@@ -172,14 +172,14 @@ func (s *APIKeyService) verifyAPIKeyPermissions(apiKey *models.APIKey, perms ...
 	return false
 }
 
-func (s *APIKeyService) getScopeAndPerm(session *dto.Session, data *dto.CreateApiKeyData) ([]models.APIKeyPermission, []string, error) {
+func (s *APIKeyService) getScopeAndPerm(tenantID string, session *dto.Session, data *dto.CreateApiKeyData) ([]models.APIKeyPermission, []string, error) {
 	scopes := make(map[string]struct{})
 	var perms []models.APIKeyPermission
 
 	if data.TenantRead {
 		scopes[fmt.Sprintf("%s:%s", models.APIPermResourceTypeTenant, models.APIKeyPermissionTypeRead)] = struct{}{}
 		perms = append(perms, models.APIKeyPermission{
-			ResourceID:   session.TenantID,
+			ResourceID:   tenantID,
 			ResourceType: models.APIPermResourceTypeTenant,
 			Permission:   models.APIKeyPermissionTypeRead,
 		})
@@ -187,7 +187,7 @@ func (s *APIKeyService) getScopeAndPerm(session *dto.Session, data *dto.CreateAp
 	if data.TenantManage {
 		scopes[fmt.Sprintf("%s:%s", models.APIPermResourceTypeTenant, models.APIKeyPermissionTypeManage)] = struct{}{}
 		perms = append(perms, models.APIKeyPermission{
-			ResourceID:   session.TenantID,
+			ResourceID:   tenantID,
 			ResourceType: models.APIPermResourceTypeTenant,
 			Permission:   models.APIKeyPermissionTypeManage,
 		})

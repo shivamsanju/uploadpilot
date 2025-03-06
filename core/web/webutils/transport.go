@@ -1,6 +1,9 @@
 package webutils
 
 import (
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"reflect"
 	"strings"
@@ -46,30 +49,49 @@ func CreateJSONHandler[Params any, Query any, Body any, Result any](
 			}
 		}
 
-		// Decode query
+		// Decode query with strict validation
 		var query Query
 		if shouldDecode(query) {
 			queryMap := make(map[string]string)
 			for k, v := range r.URL.Query() {
 				queryMap[k] = strings.Join(v, ",")
 			}
-			if err := mapstructure.Decode(queryMap, &query); err != nil {
-				HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
+
+			// Strict decoding for query params
+			decoderConfig := &mapstructure.DecoderConfig{
+				Metadata:    nil,
+				Result:      &query,
+				ErrorUnused: true, // Disallow extra fields
+			}
+			decoder, _ := mapstructure.NewDecoder(decoderConfig)
+			if err := decoder.Decode(queryMap); err != nil {
+				HandleHttpError(w, r, http.StatusUnprocessableEntity, fmt.Errorf("invalid query parameters: %w", err))
 				return
 			}
+
 			if err := validator.ValidateStruct(query); err != nil {
 				HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
 				return
 			}
 		}
 
-		// Decode body
+		// Decode body with strict JSON validation
 		var body Body
 		if shouldDecode(body) {
-			if err := render.DecodeJSON(r.Body, &body); err != nil && r.ContentLength > 0 {
-				HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
+			decoder := json.NewDecoder(r.Body)
+			decoder.DisallowUnknownFields() // Reject unknown fields
+
+			if err := decoder.Decode(&body); err != nil && r.ContentLength > 0 {
+				HandleHttpError(w, r, http.StatusUnprocessableEntity, fmt.Errorf("invalid request body: %w", err))
 				return
 			}
+
+			// Ensure there's no extra data after decoding
+			if err := decoder.Decode(&struct{}{}); err != io.EOF {
+				HandleHttpError(w, r, http.StatusUnprocessableEntity, fmt.Errorf("unexpected extra fields in request body"))
+				return
+			}
+
 			if err := validator.ValidateStruct(body); err != nil {
 				HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
 				return

@@ -2,7 +2,6 @@ package routes
 
 import (
 	"github.com/go-chi/chi/v5"
-	"github.com/supertokens/supertokens-golang/recipe/session"
 	"github.com/supertokens/supertokens-golang/supertokens"
 	"github.com/uploadpilot/core/internal/services"
 	"github.com/uploadpilot/core/web/handlers"
@@ -22,79 +21,69 @@ func NewAppRoutesV1(services *services.Services, middlewares *middlewares.Middle
 	procHandler := handlers.NewProcessorsHandler(services.ProcessorService)
 
 	router.Use(supertokens.Middleware)
+	router.Use(middlewares.CorsMiddleware)
+	router.Use(middlewares.VerifySession)
 
-	router.Group(func(r chi.Router) {
-		// User
-		r.Route("/user", func(r chi.Router) {
-			r.Get("/", session.VerifySession(nil, webutils.CreateJSONHandler(userHandler.GetUserDetails)))
-			r.Put("/", session.VerifySession(nil, webutils.CreateJSONHandler(userHandler.UpdateUserDetails)))
-
-		})
-
-		// Tenants
-		r.Route("/tenants", func(r chi.Router) {
-			r.Post("/", session.VerifySession(nil, webutils.CreateJSONHandler(tenantHandler.OnboardTenant)))
-			r.Put("/active", session.VerifySession(nil, webutils.CreateJSONHandler(tenantHandler.SetActiveTenant)))
-		})
+	router.Route("/user", func(r chi.Router) {
+		r.Get("/", webutils.CreateJSONHandler(userHandler.GetUserDetails))
+		r.Put("/", webutils.CreateJSONHandler(userHandler.UpdateUserDetails))
 
 	})
 
-	// Protected routes
+	router.Route("/tenants", func(r chi.Router) {
+		r.Post("/", webutils.CreateJSONHandler(tenantHandler.OnboardTenant))
+		r.Put("/active", webutils.CreateJSONHandler(tenantHandler.SetActiveTenant))
+	})
+
+	// Specific tenant routes
 	router.Group(func(r chi.Router) {
-		r.Use(middlewares.CorsMiddleware)
-		r.Use(middlewares.AuthMiddleware)
+		r.Use(middlewares.VerifyTenantAccess)
 
-		// ApiKeys
-		r.Route("/api-keys", func(r chi.Router) {
-
-			r.Get("/", webutils.CreateJSONHandler(authHandler.GetAPIKeys))
-			r.Post("/", webutils.CreateJSONHandler(authHandler.CreateAPIKey))
-			r.Route("/{apiKeyId}", func(r chi.Router) {
-				r.Post("/revoke", webutils.CreateJSONHandler(authHandler.RevokeAPIKey))
-			})
-		})
-
-		// Workspaces
-		r.Route("/workspaces", func(r chi.Router) {
-			r.Get("/", workspaceHandler.GetAllWorkspaces)
-			r.Post("/", workspaceHandler.CreateWorkspace)
-
-			// Single workspace
-			r.Route("/{workspaceId}", func(r chi.Router) {
-
-				r.Get("/config", workspaceHandler.GetWorkspaceConfig)
-				r.Put("/config", workspaceHandler.SetWorkspaceConfig)
-				r.Get("/allowedSources", webutils.CreateJSONHandler(workspaceHandler.GetAllAllowedSources))
-
-				// Uploads
-				r.Route("/uploads", func(r chi.Router) {
-					r.Get("/", webutils.CreateJSONHandler(uploadHandler.GetPaginatedUploads))
-					r.Post("/", webutils.CreateJSONHandler(uploadHandler.CreateUpload))
-					r.Post("/log", webutils.CreateJSONHandler(workspaceHandler.LogUpload))
-
-					r.Route("/{uploadId}", func(r chi.Router) {
-						r.Get("/", uploadHandler.GetUploadDetailsByID)
-						r.Post("/finish", webutils.CreateJSONHandler(uploadHandler.FinishUpload))
-						r.Get("/download", webutils.CreateJSONHandler(uploadHandler.GetUploadURL))
-						r.Post("/process", webutils.CreateJSONHandler(uploadHandler.ProcessUpload))
-					})
+		r.Route("/tenants/{tenantId}", func(r chi.Router) {
+			r.Route("/api-keys", func(r chi.Router) {
+				r.Get("/", webutils.CreateJSONHandler(authHandler.GetAPIKeys))
+				r.Post("/", webutils.CreateJSONHandler(authHandler.CreateAPIKey))
+				r.Route("/{apiKeyId}", func(r chi.Router) {
+					r.Post("/revoke", webutils.CreateJSONHandler(authHandler.RevokeAPIKey))
 				})
+			})
 
-				// processors
-				r.Route("/processors", func(r chi.Router) {
-					r.Get("/", procHandler.GetProcessors)
-					r.Post("/", webutils.CreateJSONHandler(procHandler.CreateProcessor))
-					r.Get("/activities", procHandler.GetAllActivities)
-					r.Get("/templates", procHandler.GetTemplates)
-					r.Route("/{processorId}", func(r chi.Router) {
-						r.Get("/", procHandler.GetProcessorDetailsByID)
-						r.Put("/", procHandler.UpdateProcessor)
-						r.Delete("/", procHandler.DeleteProcessor)
-						r.Put("/enable", procHandler.EnableProcessor)
-						r.Put("/disable", procHandler.DisableProcessor)
-						r.Put("/workflow", procHandler.UpdateWorkflow)
-						r.Get("/runs", procHandler.GetWorkflowRuns)
-						r.Get("/logs", procHandler.GetWorkflowLogs)
+			r.Route("/workspaces", func(r chi.Router) {
+				r.Get("/", webutils.CreateJSONHandler(workspaceHandler.GetAllWorkspaces))
+				r.Post("/", webutils.CreateJSONHandler(workspaceHandler.CreateWorkspace))
+
+				r.Route("/{workspaceId}", func(r chi.Router) {
+					r.Get("/config", webutils.CreateJSONHandler(workspaceHandler.GetWorkspaceConfig))
+					r.Put("/config", webutils.CreateJSONHandler(workspaceHandler.SetWorkspaceConfig))
+					r.Get("/allowedSources", webutils.CreateJSONHandler(workspaceHandler.GetAllAllowedSources))
+
+					r.Route("/uploads", func(r chi.Router) {
+						r.Get("/", webutils.CreateJSONHandler(uploadHandler.GetPaginatedUploads))
+						r.Post("/", webutils.CreateJSONHandler(uploadHandler.CreateUpload))
+						r.Post("/log", webutils.CreateJSONHandler(workspaceHandler.LogUpload))
+						r.Route("/{uploadId}", func(r chi.Router) {
+							r.Get("/", webutils.CreateJSONHandler(uploadHandler.GetUploadDetailsByID))
+							r.Post("/finish", webutils.CreateJSONHandler(uploadHandler.FinishUpload))
+							r.Get("/download", webutils.CreateJSONHandler(uploadHandler.GetUploadURL))
+							r.Post("/process", webutils.CreateJSONHandler(uploadHandler.ProcessUpload))
+						})
+					})
+
+					r.Route("/processors", func(r chi.Router) {
+						r.Get("/", webutils.CreateJSONHandler(procHandler.GetProcessors))
+						r.Post("/", webutils.CreateJSONHandler(procHandler.CreateProcessor))
+						r.Get("/activities", webutils.CreateJSONHandler(procHandler.GetAllActivities))
+						r.Get("/templates", webutils.CreateJSONHandler(procHandler.GetTemplates))
+						r.Route("/{processorId}", func(r chi.Router) {
+							r.Get("/", webutils.CreateJSONHandler(procHandler.GetProcessorDetailsByID))
+							r.Put("/", webutils.CreateJSONHandler(procHandler.UpdateProcessor))
+							r.Delete("/", webutils.CreateJSONHandler(procHandler.DeleteProcessor))
+							r.Put("/enable", webutils.CreateJSONHandler(procHandler.EnableProcessor))
+							r.Put("/disable", webutils.CreateJSONHandler(procHandler.DisableProcessor))
+							r.Put("/workflow", webutils.CreateJSONHandler(procHandler.UpdateWorkflow))
+							r.Get("/runs", webutils.CreateJSONHandler(procHandler.GetWorkflowRuns))
+							r.Get("/logs", webutils.CreateJSONHandler(procHandler.GetWorkflowLogs))
+						})
 					})
 				})
 			})

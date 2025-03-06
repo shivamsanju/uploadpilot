@@ -20,6 +20,7 @@ require (
 	github.com/phuslu/log v1.0.113
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/spf13/viper v1.19.0
+	github.com/stretchr/testify v1.10.0
 	github.com/supertokens/supertokens-golang v0.25.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 	go.temporal.io/api v1.44.1
@@ -102,7 +103,6 @@ require (
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stretchr/objx v0.5.2 // indirect
-	github.com/stretchr/testify v1.10.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/twilio/twilio-go v0.26.0 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect

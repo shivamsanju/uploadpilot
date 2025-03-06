@@ -53,7 +53,6 @@ const NewprocessorPage = () => {
           workspaceId,
           name: values.name,
           triggers: values.triggers,
-          enabled: values.enabled,
           templateKey: values.templateKey,
         },
       });

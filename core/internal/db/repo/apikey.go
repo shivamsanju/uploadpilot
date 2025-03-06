@@ -57,7 +57,7 @@ func (r *APIKeyRepo) GetApiKeyDetails(ctx context.Context, hash string) (*models
 	return &apiKey, nil
 }
 
-func (r *APIKeyRepo) GetAllApiKeys(ctx context.Context, userID string) ([]models.APIKey, error) {
+func (r *APIKeyRepo) GetAllApiKeys(ctx context.Context, userID string, tenantID string) ([]models.APIKey, error) {
 	var apiKeys []models.APIKey
 	if err := r.db.Orm.WithContext(ctx).
 		Select("id", "name", "user_id", "created_at", "expires_at", "revoked_at", "revoked_by").

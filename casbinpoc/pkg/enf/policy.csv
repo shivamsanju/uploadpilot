@@ -1,5 +1,0 @@
-p, user1, tenant2, workspace1, reader
-p, user2, tenant1, workspace1, reader
-p, user2, tenant1, workspace2, end-user
-p, user3, tenant1, workspace1, super-admin
-g, admin, super-admin

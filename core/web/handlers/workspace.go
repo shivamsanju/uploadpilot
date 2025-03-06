@@ -3,12 +3,9 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
 	"github.com/uploadpilot/core/internal/db/models"
 	"github.com/uploadpilot/core/internal/dto"
 	"github.com/uploadpilot/core/internal/services"
-	"github.com/uploadpilot/core/web/webutils"
 )
 
 type workspaceHandler struct {
@@ -21,65 +18,42 @@ func NewWorkspaceHandler(workspaceSvc *services.WorkspaceService) *workspaceHand
 	}
 }
 
-func (h *workspaceHandler) CreateWorkspace(w http.ResponseWriter, r *http.Request) {
-	workspace := &models.Workspace{}
-	if err := render.DecodeJSON(r.Body, workspace); err != nil {
-		webutils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	err := h.workspaceSvc.CreateWorkspace(r.Context(), workspace)
+func (h *workspaceHandler) CreateWorkspace(r *http.Request, params dto.TenantParams, query interface{}, body models.Workspace) (string, int, error) {
+	err := h.workspaceSvc.CreateWorkspace(r.Context(), params.TenantID, &body)
 	if err != nil {
-		webutils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
+		return "", http.StatusInternalServerError, err
 	}
-	render.JSON(w, r, workspace.ID)
+	return body.ID, http.StatusOK, nil
 }
 
-func (h *workspaceHandler) GetAllWorkspaces(w http.ResponseWriter, r *http.Request) {
-	workspaces, err := h.workspaceSvc.GetAllWorkspaces(r.Context())
+func (h *workspaceHandler) GetAllWorkspaces(r *http.Request, params dto.TenantParams, query, body interface{}) ([]models.Workspace, int, error) {
+	workspaces, err := h.workspaceSvc.GetAllWorkspaces(r.Context(), params.TenantID)
 	if err != nil {
-		webutils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
+		return nil, http.StatusInternalServerError, err
 	}
-	render.JSON(w, r, workspaces)
+	return workspaces, http.StatusOK, nil
 }
 
-func (h *workspaceHandler) GetWorkspaceConfig(w http.ResponseWriter, r *http.Request) {
-	workspaceID := chi.URLParam(r, "workspaceId")
-	uploaderConfig, err := h.workspaceSvc.GetWorkspaceConfig(r.Context(), workspaceID)
+func (h *workspaceHandler) GetWorkspaceConfig(r *http.Request, params dto.WorkspaceParams, query, body interface{}) (*models.WorkspaceConfig, int, error) {
+	uploaderConfig, err := h.workspaceSvc.GetWorkspaceConfig(r.Context(), params.TenantID, params.WorkspaceID)
 	if err != nil {
-		webutils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
+		return nil, http.StatusInternalServerError, err
 	}
-	render.JSON(w, r, uploaderConfig)
+	return uploaderConfig, http.StatusOK, nil
 }
 
-func (h *workspaceHandler) SetWorkspaceConfig(w http.ResponseWriter, r *http.Request) {
-	workspaceID := chi.URLParam(r, "workspaceId")
-
-	uploaderConfig := &models.WorkspaceConfig{}
-	if err := render.DecodeJSON(r.Body, uploaderConfig); err != nil {
-		webutils.HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	err := h.workspaceSvc.SetWorkspaceConfig(r.Context(), workspaceID, uploaderConfig)
+func (h *workspaceHandler) SetWorkspaceConfig(r *http.Request, params dto.WorkspaceParams, query interface{}, body models.WorkspaceConfig) (bool, int, error) {
+	err := h.workspaceSvc.SetWorkspaceConfig(r.Context(), params.TenantID, params.WorkspaceID, &body)
 	if err != nil {
-		webutils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
+		return false, http.StatusInternalServerError, err
 	}
-	render.JSON(w, r, nil)
+	return true, http.StatusOK, nil
 }
 
-func (h *workspaceHandler) GetAllAllowedSources(
-	r *http.Request, params dto.WorkspaceParams, query interface{}, body interface{},
-) ([]string, int, error) {
+func (h *workspaceHandler) GetAllAllowedSources(r *http.Request, params dto.WorkspaceParams, query, body interface{}) ([]string, int, error) {
 	return models.AllAllowedSources, http.StatusOK, nil
 }
 
-func (h *workspaceHandler) LogUpload(
-	r *http.Request, params dto.WorkspaceParams, query interface{}, body interface{},
-) (string, int, error) {
+func (h *workspaceHandler) LogUpload(r *http.Request, params dto.WorkspaceParams, query, body interface{}) (string, int, error) {
 	return "", http.StatusOK, nil
 }

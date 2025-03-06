@@ -4,14 +4,11 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/render"
 	"github.com/jinzhu/copier"
 	"github.com/uploadpilot/core/internal/db/models"
 	"github.com/uploadpilot/core/internal/dto"
 	"github.com/uploadpilot/core/internal/services"
 	"github.com/uploadpilot/core/pkg/utils"
-	"github.com/uploadpilot/core/web/webutils"
 )
 
 type uploadHandler struct {
@@ -26,12 +23,8 @@ func NewUploadHandler(uploadSvc *services.UploadService, workspaceSvc *services.
 	}
 }
 
-func (h *uploadHandler) GetPaginatedUploads(
-	r *http.Request,
-	params dto.WorkspaceParams,
-	query dto.PaginatedQuery,
-	body interface{},
-) (*dto.PaginatedResponse[models.Upload], int, error) {
+func (h *uploadHandler) GetPaginatedUploads(r *http.Request, params dto.WorkspaceParams, query dto.PaginatedQuery,
+	body interface{}) (*dto.PaginatedResponse[models.Upload], int, error) {
 
 	paginationParams, err := utils.GetPaginatedQueryParams(&query)
 	if err != nil {
@@ -48,25 +41,15 @@ func (h *uploadHandler) GetPaginatedUploads(
 	}, http.StatusOK, nil
 }
 
-func (h *uploadHandler) GetUploadDetailsByID(w http.ResponseWriter, r *http.Request) {
-	uploadID := chi.URLParam(r, "uploadId")
-	workspaceID := chi.URLParam(r, "workspaceId")
-
-	details, err := h.uploadSvc.GetUploadDetails(r.Context(), workspaceID, uploadID)
+func (h *uploadHandler) GetUploadDetailsByID(r *http.Request, params dto.UploadParams, query interface{}, body interface{}) (*models.Upload, int, error) {
+	details, err := h.uploadSvc.GetUploadDetails(r.Context(), params.WorkspaceID, params.UploadID)
 	if err != nil {
-		webutils.HandleHttpError(w, r, http.StatusBadRequest, err)
-		return
+		return nil, http.StatusBadRequest, err
 	}
-
-	render.JSON(w, r, details)
+	return details, http.StatusOK, nil
 }
 
-func (h *uploadHandler) GetUploadURL(
-	r *http.Request,
-	params dto.UploadParams,
-	query interface{},
-	body interface{},
-) (string, int, error) {
+func (h *uploadHandler) GetUploadURL(r *http.Request, params dto.UploadParams, query interface{}, body interface{}) (string, int, error) {
 	url, err := h.uploadSvc.GetUploadSignedURL(r.Context(), params.WorkspaceID, params.UploadID)
 	if err != nil {
 		return "", http.StatusBadRequest, err
@@ -75,12 +58,7 @@ func (h *uploadHandler) GetUploadURL(
 	return url, http.StatusOK, nil
 }
 
-func (h *uploadHandler) ProcessUpload(
-	r *http.Request,
-	params dto.UploadParams,
-	query interface{},
-	body interface{},
-) (string, int, error) {
+func (h *uploadHandler) ProcessUpload(r *http.Request, params dto.UploadParams, query interface{}, body interface{}) (string, int, error) {
 	statusCode, err := h.verifySubscription(r.Context(), params.WorkspaceID)
 	if err != nil {
 		return "", statusCode, err
@@ -93,12 +71,7 @@ func (h *uploadHandler) ProcessUpload(
 }
 
 // UPLOADER API
-func (h *uploadHandler) CreateUpload(
-	r *http.Request,
-	params dto.WorkspaceParams,
-	query interface{},
-	body dto.CreateUploadRequest,
-) (string, int, error) {
+func (h *uploadHandler) CreateUpload(r *http.Request, params dto.WorkspaceParams, query interface{}, body dto.CreateUploadRequest) (string, int, error) {
 	statusCode, err := h.verifySubscription(r.Context(), params.WorkspaceID)
 	if err != nil {
 		return "", statusCode, err
@@ -114,12 +87,7 @@ func (h *uploadHandler) CreateUpload(
 	return upload.ID, http.StatusOK, nil
 }
 
-func (h *uploadHandler) FinishUpload(
-	r *http.Request,
-	params dto.UploadParams,
-	query interface{},
-	body dto.FinishUploadRequest,
-) (bool, int, error) {
+func (h *uploadHandler) FinishUpload(r *http.Request, params dto.UploadParams, query interface{}, body dto.FinishUploadRequest) (bool, int, error) {
 	statusCode, err := h.verifySubscription(r.Context(), params.WorkspaceID)
 	if err != nil {
 		return false, statusCode, err

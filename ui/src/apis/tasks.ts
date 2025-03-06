@@ -1,7 +1,7 @@
 import { notifications } from '@mantine/notifications';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Task } from '../types/tasks';
-import axiosInstance from '../utils/axios';
+import { axiosTenantInstance } from '../utils/axios';
 
 export const useGetTasks = (workspaceId: string, processorId: string) => {
   const queryClient = useQueryClient();
@@ -16,7 +16,7 @@ export const useGetTasks = (workspaceId: string, processorId: string) => {
       if (!workspaceId) {
         return Promise.reject(new Error('workspaceId is required'));
       }
-      return axiosInstance
+      return axiosTenantInstance
         .get(`/workspaces/${workspaceId}/processors/${processorId}/tasks`)
         .then(res => res.data);
     },
@@ -44,7 +44,7 @@ export const useSaveTasksMutation = () => {
       processorId: string;
       tasks: Task[];
     }) => {
-      return axiosInstance
+      return axiosTenantInstance
         .put(
           `/workspaces/${workspaceId}/processors/${processorId}/tasks`,
           tasks,

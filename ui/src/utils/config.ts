@@ -1,3 +1,5 @@
+import { TENANT_ID_KEY } from '../constants/tenancy';
+
 export const getApiDomain = () => {
   const apiUrl = process.env.REACT_APP_BACKEND_URL || `http://localhost:8080`;
   return apiUrl;
@@ -17,4 +19,9 @@ export const getUploadApiDomain = () => {
   const uploadApiUrl =
     process.env.REACT_APP_UPLOAD_BACKEND_URL || `http://localhost:8081`;
   return uploadApiUrl;
+};
+
+export const getTenantId = (): string | null => {
+  const tenantId = localStorage.getItem(TENANT_ID_KEY);
+  return tenantId;
 };

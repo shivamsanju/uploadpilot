@@ -1,14 +1,14 @@
 import { notifications } from '@mantine/notifications';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { CreateWorkspaceData } from '../types/workspace';
-import axiosInstance from '../utils/axios';
+import { axiosTenantInstance } from '../utils/axios';
 
 export const useGetWorkspaces = () => {
   const queryClient = useQueryClient();
 
   const { isPending, error, data } = useQuery({
     queryKey: ['workspaces'],
-    queryFn: () => axiosInstance.get(`/workspaces`).then(res => res.data),
+    queryFn: () => axiosTenantInstance.get(`/workspaces`).then(res => res.data),
   });
 
   const invalidate = () =>
@@ -22,7 +22,7 @@ export const useCreateWorkspaceMutation = () => {
   return useMutation({
     mutationKey: ['workspaces'],
     mutationFn: (data: CreateWorkspaceData) =>
-      axiosInstance.post('/workspaces', data).then(res => res.data),
+      axiosTenantInstance.post('/workspaces', data).then(res => res.data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['workspaces'] });
       notifications.show({
@@ -52,7 +52,7 @@ export const useGetAllAllowedSources = (workspaceId: string) => {
       if (!workspaceId) {
         return Promise.reject(new Error('workspaceId is required'));
       }
-      return axiosInstance
+      return axiosTenantInstance
         .get(`workspaces/${workspaceId}/allowedSources`)
         .then(res => res.data);
     },
@@ -70,7 +70,7 @@ export const useGetUsersInWorkspace = (workspaceId: string) => {
       if (!workspaceId) {
         return Promise.reject(new Error('workspaceId is required'));
       }
-      return axiosInstance
+      return axiosTenantInstance
         .get(`workspaces/${workspaceId}/users`)
         .then(res => res.data);
     },
@@ -97,7 +97,7 @@ export const useAddUserToWorkspaceMutation = () => {
       email: string;
       role: string;
     }) => {
-      return axiosInstance
+      return axiosTenantInstance
         .post(`/workspaces/${workspaceId}/users`, { email, role })
         .then(res => res.data);
     },
@@ -133,7 +133,7 @@ export const useRemoveUserFromWorkspaceMutation = () => {
       workspaceId: string;
       userId: string;
     }) => {
-      return axiosInstance
+      return axiosTenantInstance
         .delete(`/workspaces/${workspaceId}/users/${userId}`)
         .then(res => res.data);
     },
@@ -171,7 +171,7 @@ export const useEditUserInWorkspaceMutation = () => {
       userId: string;
       role: string;
     }) => {
-      return axiosInstance
+      return axiosTenantInstance
         .put(`/workspaces/${workspaceId}/users/${userId}`, { role })
         .then(res => res.data);
     },

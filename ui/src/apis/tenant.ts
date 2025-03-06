@@ -2,7 +2,7 @@ import { notifications } from '@mantine/notifications';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { TENANT_ID_KEY } from '../constants/tenancy';
 import type { TenantOnboardingRequest } from '../types/tenant';
-import axiosInstance from '../utils/axios';
+import { axiosBaseInstance } from '../utils/axios';
 
 export const useOnboardTenant = () => {
   const queryClient = useQueryClient();
@@ -10,7 +10,7 @@ export const useOnboardTenant = () => {
   return useMutation({
     mutationKey: ['tenants'],
     mutationFn: (data: TenantOnboardingRequest) => {
-      return axiosInstance.post(`/tenants`, data).then(res => res.data);
+      return axiosBaseInstance.post(`/tenants`, data).then(res => res.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['user'] });
@@ -52,7 +52,7 @@ export const useSetActiveTenant = () => {
   return useMutation({
     mutationKey: ['activeTenant'],
     mutationFn: (tenantId: string) => {
-      return axiosInstance
+      return axiosBaseInstance
         .put(`/tenants/active`, { tenantId })
         .then(res => res.data);
     },

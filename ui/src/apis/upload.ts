@@ -4,7 +4,7 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query';
-import axiosInstance from '../utils/axios';
+import { axiosTenantInstance } from '../utils/axios';
 import {
   areBracketsBalanced,
   getFilterParams,
@@ -55,7 +55,7 @@ export const useGetUploads = ({
 
       const filterParam = getFilterParams(filter);
 
-      return axiosInstance
+      return axiosTenantInstance
         .get<UploadResponse>(
           `/workspaces/${workspaceId}/uploads?offset=${offset}&limit=${batchSize}${searchParam}${filterParam}`,
         )
@@ -90,7 +90,7 @@ export const useGetUploads = ({
         const searchParam = search
           ? `&search=${encodeURIComponent(search)}`
           : '';
-        return axiosInstance
+        return axiosTenantInstance
           .get<UploadResponse>(
             `/workspaces/${workspaceId}/uploads?skip=0&limit=${batchSize}${searchParam}`,
           )
@@ -120,7 +120,7 @@ export const useDownloadUploadedFile = (workspaceId: string) => {
       if (!workspaceId || !uploadId) {
         throw new Error('workspaceId and uploadId are required');
       }
-      const response = await axiosInstance.get(
+      const response = await axiosTenantInstance.get(
         `/workspaces/${workspaceId}/uploads/${uploadId}/download`,
       );
       return response.data;
@@ -135,7 +135,7 @@ export const useTriggerProcessUpload = (workspaceId: string) => {
       if (!workspaceId || !uploadId) {
         throw new Error('workspaceId and uploadId are required');
       }
-      const response = await axiosInstance.post(
+      const response = await axiosTenantInstance.post(
         `/workspaces/${workspaceId}/uploads/${uploadId}/process`,
       );
       return response.data;

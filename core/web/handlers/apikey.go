@@ -21,35 +21,23 @@ func NewAPIKeyHandler(apiKeySvc *services.APIKeyService) *apiKeyHandler {
 	}
 }
 
-func (h *apiKeyHandler) GetAPIKeys(
-	r *http.Request, params interface{}, query interface{}, body interface{},
-) ([]models.APIKey, int, error) {
-	keys, err := h.apiKeySvc.GetAllAPIKeysForUser(r.Context())
+func (h *apiKeyHandler) GetAPIKeys(r *http.Request, params dto.TenantParams, query interface{}, body interface{}) ([]models.APIKey, int, error) {
+	keys, err := h.apiKeySvc.GetAllAPIKeysForUser(r.Context(), params.TenantID)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
 	return keys, http.StatusOK, nil
 }
 
-func (h *apiKeyHandler) CreateAPIKey(
-	r *http.Request,
-	params interface{},
-	query interface{},
-	body dto.CreateApiKeyData,
-) (string, int, error) {
-	key, err := h.apiKeySvc.CreateAPIKey(r.Context(), &body)
+func (h *apiKeyHandler) CreateAPIKey(r *http.Request, params dto.TenantParams, query interface{}, body dto.CreateApiKeyData) (string, int, error) {
+	key, err := h.apiKeySvc.CreateAPIKey(r.Context(), params.TenantID, &body)
 	if err != nil {
 		return "", http.StatusInternalServerError, err
 	}
 	return key, http.StatusOK, nil
 }
 
-func (h *apiKeyHandler) RevokeAPIKey(
-	r *http.Request,
-	params dto.ApiKeyParams,
-	query interface{},
-	body interface{},
-) (bool, int, error) {
+func (h *apiKeyHandler) RevokeAPIKey(r *http.Request, params dto.ApiKeyParams, query interface{}, body interface{}) (bool, int, error) {
 	if err := h.apiKeySvc.RevokeAPIKey(r.Context(), params.ApiKeyID); err != nil {
 		return false, http.StatusInternalServerError, err
 	}

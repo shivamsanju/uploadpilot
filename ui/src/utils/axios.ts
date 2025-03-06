@@ -1,8 +1,7 @@
 import axios from 'axios';
-import { TENANT_ID_HEADER, TENANT_ID_KEY } from '../constants/tenancy';
-import { getApiDomain } from './config';
+import { getApiDomain, getTenantId } from './config';
 
-const axiosInstance = axios.create({
+const axiosBaseInstance = axios.create({
   baseURL: getApiDomain(),
   withCredentials: true,
   withXSRFToken: true,
@@ -12,15 +11,8 @@ const axiosInstance = axios.create({
 });
 
 // Request Interceptor
-axiosInstance.interceptors.request.use(
+axiosBaseInstance.interceptors.request.use(
   config => {
-    const tenantId = localStorage.getItem(TENANT_ID_KEY);
-    if (tenantId) {
-      if (!config.headers) {
-        config.headers = {};
-      }
-      config.headers[TENANT_ID_HEADER] = tenantId;
-    }
     return config;
   },
   error => {
@@ -29,18 +21,54 @@ axiosInstance.interceptors.request.use(
 );
 
 // Response Interceptor
-axiosInstance.interceptors.response.use(
+axiosBaseInstance.interceptors.response.use(
   response => {
     return response;
   },
   error => {
     if (error.response && error.response.status === 401) {
       console.error('Unauthorized! Redirecting to login...');
-      // localStorage.removeItem('uploadpilottoken');
-      // window.location.href = '/auth';
     }
     return Promise.reject(error);
   },
 );
 
-export default axiosInstance;
+// Tenant Instance
+const axiosTenantInstance = axios.create({
+  baseURL: getApiDomain(),
+  withCredentials: true,
+  withXSRFToken: true,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request Interceptor
+axiosTenantInstance.interceptors.request.use(
+  config => {
+    const tenantId = getTenantId();
+    if (!tenantId) {
+      return Promise.reject(new Error('tenantId is required'));
+    }
+    config.baseURL = `${config.baseURL}/tenants/${tenantId}`;
+    return config;
+  },
+  error => {
+    return Promise.reject(error);
+  },
+);
+
+// Response Interceptor
+axiosTenantInstance.interceptors.response.use(
+  response => {
+    return response;
+  },
+  error => {
+    if (error.response && error.response.status === 401) {
+      console.error('Unauthorized! Redirecting to login...');
+    }
+    return Promise.reject(error);
+  },
+);
+
+export { axiosBaseInstance, axiosTenantInstance };

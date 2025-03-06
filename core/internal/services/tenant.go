@@ -32,7 +32,7 @@ func (s *TenantService) GetTenantDetails(ctx context.Context, tenantID string) (
 		return nil, err
 	}
 
-	if !s.acm.CheckAccess(session.UserID, session.TenantID, "", rbac.Reader) {
+	if !s.acm.CheckAccess(session.UserID, tenantID, "", rbac.Reader) {
 		return nil, err
 	}
 
@@ -62,7 +62,7 @@ func (s *TenantService) DeleteTenant(ctx context.Context, tenantID string) error
 		return err
 	}
 
-	if !s.acm.CheckAccess(session.UserID, session.TenantID, "", rbac.Admin) {
+	if !s.acm.CheckAccess(session.UserID, tenantID, "", rbac.Admin) {
 		return err
 	}
 

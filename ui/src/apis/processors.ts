@@ -1,6 +1,6 @@
 import { notifications } from '@mantine/notifications';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axiosInstance from '../utils/axios';
+import { axiosTenantInstance } from '../utils/axios';
 
 export const useGetProcessors = (workspaceId: string) => {
   const queryClient = useQueryClient();
@@ -15,7 +15,7 @@ export const useGetProcessors = (workspaceId: string) => {
       if (!workspaceId) {
         return Promise.reject(new Error('workspaceId is required'));
       }
-      return axiosInstance
+      return axiosTenantInstance
         .get(`/workspaces/${workspaceId}/processors`)
         .then(res => res.data);
     },
@@ -41,7 +41,7 @@ export const useGetProcessor = (workspaceId: string, processorId: string) => {
           new Error('workspaceId and processorId are required'),
         );
       }
-      return axiosInstance
+      return axiosTenantInstance
         .get(`/workspaces/${workspaceId}/processors/${processorId}`)
         .then(res => res.data);
     },
@@ -67,7 +67,7 @@ export const useCreateProcessorMutation = () => {
       workspaceId: string;
       processor: any;
     }) => {
-      return axiosInstance
+      return axiosTenantInstance
         .post(`/workspaces/${workspaceId}/processors`, processor)
         .then(res => res.data);
     },
@@ -103,7 +103,7 @@ export const useUpdateProcessorMutation = () => {
       processorId: string;
       processor: any;
     }) => {
-      return axiosInstance
+      return axiosTenantInstance
         .put(`/workspaces/${workspaceId}/processors/${processorId}`, processor)
         .then(res => res.data);
     },
@@ -137,7 +137,7 @@ export const useDeleteProcessorMutation = () => {
       workspaceId: string;
       processorId: string;
     }) => {
-      return axiosInstance
+      return axiosTenantInstance
         .delete(`/workspaces/${workspaceId}/processors/${processorId}`)
         .then(res => res.data);
     },
@@ -173,7 +173,7 @@ export const useEnableDisableProcessorMutation = () => {
       processorId: string;
       enabled: boolean;
     }) => {
-      return axiosInstance
+      return axiosTenantInstance
         .put(
           `/workspaces/${workspaceId}/processors/${processorId}/${
             enabled ? 'enable' : 'disable'
@@ -214,7 +214,7 @@ export const useGetAllProcessingActivities = (workspaceId: string) => {
       if (!workspaceId) {
         return Promise.reject(new Error('workspaceId is required'));
       }
-      return axiosInstance
+      return axiosTenantInstance
         .get(`/workspaces/${workspaceId}/processors/activities`)
         .then(res => res.data);
     },
@@ -234,7 +234,7 @@ export const useGetAllWorkflowTemplates = (workspaceId: string) => {
       if (!workspaceId) {
         return Promise.reject(new Error('workspaceId is required'));
       }
-      return axiosInstance
+      return axiosTenantInstance
         .get(`/workspaces/${workspaceId}/processors/templates`)
         .then(res => res.data);
     },
@@ -257,7 +257,7 @@ export const useUpdateProcessorWorkflowMutation = () => {
       processorId: string;
       workflow: string;
     }) => {
-      return axiosInstance
+      return axiosTenantInstance
         .put(`/workspaces/${workspaceId}/processors/${processorId}/workflow`, {
           workflow,
         })
@@ -301,7 +301,7 @@ export const useGetProcessorRuns = (
           new Error('workspaceId and processorId is required'),
         );
       }
-      return axiosInstance
+      return axiosTenantInstance
         .get(`/workspaces/${workspaceId}/processors/${processorId}/runs`)
         .then(res => res.data);
     },
@@ -335,7 +335,7 @@ export const useGetProcessorRunLogs = (
           new Error('workspaceId and processorId is required'),
         );
       }
-      return axiosInstance
+      return axiosTenantInstance
         .get(
           `/workspaces/${workspaceId}/processors/${processorId}/logs?workflowId=${workflowId}&runId=${runId}`,
         )
