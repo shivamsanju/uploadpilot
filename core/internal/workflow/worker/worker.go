@@ -4,19 +4,24 @@ import (
 	"log"
 	"os"
 
-	"github.com/uploadpilot/core/pkg/dsl"
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
+	"github.com/uploadpilot/core/internal/workflow/dsl"
+	"github.com/uploadpilot/core/internal/workflow/executor"
+	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
 )
 
 type Worker struct {
+	lambdaClient   *lambda.Client
 	temporalClient client.Client
 	taskQueue      string
 	wrk            worker.Worker
 }
 
-func NewWorker(temporalClient client.Client, taskQueue string) *Worker {
+func NewWorker(lambdaClient *lambda.Client, temporalClient client.Client, taskQueue string) *Worker {
 	return &Worker{
+		lambdaClient:   lambdaClient,
 		temporalClient: temporalClient,
 		taskQueue:      taskQueue,
 	}
@@ -29,8 +34,10 @@ func (w *Worker) Start() {
 
 	wrk.RegisterWorkflow(dsl.SimpleDSLWorkflow)
 
-	ar := NewActivityRegistry(wrk)
-	ar.RegisterActivities(wrk)
+	exc := executor.NewExecutor(w.lambdaClient)
+	wrk.RegisterActivityWithOptions(exc.ExecuteLambdaContainerActivity, activity.RegisterOptions{
+		Name: "Executor",
+	})
 
 	w.wrk = wrk
 	err := wrk.Run(worker.InterruptCh())

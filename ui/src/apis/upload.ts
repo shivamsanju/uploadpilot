@@ -92,7 +92,7 @@ export const useGetUploads = ({
           : '';
         return axiosTenantInstance
           .get<UploadResponse>(
-            `/workspaces/${workspaceId}/uploads?skip=0&limit=${batchSize}${searchParam}`,
+            `/workspaces/${workspaceId}/uploads?offset=0&limit=${batchSize}${searchParam}`,
           )
           .then(res => res.data);
       },

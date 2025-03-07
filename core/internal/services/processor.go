@@ -15,7 +15,7 @@ import (
 	"github.com/uploadpilot/core/internal/rbac"
 	"github.com/uploadpilot/core/internal/templates"
 	"github.com/uploadpilot/core/internal/workflow/catalog"
-	"github.com/uploadpilot/core/pkg/dsl"
+	"github.com/uploadpilot/core/internal/workflow/dsl"
 	"github.com/uploadpilot/core/pkg/validator"
 	"github.com/uploadpilot/core/web/webutils"
 	"go.temporal.io/api/enums/v1"
@@ -154,7 +154,6 @@ func (s *ProcessorService) TriggerWorkflows(ctx context.Context, workspaceID str
 			if !doTrigger {
 				continue
 			}
-			log.Debug().Msgf("Triggering processor: %s, Workflow: %s", processor.Name, processor.Workflow)
 			_, err := s.TriggerWorkflow(ctx, upload, processor.Workflow, workspaceID, processor.ID)
 			if err != nil {
 				return err
@@ -190,8 +189,8 @@ func (s *ProcessorService) TriggerWorkflow(ctx context.Context, upload *models.U
 	dslWorkflow.WorkspaceID = workspaceID
 	dslWorkflow.UploadID = upload.ID
 	dslWorkflow.ProcessorID = processorID
-	dslWorkflow.UploadFileName = upload.FileName
-	dslWorkflow.UploadFileType = upload.ContentType
+	dslWorkflow.FileName = upload.FileName
+	dslWorkflow.ContentType = upload.ContentType
 
 	fmt.Println("workflowOptions", workflowOptions)
 	we, err := s.temporalClient.ExecuteWorkflow(context.Background(), workflowOptions, dsl.SimpleDSLWorkflow, dslWorkflow)

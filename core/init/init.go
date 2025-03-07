@@ -62,7 +62,7 @@ func Initialize() (*http.Server, *worker.Worker, *cron.Cron, func(), error) {
 	services := services.NewServices(repos, clients, accessManager)
 
 	// Initialize worker
-	wrk := worker.NewWorker(clients.TemporalClient, config.AppConfig.WorkerTaskQueue)
+	wrk := worker.NewWorker(clients.LambdaClient, clients.TemporalClient, config.AppConfig.WorkerTaskQueue)
 
 	// Initialize cron to mark timed out uploads
 	timeoutMarkerCron := NewMarkTimedOutUploadsRoutine(repos.UploadRepo)
@@ -142,7 +142,7 @@ func initClients(appConfig *config.Config) (*clients.Clients, error) {
 		APIKey:    appConfig.TemporalAPIKey,
 	}
 
-	s3Opts := &clients.S3Opts{
+	awsOpts := &clients.AwsOpts{
 		AccessKey: appConfig.S3AccessKey,
 		SecretKey: appConfig.S3SecretKey,
 		Region:    appConfig.S3Region,
@@ -153,7 +153,8 @@ func initClients(appConfig *config.Config) (*clients.Clients, error) {
 	return clients.NewAppClients(&clients.ClientOpts{
 		RedisOpts:    redisOpts,
 		TemporalOpts: temporalOpts,
-		S3Opts:       s3Opts,
+		S3Opts:       awsOpts,
+		LambdaOpts:   awsOpts,
 		KMSOpts:      kmsOpts,
 	})
 }

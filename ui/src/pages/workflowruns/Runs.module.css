@@ -7,4 +7,6 @@
 
 .codetext {
   font-size: var(--mantine-font-size-xs);
+  word-break: break-word; /* Works in most browsers */
+  word-break: break-all; /* Breaks words anywhere */
 }

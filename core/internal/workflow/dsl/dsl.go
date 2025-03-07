@@ -12,13 +12,13 @@ type (
 	WorkflowCtxKey string
 
 	Workflow struct {
-		Variables      map[string]interface{} `json:"variables" yaml:"variables"`
-		Root           Statement              `json:"root" yaml:"root"`
-		WorkspaceID    string                 `json:"workspaceID" yaml:"workspaceID"`
-		UploadID       string                 `json:"uploadID" yaml:"uploadID"`
-		ProcessorID    string                 `json:"processorID" yaml:"processorID"`
-		UploadFileName string                 `json:"uploadFileName" yaml:"uploadFileName"`
-		UploadFileType string                 `json:"uploadFileType" yaml:"uploadFileType"`
+		Variables   map[string]interface{} `json:"variables" yaml:"variables"`
+		Root        Statement              `json:"root" yaml:"root"`
+		WorkspaceID string                 `json:"workspaceID" yaml:"workspaceID"`
+		UploadID    string                 `json:"uploadID" yaml:"uploadID"`
+		ProcessorID string                 `json:"processorID" yaml:"processorID"`
+		FileName    string                 `json:"fileName" yaml:"fileName"`
+		ContentType string                 `json:"contentType" yaml:"contentType"`
 	}
 
 	Statement struct {
@@ -71,13 +71,13 @@ type (
 )
 
 type WorkflowMeta struct {
-	WorkspaceID    string `json:"workspaceID" yaml:"workspaceID"`
-	UploadID       string `json:"uploadID" yaml:"uploadID"`
-	ProcessorID    string `json:"processorID" yaml:"processorID"`
-	WorkflowID     string `json:"workflowID" yaml:"workflowID"`
-	RunID          string `json:"runID" yaml:"runID"`
-	UploadFileName string `json:"uploadFileName" yaml:"uploadFileName"`
-	UploadFileType string `json:"uploadFileType" yaml:"uploadFileType"`
+	WorkspaceID string `json:"workspaceID" yaml:"workspaceID"`
+	UploadID    string `json:"uploadID" yaml:"uploadID"`
+	ProcessorID string `json:"processorID" yaml:"processorID"`
+	WorkflowID  string `json:"workflowID" yaml:"workflowID"`
+	RunID       string `json:"runID" yaml:"runID"`
+	FileName    string `json:"fileName" yaml:"fileName"`
+	ContentType string `json:"contentType" yaml:"contentType"`
 }
 
 func SimpleDSLWorkflow(ctx workflow.Context, dslWorkflow Workflow) ([]byte, error) {
@@ -88,13 +88,13 @@ func SimpleDSLWorkflow(ctx workflow.Context, dslWorkflow Workflow) ([]byte, erro
 	}
 
 	wfMeta := &WorkflowMeta{
-		WorkspaceID:    dslWorkflow.WorkspaceID,
-		UploadID:       dslWorkflow.UploadID,
-		ProcessorID:    dslWorkflow.ProcessorID,
-		UploadFileName: dslWorkflow.UploadFileName,
-		UploadFileType: dslWorkflow.UploadFileType,
-		WorkflowID:     workflow.GetInfo(ctx).WorkflowExecution.ID,
-		RunID:          workflow.GetInfo(ctx).WorkflowExecution.RunID,
+		WorkspaceID: dslWorkflow.WorkspaceID,
+		UploadID:    dslWorkflow.UploadID,
+		ProcessorID: dslWorkflow.ProcessorID,
+		FileName:    dslWorkflow.FileName,
+		ContentType: dslWorkflow.ContentType,
+		WorkflowID:  workflow.GetInfo(ctx).WorkflowExecution.ID,
+		RunID:       workflow.GetInfo(ctx).WorkflowExecution.RunID,
 	}
 
 	wfMetaBytes, err := json.Marshal(wfMeta)
@@ -205,12 +205,12 @@ func (a *ActivityInvocation) execute(ctx workflow.Context, wfMetaString string, 
 		return err
 	}
 
-	var result string
+	var result []byte
 	if a.Input == nil {
 		a.Input = new(string)
 	}
 
-	err = workflow.ExecuteActivity(ctx, a.Uses, wfMetaString, a.Key, *a.Input, args).Get(ctx, &result)
+	err = workflow.ExecuteActivity(ctx, "Executor", a.Uses, args, wfMetaString).Get(ctx, &result)
 	if err != nil {
 		return err
 	}

@@ -42,7 +42,7 @@ export const LogsModal: React.FC<LogsModalProps> = ({
                       <Text c="dimmed">{item?.timestamp}</Text>
                       {item?.eventType === 'ActivityTaskScheduled' ? (
                         <Text fw="bold" c="green">
-                          {`Scheduled -> ${item?.details?.split(',')[0]}`}
+                          {`Scheduled -> ${item?.details?.split('"')[1]}`}
                         </Text>
                       ) : (
                         <Text c="blue">{item?.eventType}</Text>

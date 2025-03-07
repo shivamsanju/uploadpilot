@@ -15,5 +15,5 @@ var ActivityCatalog = []*ActivityMetadata{
 	ImageMetadataExtractionActivityV1_0,
 	ImageBlurActivityV1_0,
 	ExtractPDFContentV1_0,
-	WebhookV_1_0,
+	HTTP_V_01,
 }

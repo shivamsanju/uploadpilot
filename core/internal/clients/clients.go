@@ -1,6 +1,7 @@
 package clients
 
 import (
+	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/phuslu/log"
 	"github.com/redis/go-redis/v9"
@@ -11,13 +12,15 @@ import (
 type Clients struct {
 	RedisClient    *redis.Client
 	S3Client       *s3.Client
+	LambdaClient   *lambda.Client
 	TemporalClient client.Client
 	KMSClient      vault.KMS
 }
 
 type ClientOpts struct {
 	RedisOpts    *RedisOpts
-	S3Opts       *S3Opts
+	S3Opts       *AwsOpts
+	LambdaOpts   *AwsOpts
 	TemporalOpts *TemporalOpts
 	KMSOpts      *KMSOpts
 }
@@ -43,6 +46,16 @@ func NewAppClients(opts *ClientOpts) (*Clients, error) {
 		c.S3Client = s3Client
 	} else {
 		log.Warn().Msg("S3 client not initialized")
+	}
+
+	if opts.LambdaOpts != nil {
+		lambdaClient, err := NewLambdaClient(opts.LambdaOpts)
+		if err != nil {
+			return nil, err
+		}
+		c.LambdaClient = lambdaClient
+	} else {
+		log.Warn().Msg("lambda client not initialized")
 	}
 
 	if opts.TemporalOpts != nil {
