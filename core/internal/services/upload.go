@@ -17,6 +17,7 @@ import (
 	"github.com/uploadpilot/core/internal/dto"
 	"github.com/uploadpilot/core/internal/msg"
 	"github.com/uploadpilot/core/internal/rbac"
+	"github.com/uploadpilot/core/pkg/utils"
 	"github.com/uploadpilot/core/web/webutils"
 )
 
@@ -53,7 +54,9 @@ func (s *UploadService) CreateUpload(ctx context.Context, tenantID, workspaceID 
 		return nil, err
 	}
 	newUploadID := uuid.New().String()
-	req, err := s.createSingleUseSignedUploadURL(workspaceID, newUploadID, upload)
+	s3CompatibleFileName := utils.ConvertToS3CompatibleFilename(upload.FileName)
+	objectKey := fmt.Sprintf("%s/raw/%s", newUploadID, s3CompatibleFileName)
+	req, err := s.createSingleUseSignedUploadURL(workspaceID, objectKey, upload)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +64,7 @@ func (s *UploadService) CreateUpload(ctx context.Context, tenantID, workspaceID 
 	if err := s.uploadRepo.Create(ctx, &models.Upload{
 		ID:            newUploadID,
 		WorkspaceID:   workspaceID,
-		FileName:      upload.FileName,
+		FileName:      s3CompatibleFileName,
 		ContentType:   upload.ContentType,
 		ContentLength: upload.ContentLength,
 		Metadata:      upload.Metadata,
@@ -198,10 +201,20 @@ func (s *UploadService) GetUploadSignedURL(ctx context.Context, tenantID, worksp
 		return "", fmt.Errorf(msg.ErrAccessDenied)
 	}
 
+	upload, err := s.uploadRepo.Get(ctx, uploadID)
+	if err != nil {
+		return "", err
+	}
+	if upload.Status != models.UploadStatusFinished {
+		return "", fmt.Errorf(msg.ErrUploadNotFinished)
+	}
+
+	objectKey := fmt.Sprintf("%s/raw/%s", uploadID, upload.FileName)
+
 	expiry := time.Now().Add(15 * time.Minute)
 	resp, err := s3.NewPresignClient(s.s3Client).PresignGetObject(ctx, &s3.GetObjectInput{
 		Bucket:          &workspaceID,
-		Key:             &uploadID,
+		Key:             &objectKey,
 		ResponseExpires: &expiry,
 	})
 	if err != nil {

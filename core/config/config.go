@@ -48,10 +48,11 @@ type Config struct {
 	RedisTLS      bool   `mapstructure:"REDIS_TLS"`
 
 	// Storage S3
-	S3AccessKey  string `mapstructure:"S3_ACCESS_KEY"`
-	S3SecretKey  string `mapstructure:"S3_SECRET_KEY"`
-	S3BucketName string `mapstructure:"S3_BUCKET_NAME"`
-	S3Region     string `mapstructure:"S3_REGION"`
+	S3AccessKey          string `mapstructure:"S3_ACCESS_KEY"`
+	S3SecretKey          string `mapstructure:"S3_SECRET_KEY"`
+	S3BucketName         string `mapstructure:"S3_BUCKET_NAME"`
+	S3Region             string `mapstructure:"S3_REGION"`
+	S3IntermediateBucket string `mapstructure:"S3_INTERMEDIATE_BUCKET"`
 
 	// Temporal
 	TemporalNamespace string `mapstructure:"TEMPORAL_NAMESPACE"`
@@ -88,6 +89,7 @@ func LoadConfig(path, filename, ext string) error {
 	viper.SetDefault("REDIS_ADDR", "localhost:6379")
 	viper.SetDefault("REDIS_TLS", false)
 	viper.SetDefault("WORKER_TASK_QUEUE", "queue1")
+	viper.SetDefault("S3_INTERMEDIATE_BUCKET", "uploadpilottest")
 
 	// Read config file
 	if err := viper.ReadInConfig(); err != nil {

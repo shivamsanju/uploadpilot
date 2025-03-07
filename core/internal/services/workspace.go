@@ -99,6 +99,25 @@ func (s *WorkspaceService) CreateWorkspace(ctx context.Context, tenantID string,
 		return fmt.Errorf(msg.ErrUnexpected, errID)
 	}
 
+	// set cors rules in new bucket
+	_, err = s.s3Client.PutBucketCors(ctx, &s3.PutBucketCorsInput{
+		Bucket: &workspace.ID,
+		CORSConfiguration: &types.CORSConfiguration{
+			CORSRules: []types.CORSRule{
+				{
+					AllowedHeaders: []string{"*"},
+					AllowedMethods: []string{"GET", "PUT", "HEAD"},
+					AllowedOrigins: []string{"*"},
+				},
+			},
+		},
+	})
+	if err != nil {
+		errID := uuid.New().String()
+		log.Error().Err(err).Str("errID", errID).Msg("failed to create bucket cors for workspace.")
+		return fmt.Errorf(msg.ErrUnexpected, errID)
+	}
+
 	err = s.wsRepo.Create(ctx, workspace)
 	return err
 }

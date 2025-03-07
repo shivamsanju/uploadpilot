@@ -12,13 +12,13 @@ type (
 	WorkflowCtxKey string
 
 	Workflow struct {
-		Variables   map[string]interface{} `json:"variables" yaml:"variables"`
-		Root        Statement              `json:"root" yaml:"root"`
-		WorkspaceID string                 `json:"workspaceID" yaml:"workspaceID"`
-		UploadID    string                 `json:"uploadID" yaml:"uploadID"`
-		ProcessorID string                 `json:"processorID" yaml:"processorID"`
-		FileName    string                 `json:"fileName" yaml:"fileName"`
-		ContentType string                 `json:"contentType" yaml:"contentType"`
+		Variables   map[string]any `json:"variables" yaml:"variables"`
+		Root        Statement      `json:"root" yaml:"root"`
+		WorkspaceID string         `json:"workspaceID" yaml:"workspaceID"`
+		UploadID    string         `json:"uploadID" yaml:"uploadID"`
+		ProcessorID string         `json:"processorID" yaml:"processorID"`
+		FileName    string         `json:"fileName" yaml:"fileName"`
+		ContentType string         `json:"contentType" yaml:"contentType"`
 	}
 
 	Statement struct {
@@ -52,58 +52,41 @@ type (
 	}
 
 	ActivityInvocation struct {
-		Key                           string                 `json:"key" yaml:"key"`
-		Uses                          string                 `json:"uses" yaml:"uses"`
-		With                          map[string]interface{} `json:"with,omitempty" yaml:"with,omitempty"`
-		Input                         *string                `json:"input,omitempty" yaml:"input,omitempty"`
-		ScheduleToCloseTimeoutSeconds *int64                 `json:"scheduleToCloseTimeoutSeconds,omitempty" yaml:"scheduleToCloseTimeoutSeconds,omitempty"`
-		ScheduleToStartTimeoutSeconds *int64                 `json:"scheduleToStartTimeoutSeconds,omitempty" yaml:"scheduleToStartTimeoutSeconds,omitempty"`
-		StartToCloseTimeoutSeconds    *int64                 `json:"startToCloseTimeoutSeconds,omitempty" yaml:"startToCloseTimeoutSeconds,omitempty"`
-		MaxRetries                    *int32                 `json:"maxRetries,omitempty" yaml:"maxRetries,omitempty"`
-		RetryBackoffCoefficient       *float64               `json:"retryBackoffCoefficient,omitempty" yaml:"retryBackoffCoefficient,omitempty"`
-		RetryMaxIntervalSeconds       *int64                 `json:"retryMaxIntervalSeconds,omitempty" yaml:"retryMaxIntervalSeconds,omitempty"`
-		RetryInitialIntervalSeconds   *int64                 `json:"retryInitialIntervalSeconds,omitempty" yaml:"retryInitialIntervalSeconds,omitempty"`
+		Key                           string         `json:"key" yaml:"key"`
+		Uses                          string         `json:"uses" yaml:"uses"`
+		With                          map[string]any `json:"with,omitempty" yaml:"with,omitempty"`
+		Input                         *string        `json:"input,omitempty" yaml:"input,omitempty"`
+		SaveOutput                    *bool          `json:"saveOutput,omitempty" yaml:"saveOutput,omitempty"`
+		ScheduleToCloseTimeoutSeconds *int64         `json:"scheduleToCloseTimeoutSeconds,omitempty" yaml:"scheduleToCloseTimeoutSeconds,omitempty"`
+		ScheduleToStartTimeoutSeconds *int64         `json:"scheduleToStartTimeoutSeconds,omitempty" yaml:"scheduleToStartTimeoutSeconds,omitempty"`
+		StartToCloseTimeoutSeconds    *int64         `json:"startToCloseTimeoutSeconds,omitempty" yaml:"startToCloseTimeoutSeconds,omitempty"`
+		MaxRetries                    *int32         `json:"maxRetries,omitempty" yaml:"maxRetries,omitempty"`
+		RetryBackoffCoefficient       *float64       `json:"retryBackoffCoefficient,omitempty" yaml:"retryBackoffCoefficient,omitempty"`
+		RetryMaxIntervalSeconds       *int64         `json:"retryMaxIntervalSeconds,omitempty" yaml:"retryMaxIntervalSeconds,omitempty"`
+		RetryInitialIntervalSeconds   *int64         `json:"retryInitialIntervalSeconds,omitempty" yaml:"retryInitialIntervalSeconds,omitempty"`
 	}
 
 	executable interface {
-		execute(ctx workflow.Context, wfMetaString string, bindings map[string]interface{}) error
+		execute(ctx workflow.Context, bindings map[string]any) error
 	}
 )
 
-type WorkflowMeta struct {
-	WorkspaceID string `json:"workspaceID" yaml:"workspaceID"`
-	UploadID    string `json:"uploadID" yaml:"uploadID"`
-	ProcessorID string `json:"processorID" yaml:"processorID"`
-	WorkflowID  string `json:"workflowID" yaml:"workflowID"`
-	RunID       string `json:"runID" yaml:"runID"`
-	FileName    string `json:"fileName" yaml:"fileName"`
-	ContentType string `json:"contentType" yaml:"contentType"`
-}
-
 func SimpleDSLWorkflow(ctx workflow.Context, dslWorkflow Workflow) ([]byte, error) {
 	logger := workflow.GetLogger(ctx)
-	bindings := make(map[string]interface{})
+	bindings := make(map[string]any)
 	for k, v := range dslWorkflow.Variables {
 		bindings[k] = v
 	}
 
-	wfMeta := &WorkflowMeta{
-		WorkspaceID: dslWorkflow.WorkspaceID,
-		UploadID:    dslWorkflow.UploadID,
-		ProcessorID: dslWorkflow.ProcessorID,
-		FileName:    dslWorkflow.FileName,
-		ContentType: dslWorkflow.ContentType,
-		WorkflowID:  workflow.GetInfo(ctx).WorkflowExecution.ID,
-		RunID:       workflow.GetInfo(ctx).WorkflowExecution.RunID,
-	}
+	bindings["workspace_id"] = dslWorkflow.WorkspaceID
+	bindings["upload_id"] = dslWorkflow.UploadID
+	bindings["processor_id"] = dslWorkflow.ProcessorID
+	bindings["file_name"] = dslWorkflow.FileName
+	bindings["content_type"] = dslWorkflow.ContentType
+	bindings["workflow_id"] = workflow.GetInfo(ctx).WorkflowExecution.ID
+	bindings["run_id"] = workflow.GetInfo(ctx).WorkflowExecution.RunID
 
-	wfMetaBytes, err := json.Marshal(wfMeta)
-	if err != nil {
-		return nil, err
-	}
-	wfMetaString := string(wfMetaBytes)
-
-	err = dslWorkflow.Root.execute(ctx, wfMetaString, bindings)
+	err := dslWorkflow.Root.execute(ctx, bindings)
 	if err != nil {
 		logger.Error("DSL Workflow failed.", "Error", err)
 		return nil, err
@@ -113,41 +96,41 @@ func SimpleDSLWorkflow(ctx workflow.Context, dslWorkflow Workflow) ([]byte, erro
 	return nil, err
 }
 
-func (b *Statement) execute(ctx workflow.Context, wfMetaString string, bindings map[string]interface{}) error {
+func (b *Statement) execute(ctx workflow.Context, bindings map[string]any) error {
 	if b.Parallel != nil {
-		return b.Parallel.execute(ctx, wfMetaString, bindings)
+		return b.Parallel.execute(ctx, bindings)
 	}
 	if b.Sequence != nil {
-		return b.Sequence.execute(ctx, wfMetaString, bindings)
+		return b.Sequence.execute(ctx, bindings)
 	}
 	if b.Activity != nil {
-		return b.Activity.execute(ctx, wfMetaString, bindings)
+		return b.Activity.execute(ctx, bindings)
 	}
 	if b.Condition != nil {
-		return b.Condition.execute(ctx, wfMetaString, bindings)
+		return b.Condition.execute(ctx, bindings)
 	}
 	if b.Loop != nil {
-		return b.Loop.execute(ctx, wfMetaString, bindings)
+		return b.Loop.execute(ctx, bindings)
 	}
 	return nil
 }
 
-func (c *Condition) execute(ctx workflow.Context, wfMetaString string, bindings map[string]interface{}) error {
+func (c *Condition) execute(ctx workflow.Context, bindings map[string]any) error {
 	if bindings[c.Variable] == c.Value {
 		if c.Then != nil {
-			return c.Then.execute(ctx, wfMetaString, bindings)
+			return c.Then.execute(ctx, bindings)
 		}
 	} else {
 		if c.Else != nil {
-			return c.Else.execute(ctx, wfMetaString, bindings)
+			return c.Else.execute(ctx, bindings)
 		}
 	}
 	return nil
 }
 
-func (l *Loop) execute(ctx workflow.Context, wfMetaString string, bindings map[string]interface{}) error {
+func (l *Loop) execute(ctx workflow.Context, bindings map[string]any) error {
 	for i := 0; i < l.Iterations; i++ {
-		if err := l.Body.execute(ctx, wfMetaString, bindings); err != nil {
+		if err := l.Body.execute(ctx, bindings); err != nil {
 			return err
 		}
 		if bindings[*l.BreakVariable] == *l.BreakValue {
@@ -157,7 +140,7 @@ func (l *Loop) execute(ctx workflow.Context, wfMetaString string, bindings map[s
 	return nil
 }
 
-func (a *ActivityInvocation) execute(ctx workflow.Context, wfMetaString string, bindings map[string]interface{}) error {
+func (a *ActivityInvocation) execute(ctx workflow.Context, bindings map[string]any) error {
 	ao := workflow.ActivityOptions{}
 	if a.StartToCloseTimeoutSeconds != nil && *a.StartToCloseTimeoutSeconds != 0 {
 		ao.StartToCloseTimeout = time.Duration(*a.StartToCloseTimeoutSeconds) * time.Second
@@ -198,7 +181,7 @@ func (a *ActivityInvocation) execute(ctx workflow.Context, wfMetaString string, 
 	}
 	ctx = workflow.WithActivityOptions(ctx, ao)
 
-	args, err := makeInput(a.With, bindings)
+	args, err := makeInput(a.With, bindings, a.Key, a.SaveOutput)
 	if err != nil {
 		logger := workflow.GetLogger(ctx)
 		logger.Error("Failed to make input.", "Error", err)
@@ -210,7 +193,7 @@ func (a *ActivityInvocation) execute(ctx workflow.Context, wfMetaString string, 
 		a.Input = new(string)
 	}
 
-	err = workflow.ExecuteActivity(ctx, "Executor", a.Uses, args, wfMetaString).Get(ctx, &result)
+	err = workflow.ExecuteActivity(ctx, "Executor", a.Uses, args).Get(ctx, &result)
 	if err != nil {
 		return err
 	}
@@ -218,22 +201,22 @@ func (a *ActivityInvocation) execute(ctx workflow.Context, wfMetaString string, 
 	return nil
 }
 
-func (s *Sequence) execute(ctx workflow.Context, wfMetaString string, bindings map[string]interface{}) error {
+func (s *Sequence) execute(ctx workflow.Context, bindings map[string]any) error {
 	for _, stmt := range s.Elements {
-		if err := stmt.execute(ctx, wfMetaString, bindings); err != nil {
+		if err := stmt.execute(ctx, bindings); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (p *Parallel) execute(ctx workflow.Context, wfMetaString string, bindings map[string]interface{}) error {
+func (p *Parallel) execute(ctx workflow.Context, bindings map[string]any) error {
 	childCtx, cancelHandler := workflow.WithCancel(ctx)
 	selector := workflow.NewSelector(ctx)
 	var activityErr error
 
 	for _, stmt := range p.Branches {
-		f := executeAsync(stmt, childCtx, wfMetaString, bindings)
+		f := executeAsync(stmt, childCtx, bindings)
 		selector.AddFuture(f, func(f workflow.Future) {
 			if err := f.Get(ctx, nil); err != nil {
 				cancelHandler()
@@ -251,21 +234,21 @@ func (p *Parallel) execute(ctx workflow.Context, wfMetaString string, bindings m
 	return nil
 }
 
-func executeAsync(exe executable, ctx workflow.Context, wfMetaString string, bindings map[string]interface{}) workflow.Future {
+func executeAsync(exe executable, ctx workflow.Context, bindings map[string]any) workflow.Future {
 	future, settable := workflow.NewFuture(ctx)
 	workflow.Go(ctx, func(ctx workflow.Context) {
-		err := exe.execute(ctx, wfMetaString, bindings)
+		err := exe.execute(ctx, bindings)
 		settable.Set(nil, err)
 	})
 	return future
 }
 
-func makeInput(argMap map[string]interface{}, bindings map[string]interface{}) (string, error) {
-	var args map[string]interface{}
+func makeInput(argMap map[string]any, bindings map[string]any, activityKey string, saveOutput *bool) (string, error) {
+	var args map[string]any
 	if argMap != nil {
 		args = argMap
 	} else {
-		args = make(map[string]interface{})
+		args = make(map[string]any)
 	}
 	for argument, value := range argMap {
 		val, ok := value.(string)
@@ -276,6 +259,21 @@ func makeInput(argMap map[string]interface{}, bindings map[string]interface{}) (
 			args[argument] = value
 		}
 	}
+
+	args["workspace_id"] = bindings["workspace_id"]
+	args["upload_id"] = bindings["upload_id"]
+	args["processor_id"] = bindings["processor_id"]
+	args["file_name"] = bindings["file_name"]
+	args["content_type"] = bindings["content_type"]
+	args["workflow_id"] = bindings["workflow_id"]
+	args["run_id"] = bindings["run_id"]
+	args["activity_key"] = activityKey
+	if saveOutput != nil {
+		args["save_output"] = *saveOutput
+	} else {
+		args["save_output"] = false
+	}
+
 	argsbytes, err := json.Marshal(args)
 	if err != nil {
 		return "", err

@@ -14,6 +14,6 @@ var ActivityCatalog = []*ActivityMetadata{
 	ImageAddWatermarkActivityV1_0,
 	ImageMetadataExtractionActivityV1_0,
 	ImageBlurActivityV1_0,
-	ExtractPDFContentV1_0,
+	DetectDocumentText,
 	HTTP_V_01,
 }

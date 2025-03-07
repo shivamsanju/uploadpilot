@@ -19,11 +19,11 @@ import (
 	"github.com/uploadpilot/core/internal/db/repo"
 	"github.com/uploadpilot/core/internal/rbac"
 	"github.com/uploadpilot/core/internal/services"
-	"github.com/uploadpilot/core/internal/workflow/worker"
+	"github.com/uploadpilot/core/internal/workflow"
 	"github.com/uploadpilot/core/web"
 )
 
-func Initialize() (*http.Server, *worker.Worker, *cron.Cron, func(), error) {
+func Initialize() (*http.Server, *workflow.Worker, *cron.Cron, func(), error) {
 	environment := GetEnvironment()
 	setupLogger(environment)
 
@@ -62,7 +62,7 @@ func Initialize() (*http.Server, *worker.Worker, *cron.Cron, func(), error) {
 	services := services.NewServices(repos, clients, accessManager)
 
 	// Initialize worker
-	wrk := worker.NewWorker(clients.LambdaClient, clients.TemporalClient, config.AppConfig.WorkerTaskQueue)
+	wrk := workflow.NewWorker(clients.LambdaClient, clients.TemporalClient, config.AppConfig.WorkerTaskQueue)
 
 	// Initialize cron to mark timed out uploads
 	timeoutMarkerCron := NewMarkTimedOutUploadsRoutine(repos.UploadRepo)
@@ -173,7 +173,7 @@ func setupLogger(env string) {
 	}
 }
 
-func getCleanupFunc(clients *clients.Clients, dbCloseFunc func(), wrk *worker.Worker) func() {
+func getCleanupFunc(clients *clients.Clients, dbCloseFunc func(), wrk *workflow.Worker) func() {
 	return func() {
 		_ = clients.RedisClient.Close()
 		clients.TemporalClient.Close()

@@ -1,4 +1,4 @@
-package worker
+package workflow
 
 import (
 	"log"
@@ -6,7 +6,6 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/lambda"
 	"github.com/uploadpilot/core/internal/workflow/dsl"
-	"github.com/uploadpilot/core/internal/workflow/executor"
 	"go.temporal.io/sdk/activity"
 	"go.temporal.io/sdk/client"
 	"go.temporal.io/sdk/worker"
@@ -34,7 +33,7 @@ func (w *Worker) Start() {
 
 	wrk.RegisterWorkflow(dsl.SimpleDSLWorkflow)
 
-	exc := executor.NewExecutor(w.lambdaClient)
+	exc := NewExecutor(w.lambdaClient)
 	wrk.RegisterActivityWithOptions(exc.ExecuteLambdaContainerActivity, activity.RegisterOptions{
 		Name: "Executor",
 	})

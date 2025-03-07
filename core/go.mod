@@ -5,7 +5,6 @@ go 1.23.2
 replace github.com/uploadpilot/go-common v0.0.0 => ../go-common
 
 require (
-	github.com/aws/aws-lambda-go v1.47.0
 	github.com/aws/aws-sdk-go-v2 v1.36.3
 	github.com/aws/aws-sdk-go-v2/config v1.29.6
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.59

@@ -1,4 +1,4 @@
-package executor
+package workflow
 
 import (
 	"context"
@@ -21,8 +21,7 @@ func NewExecutor(lambdaClient *lambda.Client) *Executor {
 	}
 }
 
-func (e *Executor) ExecuteLambdaContainerActivity(ctx context.Context, functionName string,
-	marshaledPayload string, workflowMetadataStr string) ([]byte, error) {
+func (e *Executor) ExecuteLambdaContainerActivity(ctx context.Context, functionName, marshaledPayload string) ([]byte, error) {
 
 	input := &lambda.InvokeInput{
 		FunctionName: aws.String(functionName),
@@ -30,11 +29,16 @@ func (e *Executor) ExecuteLambdaContainerActivity(ctx context.Context, functionN
 		LogType:      types.LogTypeTail,
 	}
 
-	log.Info().Str("functionName", functionName).Str("workflowMetadataStr", workflowMetadataStr).Str("payload", marshaledPayload).Msg("invoking lambda")
+	log.Info().Str("functionName", functionName).Str("payload", marshaledPayload).Msg("invoking lambda")
 	op, err := e.lambdaClient.Invoke(context.TODO(), input)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to invoke lambda")
 		return nil, fmt.Errorf("failed to invoke lambda: %w", err)
+	}
+
+	if op.FunctionError != nil {
+		log.Error().Str("error", *op.FunctionError).Msg("lambda error")
+		return nil, fmt.Errorf("lambda error: %s", *op.FunctionError)
 	}
 
 	log.Info().Str("output", string(op.Payload)).Msg("lambda output")
