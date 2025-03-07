@@ -23,7 +23,6 @@ func (r *WorkspaceRepo) Get(ctx context.Context, workspaceID string) (*models.Wo
 	var workspace models.Workspace
 	if err := r.db.Orm.WithContext(ctx).Where("id = ?", workspaceID).
 		Select("id, name", "description", "tags", "created_at").
-		Order("created_at DESC").
 		First(&workspace).Error; err != nil {
 		return nil, dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
@@ -62,4 +61,14 @@ func (r *WorkspaceRepo) Delete(ctx context.Context, workspaceID string) error {
 		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 	return nil
+}
+
+func (r *WorkspaceRepo) GetTenantID(ctx context.Context, workspaceID string) (string, error) {
+	var workspace models.Workspace
+	if err := r.db.Orm.WithContext(ctx).Where("id = ?", workspaceID).
+		Select("tenant_id").
+		First(&workspace).Error; err != nil {
+		return "", dbutils.DBError(ctx, r.db.Orm.Logger, err)
+	}
+	return workspace.TenantID, nil
 }

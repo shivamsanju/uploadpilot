@@ -2,6 +2,7 @@ import { Box } from '@mantine/core';
 import { useNavigate } from 'react-router-dom';
 import { useGetUserDetails } from '../../apis/user';
 import { TENANT_ID_KEY } from '../../constants/tenancy';
+import { ErrorCard } from '../ErrorCard/ErrorCard';
 import { AppLoader } from '../Loader/AppLoader';
 import { TenantRegistrationForm } from './RegistrationForm';
 
@@ -17,7 +18,7 @@ const TenancyManager: React.FC<{ children: React.ReactNode }> = ({
   }
 
   if (error) {
-    navigate('/auth');
+    return <ErrorCard title={error.name} message={error.message} h="100vh" />;
   }
 
   if (!user?.tenants || Object.keys(user.tenants).length === 0) {

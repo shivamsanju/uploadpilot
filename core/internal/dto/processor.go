@@ -55,3 +55,8 @@ type ProcessorTemplate struct {
 	Label       string `json:"label"`
 	Description string `json:"description"`
 }
+
+type WorkflowQuery struct {
+	WorkflowID string `json:"workflowId"`
+	RunID      string `json:"runId"`
+}

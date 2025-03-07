@@ -24,7 +24,9 @@ export const InitSupertokens = () => {
           providers: [Google.init(), Github.init()],
         },
       }),
-      Session.init(),
+      Session.init({
+        tokenTransferMethod: 'header',
+      }),
     ],
   });
 };

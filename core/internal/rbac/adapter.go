@@ -1,10 +1,15 @@
 package rbac
 
 import (
-	gormadapter "github.com/casbin/gorm-adapter/v3"
-	"gorm.io/gorm"
+	"fmt"
+
+	pgadapter "github.com/casbin/casbin-pg-adapter"
 )
 
-func NewGormAdapter(db *gorm.DB, tableName string) (*gormadapter.Adapter, error) {
-	return gormadapter.NewAdapterByDBUseTableName(db, "", tableName)
+func NewPgAdapter(postgresURI, environnent string) (*pgadapter.Adapter, error) {
+	a, err := pgadapter.NewAdapter(postgresURI, fmt.Sprintf("casbin_%s", environnent))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create adapter: %w", err)
+	}
+	return a, nil
 }

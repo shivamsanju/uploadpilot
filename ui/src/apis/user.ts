@@ -1,11 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
 import Session from 'supertokens-web-js/recipe/session';
 import { axiosBaseInstance } from '../utils/axios';
 
 export const useGetUserDetails = () => {
-  const navigate = useNavigate();
-
   const {
     isPending,
     error,
@@ -13,18 +10,9 @@ export const useGetUserDetails = () => {
   } = useQuery({
     queryKey: ['user'],
     refetchInterval: 1200000,
-    queryFn: () => {
-      return axiosBaseInstance
-        .get(`/user`)
-        .then(res => {
-          if (res.status !== 200) {
-            navigate('/auth');
-          }
-          return res.data;
-        })
-        .catch(() => {
-          navigate('/auth');
-        });
+    queryFn: async () => {
+      const resp = await axiosBaseInstance.get(`/user`);
+      return resp.data;
     },
   });
 

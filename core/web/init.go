@@ -14,7 +14,7 @@ import (
 
 func NewWebserver(appConfig *config.Config, services *services.Services) (*http.Server, error) {
 	router := chi.NewRouter()
-	appMiddlewares := middlewares.NewAppMiddlewares(services.APIKeyService, appConfig.AllowedOrigins)
+	appMiddlewares := middlewares.NewAppMiddlewares(services.WorkspaceService, services.APIKeyService, appConfig.AllowedOrigins)
 
 	// App middlewares
 	router.Use(appMiddlewares.RecoveryMiddleware)

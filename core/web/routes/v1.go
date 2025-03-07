@@ -27,12 +27,11 @@ func NewAppRoutesV1(services *services.Services, middlewares *middlewares.Middle
 	router.Route("/user", func(r chi.Router) {
 		r.Get("/", webutils.CreateJSONHandler(userHandler.GetUserDetails))
 		r.Put("/", webutils.CreateJSONHandler(userHandler.UpdateUserDetails))
-
+		r.Put("/active-tenant", webutils.CreateJSONHandler(tenantHandler.SetActiveTenant))
 	})
 
 	router.Route("/tenants", func(r chi.Router) {
 		r.Post("/", webutils.CreateJSONHandler(tenantHandler.OnboardTenant))
-		r.Put("/active", webutils.CreateJSONHandler(tenantHandler.SetActiveTenant))
 	})
 
 	// Specific tenant routes
@@ -55,7 +54,6 @@ func NewAppRoutesV1(services *services.Services, middlewares *middlewares.Middle
 				r.Route("/{workspaceId}", func(r chi.Router) {
 					r.Get("/config", webutils.CreateJSONHandler(workspaceHandler.GetWorkspaceConfig))
 					r.Put("/config", webutils.CreateJSONHandler(workspaceHandler.SetWorkspaceConfig))
-					r.Get("/allowedSources", webutils.CreateJSONHandler(workspaceHandler.GetAllAllowedSources))
 
 					r.Route("/uploads", func(r chi.Router) {
 						r.Get("/", webutils.CreateJSONHandler(uploadHandler.GetPaginatedUploads))

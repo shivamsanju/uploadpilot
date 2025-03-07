@@ -21,10 +21,31 @@ func NewAPIKeyRepo(db *driver.Driver) *APIKeyRepo {
 	}
 }
 
-func (r *APIKeyRepo) CreateApiKey(ctx context.Context, apiKey *models.APIKey) error {
-	if err := r.db.Orm.WithContext(ctx).Create(apiKey).Error; err != nil {
+func (r *APIKeyRepo) CreateApiKey(ctx context.Context, apiKey *models.APIKey, apiKeyCreateCallback func() error) error {
+	tx := r.db.Orm.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+
+	// Create the API key within the transaction
+	if err := tx.Create(apiKey).Error; err != nil {
+		tx.Rollback()
 		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
+
+	// Update user metadata
+	if err := apiKeyCreateCallback(); err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	// Commit the transaction if everything is successful
+	if err := tx.Commit().Error; err != nil {
+		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
+	}
+
 	return nil
 }
 
@@ -39,7 +60,6 @@ func (r *APIKeyRepo) GetApiKeyDetailsByID(ctx context.Context, id string) (*mode
 func (r *APIKeyRepo) GetApiKeyLimitedDetailsByID(ctx context.Context, id string) (*models.APIKey, error) {
 	var apiKey models.APIKey
 	if err := r.db.Orm.WithContext(ctx).
-		Preload("Permissions").
 		Select("id", "name", "user_id", "created_at", "expires_at", "revoked_at", "revoked_by").
 		First(&apiKey, "id = ?", id).Error; err != nil {
 		return nil, dbutils.DBError(ctx, r.db.Orm.Logger, err)
@@ -50,14 +70,13 @@ func (r *APIKeyRepo) GetApiKeyLimitedDetailsByID(ctx context.Context, id string)
 func (r *APIKeyRepo) GetApiKeyDetails(ctx context.Context, hash string) (*models.APIKey, error) {
 	var apiKey models.APIKey
 	if err := r.db.Orm.WithContext(ctx).
-		Preload("Permissions").
 		First(&apiKey, "api_key_hash = ?", hash).Error; err != nil {
 		return nil, dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 	return &apiKey, nil
 }
 
-func (r *APIKeyRepo) GetAllApiKeys(ctx context.Context, userID string, tenantID string) ([]models.APIKey, error) {
+func (r *APIKeyRepo) GetAllApiKeysInTenant(ctx context.Context, tenantID string) ([]models.APIKey, error) {
 	var apiKeys []models.APIKey
 	if err := r.db.Orm.WithContext(ctx).
 		Select("id", "name", "user_id", "created_at", "expires_at", "revoked_at", "revoked_by").
@@ -65,7 +84,8 @@ func (r *APIKeyRepo) GetAllApiKeys(ctx context.Context, userID string, tenantID 
 			{Column: clause.Column{Name: "revoked_at"}, Desc: true},
 			{Column: clause.Column{Name: "created_at"}, Desc: true},
 		}}).
-		Find(&apiKeys, "user_id = ?", userID).
+		Where("tenant_id = ?", tenantID).
+		Find(&apiKeys).
 		Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return make([]models.APIKey, 0), nil

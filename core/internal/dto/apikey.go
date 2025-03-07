@@ -2,19 +2,11 @@ package dto
 
 import (
 	"time"
-
-	"github.com/uploadpilot/core/internal/db/models"
 )
 
 type UserClaims struct {
 	UserID string
 	Email  string
-}
-
-type APIKeyPerm struct {
-	Scope     string
-	ResouceID string
-	Perm      models.APIKeyPermissionType
 }
 
 type WorkspaceApiPerm struct {
@@ -27,7 +19,6 @@ type CreateApiKeyData struct {
 	Name           string             `json:"name" validate:"required,min=3,max=25,alphanumspace"`
 	ExpiresAt      time.Time          `json:"expiresAt" validate:"required,future"`
 	TenantRead     bool               `json:"tenantRead"`
-	TenantManage   bool               `json:"tenantManage"`
 	WorkspacePerms []WorkspaceApiPerm `json:"workspacePerms"`
 }
 

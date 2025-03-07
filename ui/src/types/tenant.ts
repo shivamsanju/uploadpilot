@@ -4,6 +4,4 @@ export type TenantOnboardingRequest = {
   phone?: string;
   address?: string;
   industry?: string;
-  companyName?: string;
-  role: string;
 };

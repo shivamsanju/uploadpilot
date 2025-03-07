@@ -17,9 +17,7 @@ export const useGetApiKeys = () => {
       if (!tenantId) {
         return Promise.reject(new Error('tenantId is required'));
       }
-      return axiosTenantInstance
-        .get(`/tenants/${tenantId}/api-keys`)
-        .then(res => res.data);
+      return axiosTenantInstance.get(`/api-keys`).then(res => res.data);
     },
   });
 
@@ -39,9 +37,7 @@ export const useCreateApiKeyMutation = () => {
       if (!tenantId) {
         return Promise.reject(new Error('tenantId is required'));
       }
-      return axiosTenantInstance
-        .post(`/tenants/${tenantId}/api-keys`, data)
-        .then(res => res.data);
+      return axiosTenantInstance.post(`/api-keys`, data).then(res => res.data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['apikeys'] });
@@ -72,7 +68,7 @@ export const useRevokeApiKeyMutation = () => {
         return Promise.reject(new Error('tenantId is required'));
       }
       return axiosTenantInstance
-        .post(`/tenants/${tenantId}/api-keys/${id}/revoke`)
+        .post(`/api-keys/${id}/revoke`)
         .then(res => res.data);
     },
     onSuccess: () => {

@@ -11,14 +11,16 @@ import (
 )
 
 type Middlewares struct {
+	workspaceSvc   *services.WorkspaceService
 	apiKeySvc      *services.APIKeyService
 	allowedOrigins []string
 }
 
-func NewAppMiddlewares(apiKeySvc *services.APIKeyService, allowedOrigins []string) *Middlewares {
+func NewAppMiddlewares(workspaceSvc *services.WorkspaceService, apiKeySvc *services.APIKeyService, allowedOrigins []string) *Middlewares {
 	return &Middlewares{
-		apiKeySvc:      apiKeySvc,
-		allowedOrigins: allowedOrigins,
+		workspaceSvc,
+		apiKeySvc,
+		allowedOrigins,
 	}
 }
 

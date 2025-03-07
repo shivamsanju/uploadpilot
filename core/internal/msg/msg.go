@@ -2,7 +2,7 @@ package msg
 
 // Common errors
 const (
-	ErrUnexpected = "oops! something went wrong. please try again"
+	ErrUnexpected = "oops! something went wrong. please try again. [Error ID: %s]"
 	ErrUnknown    = "there was an issue processing your request. please try again later"
 )
 

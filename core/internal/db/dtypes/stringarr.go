@@ -37,3 +37,7 @@ func (s StringArray) Value() (driver.Value, error) {
 	// Convert the StringArray to the PostgreSQL array format
 	return "{" + strings.Join(s, ",") + "}", nil
 }
+
+func (s StringArray) ArrayValue() ([]string, error) {
+	return s, nil
+}

@@ -1,11 +1,9 @@
 import { CodeHighlight } from '@mantine/code-highlight';
 import '@mantine/code-highlight/styles.css';
-import { MantineStyleProp, Paper, Stack, Text, Timeline } from '@mantine/core';
+import { MantineStyleProp, Stack, Text, Timeline } from '@mantine/core';
 import { IconBrandNpm, IconCode, IconConfetti } from '@tabler/icons-react';
 import { useParams } from 'react-router-dom';
-import { getUploadApiDomain } from '../../../utils/config';
-
-const uploadEndpoint = getUploadApiDomain();
+import { getTenantId } from '../../../utils/config';
 
 const GoIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
   const { workspaceId } = useParams();
@@ -25,66 +23,61 @@ const GoIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
           <Text opacity={0.7} size="sm" mb="lg">
             Install the go sdk
           </Text>
-          <Paper p="lg">
-            <CodeHighlight
-              m="sm"
-              code={`go get github.com/uploadpilot/sdk/go-client`}
-            />
-          </Paper>
+          <CodeHighlight
+            m="sm"
+            code={`go get github.com/uploadpilot/sdk/go-client`}
+          />
         </Timeline.Item>
 
         <Timeline.Item bullet={<IconCode size={12} />} title="Code">
           <Text opacity={0.7} size="sm" mb="lg">
             Use the go sdk
           </Text>
-          <Paper p="lg">
-            <CodeHighlight
-              m="sm"
-              language="go"
-              code={`
+          <CodeHighlight
+            m="sm"
+            code={`
 package main
 
 import (
-	"log"
-	"os"
+  "log"
+  "os"
 
-	gocl "github.com/uploadpilot/sdk/go-client"
+  "github.com/uploadpilot/go-sdk/client"
 )
 
 func main() {
-	log.Println("uploading file start...")
-	cl, err := gocl.NewUploader(
-          "${workspaceId}", // replace with your workspace id
-          "${uploadEndpoint}", // uploadpilot endpoint
-          "your_api_key", // replace with your api key
-        )
-	if err != nil {
-		log.Fatal("failed to create uploader:", err)
-		os.Exit(1)
-	}
-	err = cl.UploadFile(
-		"../wf.yaml",
-		&gocl.UploadOptions{
-			Metadata: map[string]string{
-				"filename": "wf.yaml",
-				"filetype": "text/plain",
-			},
-		},
-	)
-	if err != nil {
-		log.Fatal("failed to upload file:", err)
-		os.Exit(1)
-	}
-	log.Println("file uploaded successfully!")
-}`}
-            />
-          </Paper>
+  uploader, err := client.NewUploader(
+    "${getTenantId()}",
+    "${workspaceId}",
+    "YOUR_API_KEY",
+  )
+  if err != nil {
+    log.Fatal("Failed to create uploader:", err)
+    os.Exit(1)
+  }
+
+  err = uploader.UploadFile(
+    "../wf.yaml",
+    &client.UploadOptions{
+      FileName: "wf.yaml",
+      Metadata: map[string]string{
+        "key": "value",
+      },
+    },
+  )
+  if err != nil {
+    log.Fatal("Failed to upload file:", err)
+    os.Exit(1)
+  }
+}
+`}
+          />
         </Timeline.Item>
 
         <Timeline.Item bullet={<IconConfetti size={12} />} title="Cheers">
           <Text opacity={0.7} size="sm" mb="lg">
-            You did it, Check your imported files in the import section or
-            configure from the configuration section
+            You did it, Start uploading and check your uploaded files in the
+            uploads section or configure from the configuration section
           </Text>
         </Timeline.Item>
       </Timeline>

@@ -47,7 +47,7 @@ const NewprocessorPage = () => {
 
   const handleAdd = async (values: any) => {
     try {
-      await createMutateAsync({
+      const procId = await createMutateAsync({
         workspaceId: workspaceId || '',
         processor: {
           workspaceId,
@@ -56,8 +56,9 @@ const NewprocessorPage = () => {
           templateKey: values.templateKey,
         },
       });
+      console.log(procId);
       form.reset();
-      navigate(`/workspace/${workspaceId}/processors`);
+      navigate(`/workspace/${workspaceId}/processors/${procId}/workflow`);
     } catch (error) {
       console.error(error);
     }

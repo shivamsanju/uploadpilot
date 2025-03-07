@@ -25,8 +25,6 @@ export const TenantRegistrationForm = ({
       phone: '',
       address: '',
       industry: '',
-      companyName: '',
-      role: '',
     },
     validate: {
       name: value => {

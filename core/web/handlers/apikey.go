@@ -22,7 +22,7 @@ func NewAPIKeyHandler(apiKeySvc *services.APIKeyService) *apiKeyHandler {
 }
 
 func (h *apiKeyHandler) GetAPIKeys(r *http.Request, params dto.TenantParams, query interface{}, body interface{}) ([]models.APIKey, int, error) {
-	keys, err := h.apiKeySvc.GetAllAPIKeysForUser(r.Context(), params.TenantID)
+	keys, err := h.apiKeySvc.GetAllAPIKeysInTenant(r.Context(), params.TenantID)
 	if err != nil {
 		return nil, http.StatusInternalServerError, err
 	}
@@ -38,7 +38,7 @@ func (h *apiKeyHandler) CreateAPIKey(r *http.Request, params dto.TenantParams, q
 }
 
 func (h *apiKeyHandler) RevokeAPIKey(r *http.Request, params dto.ApiKeyParams, query interface{}, body interface{}) (bool, int, error) {
-	if err := h.apiKeySvc.RevokeAPIKey(r.Context(), params.ApiKeyID); err != nil {
+	if err := h.apiKeySvc.RevokeAPIKey(r.Context(), params.TenantID, params.ApiKeyID); err != nil {
 		return false, http.StatusInternalServerError, err
 	}
 	return true, http.StatusOK, nil

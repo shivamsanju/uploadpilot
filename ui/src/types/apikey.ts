@@ -19,6 +19,5 @@ export type CreateApiKeyData = {
   name: string;
   expiresAt: Date;
   tenantRead: boolean;
-  tenantManage: boolean;
   workspacePerms: APIWorkspacePerm[];
 };

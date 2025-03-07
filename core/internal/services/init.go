@@ -16,10 +16,10 @@ type Services struct {
 
 func NewServices(repos *repo.Repositories, clients *clients.Clients, accessManager *rbac.AccessManager) *Services {
 	tenantSvc := NewTenantService(accessManager, repos.TenantRepo)
-	workspaceSvc := NewWorkspaceService(accessManager, repos.WorkspaceRepo, repos.WorkspaceConfigRepo)
-	apiKeySvc := NewAPIKeyService(repos.APIKeyRepo, clients.KMSClient)
-	processorSvc := NewProcessorService(repos.ProcessorRepo, clients.TemporalClient)
-	uploadSvc := NewUploadService(repos.UploadRepo, processorSvc, clients.S3Client)
+	workspaceSvc := NewWorkspaceService(accessManager, repos.WorkspaceRepo, repos.WorkspaceConfigRepo, clients.S3Client)
+	apiKeySvc := NewAPIKeyService(accessManager, repos.APIKeyRepo, clients.KMSClient)
+	processorSvc := NewProcessorService(accessManager, repos.ProcessorRepo, clients.TemporalClient)
+	uploadSvc := NewUploadService(accessManager, repos.UploadRepo, workspaceSvc, processorSvc, clients.S3Client)
 
 	return &Services{
 		TenantService:    tenantSvc,

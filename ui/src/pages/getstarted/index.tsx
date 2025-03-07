@@ -1,17 +1,16 @@
-import { ActionIcon, Group, Stack, Text } from '@mantine/core';
+import { ActionIcon, Box, Group, Stack, Text } from '@mantine/core';
 import { useViewportSize } from '@mantine/hooks';
 import {
   IconBrandGolang,
-  IconBrandJavascript,
-  IconBrandPython,
-  IconBrandReact,
-  IconBrandTypescript,
+  IconBrandNodejs,
+  IconWorldWww,
 } from '@tabler/icons-react';
 import { useEffect, useState } from 'react';
 import { useSetBreadcrumbs } from '../../hooks/breadcrumb';
+import BrowserIntegrationPage from './browser';
 import classes from './getstarted.module.css';
 import GoIntegrationPage from './go';
-import ReactUploaderPreviewPage from './react';
+import NodejsIntegrationPage from './nodejs';
 
 const style = (width: number) => {
   if (width > 768) {
@@ -35,71 +34,23 @@ const style = (width: number) => {
 
 const frameworks = [
   {
-    name: 'React',
-    icon: IconBrandReact,
+    name: 'Browser',
+    icon: IconWorldWww,
+  },
+  {
+    name: 'Node.js',
+    icon: IconBrandNodejs,
   },
   {
     name: 'Go',
     icon: IconBrandGolang,
-  },
-  {
-    name: 'Python',
-    icon: IconBrandPython,
-  },
-  {
-    name: 'JavaScript',
-    icon: IconBrandJavascript,
-  },
-  {
-    name: 'TypeScript',
-    icon: IconBrandTypescript,
-  },
-  {
-    name: 'React',
-    icon: IconBrandReact,
-  },
-  {
-    name: 'Go',
-    icon: IconBrandGolang,
-  },
-  {
-    name: 'Python',
-    icon: IconBrandPython,
-  },
-  {
-    name: 'JavaScript',
-    icon: IconBrandJavascript,
-  },
-  {
-    name: 'TypeScript',
-    icon: IconBrandTypescript,
-  },
-  {
-    name: 'React',
-    icon: IconBrandReact,
-  },
-  {
-    name: 'Go',
-    icon: IconBrandGolang,
-  },
-  {
-    name: 'Python',
-    icon: IconBrandPython,
-  },
-  {
-    name: 'JavaScript',
-    icon: IconBrandJavascript,
-  },
-  {
-    name: 'TypeScript',
-    icon: IconBrandTypescript,
   },
 ];
 
 export const GetStartedPage = () => {
   const { width } = useViewportSize();
   const setBreadcrumbs = useSetBreadcrumbs();
-  const [selectedFramework, setSelectedFramework] = useState('React');
+  const [selectedFramework, setSelectedFramework] = useState('Browser');
 
   const s = style(width);
 
@@ -108,34 +59,39 @@ export const GetStartedPage = () => {
   }, [setBreadcrumbs]);
 
   return (
-    <Stack justify="center" align="center" pt="sm" mb={50}>
-      <Text ta="center" fw={700} fz="25px" mb="sm">
-        Choose your framework
-      </Text>
-      <Group justify="center" gap="xl" mb="md" w="50%">
-        {frameworks.map(framework => (
-          <ActionIcon
-            key={framework.name}
-            size="60"
-            p="sm"
-            radius="xl"
-            variant={
-              selectedFramework === framework.name ? 'filled' : 'outline'
-            }
-            onClick={() => setSelectedFramework(framework.name)}
-            className={
-              selectedFramework === framework.name ? classes.selected : ''
-            }
-          >
-            {<framework.icon size={30} />}
-          </ActionIcon>
-        ))}
-      </Group>
-      {selectedFramework === 'React' && <ReactUploaderPreviewPage style={s} />}
+    <Stack justify="center" pt="sm" mb={50}>
+      <Stack justify="center" align="center" mb="md">
+        <Box w={{ sm: '100vw', md: '70vw', lg: '60vw' }}>
+          <Text size="sm" mb="sm">
+            Select your platform to get started...
+          </Text>
+          <Group gap="xl">
+            {frameworks.map(framework => (
+              <ActionIcon
+                key={framework.name}
+                title={framework.name}
+                size="80"
+                p="lg"
+                variant={
+                  selectedFramework === framework.name ? 'light' : 'outline'
+                }
+                onClick={() => setSelectedFramework(framework.name)}
+                className={
+                  selectedFramework === framework.name ? classes.selected : ''
+                }
+              >
+                <Stack align="center" gap="5">
+                  {<framework.icon size={30} />}
+                  <Text fw={500}>{framework.name}</Text>
+                </Stack>
+              </ActionIcon>
+            ))}
+          </Group>
+        </Box>
+      </Stack>
+      {selectedFramework === 'Browser' && <BrowserIntegrationPage style={s} />}
       {selectedFramework === 'Go' && <GoIntegrationPage style={s} />}
-      {selectedFramework === 'Python' && <GoIntegrationPage style={s} />}
-      {selectedFramework === 'JavaScript' && <GoIntegrationPage style={s} />}
-      {selectedFramework === 'TypeScript' && <GoIntegrationPage style={s} />}
+      {selectedFramework === 'Node.js' && <NodejsIntegrationPage style={s} />}
     </Stack>
   );
 };

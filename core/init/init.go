@@ -1,6 +1,7 @@
 package initializer
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -8,6 +9,7 @@ import (
 
 	"github.com/phuslu/log"
 	"github.com/redis/go-redis/v9"
+	"github.com/robfig/cron/v3"
 	"github.com/uploadpilot/core/config"
 	"github.com/uploadpilot/core/internal/auth"
 	"github.com/uploadpilot/core/internal/clients"
@@ -17,40 +19,40 @@ import (
 	"github.com/uploadpilot/core/internal/db/repo"
 	"github.com/uploadpilot/core/internal/rbac"
 	"github.com/uploadpilot/core/internal/services"
+	"github.com/uploadpilot/core/internal/workflow/worker"
 	"github.com/uploadpilot/core/web"
 )
 
-func Initialize() (*http.Server, func(), error) {
-	if err := config.LoadConfig("./config", "dev", "env"); err != nil {
-		return nil, nil, fmt.Errorf("config initialization failed: %w", err)
-	}
+func Initialize() (*http.Server, *worker.Worker, *cron.Cron, func(), error) {
+	environment := GetEnvironment()
+	setupLogger(environment)
 
-	setupLogger(config.AppConfig.Environment)
+	if err := config.LoadConfig("./config", environment, "env"); err != nil {
+		return nil, nil, nil, nil, fmt.Errorf("config initialization failed: %w", err)
+	}
 
 	// Initialize auth
 	if err := initAuth(config.AppConfig); err != nil {
-		return nil, nil, fmt.Errorf("auth initialization failed: %w", err)
+		return nil, nil, nil, nil, fmt.Errorf("auth initialization failed: %w", err)
 	}
 
 	// Initialize clients
 	clients, err := initClients(config.AppConfig)
 	if err != nil {
-		return nil, nil, fmt.Errorf("clients initialization failed: %w", err)
+		return nil, nil, nil, nil, fmt.Errorf("clients initialization failed: %w", err)
 	}
 
 	// Initialize database
 	pgDriver, dbCloseFunc, err := initDatabase(config.AppConfig, clients.RedisClient)
 	if err != nil {
-		cleanupFunc := getCleanupFunc(clients, nil)
-		return nil, cleanupFunc, fmt.Errorf("database initialization failed: %w", err)
+		cleanupFunc := getCleanupFunc(clients, nil, nil)
+		return nil, nil, nil, cleanupFunc, fmt.Errorf("database initialization failed: %w", err)
 	}
 
-	cleanupFunc := getCleanupFunc(clients, dbCloseFunc)
-
 	// Initialize rbac
-	accessManager, err := initRBAC(pgDriver, "access_policy")
+	accessManager, err := initRBAC(config.AppConfig, environment)
 	if err != nil {
-		return nil, nil, fmt.Errorf("rbac initialization failed: %w", err)
+		return nil, nil, nil, nil, fmt.Errorf("rbac initialization failed: %w", err)
 	}
 
 	// Initialize repositories
@@ -59,13 +61,21 @@ func Initialize() (*http.Server, func(), error) {
 	// Initialize services
 	services := services.NewServices(repos, clients, accessManager)
 
+	// Initialize worker
+	wrk := worker.NewWorker(clients.TemporalClient, config.AppConfig.WorkerTaskQueue)
+
+	// Initialize cron to mark timed out uploads
+	timeoutMarkerCron := NewMarkTimedOutUploadsRoutine(repos.UploadRepo)
+
 	// Initialize the web server.
 	srv, err := web.NewWebserver(config.AppConfig, services)
 	if err != nil {
-		return nil, nil, fmt.Errorf("web server initialization failed: %w", err)
+		return nil, nil, nil, nil, fmt.Errorf("web server initialization failed: %w", err)
 	}
 
-	return srv, cleanupFunc, nil
+	cleanupFunc := getCleanupFunc(clients, dbCloseFunc, wrk)
+
+	return srv, wrk, timeoutMarkerCron, cleanupFunc, nil
 }
 
 func initDatabase(appConfig *config.Config, redisClient *redis.Client) (*driver.Driver, func(), error) {
@@ -149,10 +159,7 @@ func initClients(appConfig *config.Config) (*clients.Clients, error) {
 }
 
 func setupLogger(env string) {
-	if env == "" {
-		env = "development"
-	}
-	if env == "development" && log.IsTerminal(os.Stderr.Fd()) {
+	if env == "dev" && log.IsTerminal(os.Stderr.Fd()) {
 		log.DefaultLogger = log.Logger{
 			TimeFormat: "15:04:05",
 			Caller:     1,
@@ -165,18 +172,21 @@ func setupLogger(env string) {
 	}
 }
 
-func getCleanupFunc(clients *clients.Clients, dbCloseFunc func()) func() {
+func getCleanupFunc(clients *clients.Clients, dbCloseFunc func(), wrk *worker.Worker) func() {
 	return func() {
 		_ = clients.RedisClient.Close()
 		clients.TemporalClient.Close()
 		if dbCloseFunc != nil {
 			dbCloseFunc()
 		}
+		if wrk != nil {
+			wrk.Stop()
+		}
 	}
 }
 
-func initRBAC(dbDriver *driver.Driver, tableName string) (*rbac.AccessManager, error) {
-	gormAdapter, err := rbac.NewGormAdapter(dbDriver.Orm, tableName)
+func initRBAC(config *config.Config, env string) (*rbac.AccessManager, error) {
+	gormAdapter, err := rbac.NewPgAdapter(config.PostgresURI, env)
 	if err != nil {
 		return nil, err
 	}
@@ -191,4 +201,37 @@ func initRBAC(dbDriver *driver.Driver, tableName string) (*rbac.AccessManager, e
 	}
 
 	return manager, nil
+}
+
+func GetEnvironment() string {
+	env := os.Getenv("ENVIRONMENT")
+	if env == "development" {
+		env = "dev"
+	} else if env == "production" {
+		env = "prod"
+	} else if env == "testing" {
+		env = "test"
+	}
+
+	if env == "" {
+		env = "dev"
+	}
+
+	os.Setenv("ENVIRONMENT", env)
+	return env
+}
+
+func NewMarkTimedOutUploadsRoutine(uploadRepo *repo.UploadRepo) *cron.Cron {
+	c := cron.New()
+
+	// Every 5 minutes
+	c.AddFunc("*/5 * * * *", func() {
+		err := uploadRepo.BulkMarkTimedOut(context.Background())
+		if err != nil {
+			log.Error().Err(err).Msg("failed to mark timed out uploads")
+		}
+		log.Debug().Msg("marked timed out uploads")
+	})
+
+	return c
 }

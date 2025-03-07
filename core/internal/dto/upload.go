@@ -1,20 +1,16 @@
 package dto
 
-import "time"
-
 type CreateUploadRequest struct {
-	ID        string                 `json:"id,omitempty"`
-	FileName  string                 `json:"fileName" validate:"required"`
-	FileType  string                 `json:"fileType,omitempty"`
-	Size      int64                  `json:"size" validate:"required"`
-	Metadata  map[string]interface{} `json:"metadata,omitempty"`
-	Status    string                 `json:"status,omitempty"`
-	StartedAt time.Time              `json:"startedAt" validate:"required"`
+	FileName              string                 `json:"fileName" validate:"required"`
+	ContentType           string                 `json:"contentType" validate:"required"`
+	ContentLength         int64                  `json:"contentLength" validate:"required"`
+	Metadata              map[string]interface{} `json:"metadata,omitempty"`
+	UploadURLValiditySecs int64                  `json:"uploadUrlValiditySecs" validate:"required"`
 }
 
-type FinishUploadRequest struct {
-	FinishedAt time.Time `json:"finishedAt" validate:"required"`
-	Status     string    `json:"status,omitempty" validate:"required"`
-	FileType   string    `json:"fileType,omitempty"`
-	Size       int64     `json:"size,omitempty"`
+type CreateUploadResponse struct {
+	UploadID      string              `json:"uploadId" validate:"required"`
+	UploadURL     string              `json:"uploadUrl" validate:"required"`
+	Method        string              `json:"method" validate:"required"`
+	SignedHeaders map[string][]string `json:"signedHeaders" validate:"required"`
 }

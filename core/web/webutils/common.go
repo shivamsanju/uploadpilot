@@ -66,6 +66,10 @@ func GetTenantIDFromReq(r *http.Request) string {
 	return chi.URLParam(r, "tenantId")
 }
 
+func GetWorkspaceIDFromReq(r *http.Request) string {
+	return chi.URLParam(r, "workspaceId")
+}
+
 func GetUserTenantsFromMetadata(metadata map[string]interface{}) (map[string]dto.TenantMetadata, error) {
 	userTenants := make(map[string]dto.TenantMetadata)
 	ut, ok := metadata[dto.UserMetadataTenantKey]

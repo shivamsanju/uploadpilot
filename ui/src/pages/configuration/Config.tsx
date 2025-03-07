@@ -1,7 +1,6 @@
 import {
   Button,
   Group,
-  MultiSelect,
   NumberInput,
   SimpleGrid,
   Stack,
@@ -13,7 +12,6 @@ import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
 import { useParams } from 'react-router-dom';
 import { useUpdateUploaderConfigMutation } from '../../apis/uploader';
-import { useGetAllAllowedSources } from '../../apis/workspace';
 import { ContainerOverlay } from '../../components/Overlay';
 import { WorkspaceConfig } from '../../types/uploader';
 import classes from './Form.module.css';
@@ -24,23 +22,15 @@ type NewUploaderConfigProps = {
 
 const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
   const { workspaceId } = useParams();
-  const { isPending, allowedSources } = useGetAllAllowedSources(
-    workspaceId || '',
-  );
-  const { mutateAsync, isPending: isPendingMutation } =
-    useUpdateUploaderConfigMutation();
+
+  const { mutateAsync, isPending } = useUpdateUploaderConfigMutation();
 
   const form = useForm<WorkspaceConfig>({
     initialValues: {
       ...config,
-      allowedFileTypes: config?.allowedFileTypes || [],
-      allowedSources: config?.allowedSources || [],
+      allowedContentTypes: config?.allowedContentTypes || [],
       requiredMetadataFields: config?.requiredMetadataFields || [],
       allowedOrigins: config?.allowedOrigins || [],
-    },
-    validate: {
-      allowedSources: value =>
-        value.length === 0 ? 'Please select at least one source' : null,
     },
   });
 
@@ -60,8 +50,6 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
           ...form.values,
           minFileSize: form.values.minFileSize || 0,
           maxFileSize: form.values.maxFileSize || 0,
-          minNumberOfFiles: form.values.minNumberOfFiles || 0,
-          maxNumberOfFiles: form.values.maxNumberOfFiles || 0,
         },
       }).catch(error => {
         console.log(error);
@@ -80,19 +68,16 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
       onSubmit={form.onSubmit(handleEditAndSaveButton)}
       onReset={handleResetButton}
     >
-      <ContainerOverlay visible={isPending || isPendingMutation} />
+      <ContainerOverlay visible={isPending} />
       <SimpleGrid cols={{ base: 1, xl: 2 }} spacing="50">
         <Stack gap="xl">
-          {/* Allowed input sources */}
-          <MultiSelect
-            label="Allowed input sources"
-            placeholder="Select allowed input sources"
-            data={allowedSources || []}
-            {...form.getInputProps('allowedSources')}
-            disabled={isPending}
-            searchable
+          <NumberInput
+            required
+            label="Max upload url validity (seconds)"
+            placeholder="Enter maximum upload url validity in seconds"
+            {...form.getInputProps('maxUploadURLLifetimeSecs')}
+            min={0}
           />
-
           {/* Max file size */}
           <NumberInput
             label="Max file size"
@@ -100,25 +85,22 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
             {...form.getInputProps('maxFileSize')}
             min={0}
           />
-
-          {/* Max number of files */}
+          {/* Min file size */}
           <NumberInput
-            label="Max number of files"
-            placeholder="Specify the maximum number of files allowed"
-            {...form.getInputProps('maxNumberOfFiles')}
-            min={1}
+            label="Min file size"
+            placeholder="Enter minimum file size in bytes"
+            {...form.getInputProps('minFileSize')}
+            min={0}
           />
         </Stack>
         <Stack gap="xl">
-          {/* Allowed file types */}
           <TagsInput
-            label="Allowed mime types"
-            placeholder="Comma separated mime types"
-            {...form.getInputProps('allowedFileTypes')}
+            label="Allowed content types"
+            placeholder="Comma separated content types"
+            {...form.getInputProps('allowedContentTypes')}
             min={0}
           />
-
-          {/*Auth Endpoint */}
+          {/*Allowed origins */}
           <TagsInput
             label="Allowed origins"
             placeholder="Comma separated origins"

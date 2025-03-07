@@ -1,17 +1,9 @@
-import { CodeHighlight } from '@mantine/code-highlight';
-import { Modal } from '@mantine/core';
-import React from 'react';
+import { Box, Group, Modal, Text, Timeline } from '@mantine/core';
 import { useGetProcessorRunLogs } from '../../apis/processors';
 import { RefreshButton } from '../../components/Buttons/RefreshButton/RefreshButton';
 import { ErrorLoadingWrapper } from '../../components/ErrorLoadingWrapper';
+import classes from './Runs.module.css';
 
-const formatLogs = (logs: any[]) => {
-  let str = '';
-  for (const log of logs) {
-    str += `${log?.timestamp} | ${log?.eventType?.toUpperCase()} | ${log?.details}\n`;
-  }
-  return str;
-};
 type LogsModalProps = {
   open: boolean;
   onClose: () => void;
@@ -38,8 +30,31 @@ export const LogsModal: React.FC<LogsModalProps> = ({
   return (
     <Modal opened={open} fullScreen title="Logs" onClose={onClose} size="100%">
       <ErrorLoadingWrapper isPending={isPending} error={error}>
-        <RefreshButton onClick={invalidate} my="sm" />
-        <CodeHighlight mih={300} code={formatLogs(logs || [])} />
+        <Box px="md">
+          <RefreshButton onClick={invalidate} mb="md" variant="outline" />
+          <Timeline bulletSize={14}>
+            {logs?.length > 0 &&
+              logs.map((item: any, index: number) => (
+                <Timeline.Item
+                  key={index}
+                  title={
+                    <Group align="center" gap="md">
+                      <Text c="dimmed">{item?.timestamp}</Text>
+                      {item?.eventType === 'ActivityTaskScheduled' ? (
+                        <Text fw="bold" c="green">
+                          {`Scheduled -> ${item?.details?.split(',')[0]}`}
+                        </Text>
+                      ) : (
+                        <Text c="blue">{item?.eventType}</Text>
+                      )}
+                    </Group>
+                  }
+                >
+                  <code className={classes.codetext}>{item?.details}</code>
+                </Timeline.Item>
+              ))}
+          </Timeline>
+        </Box>
       </ErrorLoadingWrapper>
     </Modal>
   );

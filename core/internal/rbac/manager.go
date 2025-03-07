@@ -2,9 +2,9 @@ package rbac
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/casbin/casbin/v2"
+	"github.com/phuslu/log"
 )
 
 type AccessManager struct {
@@ -58,10 +58,17 @@ func (am *AccessManager) AddAccess(sub, tenantID, workspaceID string, role AppRo
 
 // CheckAccess verifies if a subject has access to a specific workspace with a minimum required role
 func (am *AccessManager) CheckAccess(sub, tenantID, workspaceID string, requiredRole AppRole) bool {
+	log.Debug().Str("sub", sub).Str("tenant_id", tenantID).Str("workspace_id", workspaceID).Str("role", string(requiredRole)).Msg("checking access")
 	allowed, err := am.enforcer.Enforce(sub, tenantID, workspaceID, string(requiredRole))
 	if err != nil {
-		log.Printf("Error checking access: %v", err)
+		log.Debug().Str("sub", sub).Str("tenant_id", tenantID).Str("workspace_id", workspaceID).Msg("accessNotGranted")
+		log.Error().Err(err).Msg("failed to check access")
 		return false
+	}
+	if !allowed {
+		log.Debug().Str("sub", sub).Str("tenant_id", tenantID).Str("workspace_id", workspaceID).Msg("AccessNotGranted")
+	} else {
+		log.Debug().Str("sub", sub).Str("tenant_id", tenantID).Str("workspace_id", workspaceID).Msg("AccessGranted")
 	}
 	return allowed
 }

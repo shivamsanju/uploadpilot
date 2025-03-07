@@ -9,11 +9,12 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/phuslu/log"
-	"github.com/uploadpilot/core/internal/activities/catalog"
 	"github.com/uploadpilot/core/internal/db/models"
 	"github.com/uploadpilot/core/internal/db/repo"
 	"github.com/uploadpilot/core/internal/dto"
+	"github.com/uploadpilot/core/internal/rbac"
 	"github.com/uploadpilot/core/internal/templates"
+	"github.com/uploadpilot/core/internal/workflow/catalog"
 	"github.com/uploadpilot/core/pkg/dsl"
 	"github.com/uploadpilot/core/pkg/validator"
 	"github.com/uploadpilot/core/web/webutils"
@@ -25,13 +26,15 @@ import (
 )
 
 type ProcessorService struct {
+	accessManager  *rbac.AccessManager
 	procRepo       *repo.ProcessorRepo
 	validator      *validator.Validator
 	temporalClient client.Client
 }
 
-func NewProcessorService(procRepo *repo.ProcessorRepo, temporalClient client.Client) *ProcessorService {
+func NewProcessorService(accessManager *rbac.AccessManager, procRepo *repo.ProcessorRepo, temporalClient client.Client) *ProcessorService {
 	return &ProcessorService{
+		accessManager:  accessManager,
 		procRepo:       procRepo,
 		validator:      validator.NewValidator(),
 		temporalClient: temporalClient,
@@ -140,7 +143,7 @@ func (s *ProcessorService) TriggerWorkflows(ctx context.Context, workspaceID str
 			var doTrigger bool = false
 			if len(processor.Triggers) != 0 {
 				for _, trigger := range processor.Triggers {
-					if trigger == upload.FileType {
+					if trigger == upload.ContentType {
 						doTrigger = true
 						break
 					}
@@ -179,7 +182,7 @@ func (s *ProcessorService) TriggerWorkflow(ctx context.Context, upload *models.U
 		Memo: map[string]interface{}{
 			"uploadId":    upload.ID,
 			"workspaceId": workspaceID,
-			"fileType":    upload.FileType,
+			"fileType":    upload.ContentType,
 			"fileName":    upload.FileName,
 		},
 	}
@@ -188,7 +191,7 @@ func (s *ProcessorService) TriggerWorkflow(ctx context.Context, upload *models.U
 	dslWorkflow.UploadID = upload.ID
 	dslWorkflow.ProcessorID = processorID
 	dslWorkflow.UploadFileName = upload.FileName
-	dslWorkflow.UploadFileType = upload.FileType
+	dslWorkflow.UploadFileType = upload.ContentType
 
 	fmt.Println("workflowOptions", workflowOptions)
 	we, err := s.temporalClient.ExecuteWorkflow(context.Background(), workflowOptions, dsl.SimpleDSLWorkflow, dslWorkflow)

@@ -41,26 +41,6 @@ export const useCreateWorkspaceMutation = () => {
   });
 };
 
-export const useGetAllAllowedSources = (workspaceId: string) => {
-  const {
-    isPending,
-    error,
-    data: allowedSources,
-  } = useQuery({
-    queryKey: ['allowedSources'],
-    queryFn: () => {
-      if (!workspaceId) {
-        return Promise.reject(new Error('workspaceId is required'));
-      }
-      return axiosTenantInstance
-        .get(`workspaces/${workspaceId}/allowedSources`)
-        .then(res => res.data);
-    },
-  });
-
-  return { isPending, error, allowedSources };
-};
-
 export const useGetUsersInWorkspace = (workspaceId: string) => {
   const queryClient = useQueryClient();
 

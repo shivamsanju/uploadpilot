@@ -53,7 +53,7 @@ export const useSetActiveTenant = () => {
     mutationKey: ['activeTenant'],
     mutationFn: (tenantId: string) => {
       return axiosBaseInstance
-        .put(`/tenants/active`, { tenantId })
+        .put(`/user/active-tenant`, { tenantId })
         .then(res => res.data);
     },
     onSuccess: () => {

@@ -173,34 +173,34 @@ const UploadList = ({ setTotalRecords }: any) => {
       },
       {
         title: 'Name',
-        accessor: 'metadata.filename',
+        accessor: 'fileName',
         elipsis: true,
         render: (params: any) => <Text fz="sm">{params?.fileName}</Text>,
       },
       {
-        title: 'File Type',
-        accessor: 'metadata.filetype',
+        title: 'Content Type',
+        accessor: 'contentType',
         hidden: width < 768,
-        render: (params: any) => (
-          <>
-            <Text fz="sm">{params?.fileType}</Text>
-            {/* <Text fz="xs" c="dimmed">
-              Mime Type
-            </Text> */}
-          </>
-        ),
+        render: (params: any) => <Text fz="sm">{params?.contentType}</Text>,
       },
       {
         title: 'Size',
-        accessor: 'size',
+        accessor: 'contentLength',
         hidden: width < 768,
         render: (params: any) => (
-          <>
-            <Text fz="sm">{formatBytes(Number(params?.size))}</Text>
-            {/* <Text fz="xs" c="dimmed">
-              Size
-            </Text> */}
-          </>
+          <Text fz="sm">{formatBytes(Number(params?.contentLength))}</Text>
+        ),
+      },
+      {
+        title: 'Started At',
+        accessor: 'startedAt',
+        hidden: width < 768,
+        render: (params: any) => (
+          <Text fz="sm">
+            {params?.startedAt && !params.startedAt.startsWith('0001-01-01')
+              ? timeAgo.format(new Date(params?.startedAt))
+              : '-'}
+          </Text>
         ),
       },
       {
@@ -208,15 +208,11 @@ const UploadList = ({ setTotalRecords }: any) => {
         accessor: 'finishedAt',
         hidden: width < 768,
         render: (params: any) => (
-          <>
-            <Text fz="sm">
-              {params?.finishedAt &&
-                timeAgo.format(new Date(params?.finishedAt))}
-            </Text>
-            {/* <Text fz="xs" c="dimmed">
-              Uploaded
-            </Text> */}
-          </>
+          <Text fz="sm">
+            {params?.finishedAt && !params.finishedAt.startsWith('0001-01-01')
+              ? timeAgo.format(new Date(params?.finishedAt))
+              : '-'}
+          </Text>
         ),
       },
       {
@@ -231,7 +227,14 @@ const UploadList = ({ setTotalRecords }: any) => {
         filter: (
           <MultiSelect
             w={200}
-            data={['Uploaded', 'Failed', 'In Progress', 'Queued']}
+            data={[
+              'Finished',
+              'Failed',
+              'Created',
+              'Queued',
+              'Skipped',
+              'Cancelled',
+            ]}
             value={statusFilter}
             placeholder="Filter by status"
             onChange={setStatusFilter}
@@ -261,7 +264,7 @@ const UploadList = ({ setTotalRecords }: any) => {
                 </ActionIcon>
               </Menu.Target>
               <Menu.Dropdown>
-                {params?.status === 'Uploaded' && (
+                {params?.status === 'Finished' && (
                   <Menu.Item
                     onClick={() => handleDownload(params?.id)}
                     leftSection={<IconDownload size={18} />}
@@ -269,7 +272,7 @@ const UploadList = ({ setTotalRecords }: any) => {
                     <Text>Download</Text>
                   </Menu.Item>
                 )}
-                {params?.status === 'Uploaded' && (
+                {params?.status === 'Finished' && (
                   <Menu.Item
                     onClick={() => handleCopyLink(params?.id)}
                     leftSection={<IconCopy size={18} />}
@@ -283,12 +286,14 @@ const UploadList = ({ setTotalRecords }: any) => {
                 >
                   <Text>View Metadata</Text>
                 </Menu.Item>
-                <Menu.Item
-                  onClick={() => processUpload(params?.id)}
-                  leftSection={<IconBolt size={18} />}
-                >
-                  <Text>Process</Text>
-                </Menu.Item>
+                {params?.status === 'Finished' && (
+                  <Menu.Item
+                    onClick={() => processUpload(params?.id)}
+                    leftSection={<IconBolt size={18} />}
+                  >
+                    <Text>Process</Text>
+                  </Menu.Item>
+                )}
               </Menu.Dropdown>
             </Menu>
           </Group>
@@ -310,7 +315,7 @@ const UploadList = ({ setTotalRecords }: any) => {
   }, [setTotalRecords, totalRecords]);
 
   if (error) {
-    return <ErrorCard title="Error" message={error.message} h="70vh" />;
+    return <ErrorCard title={error.name} message={error.message} h="70vh" />;
   }
 
   if (isFetchNextPageError) {

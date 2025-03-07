@@ -37,7 +37,6 @@ const CreateApiKeyPage: React.FC<Props> = () => {
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       name: '',
       tenantRead: false,
-      tenantManage: false,
       workspacePerms: [],
     },
     validate: {
@@ -144,12 +143,8 @@ const CreateApiKeyPage: React.FC<Props> = () => {
               Tenant level permissions
             </Text>
             <Checkbox
-              label="Read access"
+              label="Read access (can view all workspaces)"
               {...form.getInputProps('tenantRead')}
-            />
-            <Checkbox
-              label="Manage access"
-              {...form.getInputProps('tenantManage')}
             />
             <Text size="md" fw={500} mt="xl">
               Workspace level permissions

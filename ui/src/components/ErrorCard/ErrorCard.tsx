@@ -1,8 +1,9 @@
 import {
+  Box,
   Button,
-  Container,
+  Divider,
+  Group,
   Image,
-  Stack,
   Text,
   Title,
   useMantineColorScheme,
@@ -20,24 +21,49 @@ export const ErrorCard: React.FC<ErrorCardProps> = ({ title, message, h }) => {
   const refreshPage = () => window.location.reload();
   const { colorScheme } = useMantineColorScheme();
   return (
-    <Container p="sm">
-      <Stack align="center" h={h}>
-        <Image
-          alt="error"
-          h="300"
-          w="400"
-          src={colorScheme === 'dark' ? imageDark : imageLight}
-        />
-        <Title order={1} fw="bolder" p={0}>
-          {title}
+    <Group align="center" justify="center" h={h}>
+      <Image
+        alt="error"
+        h="300"
+        w="400"
+        src={colorScheme === 'dark' ? imageDark : imageLight}
+      />
+      <Box>
+        <Title order={1} fw="bolder" p={0} m={0}>
+          {getFormattedTitle(title, message)}
         </Title>
-        <Text c="dimmed" size="md">
-          {message}
+        <Divider mb="sm" size="lg" />
+        <Text c="dimmed" size="md" p={0} m={0} mt="3">
+          {getFormattedMessage(message)}
         </Text>
-        <Button variant="outline" size="md" mt="sm" onClick={refreshPage}>
+        <Button variant="outline" mt="sm" onClick={refreshPage}>
           Refresh the page
         </Button>
-      </Stack>
-    </Container>
+      </Box>
+    </Group>
   );
+};
+
+const getFormattedTitle = (title: string, message: string) => {
+  if (message === 'Request failed with status code 403') {
+    return 'Unauthorized';
+  }
+
+  if (message === 'Network Error') {
+    return 'Network Error';
+  }
+
+  return title.replace('AxiosError', 'Error');
+};
+
+const getFormattedMessage = (message: string) => {
+  switch (message) {
+    case 'Request failed with status code 403': {
+      return 'Access Denied';
+    }
+    case 'Network Error': {
+      return 'Please check your internet connection';
+    }
+  }
+  return message;
 };

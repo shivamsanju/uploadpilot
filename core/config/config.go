@@ -57,6 +57,7 @@ type Config struct {
 	TemporalNamespace string `mapstructure:"TEMPORAL_NAMESPACE"`
 	TemporalHostPort  string `mapstructure:"TEMPORAL_HOST_PORT"`
 	TemporalAPIKey    string `mapstructure:"TEMPORAL_API_KEY"`
+	WorkerTaskQueue   string `mapstructure:"WORKER_TASK_QUEUE"`
 }
 
 var AppConfig *Config
@@ -68,7 +69,7 @@ func LoadConfig(path, filename, ext string) error {
 	viper.AutomaticEnv()
 
 	// Set default values
-	viper.SetDefault("ENVIRONMENT", "development")
+	viper.SetDefault("ENVIRONMENT", "dev")
 	viper.SetDefault("APP_NAME", "UploadPilot")
 	viper.SetDefault("PORT", 8080)
 	viper.SetDefault("SELF_ENDPOINT", "http://localhost:8080")
@@ -86,6 +87,7 @@ func LoadConfig(path, filename, ext string) error {
 	viper.SetDefault("USE_CACHE", false)
 	viper.SetDefault("REDIS_ADDR", "localhost:6379")
 	viper.SetDefault("REDIS_TLS", false)
+	viper.SetDefault("WORKER_TASK_QUEUE", "queue1")
 
 	// Read config file
 	if err := viper.ReadInConfig(); err != nil {

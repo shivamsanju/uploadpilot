@@ -50,10 +50,6 @@ func (h *workspaceHandler) SetWorkspaceConfig(r *http.Request, params dto.Worksp
 	return true, http.StatusOK, nil
 }
 
-func (h *workspaceHandler) GetAllAllowedSources(r *http.Request, params dto.WorkspaceParams, query, body interface{}) ([]string, int, error) {
-	return models.AllAllowedSources, http.StatusOK, nil
-}
-
 func (h *workspaceHandler) LogUpload(r *http.Request, params dto.WorkspaceParams, query, body interface{}) (string, int, error) {
 	return "", http.StatusOK, nil
 }

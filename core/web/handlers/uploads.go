@@ -1,10 +1,8 @@
 package handlers
 
 import (
-	"context"
 	"net/http"
 
-	"github.com/jinzhu/copier"
 	"github.com/uploadpilot/core/internal/db/models"
 	"github.com/uploadpilot/core/internal/dto"
 	"github.com/uploadpilot/core/internal/services"
@@ -30,7 +28,7 @@ func (h *uploadHandler) GetPaginatedUploads(r *http.Request, params dto.Workspac
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
-	uploads, totalRecords, err := h.uploadSvc.GetAllUploads(r.Context(), params.WorkspaceID, paginationParams)
+	uploads, totalRecords, err := h.uploadSvc.GetAllUploadsForWorkspace(r.Context(), params.TenantID, params.WorkspaceID, paginationParams)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
@@ -42,7 +40,7 @@ func (h *uploadHandler) GetPaginatedUploads(r *http.Request, params dto.Workspac
 }
 
 func (h *uploadHandler) GetUploadDetailsByID(r *http.Request, params dto.UploadParams, query interface{}, body interface{}) (*models.Upload, int, error) {
-	details, err := h.uploadSvc.GetUploadDetails(r.Context(), params.WorkspaceID, params.UploadID)
+	details, err := h.uploadSvc.GetUploadDetails(r.Context(), params.TenantID, params.WorkspaceID, params.UploadID)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
@@ -50,7 +48,7 @@ func (h *uploadHandler) GetUploadDetailsByID(r *http.Request, params dto.UploadP
 }
 
 func (h *uploadHandler) GetUploadURL(r *http.Request, params dto.UploadParams, query interface{}, body interface{}) (string, int, error) {
-	url, err := h.uploadSvc.GetUploadSignedURL(r.Context(), params.WorkspaceID, params.UploadID)
+	url, err := h.uploadSvc.GetUploadSignedURL(r.Context(), params.TenantID, params.WorkspaceID, params.UploadID)
 	if err != nil {
 		return "", http.StatusBadRequest, err
 	}
@@ -59,11 +57,7 @@ func (h *uploadHandler) GetUploadURL(r *http.Request, params dto.UploadParams, q
 }
 
 func (h *uploadHandler) ProcessUpload(r *http.Request, params dto.UploadParams, query interface{}, body interface{}) (string, int, error) {
-	statusCode, err := h.verifySubscription(r.Context(), params.WorkspaceID)
-	if err != nil {
-		return "", statusCode, err
-	}
-	err = h.uploadSvc.ProcessUpload(r.Context(), params.WorkspaceID, params.UploadID)
+	err := h.uploadSvc.ProcessUpload(r.Context(), params.TenantID, params.WorkspaceID, params.UploadID)
 	if err != nil {
 		return "", http.StatusBadRequest, err
 	}
@@ -71,35 +65,20 @@ func (h *uploadHandler) ProcessUpload(r *http.Request, params dto.UploadParams, 
 }
 
 // UPLOADER API
-func (h *uploadHandler) CreateUpload(r *http.Request, params dto.WorkspaceParams, query interface{}, body dto.CreateUploadRequest) (string, int, error) {
-	statusCode, err := h.verifySubscription(r.Context(), params.WorkspaceID)
+func (h *uploadHandler) CreateUpload(r *http.Request, params dto.WorkspaceParams, query interface{}, body dto.CreateUploadRequest) (*dto.CreateUploadResponse, int, error) {
+	res, err := h.uploadSvc.CreateUpload(r.Context(), params.TenantID, params.WorkspaceID, &body)
 	if err != nil {
-		return "", statusCode, err
-	}
-	var upload models.Upload
-	if err := copier.Copy(&upload, &body); err != nil {
-		return "", http.StatusUnprocessableEntity, err
-	}
-	if err := h.uploadSvc.CreateUpload(r.Context(), params.WorkspaceID, &upload); err != nil {
-		return "", http.StatusBadRequest, err
+		return nil, http.StatusBadRequest, err
 	}
 
-	return upload.ID, http.StatusOK, nil
+	return res, http.StatusOK, nil
 }
 
-func (h *uploadHandler) FinishUpload(r *http.Request, params dto.UploadParams, query interface{}, body dto.FinishUploadRequest) (bool, int, error) {
-	statusCode, err := h.verifySubscription(r.Context(), params.WorkspaceID)
-	if err != nil {
-		return false, statusCode, err
-	}
-	err = h.uploadSvc.FinishUpload(r.Context(), params.WorkspaceID, params.UploadID, &body)
+func (h *uploadHandler) FinishUpload(r *http.Request, params dto.UploadParams, query, body interface{}) (bool, int, error) {
+	err := h.uploadSvc.FinishUpload(r.Context(), params.TenantID, params.WorkspaceID, params.UploadID)
 	if err != nil {
 		return false, http.StatusBadRequest, err
 	}
 
 	return true, http.StatusOK, nil
-}
-
-func (h *uploadHandler) verifySubscription(ctx context.Context, workspaceID string) (int, error) {
-	return http.StatusOK, nil
 }

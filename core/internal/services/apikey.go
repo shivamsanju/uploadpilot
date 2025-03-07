@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -16,34 +15,51 @@ import (
 	"github.com/uploadpilot/core/internal/db/repo"
 	"github.com/uploadpilot/core/internal/dto"
 	"github.com/uploadpilot/core/internal/msg"
+	"github.com/uploadpilot/core/internal/rbac"
 	"github.com/uploadpilot/core/pkg/utils"
 	"github.com/uploadpilot/core/pkg/vault"
 	"github.com/uploadpilot/core/web/webutils"
 )
 
 type APIKeyService struct {
-	apiKeyRepo *repo.APIKeyRepo
-	kms        vault.KMS
-	apiKeySalt string
+	accessManager *rbac.AccessManager
+	apiKeyRepo    *repo.APIKeyRepo
+	kms           vault.KMS
+	apiKeySalt    string
 }
 
-func NewAPIKeyService(apiKeyRepo *repo.APIKeyRepo, kms vault.KMS) *APIKeyService {
+func NewAPIKeyService(accessManager *rbac.AccessManager, apiKeyRepo *repo.APIKeyRepo, kms vault.KMS) *APIKeyService {
 	return &APIKeyService{
-		apiKeyRepo: apiKeyRepo,
-		kms:        kms,
-		apiKeySalt: config.AppConfig.ApiKeyEncryptionKey,
+		accessManager: accessManager,
+		apiKeyRepo:    apiKeyRepo,
+		kms:           kms,
+		apiKeySalt:    config.AppConfig.ApiKeyEncryptionKey,
 	}
 }
 
-func (s *APIKeyService) GetAllAPIKeysForUser(ctx context.Context, tenantID string) ([]models.APIKey, error) {
-	user, err := webutils.GetSessionFromCtx(ctx)
+func (s *APIKeyService) GetAllAPIKeysInTenant(ctx context.Context, tenantID string) ([]models.APIKey, error) {
+	session, err := webutils.GetSessionFromCtx(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return s.apiKeyRepo.GetAllApiKeys(ctx, user.UserID, tenantID)
+
+	if !s.accessManager.CheckAccess(session.Sub, tenantID, "", rbac.Admin) {
+		return nil, fmt.Errorf(msg.ErrAccessDenied)
+	}
+
+	return s.apiKeyRepo.GetAllApiKeysInTenant(ctx, tenantID)
 }
 
-func (s *APIKeyService) GetAPIKeyInfo(ctx context.Context, id string) (*models.APIKey, error) {
+func (s *APIKeyService) GetAPIKeyInfo(ctx context.Context, tenantID, id string) (*models.APIKey, error) {
+	session, err := webutils.GetSessionFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if !s.accessManager.CheckAccess(session.Sub, tenantID, "", rbac.Admin) {
+		return nil, fmt.Errorf(msg.ErrAccessDenied)
+	}
+
 	return s.apiKeyRepo.GetApiKeyDetailsByID(ctx, id)
 }
 
@@ -53,13 +69,11 @@ func (s *APIKeyService) CreateAPIKey(ctx context.Context, tenantID string, data 
 		return "", err
 	}
 
-	perms, scope, err := s.getScopeAndPerm(tenantID, session, data)
-	if err != nil {
-		return "", err
+	if !s.accessManager.CheckAccess(session.Sub, tenantID, "", rbac.Admin) {
+		return "", fmt.Errorf(msg.ErrAccessDenied)
 	}
 
 	newKey := "up-" + utils.GenerateRandomAlphaNumericString(64) + data.ExpiresAt.Format("20060102150405")
-
 	hashedKey, err := s.kms.Hash(newKey, s.apiKeySalt)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to hash api key")
@@ -67,26 +81,30 @@ func (s *APIKeyService) CreateAPIKey(ctx context.Context, tenantID string, data 
 	}
 
 	apiKey := &models.APIKey{
-		Name:        data.Name,
-		UserID:      session.UserID,
-		TenantID:    tenantID,
-		ApiKeyHash:  hashedKey,
-		ExpiresAt:   &data.ExpiresAt,
-		Scopes:      scope,
-		Permissions: perms,
+		Name:       data.Name,
+		UserID:     session.UserID,
+		TenantID:   tenantID,
+		ApiKeyHash: hashedKey,
+		ExpiresAt:  &data.ExpiresAt,
 	}
 
-	if err := s.apiKeyRepo.CreateApiKey(ctx, apiKey); err != nil {
+	if err := s.apiKeyRepo.CreateApiKey(ctx, apiKey, func() error {
+		return s.addAccessToAPIKey(hashedKey, tenantID, data)
+	}); err != nil {
 		return "", err
 	}
 
 	return newKey, nil
 }
 
-func (s *APIKeyService) RevokeAPIKey(ctx context.Context, id string) error {
+func (s *APIKeyService) RevokeAPIKey(ctx context.Context, tenantID, id string) error {
 	user, err := webutils.GetSessionFromCtx(ctx)
 	if err != nil {
 		return err
+	}
+
+	if !s.accessManager.CheckAccess(user.UserID, tenantID, "", rbac.Admin) {
+		return fmt.Errorf(msg.ErrAccessDenied)
 	}
 
 	apiKey, err := s.apiKeyRepo.GetApiKeyDetailsByID(ctx, id)
@@ -101,7 +119,7 @@ func (s *APIKeyService) RevokeAPIKey(ctx context.Context, id string) error {
 	return s.apiKeyRepo.Update(ctx, apiKey)
 }
 
-func (s *APIKeyService) ValidateAPIKey(ctx context.Context, apiKey string, perms ...dto.APIKeyPerm) (*models.APIKey, error) {
+func (s *APIKeyService) VerifyAPIKey(ctx context.Context, apiKey string) (*models.APIKey, error) {
 	if ok := s.isValidAPIKeyFormat(apiKey); !ok {
 		return nil, errors.New(msg.ErrInvalidAPIKey)
 	}
@@ -130,13 +148,35 @@ func (s *APIKeyService) ValidateAPIKey(ctx context.Context, apiKey string, perms
 		return nil, errors.New(msg.ErrExpiredAPIKey)
 	}
 
-	hasPerm := s.verifyAPIKeyPermissions(apiKeyDetails, perms...)
+	return apiKeyDetails, nil
+}
 
-	if !hasPerm {
-		return nil, errors.New(msg.ErrInvalidAPIKey)
+func (s *APIKeyService) addAccessToAPIKey(apiKeyHash, tenantID string, data *dto.CreateApiKeyData) error {
+	if data.TenantRead {
+		if err := s.accessManager.AddAccess(apiKeyHash, tenantID, "", rbac.Reader); err != nil {
+			return err
+		}
 	}
 
-	return apiKeyDetails, nil
+	for _, perm := range data.WorkspacePerms {
+		if perm.Manage {
+			if err := s.accessManager.AddAccess(apiKeyHash, tenantID, perm.ID, rbac.Admin); err != nil {
+				return err
+			}
+		}
+		if perm.Read {
+			if err := s.accessManager.AddAccess(apiKeyHash, tenantID, perm.ID, rbac.Reader); err != nil {
+				return err
+			}
+		}
+		if perm.Upload {
+			if err := s.accessManager.AddAccess(apiKeyHash, tenantID, perm.ID, rbac.Uploader); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 func (s *APIKeyService) isValidAPIKeyFormat(apiKey string) bool {
@@ -154,80 +194,4 @@ func (s *APIKeyService) isValidAPIKeyFormat(apiKey string) bool {
 		return false
 	}
 	return true
-}
-
-func (s *APIKeyService) verifyAPIKeyPermissions(apiKey *models.APIKey, perms ...dto.APIKeyPerm) bool {
-	for _, perm := range perms {
-		if !slices.Contains(apiKey.Scopes, perm.Scope) {
-			return false
-		}
-		for _, apiPerm := range apiKey.Permissions {
-			log.Debug().Str("Got", fmt.Sprintf("%s:%s", apiPerm.ResourceID, apiPerm.Permission)).Str("Expected", fmt.Sprintf("%s:%s", perm.ResouceID, perm.Perm)).Msg("verifying api key permissions")
-
-			if perm.ResouceID == apiPerm.ResourceID && perm.Perm == apiPerm.Permission {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func (s *APIKeyService) getScopeAndPerm(tenantID string, session *dto.Session, data *dto.CreateApiKeyData) ([]models.APIKeyPermission, []string, error) {
-	scopes := make(map[string]struct{})
-	var perms []models.APIKeyPermission
-
-	if data.TenantRead {
-		scopes[fmt.Sprintf("%s:%s", models.APIPermResourceTypeTenant, models.APIKeyPermissionTypeRead)] = struct{}{}
-		perms = append(perms, models.APIKeyPermission{
-			ResourceID:   tenantID,
-			ResourceType: models.APIPermResourceTypeTenant,
-			Permission:   models.APIKeyPermissionTypeRead,
-		})
-	}
-	if data.TenantManage {
-		scopes[fmt.Sprintf("%s:%s", models.APIPermResourceTypeTenant, models.APIKeyPermissionTypeManage)] = struct{}{}
-		perms = append(perms, models.APIKeyPermission{
-			ResourceID:   tenantID,
-			ResourceType: models.APIPermResourceTypeTenant,
-			Permission:   models.APIKeyPermissionTypeManage,
-		})
-	}
-
-	for _, perm := range data.WorkspacePerms {
-		if perm.Read {
-			scopes[fmt.Sprintf("%s:%s", models.APIPermResourceTypeWorkspace, models.APIKeyPermissionTypeRead)] = struct{}{}
-			perms = append(perms, models.APIKeyPermission{
-				ResourceID:   perm.ID,
-				ResourceType: models.APIPermResourceTypeWorkspace,
-				Permission:   models.APIKeyPermissionTypeRead,
-			})
-		}
-		if perm.Manage {
-			scopes[fmt.Sprintf("%s:%s", models.APIPermResourceTypeWorkspace, models.APIKeyPermissionTypeManage)] = struct{}{}
-			perms = append(perms, models.APIKeyPermission{
-				ResourceID:   perm.ID,
-				ResourceType: models.APIPermResourceTypeWorkspace,
-				Permission:   models.APIKeyPermissionTypeManage,
-			})
-		}
-		if perm.Upload {
-			scopes[fmt.Sprintf("%s:%s", models.APIPermResourceTypeWorkspace, models.APIKeyPermissionTypeUpload)] = struct{}{}
-			perms = append(perms, models.APIKeyPermission{
-				ResourceID:   perm.ID,
-				ResourceType: models.APIPermResourceTypeWorkspace,
-				Permission:   models.APIKeyPermissionTypeUpload,
-			})
-		}
-	}
-
-	if len(scopes) == 0 {
-		return nil, nil, errors.New(msg.ErrNoScopeInAPIKeyCreateRequest)
-	}
-
-	scopesSlice := make([]string, 0, len(scopes))
-	for k := range scopes {
-		scopesSlice = append(scopesSlice, k)
-	}
-
-	return perms, scopesSlice, nil
 }

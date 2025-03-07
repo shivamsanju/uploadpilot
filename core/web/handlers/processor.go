@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"github.com/jinzhu/copier"
-	"github.com/uploadpilot/core/internal/activities/catalog"
 	"github.com/uploadpilot/core/internal/db/models"
 	"github.com/uploadpilot/core/internal/dto"
 	"github.com/uploadpilot/core/internal/services"
+	"github.com/uploadpilot/core/internal/workflow/catalog"
 )
 
 type processorHandler struct {
@@ -95,7 +95,7 @@ func (h *processorHandler) DisableProcessor(r *http.Request, params dto.Processo
 	return true, http.StatusOK, nil
 }
 
-func (h *processorHandler) GetAllActivities(r *http.Request, params dto.ProcessorParams, query, body interface{}) ([]catalog.ActivityMetadata, int, error) {
+func (h *processorHandler) GetAllActivities(r *http.Request, params dto.WorkspaceParams, query, body interface{}) ([]catalog.ActivityMetadata, int, error) {
 	return h.pSvc.GetAllActivities(r.Context()), http.StatusOK, nil
 }
 
@@ -107,8 +107,8 @@ func (h *processorHandler) GetWorkflowRuns(r *http.Request, params dto.Processor
 	return runs, http.StatusOK, nil
 }
 
-func (h *processorHandler) GetWorkflowLogs(r *http.Request, params dto.WorkflowRunParams, query, body interface{}) ([]dto.WorkflowRunLogs, int, error) {
-	details, err := h.pSvc.GetWorkflowHistory(r.Context(), params.WorkflowID, params.RunID)
+func (h *processorHandler) GetWorkflowLogs(r *http.Request, params dto.ProcessorParams, query dto.WorkflowQuery, body interface{}) ([]dto.WorkflowRunLogs, int, error) {
+	details, err := h.pSvc.GetWorkflowHistory(r.Context(), query.WorkflowID, query.RunID)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}

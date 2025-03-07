@@ -47,9 +47,8 @@ const ProcessorSettingsPage = () => {
         workspaceId: workspaceId || '',
         processorId: processorId || '',
         processor: {
-          workspaceId,
           name: values.name,
-          triggers: values.triggers,
+          triggers: values.triggers || [],
         },
       });
     } catch (error) {
