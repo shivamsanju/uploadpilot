@@ -36,7 +36,7 @@ const HomeLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
         navbar={{
           width: opened ? 250 : 75,
           breakpoint: 'sm',
-          collapsed: { mobile: opened },
+          collapsed: { mobile: !opened },
         }}
         padding="md"
         transitionDuration={500}

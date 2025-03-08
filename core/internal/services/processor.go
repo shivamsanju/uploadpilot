@@ -7,11 +7,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/phuslu/log"
 	"github.com/uploadpilot/core/internal/db/models"
 	"github.com/uploadpilot/core/internal/db/repo"
 	"github.com/uploadpilot/core/internal/dto"
+	"github.com/uploadpilot/core/internal/msg"
 	"github.com/uploadpilot/core/internal/rbac"
 	"github.com/uploadpilot/core/internal/templates"
 	"github.com/uploadpilot/core/internal/workflow/catalog"
@@ -30,14 +31,16 @@ type ProcessorService struct {
 	procRepo       *repo.ProcessorRepo
 	validator      *validator.Validator
 	temporalClient client.Client
+	s3Client       *s3.Client
 }
 
-func NewProcessorService(accessManager *rbac.AccessManager, procRepo *repo.ProcessorRepo, temporalClient client.Client) *ProcessorService {
+func NewProcessorService(accessManager *rbac.AccessManager, procRepo *repo.ProcessorRepo, temporalClient client.Client, s3Client *s3.Client) *ProcessorService {
 	return &ProcessorService{
 		accessManager:  accessManager,
 		procRepo:       procRepo,
 		validator:      validator.NewValidator(),
 		temporalClient: temporalClient,
+		s3Client:       s3Client,
 	}
 }
 
@@ -170,7 +173,7 @@ func (s *ProcessorService) TriggerWorkflow(ctx context.Context, upload *models.U
 	}
 
 	workflowOptions := client.StartWorkflowOptions{
-		ID:        uuid.New().String(),
+		ID:        processorID,
 		TaskQueue: "queue1",
 		TypedSearchAttributes: temporal.NewSearchAttributes(
 			temporal.NewSearchAttributeKeyKeyword("processorId").ValueSet(processorID),
@@ -201,7 +204,15 @@ func (s *ProcessorService) TriggerWorkflow(ctx context.Context, upload *models.U
 	return &dto.TriggerWorkflowResp{WorkflowID: we.GetID(), RunID: we.GetRunID()}, nil
 }
 
-func (s *ProcessorService) GetWorkflowRuns(ctx context.Context, processorID string) ([]dto.WorkflowRun, error) {
+func (s *ProcessorService) GetWorkflowRuns(ctx context.Context, tenantID, workspaceID, processorID string) ([]dto.WorkflowRun, error) {
+	session, err := webutils.GetSessionFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !s.accessManager.CheckAccess(session.Sub, tenantID, workspaceID, rbac.Reader) {
+		return nil, fmt.Errorf(msg.ErrAccessDenied)
+	}
+
 	result, err := s.temporalClient.ListWorkflow(ctx, &workflowservice.ListWorkflowExecutionsRequest{
 		Query: "processorId = '" + processorID + "'",
 	})
@@ -243,10 +254,18 @@ func (s *ProcessorService) GetWorkflowRuns(ctx context.Context, processorID stri
 	return runs, nil
 }
 
-func (s *ProcessorService) GetWorkflowHistory(ctx context.Context, workflowID string, runID string) ([]dto.WorkflowRunLogs, error) {
+func (s *ProcessorService) GetWorkflowHistory(ctx context.Context, tenantID, workspaceID, procesorID, workflowID, runID string) ([]dto.WorkflowRunLogs, error) {
 	log.Info().Msgf("Getting workflow history for workflowID: %s, runID: %s", workflowID, runID)
-	var logs []dto.WorkflowRunLogs
 
+	session, err := webutils.GetSessionFromCtx(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if !s.accessManager.CheckAccess(session.Sub, tenantID, workspaceID, rbac.Reader) {
+		return nil, fmt.Errorf(msg.ErrAccessDenied)
+	}
+
+	var logs []dto.WorkflowRunLogs
 	iter := s.temporalClient.GetWorkflowHistory(context.Background(), workflowID, runID, false, enums.HISTORY_EVENT_FILTER_TYPE_ALL_EVENT)
 	for iter.HasNext() {
 		event, err := iter.Next()
@@ -310,4 +329,43 @@ func (s *ProcessorService) GetWorkflowHistory(ctx context.Context, workflowID st
 	}
 
 	return logs, nil
+}
+
+func (s *ProcessorService) CancelWorkflowRun(ctx context.Context, tenantID, workspaceID, procesorID, workflowID, runID string) error {
+	log.Info().Msgf("Cancelling workflowID: %s, runID: %s", workflowID, runID)
+	session, err := webutils.GetSessionFromCtx(ctx)
+	if err != nil {
+		return err
+	}
+	if !s.accessManager.CheckAccess(session.Sub, tenantID, workspaceID, rbac.Admin) {
+		return fmt.Errorf(msg.ErrAccessDenied)
+	}
+
+	return s.temporalClient.CancelWorkflow(context.Background(), workflowID, runID)
+}
+
+func (s *ProcessorService) GetRunArtifactsSignedURL(ctx context.Context, tenantID, workspaceID, procesorID, uploadID, runID string) (string, error) {
+	log.Info().Msgf("Downloading artifacts for runID: %s", runID)
+	session, err := webutils.GetSessionFromCtx(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	if !s.accessManager.CheckAccess(session.Sub, tenantID, workspaceID, rbac.Reader) {
+		return "", fmt.Errorf(msg.ErrAccessDenied)
+	}
+
+	objectKey := fmt.Sprintf("%s/processed-zip/%s/%s.zip", uploadID, procesorID, runID)
+
+	expiry := time.Now().Add(15 * time.Minute)
+	resp, err := s3.NewPresignClient(s.s3Client).PresignGetObject(ctx, &s3.GetObjectInput{
+		Bucket:          &workspaceID,
+		Key:             &objectKey,
+		ResponseExpires: &expiry,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return resp.URL, nil
 }

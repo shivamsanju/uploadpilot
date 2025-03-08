@@ -4,7 +4,7 @@ import {
   IconCircles,
   IconCloudUpload,
   IconGauge,
-  IconRoute,
+  IconTools,
 } from '@tabler/icons-react';
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
@@ -33,7 +33,7 @@ const WorkspaceLayout: React.FC<{ children: React.ReactNode }> = ({
       },
       {
         label: 'Processors',
-        icon: IconRoute,
+        icon: IconTools,
         link: `/workspace/${workspaceId}/processors`,
       },
       {
@@ -56,7 +56,7 @@ const WorkspaceLayout: React.FC<{ children: React.ReactNode }> = ({
         navbar={{
           width: opened ? 250 : 75,
           breakpoint: 'sm',
-          collapsed: { mobile: opened },
+          collapsed: { mobile: !opened },
         }}
         padding="md"
         transitionDuration={500}

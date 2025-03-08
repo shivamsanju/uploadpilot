@@ -1,14 +1,22 @@
 import { Box, Group, Paper, Title } from '@mantine/core';
 import { IconPlus } from '@tabler/icons-react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGetWorkspaces } from '../../apis/workspace';
 import { ErrorLoadingWrapper } from '../../components/ErrorLoadingWrapper';
 import { WorkspaceCard } from '../../components/WorkspaceCard';
+import { useSetBreadcrumbs } from '../../hooks/breadcrumb';
 import classes from './Workspace.module.css';
 
 const WorkspaceLandingPage = () => {
   const { isPending, error, workspaces } = useGetWorkspaces();
   const navigate = useNavigate();
+
+  const setBreadcrumbs = useSetBreadcrumbs();
+
+  useEffect(() => {
+    setBreadcrumbs([{ label: '' }]);
+  }, [setBreadcrumbs]);
 
   return (
     <ErrorLoadingWrapper error={error} isPending={isPending}>

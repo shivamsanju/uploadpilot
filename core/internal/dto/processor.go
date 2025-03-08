@@ -58,5 +58,8 @@ type ProcessorTemplate struct {
 
 type WorkflowQuery struct {
 	WorkflowID string `json:"workflowId"`
-	RunID      string `json:"runId"`
+}
+
+type UploadQuery struct {
+	UploadID string `json:"uploadId"`
 }

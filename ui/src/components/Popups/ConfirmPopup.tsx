@@ -16,11 +16,11 @@ export const showConfirmationPopup = ({
     children: (
       <Stack align="center">
         <Alert
-          color="orange"
+          color="#E4A11B"
           variant="light"
           icon={<IconInfoCircle size={30} />}
         >
-          <Text size="sm" c="orange">
+          <Text size="sm" c="#E4A11B">
             {message || 'Are you sure you want to perform this action?'}
           </Text>
         </Alert>

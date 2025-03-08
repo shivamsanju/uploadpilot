@@ -16,17 +16,19 @@ var ImageResizeV1_0 = &ActivityMetadata{
 `,
 }
 
-var ImageConverterPNGV1 = &ActivityMetadata{
-	Name:        "ImageConverterPNGV1",
-	DisplayName: "Convert Image to PNG Format V1",
-	Description: `This Activity converts an image to PNG format.
+var ImageFormatConvertorV1 = &ActivityMetadata{
+	Name:        "ImageFormatConvertorV1",
+	DisplayName: "Convert Image  Format V1",
+	Description: `This Activity converts an image to a different format.
 	Supports "png", "jpg", "jpeg", "webp", "bmp", "gif", "tiff" formats.
 	Compression options are available for lossy formats. 
 	This Activity is useful for optimizing storage and compatibility across platforms.`,
 	Workflow: `
 - activity:
     key: uniqueKeyLessThan20Chars
-    uses: ImageConverterPNGV1
+    uses: ImageFormatConvertorV1
+    with:
+      format: "jpg"
 `,
 }
 

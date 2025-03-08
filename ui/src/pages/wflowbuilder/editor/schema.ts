@@ -155,14 +155,18 @@ export const validateWorkflowContent = (content: string): string | null => {
 function validateUniqueKeys(statement: any, seenKeys = new Set()) {
   if (!statement) return true;
 
-  // Check activity key uniqueness
+  // Check activity key uniqueness and format
   if (statement.activity) {
-    if (seenKeys.has(statement.activity.key)) {
+    const key = statement.activity.key;
+    if (!/^[a-zA-Z0-9_]{1,19}$/.test(key)) {
       throw new Error(
-        `Duplicate activity key found: ${statement.activity.key}`,
+        `Activity key must be alphanumeric with underscore and less than 20 characters: ${key}`,
       );
     }
-    seenKeys.add(statement.activity.key);
+    if (seenKeys.has(key)) {
+      throw new Error(`Duplicate activity key found: ${key}`);
+    }
+    seenKeys.add(key);
   }
 
   // Recursively check nested structures

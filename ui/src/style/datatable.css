@@ -46,6 +46,10 @@
   border-bottom-right-radius: 10px !important;
 }
 
+.mantine-datatable-row td {
+  font-size: var(--mantine-font-size-xs) !important;
+}
+
 .mantine-datatable-table {
   border-collapse: unset !important;
   /* padding-right: 20px !important; */

@@ -2,21 +2,21 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
   
 Resources:
-  ImageConverterPNGV1:
+  ImageFormatConvertorV1:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: ImageConverterPNGV1
+      FunctionName: ImageFormatConvertorV1
       CodeUri: ./code
       Runtime: python3.12
       Handler: app.lambda_handler
       Timeout: 300
       MemorySize: 128
-      Role: !GetAtt ImageConverterPNGV1Role.Arn
+      Role: !GetAtt ImageFormatConvertorV1Role.Arn
       Environment:
         Variables:
           ENVIRONMENT: "dev"
 
-  ImageConverterPNGV1Role:
+  ImageFormatConvertorV1Role:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -27,7 +27,7 @@ Resources:
               Service: lambda.amazonaws.com
             Action: sts:AssumeRole
       Policies:
-        - PolicyName: ImageConverterPNGV1S3Access
+        - PolicyName: ImageFormatConvertorV1S3Access
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -36,3 +36,13 @@ Resources:
                   - s3:GetObject
                   - s3:PutObject
                 Resource: "arn:aws:s3:::*"
+        - PolicyName: ImageFormatConvertorV1CloudWatchLogs
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "arn:aws:logs:*:*:*"

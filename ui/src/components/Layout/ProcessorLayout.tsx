@@ -40,7 +40,7 @@ const ProcessorLayout: React.FC<{ children: React.ReactNode }> = ({
         navbar={{
           width: opened ? 250 : 75,
           breakpoint: 'sm',
-          collapsed: { mobile: opened },
+          collapsed: { mobile: !opened },
         }}
         padding="md"
         transitionDuration={500}

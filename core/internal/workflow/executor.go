@@ -3,6 +3,7 @@ package workflow
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -33,12 +34,36 @@ func (e *Executor) ExecuteLambdaContainerActivity(ctx context.Context, functionN
 	op, err := e.lambdaClient.Invoke(context.TODO(), input)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to invoke lambda")
-		return nil, fmt.Errorf("failed to invoke lambda: %w", err)
+		return nil, fmt.Errorf("failed to run activity: %w", err)
 	}
 
 	if op.FunctionError != nil {
 		log.Error().Str("error", *op.FunctionError).Msg("lambda error")
-		return nil, fmt.Errorf("lambda error: %s", *op.FunctionError)
+		return nil, fmt.Errorf("error: %s", string(op.Payload))
+	}
+
+	var output map[string]interface{}
+	if err := json.Unmarshal(op.Payload, &output); err != nil {
+		log.Error().Err(err).Msg("failed to unmarshal lambda output")
+		return nil, fmt.Errorf("failed to unmarshal lambda output: %w", err)
+	}
+
+	success, ok := output["success"]
+	if !ok {
+		log.Error().Str("output", string(op.Payload)).Msg("lambda output")
+		return nil, fmt.Errorf("failed to unmarshal lambda output: success field not found")
+	}
+
+	s, ok := success.(bool)
+	if !ok || !s {
+		err := output["error"].(string)
+		log.Error().Str("error", err).Msg("lambda execution failed")
+		return nil, fmt.Errorf("error: %s", err)
+	}
+
+	if op.FunctionError != nil {
+		log.Error().Str("error", *op.FunctionError).Msg("lambda error")
+		return nil, fmt.Errorf("error: %s", string(op.Payload))
 	}
 
 	log.Info().Str("output", string(op.Payload)).Msg("lambda output")

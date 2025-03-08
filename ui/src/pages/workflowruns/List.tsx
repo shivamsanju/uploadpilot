@@ -1,6 +1,5 @@
 import {
   ActionIcon,
-  Badge,
   Box,
   Button,
   Group,
@@ -11,11 +10,22 @@ import {
   Title,
 } from '@mantine/core';
 import { useViewportSize } from '@mantine/hooks';
-import { IconBolt, IconDots, IconLogs, IconSearch } from '@tabler/icons-react';
+import {
+  IconBolt,
+  IconCancel,
+  IconDots,
+  IconDownload,
+  IconLogs,
+  IconSearch,
+} from '@tabler/icons-react';
 import { DataTableColumn } from 'mantine-datatable';
 import { useCallback, useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useGetProcessorRuns } from '../../apis/processors';
+import {
+  useCancelWorkflowRun,
+  useDownloadRunArtifacts,
+  useGetProcessorRuns,
+} from '../../apis/processors';
 import { useTriggerProcessUpload } from '../../apis/upload';
 import { RefreshButton } from '../../components/Buttons/RefreshButton/RefreshButton';
 import { ErrorCard } from '../../components/ErrorCard/ErrorCard';
@@ -24,7 +34,7 @@ import { showConfirmationPopup } from '../../components/Popups/ConfirmPopup';
 import { UploadPilotDataTable } from '../../components/Table/Table';
 import { formatMilliseconds } from '../../utils/datetime';
 import { LogsModal } from './Logs';
-import { statusConfig } from './status';
+import { WorkflowStatus } from './Status';
 
 const ProcessorRunsList = () => {
   const [workflowId, setWorkflowId] = useState<string>('');
@@ -41,6 +51,14 @@ const ProcessorRunsList = () => {
 
   const { mutateAsync: triggerProcessUpload, isPending: isTriggeringProcess } =
     useTriggerProcessUpload(workspaceId || '');
+
+  const { mutateAsync: downloadRunArtifacts } = useDownloadRunArtifacts(
+    workspaceId || '',
+    processorId || '',
+  );
+
+  const { mutateAsync: cancelWorkflowRun, isPending: isCancelling } =
+    useCancelWorkflowRun(workspaceId || '', processorId || '');
 
   const processUpload = useCallback(
     async (uploadId: string) => {
@@ -91,6 +109,37 @@ const ProcessorRunsList = () => {
     setOpened(false);
   }, []);
 
+  const handleDownloadArtifacts = useCallback(
+    async (uploadId: string, runId: string) => {
+      try {
+        const url = await downloadRunArtifacts({ uploadId, runId });
+        window.open(url, '_blank');
+      } catch (error) {
+        console.error('Error downloading artifacts:', error);
+      }
+    },
+    [downloadRunArtifacts],
+  );
+
+  const handleCancelRun = useCallback(
+    async (runId: string, workflowId: string) => {
+      try {
+        showConfirmationPopup({
+          message: 'Are you sure you want to cancel this run?',
+          onOk: async () => {
+            await cancelWorkflowRun({ runId, workflowId });
+            setTimeout(() => {
+              invalidate();
+            }, 2000);
+          },
+        });
+      } catch (error) {
+        console.error('Error cancelling run:', error);
+      }
+    },
+    [cancelWorkflowRun, invalidate],
+  );
+
   const columns: DataTableColumn[] = useMemo(
     () => [
       {
@@ -132,13 +181,10 @@ const ProcessorRunsList = () => {
         title: 'Status',
         textAlign: 'center',
         render: (item: any) => (
-          <Badge
-            variant="subtle"
-            color={statusConfig[item?.status?.toLowerCase() || '']}
-            size="sm"
-          >
+          <Group align="center" gap="0">
+            <WorkflowStatus status={item?.status} />
             {item?.status}
-          </Badge>
+          </Group>
         ),
       },
       {
@@ -159,6 +205,16 @@ const ProcessorRunsList = () => {
                 </ActionIcon>
               </Menu.Target>
               <Menu.Dropdown>
+                {item.status === 'Completed' && (
+                  <Menu.Item
+                    leftSection={<IconDownload size={16} stroke={1.5} />}
+                    onClick={() =>
+                      handleDownloadArtifacts(item?.uploadId, item?.runId)
+                    }
+                  >
+                    <Text>Download Artifacts</Text>
+                  </Menu.Item>
+                )}
                 <Menu.Item
                   leftSection={<IconLogs size={16} stroke={1.5} />}
                   onClick={() => handleViewLogs(item?.runId, item?.workflowId)}
@@ -171,13 +227,30 @@ const ProcessorRunsList = () => {
                 >
                   <Text>Re Trigger</Text>
                 </Menu.Item>
+                {item?.status === 'Running' && (
+                  <Menu.Item
+                    color="red"
+                    leftSection={<IconCancel size={16} stroke={1.5} />}
+                    onClick={() =>
+                      handleCancelRun(item?.runId, item?.workflowId)
+                    }
+                  >
+                    <Text>Cancel Run</Text>
+                  </Menu.Item>
+                )}
               </Menu.Dropdown>
             </Menu>
           </Group>
         ),
       },
     ],
-    [width, handleViewLogs, processUpload],
+    [
+      width,
+      handleViewLogs,
+      processUpload,
+      handleCancelRun,
+      handleDownloadArtifacts,
+    ],
   );
 
   if (error) {
@@ -186,7 +259,9 @@ const ProcessorRunsList = () => {
 
   return (
     <Box>
-      <ContainerOverlay visible={isPending || isTriggeringProcess} />
+      <ContainerOverlay
+        visible={isPending || isTriggeringProcess || isCancelling}
+      />
       <UploadPilotDataTable
         minHeight={500}
         columns={columns}

@@ -2,6 +2,7 @@ package dsl
 
 import (
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"go.temporal.io/sdk/temporal"
@@ -87,6 +88,12 @@ func SimpleDSLWorkflow(ctx workflow.Context, dslWorkflow Workflow) ([]byte, erro
 	bindings["run_id"] = workflow.GetInfo(ctx).WorkflowExecution.RunID
 
 	err := dslWorkflow.Root.execute(ctx, bindings)
+	if err != nil {
+		logger.Error("DSL Workflow failed.", "Error", err)
+		return nil, err
+	}
+
+	err = doPostProcessing(ctx, bindings)
 	if err != nil {
 		logger.Error("DSL Workflow failed.", "Error", err)
 		return nil, err
@@ -254,9 +261,9 @@ func makeInput(argMap map[string]any, bindings map[string]any, activityKey strin
 		val, ok := value.(string)
 		if ok && val[0] == '$' {
 			varName := val[1:]
-			args[argument] = bindings[varName]
+			args[fmt.Sprintf("%s_%s", activityKey, argument)] = bindings[varName]
 		} else {
-			args[argument] = value
+			args[fmt.Sprintf("%s_%s", activityKey, argument)] = value
 		}
 	}
 
@@ -280,4 +287,31 @@ func makeInput(argMap map[string]any, bindings map[string]any, activityKey strin
 	}
 
 	return string(argsbytes), nil
+}
+
+func doPostProcessing(ctx workflow.Context, bindings map[string]any) error {
+	ao := workflow.ActivityOptions{}
+	ao.RetryPolicy = &temporal.RetryPolicy{
+		MaximumAttempts:    1,
+		InitialInterval:    0,
+		BackoffCoefficient: 2,
+		MaximumInterval:    1 * time.Minute,
+	}
+	ao.ScheduleToStartTimeout = 24 * time.Hour
+	ao.StartToCloseTimeout = 24 * time.Hour
+	ao.ScheduleToCloseTimeout = 24 * time.Hour
+
+	ctx = workflow.WithActivityOptions(ctx, ao)
+
+	bindingsB, err := json.Marshal(bindings)
+	if err != nil {
+		return err
+	}
+
+	err = workflow.ExecuteActivity(ctx, "Executor", "SaveArtifactsV1", string(bindingsB)).Get(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -18,7 +18,7 @@ func NewServices(repos *repo.Repositories, clients *clients.Clients, accessManag
 	tenantSvc := NewTenantService(accessManager, repos.TenantRepo)
 	workspaceSvc := NewWorkspaceService(accessManager, repos.WorkspaceRepo, repos.WorkspaceConfigRepo, clients.S3Client)
 	apiKeySvc := NewAPIKeyService(accessManager, repos.APIKeyRepo, clients.KMSClient)
-	processorSvc := NewProcessorService(accessManager, repos.ProcessorRepo, clients.TemporalClient)
+	processorSvc := NewProcessorService(accessManager, repos.ProcessorRepo, clients.TemporalClient, clients.S3Client)
 	uploadSvc := NewUploadService(accessManager, repos.UploadRepo, workspaceSvc, processorSvc, clients.S3Client)
 
 	return &Services{

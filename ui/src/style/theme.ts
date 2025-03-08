@@ -39,32 +39,6 @@ type Icolors = readonly [
   ...string[],
 ];
 
-// const magenta: Icolors = [
-//   "#ffe9f6",
-//   "#ffd1e6",
-//   "#faa1c9",
-//   "#f66eab",
-//   "#f24391",
-//   "#f02981",
-//   "#f01879",
-//   "#d60867",
-//   "#c0005c",
-//   "#a9004f"
-// ]
-
-// const yellowOrange: Icolors= [
-//   "#fff8e1",
-//   "#ffefcb",
-//   "#ffdd9a",
-//   "#ffca64",
-//   "#ffba38",
-//   "#ffb01b",
-//   "#ffab09",
-//   "#e39500",
-//   "#cb8400",
-//   "#b07100",
-// ]
-
 const white: Icolors = [
   '#ffffff',
   '#fafafa',
@@ -77,19 +51,6 @@ const white: Icolors = [
   '#8c8c8c',
   '#7e7e7e',
 ];
-
-// const blue: Icolors = [
-//   "#e2f7ff",
-//   "#ceeaff",
-//   "#9fd1fb",
-//   "#6db8f6",
-//   "#43a2f1",
-//   "#2894ef",
-//   "#128eef",
-//   "#007ad6",
-//   "#006dc1",
-//   "#005eab"
-// ]
 
 // const lightBlue: Icolors = [
 //   '#e1f8ff',
@@ -178,7 +139,6 @@ export const myAppTheme = createTheme({
         variant: 'white',
       },
     }),
-
     Badge: Badge.extend({
       defaultProps: {
         size: 'xs',

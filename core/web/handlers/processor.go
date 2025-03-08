@@ -20,7 +20,8 @@ func NewProcessorsHandler(pSvc *services.ProcessorService) *processorHandler {
 	}
 }
 
-func (h *processorHandler) GetProcessors(r *http.Request, params dto.WorkspaceParams, query, body interface{}) ([]models.Processor, int, error) {
+func (h *processorHandler) GetProcessors(r *http.Request, params dto.WorkspaceParams,
+	query, body interface{}) ([]models.Processor, int, error) {
 	processors, err := h.pSvc.GetAllProcessorsInWorkspace(r.Context(), params.WorkspaceID)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
@@ -29,7 +30,8 @@ func (h *processorHandler) GetProcessors(r *http.Request, params dto.WorkspacePa
 	return processors, http.StatusOK, nil
 }
 
-func (h *processorHandler) GetProcessorDetailsByID(r *http.Request, params dto.ProcessorParams, query, body interface{}) (*models.Processor, int, error) {
+func (h *processorHandler) GetProcessorDetailsByID(r *http.Request, params dto.ProcessorParams,
+	query, body interface{}) (*models.Processor, int, error) {
 	processor, err := h.pSvc.GetProcessor(r.Context(), params.ProcessorID)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
@@ -38,12 +40,14 @@ func (h *processorHandler) GetProcessorDetailsByID(r *http.Request, params dto.P
 	return processor, http.StatusOK, nil
 }
 
-func (h *processorHandler) GetTemplates(r *http.Request, params dto.WorkspaceParams, query, body interface{}) ([]dto.ProcessorTemplate, int, error) {
+func (h *processorHandler) GetTemplates(r *http.Request, params dto.WorkspaceParams,
+	query, body interface{}) ([]dto.ProcessorTemplate, int, error) {
 	templates := h.pSvc.GetTemplates(r.Context())
 	return templates, http.StatusOK, nil
 }
 
-func (h *processorHandler) CreateProcessor(r *http.Request, params dto.WorkspaceParams, query interface{}, body dto.CreateProcessorRequest) (*string, int, error) {
+func (h *processorHandler) CreateProcessor(r *http.Request, params dto.WorkspaceParams,
+	query interface{}, body dto.CreateProcessorRequest) (*string, int, error) {
 	var processor models.Processor
 	if err := copier.Copy(&processor, &body); err != nil {
 		return nil, http.StatusUnprocessableEntity, err
@@ -55,7 +59,8 @@ func (h *processorHandler) CreateProcessor(r *http.Request, params dto.Workspace
 	return &processor.ID, http.StatusOK, nil
 }
 
-func (h *processorHandler) UpdateProcessor(r *http.Request, params dto.ProcessorParams, query interface{}, body dto.EditProcRequest) (*string, int, error) {
+func (h *processorHandler) UpdateProcessor(r *http.Request, params dto.ProcessorParams,
+	query interface{}, body dto.EditProcRequest) (*string, int, error) {
 	err := h.pSvc.EditNameAndTrigger(r.Context(), params.WorkspaceID, params.ProcessorID, &body)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
@@ -63,21 +68,24 @@ func (h *processorHandler) UpdateProcessor(r *http.Request, params dto.Processor
 	return nil, http.StatusOK, nil
 }
 
-func (h *processorHandler) DeleteProcessor(r *http.Request, params dto.ProcessorParams, query, body interface{}) (bool, int, error) {
+func (h *processorHandler) DeleteProcessor(r *http.Request, params dto.ProcessorParams,
+	query, body interface{}) (bool, int, error) {
 	if err := h.pSvc.DeleteProcessor(r.Context(), params.WorkspaceID, params.ProcessorID); err != nil {
 		return false, http.StatusBadRequest, err
 	}
 	return true, http.StatusOK, nil
 }
 
-func (h *processorHandler) UpdateWorkflow(r *http.Request, params dto.ProcessorParams, query interface{}, body dto.WorkflowUpdate) (bool, int, error) {
+func (h *processorHandler) UpdateWorkflow(r *http.Request, params dto.ProcessorParams,
+	query interface{}, body dto.WorkflowUpdate) (bool, int, error) {
 	if err := h.pSvc.UpdateWorkflow(r.Context(), params.WorkspaceID, params.ProcessorID, body.Workflow); err != nil {
 		return false, http.StatusBadRequest, err
 	}
 	return true, http.StatusOK, nil
 }
 
-func (h *processorHandler) EnableProcessor(r *http.Request, params dto.ProcessorParams, query, body interface{}) (bool, int, error) {
+func (h *processorHandler) EnableProcessor(r *http.Request, params dto.ProcessorParams,
+	query, body interface{}) (bool, int, error) {
 	err := h.pSvc.EnableDisableProcessor(r.Context(), params.WorkspaceID, params.ProcessorID, true)
 	if err != nil {
 		return false, http.StatusBadRequest, err
@@ -86,7 +94,8 @@ func (h *processorHandler) EnableProcessor(r *http.Request, params dto.Processor
 	return true, http.StatusOK, nil
 }
 
-func (h *processorHandler) DisableProcessor(r *http.Request, params dto.ProcessorParams, query, body interface{}) (bool, int, error) {
+func (h *processorHandler) DisableProcessor(r *http.Request, params dto.ProcessorParams,
+	query, body interface{}) (bool, int, error) {
 	err := h.pSvc.EnableDisableProcessor(r.Context(), params.WorkspaceID, params.ProcessorID, false)
 	if err != nil {
 		return false, http.StatusBadRequest, err
@@ -95,23 +104,49 @@ func (h *processorHandler) DisableProcessor(r *http.Request, params dto.Processo
 	return true, http.StatusOK, nil
 }
 
-func (h *processorHandler) GetAllActivities(r *http.Request, params dto.WorkspaceParams, query, body interface{}) ([]catalog.ActivityMetadata, int, error) {
+func (h *processorHandler) GetAllActivities(r *http.Request, params dto.WorkspaceParams,
+	query, body interface{}) ([]catalog.ActivityMetadata, int, error) {
 	return h.pSvc.GetAllActivities(r.Context()), http.StatusOK, nil
 }
 
-func (h *processorHandler) GetWorkflowRuns(r *http.Request, params dto.ProcessorParams, query, body interface{}) ([]dto.WorkflowRun, int, error) {
-	runs, err := h.pSvc.GetWorkflowRuns(r.Context(), params.ProcessorID)
+func (h *processorHandler) GetWorkflowRuns(r *http.Request, params dto.ProcessorParams,
+	query, body interface{}) ([]dto.WorkflowRun, int, error) {
+	runs, err := h.pSvc.GetWorkflowRuns(r.Context(), params.TenantID, params.WorkspaceID, params.ProcessorID)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
 	return runs, http.StatusOK, nil
 }
 
-func (h *processorHandler) GetWorkflowLogs(r *http.Request, params dto.ProcessorParams, query dto.WorkflowQuery, body interface{}) ([]dto.WorkflowRunLogs, int, error) {
-	details, err := h.pSvc.GetWorkflowHistory(r.Context(), query.WorkflowID, query.RunID)
+func (h *processorHandler) GetWorkflowLogs(r *http.Request, params dto.RunParams,
+	query dto.WorkflowQuery, body interface{}) ([]dto.WorkflowRunLogs, int, error) {
+	details, err := h.pSvc.GetWorkflowHistory(r.Context(), params.TenantID, params.WorkspaceID,
+		params.ProcessorID, query.WorkflowID, params.RunID)
 	if err != nil {
 		return nil, http.StatusBadRequest, err
 	}
 
 	return details, http.StatusOK, nil
+}
+
+func (h *processorHandler) CancelWorkflowRun(r *http.Request, params dto.RunParams,
+	query dto.WorkflowQuery, body interface{}) (bool, int, error) {
+	err := h.pSvc.CancelWorkflowRun(r.Context(), params.TenantID, params.WorkspaceID,
+		params.ProcessorID, query.WorkflowID, params.RunID)
+	if err != nil {
+		return false, http.StatusBadRequest, err
+	}
+
+	return true, http.StatusOK, nil
+}
+
+func (h *processorHandler) DownloadRunArtifacts(r *http.Request, params dto.RunParams,
+	query dto.UploadQuery, body interface{}) (string, int, error) {
+	url, err := h.pSvc.GetRunArtifactsSignedURL(r.Context(), params.TenantID,
+		params.WorkspaceID, params.ProcessorID, query.UploadID, params.RunID)
+	if err != nil {
+		return "", http.StatusBadRequest, err
+	}
+
+	return url, http.StatusOK, nil
 }

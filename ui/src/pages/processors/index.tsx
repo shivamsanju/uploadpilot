@@ -1,5 +1,5 @@
 import { Box, Group, Title } from '@mantine/core';
-import { IconDeviceAirtag } from '@tabler/icons-react';
+import { IconTools } from '@tabler/icons-react';
 import { useEffect } from 'react';
 import { useSetBreadcrumbs } from '../../hooks/breadcrumb';
 import ProcessorsList from './List';
@@ -17,7 +17,7 @@ const ProcessorsPage = () => {
   return (
     <Box mb={50}>
       <Group mb="xl">
-        <IconDeviceAirtag size={24} />
+        <IconTools size={24} />
         <Title order={3}>Processors</Title>
       </Group>
       <ProcessorsList />

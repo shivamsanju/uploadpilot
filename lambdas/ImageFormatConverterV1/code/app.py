@@ -10,15 +10,20 @@ def lambda_handler(event, context):
     
     bucket_name, object_key, filename = get_file_key(event)
 
+    requested_format = event.get(f'{event.get("activity_key", "")}_format', "")
+
+    if requested_format not in ALLOWED_EXTENSIONS:
+        raise ValueError(f"Unsupported file extension. Only {ALLOWED_EXTENSIONS} are supported.")
+
     try:
         response = s3_client.get_object(Bucket=bucket_name, Key=object_key)
         image_data = response["Body"].read()
 
         image = Image.open(io.BytesIO(image_data))
         output_buffer = io.BytesIO()
-        image.save(output_buffer, format="PNG")
+        image.save(output_buffer, format=requested_format.upper())
 
-        new_filename = filename.rsplit(".", 1)[0] + ".png"
+        new_filename = filename.rsplit(".", 1)[0] + "." + requested_format
         new_key = get_output_key(event, new_filename)
 
         # Upload the PNG image back to S3
@@ -26,14 +31,15 @@ def lambda_handler(event, context):
             Bucket=bucket_name,
             Key=new_key,
             Body=output_buffer.getvalue(),
-            ContentType="image/png"
+            ContentType=f"image/{requested_format}"
         )
 
         return {
             "success": True,
             "file_name": new_filename,
-            "content_type": "image/png",
-            "output_key": new_key
+            "content_type": f"image/{requested_format}",
+            "output_key": new_key,
+            "message": "Conversion successful"
         }
 
     except Exception as e:

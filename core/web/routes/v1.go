@@ -79,8 +79,14 @@ func NewAppRoutesV1(services *services.Services, middlewares *middlewares.Middle
 							r.Put("/enable", webutils.CreateJSONHandler(procHandler.EnableProcessor))
 							r.Put("/disable", webutils.CreateJSONHandler(procHandler.DisableProcessor))
 							r.Put("/workflow", webutils.CreateJSONHandler(procHandler.UpdateWorkflow))
-							r.Get("/runs", webutils.CreateJSONHandler(procHandler.GetWorkflowRuns))
-							r.Get("/logs", webutils.CreateJSONHandler(procHandler.GetWorkflowLogs))
+							r.Route("/runs", func(r chi.Router) {
+								r.Get("/", webutils.CreateJSONHandler(procHandler.GetWorkflowRuns))
+								r.Route("/{runId}", func(r chi.Router) {
+									r.Get("/logs", webutils.CreateJSONHandler(procHandler.GetWorkflowLogs))
+									r.Put("/cancel", webutils.CreateJSONHandler(procHandler.CancelWorkflowRun))
+									r.Get("/download-artifacts", webutils.CreateJSONHandler(procHandler.DownloadRunArtifacts))
+								})
+							})
 						})
 					})
 				})

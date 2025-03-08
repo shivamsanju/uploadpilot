@@ -36,3 +36,13 @@ Resources:
                   - s3:GetObject
                   - s3:PutObject
                 Resource: "arn:aws:s3:::*"
+        - PolicyName: ImageToTextV1CloudWatchLogs
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: "arn:aws:logs:*:*:*"

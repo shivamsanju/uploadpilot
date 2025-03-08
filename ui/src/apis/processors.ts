@@ -337,7 +337,7 @@ export const useGetProcessorRunLogs = (
       }
       return axiosTenantInstance
         .get(
-          `/workspaces/${workspaceId}/processors/${processorId}/logs?workflowId=${workflowId}&runId=${runId}`,
+          `/workspaces/${workspaceId}/processors/${processorId}/runs/${runId}/logs?workflowId=${workflowId}`,
         )
         .then(res => res.data);
     },
@@ -349,4 +349,72 @@ export const useGetProcessorRunLogs = (
     });
 
   return { isPending, error, logs, invalidate, isFetching };
+};
+
+export const useCancelWorkflowRun = (
+  workspaceId: string,
+  processorId: string,
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: ['processorRuns', workspaceId, processorId],
+    mutationFn: ({
+      workflowId,
+      runId,
+    }: {
+      workflowId: string;
+      runId: string;
+    }) => {
+      return axiosTenantInstance
+        .put(
+          `/workspaces/${workspaceId}/processors/${processorId}/runs/${runId}/cancel?workflowId=${workflowId}`,
+        )
+        .then(res => res.data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['processorRuns', workspaceId, processorId],
+      });
+      notifications.show({
+        title: 'Success',
+        message: 'Workflow run cancelled successfully',
+        color: 'green',
+      });
+    },
+    onError: (error: any) => {
+      notifications.show({
+        title: 'Error',
+        message: `Failed to cancel workflow run. Reason: ${
+          error?.response?.data?.message || error.message
+        }`,
+        color: 'red',
+      });
+    },
+  });
+};
+
+export const useDownloadRunArtifacts = (
+  workspaceId: string,
+  processorId: string,
+) => {
+  return useMutation({
+    mutationKey: ['artifacts', workspaceId, processorId],
+    mutationFn: async ({
+      uploadId,
+      runId,
+    }: {
+      runId: string;
+      uploadId: string;
+    }) => {
+      if (!workspaceId || !uploadId || !runId || !processorId) {
+        throw new Error(
+          'workspaceId and uploadId and runId and processorId are required',
+        );
+      }
+      const response = await axiosTenantInstance.get(
+        `/workspaces/${workspaceId}/processors/${processorId}/runs/${runId}/download-artifacts?uploadId=${uploadId}`,
+      );
+      return response.data;
+    },
+  });
 };
