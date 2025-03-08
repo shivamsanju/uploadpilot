@@ -1,8 +1,10 @@
 import { Button, Group, Title } from '@mantine/core';
+import { showNotification } from '@mantine/notifications';
 import { IconDeviceFloppy, IconMenu4, IconRestore } from '@tabler/icons-react';
 import { useUpdateProcessorWorkflowMutation } from '../../apis/processors';
 import { showConfirmationPopup } from '../../components/Popups/ConfirmPopup';
 import classes from './Builder.module.css';
+import { validateWorkflowContent } from './editor/schema';
 
 type Props = {
   workspaceId: string;
@@ -21,6 +23,15 @@ export const EditorHeader: React.FC<Props> = ({
 
   const saveWorkflow = async () => {
     try {
+      const err = validateWorkflowContent(workflowContent || '');
+      if (err !== null) {
+        showNotification({
+          color: 'red',
+          title: 'Error',
+          message: 'Invalid YAML: ' + err,
+        });
+        return;
+      }
       await mutateAsync({
         workspaceId,
         processorId: processor?.id,

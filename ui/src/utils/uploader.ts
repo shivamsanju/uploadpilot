@@ -62,7 +62,8 @@ export class Uploader {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to get upload URL.');
+      const resp = await response.text();
+      throw new Error('Failed to get upload URL: ' + resp);
     }
 
     return response.json();
@@ -83,7 +84,8 @@ export class Uploader {
     });
 
     if (!uploadResponse.ok) {
-      throw new Error('Upload to S3 failed.');
+      const resp = await uploadResponse.text();
+      throw new Error('Failed to upload: ' + resp);
     }
   }
 
@@ -102,7 +104,8 @@ export class Uploader {
     });
 
     if (!response.ok) {
-      throw new Error('Failed to complete upload.');
+      const err = await response.text();
+      throw new Error('Failed to complete upload: ' + err);
     }
 
     return true;

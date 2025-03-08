@@ -8,12 +8,13 @@ type ActivityMetadata struct {
 }
 
 var ActivityCatalog = []*ActivityMetadata{
-	ImageResizeV1_0,
-	ImageConvertToPngV1_0,
+	ImageConverterPNGV1,
+	DetectDocumentTextV1,
+	ImageToTextV1,
+	HTTP_V_01,
 	ImageConvertToBmpV1_0,
 	ImageAddWatermarkActivityV1_0,
 	ImageMetadataExtractionActivityV1_0,
 	ImageBlurActivityV1_0,
-	DetectDocumentText,
-	HTTP_V_01,
+	ImageResizeV1_0,
 }

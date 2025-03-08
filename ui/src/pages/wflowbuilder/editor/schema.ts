@@ -133,6 +133,8 @@ export const validateWorkflowContent = (content: string): string | null => {
   try {
     const formattedContent = content.replace(/\t/g, '  ');
     const parsedData = parse(formattedContent) as unknown;
+    validateUniqueKeys((parsedData as any).root);
+
     const ajv = new Ajv();
     const validate = ajv.compile(schema);
     const valid = validate(parsedData);
@@ -149,3 +151,40 @@ export const validateWorkflowContent = (content: string): string | null => {
     return (e as Error).message;
   }
 };
+
+function validateUniqueKeys(statement: any, seenKeys = new Set()) {
+  if (!statement) return true;
+
+  // Check activity key uniqueness
+  if (statement.activity) {
+    if (seenKeys.has(statement.activity.key)) {
+      throw new Error(
+        `Duplicate activity key found: ${statement.activity.key}`,
+      );
+    }
+    seenKeys.add(statement.activity.key);
+  }
+
+  // Recursively check nested structures
+  if (statement.sequence) {
+    for (const element of statement.sequence.elements) {
+      validateUniqueKeys(element, seenKeys);
+    }
+  }
+  if (statement.parallel) {
+    for (const branch of statement.parallel.branches) {
+      validateUniqueKeys(branch, seenKeys);
+    }
+  }
+  if (statement.condition) {
+    validateUniqueKeys(statement.condition.then, seenKeys);
+    if (statement.condition.else) {
+      validateUniqueKeys(statement.condition.else, seenKeys);
+    }
+  }
+  if (statement.loop) {
+    validateUniqueKeys(statement.loop.body, seenKeys);
+  }
+
+  return true;
+}

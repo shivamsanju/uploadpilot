@@ -1,0 +1,10 @@
+{
+  "workspace_id": "workspace_id",
+  "processor_id": "processor_id",
+  "upload_id": "upload_id",
+  "file_name": "file_name",
+  "content_type": "content_type",
+  "workflow_id": "workflow_id",
+  "run_id": "run_id",
+  "activity_key": "activity_key"
+}

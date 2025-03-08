@@ -36,7 +36,7 @@ const BrowserIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
       });
       setStatus('Upload complete');
     } catch (error) {
-      setStatus('Upload failed');
+      setStatus('Upload failed: ' + error);
     }
   };
 
@@ -117,13 +117,15 @@ document.addEventListener('DOMContentLoaded', () => {
             c={
               status === 'Upload complete'
                 ? 'green'
-                : status === 'Upload failed'
+                : status.startsWith('Upload failed')
                   ? 'red'
                   : 'yellow'
             }
           >
             {status === 'Upload complete' && <IconCircleCheck size={16} />}
-            {status === 'Upload failed' && <IconExclamationCircle size={16} />}
+            {status.startsWith('Upload failed') && (
+              <IconExclamationCircle size={16} />
+            )}
             <Text>{status}</Text>
           </Group>
           <Group align="center" justify="space-between" gap="md" px="sm">
