@@ -322,7 +322,7 @@ func (s *ProcessorService) GetWorkflowHistory(ctx context.Context, tenantID, wor
 			log.Details = fmt.Sprintf("Result: %s", payloadStr)
 
 		default:
-			log.Details = ""
+			continue
 		}
 
 		logs = append(logs, log)
@@ -355,7 +355,7 @@ func (s *ProcessorService) GetRunArtifactsSignedURL(ctx context.Context, tenantI
 		return "", fmt.Errorf(msg.ErrAccessDenied)
 	}
 
-	objectKey := fmt.Sprintf("%s/processed-zip/%s/%s.zip", uploadID, procesorID, runID)
+	objectKey := fmt.Sprintf("%s/artifacts/%s/%s.zip", uploadID, procesorID, runID)
 
 	expiry := time.Now().Add(15 * time.Minute)
 	resp, err := s3.NewPresignClient(s.s3Client).PresignGetObject(ctx, &s3.GetObjectInput{

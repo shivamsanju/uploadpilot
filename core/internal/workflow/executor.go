@@ -48,14 +48,21 @@ func (e *Executor) ExecuteLambdaContainerActivity(ctx context.Context, functionN
 		return nil, fmt.Errorf("failed to unmarshal lambda output: %w", err)
 	}
 
-	success, ok := output["success"]
+	log.Debug().Interface("output", output).Msg("lambda output")
+	success, ok := output["status_code"]
 	if !ok {
 		log.Error().Str("output", string(op.Payload)).Msg("lambda output")
-		return nil, fmt.Errorf("failed to unmarshal lambda output: success field not found")
+		return nil, fmt.Errorf("failed to unmarshal lambda output: status_code field not found")
 	}
 
-	s, ok := success.(bool)
-	if !ok || !s {
+	statusFloat, ok := success.(float64)
+	if !ok {
+		log.Error().Interface("success", success).Msg("status_code is not a float64")
+		return nil, fmt.Errorf("failed to unmarshal lambda output: status_code is not a float64")
+	}
+	s := int(statusFloat)
+	log.Debug().Int("s", s).Msg("lambda status code")
+	if s < 200 || s > 299 {
 		err := output["error"].(string)
 		log.Error().Str("error", err).Msg("lambda execution failed")
 		return nil, fmt.Errorf("error: %s", err)

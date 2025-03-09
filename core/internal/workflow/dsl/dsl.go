@@ -15,11 +15,11 @@ type (
 	Workflow struct {
 		Variables   map[string]any `json:"variables" yaml:"variables"`
 		Root        Statement      `json:"root" yaml:"root"`
-		WorkspaceID string         `json:"workspaceID" yaml:"workspaceID"`
-		UploadID    string         `json:"uploadID" yaml:"uploadID"`
-		ProcessorID string         `json:"processorID" yaml:"processorID"`
-		FileName    string         `json:"fileName" yaml:"fileName"`
-		ContentType string         `json:"contentType" yaml:"contentType"`
+		WorkspaceID string         `json:"workspaceId"`
+		UploadID    string         `json:"uploadId"`
+		ProcessorID string         `json:"processorId"`
+		FileName    string         `json:"fileName"`
+		ContentType string         `json:"contentType"`
 	}
 
 	Statement struct {
@@ -48,8 +48,8 @@ type (
 	Loop struct {
 		Iterations    int        `json:"iterations,omitempty" yaml:"iterations,omitempty"`
 		Body          *Statement `json:"body" yaml:"body"`
-		BreakVariable *string    `json:"breakVariable,omitempty" yaml:"breakVariable,omitempty"`
-		BreakValue    *string    `json:"breakValue,omitempty" yaml:"breakValue,omitempty"`
+		BreakVariable *string    `json:"break_variable,omitempty" yaml:"break_variable,omitempty"`
+		BreakValue    *string    `json:"break_value,omitempty" yaml:"break_value,omitempty"`
 	}
 
 	ActivityInvocation struct {
@@ -57,20 +57,38 @@ type (
 		Uses                          string         `json:"uses" yaml:"uses"`
 		With                          map[string]any `json:"with,omitempty" yaml:"with,omitempty"`
 		Input                         *string        `json:"input,omitempty" yaml:"input,omitempty"`
-		SaveOutput                    *bool          `json:"saveOutput,omitempty" yaml:"saveOutput,omitempty"`
-		ScheduleToCloseTimeoutSeconds *int64         `json:"scheduleToCloseTimeoutSeconds,omitempty" yaml:"scheduleToCloseTimeoutSeconds,omitempty"`
-		ScheduleToStartTimeoutSeconds *int64         `json:"scheduleToStartTimeoutSeconds,omitempty" yaml:"scheduleToStartTimeoutSeconds,omitempty"`
-		StartToCloseTimeoutSeconds    *int64         `json:"startToCloseTimeoutSeconds,omitempty" yaml:"startToCloseTimeoutSeconds,omitempty"`
-		MaxRetries                    *int32         `json:"maxRetries,omitempty" yaml:"maxRetries,omitempty"`
-		RetryBackoffCoefficient       *float64       `json:"retryBackoffCoefficient,omitempty" yaml:"retryBackoffCoefficient,omitempty"`
-		RetryMaxIntervalSeconds       *int64         `json:"retryMaxIntervalSeconds,omitempty" yaml:"retryMaxIntervalSeconds,omitempty"`
-		RetryInitialIntervalSeconds   *int64         `json:"retryInitialIntervalSeconds,omitempty" yaml:"retryInitialIntervalSeconds,omitempty"`
+		SaveOutput                    *bool          `json:"save_output,omitempty" yaml:"save_output,omitempty"`
+		ScheduleToCloseTimeoutSeconds *int64         `json:"schedule_to_close_timeout_seconds,omitempty" yaml:"schedule_to_close_timeout_seconds,omitempty"`
+		ScheduleToStartTimeoutSeconds *int64         `json:"schedule_to_start_timeout_seconds,omitempty" yaml:"schedule_to_start_timeout_seconds,omitempty"`
+		StartToCloseTimeoutSeconds    *int64         `json:"start_to_close_timeout_seconds,omitempty" yaml:"start_to_close_timeout_seconds,omitempty"`
+		MaxRetries                    *int32         `json:"max_retries,omitempty" yaml:"max_retries,omitempty"`
+		RetryBackoffCoefficient       *float64       `json:"retry_backoff_coefficient,omitempty" yaml:"retry_backoff_coefficient,omitempty"`
+		RetryMaxIntervalSeconds       *int64         `json:"retry_max_interval_seconds,omitempty" yaml:"retry_max_interval_seconds,omitempty"`
+		RetryInitialIntervalSeconds   *int64         `json:"retry_initial_interval_seconds,omitempty" yaml:"retry_initial_interval_seconds,omitempty"`
 	}
 
 	executable interface {
 		execute(ctx workflow.Context, bindings map[string]any) error
 	}
 )
+
+func (w Workflow) MarshalJSON() ([]byte, error) {
+	type Alias Workflow
+	return json.Marshal(&struct {
+		*Alias
+	}{
+		Alias: (*Alias)(&w),
+	})
+}
+
+func (w Workflow) MarshalYAML() (interface{}, error) {
+	type Alias Workflow
+	return &struct {
+		*Alias
+	}{
+		Alias: (*Alias)(&w),
+	}, nil
+}
 
 func SimpleDSLWorkflow(ctx workflow.Context, dslWorkflow Workflow) ([]byte, error) {
 	logger := workflow.GetLogger(ctx)
@@ -87,13 +105,13 @@ func SimpleDSLWorkflow(ctx workflow.Context, dslWorkflow Workflow) ([]byte, erro
 	bindings["workflow_id"] = workflow.GetInfo(ctx).WorkflowExecution.ID
 	bindings["run_id"] = workflow.GetInfo(ctx).WorkflowExecution.RunID
 
-	err := dslWorkflow.Root.execute(ctx, bindings)
-	if err != nil {
-		logger.Error("DSL Workflow failed.", "Error", err)
-		return nil, err
-	}
+	defer func() {
+		if err := doPostProcessing(ctx, bindings); err != nil {
+			logger.Error("Error in post processing.", "Error", err)
+		}
+	}()
 
-	err = doPostProcessing(ctx, bindings)
+	err := dslWorkflow.Root.execute(ctx, bindings)
 	if err != nil {
 		logger.Error("DSL Workflow failed.", "Error", err)
 		return nil, err
@@ -188,7 +206,7 @@ func (a *ActivityInvocation) execute(ctx workflow.Context, bindings map[string]a
 	}
 	ctx = workflow.WithActivityOptions(ctx, ao)
 
-	args, err := makeInput(a.With, bindings, a.Key, a.SaveOutput)
+	args, err := makeInput(a.With, bindings, a.Key, a.SaveOutput, a.Input)
 	if err != nil {
 		logger := workflow.GetLogger(ctx)
 		logger.Error("Failed to make input.", "Error", err)
@@ -196,15 +214,17 @@ func (a *ActivityInvocation) execute(ctx workflow.Context, bindings map[string]a
 	}
 
 	var result []byte
-	if a.Input == nil {
-		a.Input = new(string)
-	}
-
 	err = workflow.ExecuteActivity(ctx, "Executor", a.Uses, args).Get(ctx, &result)
 	if err != nil {
 		return err
 	}
-	bindings[a.Key+"result"] = result
+
+	var output map[string]any
+	if err := json.Unmarshal(result, &output); err != nil {
+		return err
+	}
+
+	saveOutput(output, bindings, a.Key)
 	return nil
 }
 
@@ -250,43 +270,42 @@ func executeAsync(exe executable, ctx workflow.Context, bindings map[string]any)
 	return future
 }
 
-func makeInput(argMap map[string]any, bindings map[string]any, activityKey string, saveOutput *bool) (string, error) {
-	var args map[string]any
-	if argMap != nil {
-		args = argMap
-	} else {
-		args = make(map[string]any)
-	}
+func makeInput(argMap map[string]any, bindings map[string]any, activityKey string, saveOutput *bool, inputActivityKey *string) (string, error) {
 	for argument, value := range argMap {
 		val, ok := value.(string)
 		if ok && val[0] == '$' {
 			varName := val[1:]
-			args[fmt.Sprintf("%s_%s", activityKey, argument)] = bindings[varName]
+			bindings[fmt.Sprintf("%s.%s", activityKey, argument)] = bindings[varName]
 		} else {
-			args[fmt.Sprintf("%s_%s", activityKey, argument)] = value
+			bindings[fmt.Sprintf("%s.%s", activityKey, argument)] = value
 		}
 	}
 
-	args["workspace_id"] = bindings["workspace_id"]
-	args["upload_id"] = bindings["upload_id"]
-	args["processor_id"] = bindings["processor_id"]
-	args["file_name"] = bindings["file_name"]
-	args["content_type"] = bindings["content_type"]
-	args["workflow_id"] = bindings["workflow_id"]
-	args["run_id"] = bindings["run_id"]
-	args["activity_key"] = activityKey
+	bindings["current_activity_key"] = activityKey
 	if saveOutput != nil {
-		args["save_output"] = *saveOutput
+		bindings[fmt.Sprintf("%s.save_output", activityKey)] = *saveOutput
 	} else {
-		args["save_output"] = false
+		bindings[fmt.Sprintf("%s.save_output", activityKey)] = false
+	}
+	if inputActivityKey != nil {
+		bindings[fmt.Sprintf("%s.input", activityKey)] = *inputActivityKey
+	} else {
+		bindings[fmt.Sprintf("%s.input", activityKey)] = ""
 	}
 
-	argsbytes, err := json.Marshal(args)
+	argsbytes, err := json.Marshal(bindings)
 	if err != nil {
 		return "", err
 	}
 
 	return string(argsbytes), nil
+}
+
+func saveOutput(result map[string]any, bindings map[string]any, activityKey string) error {
+	for key, value := range result {
+		bindings[fmt.Sprintf("%s.%s", activityKey, key)] = value
+	}
+	return nil
 }
 
 func doPostProcessing(ctx workflow.Context, bindings map[string]any) error {
@@ -308,7 +327,7 @@ func doPostProcessing(ctx workflow.Context, bindings map[string]any) error {
 		return err
 	}
 
-	err = workflow.ExecuteActivity(ctx, "Executor", "SaveArtifactsV1", string(bindingsB)).Get(ctx, nil)
+	err = workflow.ExecuteActivity(ctx, "Executor", "PostProcessingV1", string(bindingsB)).Get(ctx, nil)
 	if err != nil {
 		return err
 	}
