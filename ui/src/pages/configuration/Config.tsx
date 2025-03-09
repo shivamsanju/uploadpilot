@@ -119,7 +119,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
         <Stack gap="xl">
           <Group justify="space-between" className={classes.item}>
             <div>
-              <Text size="sm">Allow pause and resume</Text>
+              <Text fw="500">Allow pause and resume</Text>
               <Text c="dimmed">
                 Toggle to allow pause and resume in the uploader
               </Text>
@@ -137,7 +137,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
 
           <Group justify="space-between" className={classes.item}>
             <div>
-              <Text size="sm">Enable image editing</Text>
+              <Text fw="500">Enable image editing</Text>
               <Text c="dimmed">
                 Toggle to enable image editing in the uploader ui
               </Text>
@@ -156,7 +156,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
         <Stack gap="xl">
           <Group justify="space-between" className={classes.item}>
             <div>
-              <Text size="sm">Use compression</Text>
+              <Text fw="500">Use compression</Text>
               <Text c="dimmed">
                 Toggle to enable compression while uploading files
               </Text>
@@ -174,7 +174,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
 
           <Group justify="space-between" className={classes.item}>
             <div>
-              <Text size="sm">Use fault tolerant mode</Text>
+              <Text fw="500">Use fault tolerant mode</Text>
               <Text c="dimmed">
                 Fault tolerant mode allows to recover from browser crashes
               </Text>

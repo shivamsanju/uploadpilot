@@ -81,18 +81,18 @@ const ProcessorSettingsPage = () => {
       <ContainerOverlay visible={isCreating || isPending} />
       <form onSubmit={form.onSubmit(handleUpdate)}>
         <TextInput
+          maw="800"
           mt="xl"
           withAsterisk
           label="Name"
-          description="Name of the processor"
           type="name"
           placeholder="Enter a name"
           {...form.getInputProps('name')}
         />
         <TagsInput
+          maw="800"
           mt="xl"
           label="Trigger"
-          description="File type to trigger the processor"
           placeholder="Enter comma separated file type"
           {...form.getInputProps('triggers')}
           min={0}

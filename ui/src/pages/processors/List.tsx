@@ -150,6 +150,7 @@ const ProcessorList = () => {
       {
         accessor: 'name',
         title: 'Name',
+        render: (params: any) => <Text>{params?.name}</Text>,
       },
       {
         accessor: 'triggers',
@@ -157,7 +158,7 @@ const ProcessorList = () => {
         hidden: width < 768,
         render: (item: any) => (
           <div>
-            <Text fz="sm" fw={500}>
+            <Text fw={500}>
               {item.triggers && item.triggers.length > 0 ? (
                 <>
                   {item.triggers
@@ -186,7 +187,7 @@ const ProcessorList = () => {
         hidden: width < 768,
         textAlign: 'center',
         render: (params: any) => (
-          <Text fz="sm">
+          <Text>
             {params?.updatedAt && timeAgo.format(new Date(params?.updatedAt))}
           </Text>
         ),

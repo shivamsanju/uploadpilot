@@ -169,20 +169,20 @@ const UploadList = ({ setTotalRecords }: any) => {
         title: 'Name',
         accessor: 'fileName',
         elipsis: true,
-        render: (params: any) => <Text fz="sm">{params?.fileName}</Text>,
+        render: (params: any) => <Text>{params?.fileName}</Text>,
       },
       {
         title: 'Content Type',
         accessor: 'contentType',
         hidden: width < 768,
-        render: (params: any) => <Text fz="sm">{params?.contentType}</Text>,
+        render: (params: any) => <Text>{params?.contentType}</Text>,
       },
       {
         title: 'Size',
         accessor: 'contentLength',
         hidden: width < 768,
         render: (params: any) => (
-          <Text fz="sm">{formatBytes(Number(params?.contentLength))}</Text>
+          <Text>{formatBytes(Number(params?.contentLength))}</Text>
         ),
       },
       {
@@ -190,7 +190,7 @@ const UploadList = ({ setTotalRecords }: any) => {
         accessor: 'startedAt',
         hidden: width < 768,
         render: (params: any) => (
-          <Text fz="sm">
+          <Text>
             {params?.startedAt && !params.startedAt.startsWith('0001-01-01')
               ? timeAgo.format(new Date(params?.startedAt))
               : '-'}
@@ -202,7 +202,7 @@ const UploadList = ({ setTotalRecords }: any) => {
         accessor: 'finishedAt',
         hidden: width < 768,
         render: (params: any) => (
-          <Text fz="sm">
+          <Text>
             {params?.finishedAt && !params.finishedAt.startsWith('0001-01-01')
               ? timeAgo.format(new Date(params?.finishedAt))
               : '-'}
