@@ -1,11 +1,7 @@
-### UploadPilot MonoRepo
+### UploadPilot MonoRepo Structure 🚀
 
-### Micorservices
-- manager
-- admin-ui
-- uploader + companion
-- momentum
-- postgres
-- temporal
-- elastic search
-- redis
+- **core** 🏗️ – Foundational backend services and core logic
+- **ui** 🎨 – Frontend/UI components and web interfaces
+- **sdk** 📦 – Software Development Kits for integrations
+- **lambdas** ⚡ – Serverless functions and event-driven services
+- **examples** 🛠️ – Reference implementations and usage demos
