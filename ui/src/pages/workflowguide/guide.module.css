@@ -1,0 +1,7 @@
+.guideMd p {
+  font-size: var(--mantine-font-size-sm);
+}
+
+.guideMd li {
+  font-size: var(--mantine-font-size-sm);
+}

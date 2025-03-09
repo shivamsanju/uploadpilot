@@ -8,7 +8,7 @@ var ImageResizeV1_0 = &ActivityMetadata{
 	This is essential for optimizing images for web usage, thumbnails, and performance improvements.`,
 	Workflow: `
 - activity:
-    key: uniqueKeyLessThan20Chars
+    key: unique_alphanum_key
     uses: ImageResize@v1.0
     with:
       width: 100
@@ -25,7 +25,7 @@ var ImageFormatConvertorV1 = &ActivityMetadata{
 	This Activity is useful for optimizing storage and compatibility across platforms.`,
 	Workflow: `
 - activity:
-    key: uniqueKeyLessThan20Chars
+    key: unique_alphanum_key
     uses: ImageFormatConvertorV1
     with:
       format: "jpg"
@@ -40,7 +40,7 @@ var ImageConvertToJpegV1_0 = &ActivityMetadata{
 	This Activity is useful for optimizing storage and compatibility across platforms.`,
 	Workflow: `
 - activity:
-    key: uniqueKeyLessThan20Chars
+    key: unique_alphanum_key
     uses: ImageConvertToJpeg@v1.0
 `,
 }
@@ -53,7 +53,7 @@ var ImageConvertToBmpV1_0 = &ActivityMetadata{
 	This Activity is useful for optimizing storage and compatibility across platforms.`,
 	Workflow: `
 - activity:
-    key: uniqueKeyLessThan20Chars
+    key: unique_alphanum_key
     uses: ImageConvertToBmp@v1.0
 `,
 }
@@ -66,7 +66,7 @@ var ImageAddWatermarkActivityV1_0 = &ActivityMetadata{
 	This helps in branding, copyright protection, and content ownership verification.`,
 	Workflow: `
 - activity:
-    key: uniqueKeyLessThan20Chars
+    key: unique_alphanum_key
     uses: ImageAddWatermark@v1.0
     with:
       size: 40
@@ -83,7 +83,7 @@ var ImageMetadataExtractionActivityV1_0 = &ActivityMetadata{
 	Useful for digital forensics, asset management, and content analysis.`,
 	Workflow: `
 - activity:
-    key: uniqueKeyLessThan20Chars
+    key: unique_alphanum_key
     uses: ImageMetadataExtraction@v1.0
 `,
 }
@@ -96,7 +96,7 @@ var ImageBlurActivityV1_0 = &ActivityMetadata{
 	This is useful for optimizing images for web usage, thumbnails, and performance improvements.`,
 	Workflow: `
 - activity:
-    key: uniqueKeyLessThan20Chars
+    key: unique_alphanum_key
     uses: ImageBlur@v1.0
     with:
       radius: 2

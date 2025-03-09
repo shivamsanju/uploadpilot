@@ -140,17 +140,11 @@ const UploadList = ({ setTotalRecords }: any) => {
     [getFileUrl],
   );
 
-  const handleViewMetadata = useCallback(
-    (importId: string) => {
-      const uploadItem = uploads?.find((item: any) => item.id === importId);
-      if (uploadItem) {
-        setOpenModal(true);
-        setMetadata(uploadItem.metadata || {});
-        setModalVariant('metadata');
-      }
-    },
-    [uploads],
-  );
+  const handleViewMetadata = useCallback((metadata: any) => {
+    setOpenModal(true);
+    setMetadata(metadata || {});
+    setModalVariant('metadata');
+  }, []);
 
   const handleRefresh = () => {
     invalidate();
@@ -281,7 +275,7 @@ const UploadList = ({ setTotalRecords }: any) => {
                   </Menu.Item>
                 )}
                 <Menu.Item
-                  onClick={() => handleViewMetadata(params?.id)}
+                  onClick={() => handleViewMetadata(params?.metadata)}
                   leftSection={<IconBraces size={18} />}
                 >
                   <Text>View Metadata</Text>

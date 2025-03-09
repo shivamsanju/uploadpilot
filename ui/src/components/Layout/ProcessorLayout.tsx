@@ -1,5 +1,10 @@
 import { AppShell, ScrollArea } from '@mantine/core';
-import { IconBolt, IconFileStack, IconSettings } from '@tabler/icons-react';
+import {
+  IconBolt,
+  IconClipboardText,
+  IconFileStack,
+  IconSettings,
+} from '@tabler/icons-react';
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useNavbar } from '../../context/NavbarContext';
@@ -29,6 +34,11 @@ const ProcessorLayout: React.FC<{ children: React.ReactNode }> = ({
         label: 'Settings',
         icon: IconSettings,
         link: `/workspace/${workspaceId}/processors/${processorId}/settings`,
+      },
+      {
+        label: 'Builder guide',
+        icon: IconClipboardText,
+        link: `/workspace/${workspaceId}/processors/${processorId}/builder-guide`,
       },
     ],
     [workspaceId, processorId],

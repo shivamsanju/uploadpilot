@@ -10,7 +10,7 @@ The response can be captured for further processing or analysis.
   `,
 	Workflow: `
 - activity:
-    key: uniqueKeyLessThan20Chars
+    key: unique_alphanum_key
     uses: HTTP_V_01
     with:
       url: "https://api.restful-api.dev/objects"

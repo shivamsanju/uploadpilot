@@ -1,3 +1,14 @@
+export class NodeFile extends Blob {
+  name: string;
+  lastModified: number;
+
+  constructor(buffer: Buffer, name: string, type = "application/octet-stream") {
+    super([buffer], { type });
+    this.name = name;
+    this.lastModified = Date.now();
+  }
+}
+
 export class Uploader {
   private apiKey: string;
   private tenantId: string;
@@ -5,19 +16,19 @@ export class Uploader {
   private baseUrl: string;
 
   constructor(
-    apiKey: string,
     tenantId: string,
     workspaceId: string,
+    apiKey: string,
     baseUrl: string = "http://localhost:8080"
   ) {
-    this.apiKey = apiKey;
     this.tenantId = tenantId;
     this.workspaceId = workspaceId;
+    this.apiKey = apiKey;
     this.baseUrl = baseUrl;
   }
 
   async upload(
-    file: File,
+    file: File | NodeFile,
     metadata: Record<string, any> = {}
   ): Promise<boolean> {
     if (!file) {
@@ -29,8 +40,19 @@ export class Uploader {
     return this.completeUpload(uploadId.uploadId);
   }
 
+  async uploadMultiple(
+    files: File[] | NodeFile[],
+    metadata: Record<string, any> = {}
+  ): Promise<boolean[]> {
+    if (!files.length) {
+      throw new Error("No files provided for upload.");
+    }
+
+    return Promise.all(files.map((file) => this.upload(file, metadata)));
+  }
+
   private async getPresignedUrl(
-    file: File,
+    file: File | NodeFile,
     metadata: Record<string, any>
   ): Promise<{ uploadUrl: string; method: string; uploadId: string }> {
     const uploadUrlEndpoint = `${this.baseUrl}/tenants/${this.tenantId}/workspaces/${this.workspaceId}/uploads`;
@@ -51,14 +73,15 @@ export class Uploader {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to get upload URL.");
+      const resp = await response.text();
+      throw new Error("Failed to get upload URL: " + resp);
     }
 
     return response.json();
   }
 
   private async uploadToS3(
-    file: File,
+    file: File | NodeFile,
     uploadUrl: string,
     method: string
   ): Promise<void> {
@@ -72,7 +95,8 @@ export class Uploader {
     });
 
     if (!uploadResponse.ok) {
-      throw new Error("Upload to S3 failed.");
+      const resp = await uploadResponse.text();
+      throw new Error("Failed to upload: " + resp);
     }
   }
 
@@ -81,7 +105,7 @@ export class Uploader {
       throw new Error("No uploadId provided.");
     }
 
-    const completeEndpoint = `${this.baseUrl}/tenants/${this.tenantId}/workspaces/${this.workspaceId}/uploads/${uploadId}/complete`;
+    const completeEndpoint = `${this.baseUrl}/tenants/${this.tenantId}/workspaces/${this.workspaceId}/uploads/${uploadId}/finish`;
 
     const response = await fetch(completeEndpoint, {
       method: "POST",
@@ -91,7 +115,8 @@ export class Uploader {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to complete upload.");
+      const err = await response.text();
+      throw new Error("Failed to complete upload: " + err);
     }
 
     return true;

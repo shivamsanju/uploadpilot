@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"time"
 
+	"maps"
+
 	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 )
@@ -13,21 +15,21 @@ type (
 	WorkflowCtxKey string
 
 	Workflow struct {
-		Variables   map[string]any `json:"variables" yaml:"variables"`
-		Root        Statement      `json:"root" yaml:"root"`
-		WorkspaceID string         `json:"workspaceId"`
-		UploadID    string         `json:"uploadId"`
-		ProcessorID string         `json:"processorId"`
-		FileName    string         `json:"fileName"`
-		ContentType string         `json:"contentType"`
+		WorkspaceID       string         `json:"workspaceId"`
+		UploadID          string         `json:"uploadId"`
+		ProcessorID       string         `json:"processorId"`
+		FileName          string         `json:"fileName"`
+		ContentType       string         `json:"contentType"`
+		Variables         map[string]any `json:"variables" yaml:"variables"`
+		Root              Statement      `json:"root" yaml:"root"`
+		OnWorkflowSuccess *Statement     `json:"on_workflow_success" yaml:"on_workflow_success"`
+		OnWorkflowFailure *Statement     `json:"on_workflow_failure" yaml:"on_workflow_failure"`
 	}
 
 	Statement struct {
-		Activity  *ActivityInvocation `json:"activity,omitempty" yaml:"activity,omitempty"`
-		Sequence  *Sequence           `json:"sequence,omitempty" yaml:"sequence,omitempty"`
-		Parallel  *Parallel           `json:"parallel,omitempty" yaml:"parallel,omitempty"`
-		Condition *Condition          `json:"condition,omitempty" yaml:"condition,omitempty"`
-		Loop      *Loop               `json:"loop,omitempty" yaml:"loop,omitempty"`
+		Activity *ActivityInvocation `json:"activity,omitempty" yaml:"activity,omitempty"`
+		Sequence *Sequence           `json:"sequence,omitempty" yaml:"sequence,omitempty"`
+		Parallel *Parallel           `json:"parallel,omitempty" yaml:"parallel,omitempty"`
 	}
 
 	Sequence struct {
@@ -36,20 +38,6 @@ type (
 
 	Parallel struct {
 		Branches []*Statement `json:"branches" yaml:"branches"`
-	}
-
-	Condition struct {
-		Variable string     `json:"variable" yaml:"variable"`
-		Value    string     `json:"value" yaml:"value"`
-		Then     *Statement `json:"then" yaml:"then"`
-		Else     *Statement `json:"else,omitempty" yaml:"else,omitempty"`
-	}
-
-	Loop struct {
-		Iterations    int        `json:"iterations,omitempty" yaml:"iterations,omitempty"`
-		Body          *Statement `json:"body" yaml:"body"`
-		BreakVariable *string    `json:"break_variable,omitempty" yaml:"break_variable,omitempty"`
-		BreakValue    *string    `json:"break_value,omitempty" yaml:"break_value,omitempty"`
 	}
 
 	ActivityInvocation struct {
@@ -65,6 +53,8 @@ type (
 		RetryBackoffCoefficient       *float64       `json:"retry_backoff_coefficient,omitempty" yaml:"retry_backoff_coefficient,omitempty"`
 		RetryMaxIntervalSeconds       *int64         `json:"retry_max_interval_seconds,omitempty" yaml:"retry_max_interval_seconds,omitempty"`
 		RetryInitialIntervalSeconds   *int64         `json:"retry_initial_interval_seconds,omitempty" yaml:"retry_initial_interval_seconds,omitempty"`
+		OnSuccess                     *Statement     `json:"on_success,omitempty" yaml:"on_success,omitempty"`
+		OnError                       *Statement     `json:"on_error,omitempty" yaml:"on_error,omitempty"`
 	}
 
 	executable interface {
@@ -72,53 +62,49 @@ type (
 	}
 )
 
-func (w Workflow) MarshalJSON() ([]byte, error) {
-	type Alias Workflow
-	return json.Marshal(&struct {
-		*Alias
-	}{
-		Alias: (*Alias)(&w),
-	})
-}
-
-func (w Workflow) MarshalYAML() (interface{}, error) {
-	type Alias Workflow
-	return &struct {
-		*Alias
-	}{
-		Alias: (*Alias)(&w),
-	}, nil
-}
-
 func SimpleDSLWorkflow(ctx workflow.Context, dslWorkflow Workflow) ([]byte, error) {
 	logger := workflow.GetLogger(ctx)
 	bindings := make(map[string]any)
-	for k, v := range dslWorkflow.Variables {
-		bindings[k] = v
+	maps.Copy(bindings, dslWorkflow.Variables)
+
+	// adds workspace_id, upload_id, run_id etc
+	addWorkflowIdentifiersToBindings(ctx, bindings, dslWorkflow)
+
+	workflowErr := dslWorkflow.Root.execute(ctx, bindings)
+
+	// runs the post processing activity in any case
+	// TODO: handle what if it fails
+	if e := runPostProcessingActivity(ctx, bindings); e != nil {
+		logger.Error("Error in post processing: ", e)
+		if workflowErr != nil {
+			workflowErr = fmt.Errorf("failed to run post processing. original error: %w", workflowErr)
+		} else {
+			workflowErr = fmt.Errorf("failed to run post processing")
+		}
 	}
 
-	bindings["workspace_id"] = dslWorkflow.WorkspaceID
-	bindings["upload_id"] = dslWorkflow.UploadID
-	bindings["processor_id"] = dslWorkflow.ProcessorID
-	bindings["file_name"] = dslWorkflow.FileName
-	bindings["content_type"] = dslWorkflow.ContentType
-	bindings["workflow_id"] = workflow.GetInfo(ctx).WorkflowExecution.ID
-	bindings["run_id"] = workflow.GetInfo(ctx).WorkflowExecution.RunID
+	if workflowErr != nil {
+		logger.Error("DSL Workflow failed: ", workflowErr)
+		bindings["workflow_error"] = workflowErr
 
-	defer func() {
-		if err := doPostProcessing(ctx, bindings); err != nil {
-			logger.Error("Error in post processing.", "Error", err)
+		if dslWorkflow.OnWorkflowFailure != nil {
+			onFailureErr := dslWorkflow.OnWorkflowFailure.execute(ctx, bindings)
+			if onFailureErr != nil {
+				workflowErr = fmt.Errorf("failed to run on_workflow_failure: %w. original error: %w", onFailureErr, workflowErr)
+			}
 		}
-	}()
+		return nil, workflowErr
+	}
 
-	err := dslWorkflow.Root.execute(ctx, bindings)
-	if err != nil {
-		logger.Error("DSL Workflow failed.", "Error", err)
-		return nil, err
+	if dslWorkflow.OnWorkflowSuccess != nil {
+		onSuccessErr := dslWorkflow.OnWorkflowSuccess.execute(ctx, bindings)
+		if onSuccessErr != nil {
+			return nil, fmt.Errorf("failed to run on_workflow_success: %w", onSuccessErr)
+		}
 	}
 
 	logger.Info("DSL Workflow completed.")
-	return nil, err
+	return nil, nil
 }
 
 func (b *Statement) execute(ctx workflow.Context, bindings map[string]any) error {
@@ -130,37 +116,6 @@ func (b *Statement) execute(ctx workflow.Context, bindings map[string]any) error
 	}
 	if b.Activity != nil {
 		return b.Activity.execute(ctx, bindings)
-	}
-	if b.Condition != nil {
-		return b.Condition.execute(ctx, bindings)
-	}
-	if b.Loop != nil {
-		return b.Loop.execute(ctx, bindings)
-	}
-	return nil
-}
-
-func (c *Condition) execute(ctx workflow.Context, bindings map[string]any) error {
-	if bindings[c.Variable] == c.Value {
-		if c.Then != nil {
-			return c.Then.execute(ctx, bindings)
-		}
-	} else {
-		if c.Else != nil {
-			return c.Else.execute(ctx, bindings)
-		}
-	}
-	return nil
-}
-
-func (l *Loop) execute(ctx workflow.Context, bindings map[string]any) error {
-	for i := 0; i < l.Iterations; i++ {
-		if err := l.Body.execute(ctx, bindings); err != nil {
-			return err
-		}
-		if bindings[*l.BreakVariable] == *l.BreakValue {
-			break
-		}
 	}
 	return nil
 }
@@ -221,10 +176,17 @@ func (a *ActivityInvocation) execute(ctx workflow.Context, bindings map[string]a
 
 	var output map[string]any
 	if err := json.Unmarshal(result, &output); err != nil {
+		if a.OnError != nil {
+			return a.OnError.execute(ctx, bindings)
+		}
 		return err
 	}
 
 	saveOutput(output, bindings, a.Key)
+	if a.OnSuccess != nil {
+		return a.OnSuccess.execute(ctx, bindings)
+	}
+
 	return nil
 }
 
@@ -268,69 +230,4 @@ func executeAsync(exe executable, ctx workflow.Context, bindings map[string]any)
 		settable.Set(nil, err)
 	})
 	return future
-}
-
-func makeInput(argMap map[string]any, bindings map[string]any, activityKey string, saveOutput *bool, inputActivityKey *string) (string, error) {
-	for argument, value := range argMap {
-		val, ok := value.(string)
-		if ok && val[0] == '$' {
-			varName := val[1:]
-			bindings[fmt.Sprintf("%s.%s", activityKey, argument)] = bindings[varName]
-		} else {
-			bindings[fmt.Sprintf("%s.%s", activityKey, argument)] = value
-		}
-	}
-
-	bindings["current_activity_key"] = activityKey
-	if saveOutput != nil {
-		bindings[fmt.Sprintf("%s.save_output", activityKey)] = *saveOutput
-	} else {
-		bindings[fmt.Sprintf("%s.save_output", activityKey)] = false
-	}
-	if inputActivityKey != nil {
-		bindings[fmt.Sprintf("%s.input", activityKey)] = *inputActivityKey
-	} else {
-		bindings[fmt.Sprintf("%s.input", activityKey)] = ""
-	}
-
-	argsbytes, err := json.Marshal(bindings)
-	if err != nil {
-		return "", err
-	}
-
-	return string(argsbytes), nil
-}
-
-func saveOutput(result map[string]any, bindings map[string]any, activityKey string) error {
-	for key, value := range result {
-		bindings[fmt.Sprintf("%s.%s", activityKey, key)] = value
-	}
-	return nil
-}
-
-func doPostProcessing(ctx workflow.Context, bindings map[string]any) error {
-	ao := workflow.ActivityOptions{}
-	ao.RetryPolicy = &temporal.RetryPolicy{
-		MaximumAttempts:    1,
-		InitialInterval:    0,
-		BackoffCoefficient: 2,
-		MaximumInterval:    1 * time.Minute,
-	}
-	ao.ScheduleToStartTimeout = 24 * time.Hour
-	ao.StartToCloseTimeout = 24 * time.Hour
-	ao.ScheduleToCloseTimeout = 24 * time.Hour
-
-	ctx = workflow.WithActivityOptions(ctx, ao)
-
-	bindingsB, err := json.Marshal(bindings)
-	if err != nil {
-		return err
-	}
-
-	err = workflow.ExecuteActivity(ctx, "Executor", "PostProcessingV1", string(bindingsB)).Get(ctx, nil)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

@@ -20,6 +20,7 @@ import { TenantRegistrationPage } from './pages/tenancy/registration';
 import TenantSelectionPage from './pages/tenancy/selection';
 import UploadsPage from './pages/uploads';
 import WorkflowBuilderPage from './pages/wflowbuilder';
+import WorkflowBuilderGuidePage from './pages/workflowguide';
 import WorkflowRunsPage from './pages/workflowruns';
 import WorkspaceLandingPage from './pages/workspace';
 import CreateWorkspacePage from './pages/workspace/add';
@@ -111,6 +112,11 @@ const routes: Route[] = [
     path: '/workspace/:workspaceId/processors/:processorId/workflow',
     layout: ProcessorLayout,
     element: <WorkflowBuilderPage />,
+  },
+  {
+    path: '/workspace/:workspaceId/processors/:processorId/builder-guide',
+    layout: ProcessorLayout,
+    element: <WorkflowBuilderGuidePage />,
   },
   {
     path: '/workspace/:workspaceId/processors/:processorId/runs',

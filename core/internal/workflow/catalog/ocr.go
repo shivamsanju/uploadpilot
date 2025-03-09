@@ -7,7 +7,7 @@ var DetectDocumentTextV1 = &ActivityMetadata{
 This activity is useful for extracting text from various document formats, such as PDF, Images, DOC, DOCX, and more.`,
 	Workflow: `
 - activity:
-    key: uniqueKeyLessThan20Chars
+    key: unique_alphanum_key
     uses: DetectDocumentTextV1
     saveOutput: true
 `,
@@ -20,7 +20,7 @@ var ImageToTextV1 = &ActivityMetadata{
 This activity is useful for extracting text from various image formats, such as JPEG, PNG, and more.`,
 	Workflow: `
 - activity:
-	key: uniqueKeyLessThan20Chars
+	key: unique_alphanum_key
 	uses: ImageToTextV1
 	saveOutput: true
 `,

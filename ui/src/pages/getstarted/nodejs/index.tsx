@@ -33,9 +33,9 @@ const NodejsIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
           <CodeHighlight
             m="sm"
             code={`
-import { Uploader } from 'uploadpilot-uploader';
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
+import { NodeFile, Uploader } from 'uploadpilot-uploader';
 
 const uploader = new Uploader(
   '${getTenantId()}',
@@ -43,22 +43,27 @@ const uploader = new Uploader(
   'YOUR_API_KEY',
 );
 
-async function main() {
+async function main(): Promise<void> {
   try {
-    const filePath = path.resolve('path/to/your/file.ext'); // Replace with actual file path
-    const fileBuffer = fs.readFileSync(filePath);
+    const filePath: string = path.resolve("./files/a.txt"); // Replace with actual file path
+    const fileBuffer: Buffer = fs.readFileSync(filePath);
 
-    const file = new File([fileBuffer], path.basename(filePath), {
-      type: 'application/octet-stream', // Change MIME type if necessary
-    });
+    const file = new NodeFile(
+      fileBuffer,
+      path.basename(filePath),
+      "application/octet-stream"
+    );
 
     await uploader.uploadMultiple([file], {
-      "metadata-key": "metadata-value",
+      file_name: "a.txt",
     });
-    
-    console.log('File uploaded successfully');
+
+    console.log("File uploaded successfully");
   } catch (error) {
-    console.error('Error uploading file:', error);
+    console.error(
+      "Error uploading file:",
+      error instanceof Error ? error.message : error
+    );
   }
 }
 

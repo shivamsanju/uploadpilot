@@ -50,25 +50,31 @@ func main() {
     "${getTenantId()}",
     "${workspaceId}",
     "YOUR_API_KEY",
+    &client.UploaderOpts{
+      BaseURL: "http://localhost:8080",
+    }
   )
+
+  fileData, err := os.ReadFile("./files/image.png")
   if err != nil {
-    log.Fatal("Failed to create uploader:", err)
-    os.Exit(1)
+    fmt.Println("Error reading file:", err)
+    return
   }
 
-  err = uploader.UploadFile(
-    "../wf.yaml",
-    &client.UploadOptions{
-      FileName: "wf.yaml",
-      Metadata: map[string]string{
-        "key": "value",
-      },
-    },
-  )
-  if err != nil {
-    log.Fatal("Failed to upload file:", err)
-    os.Exit(1)
+  File := &client.File{
+    Name:         "image.png",
+    Data:         fileData,
+    ContentType:  "image/png",
   }
+
+  success, err := up.Upload(File, map[string]interface{}{"description": "Test file"})
+  if err != nil {
+    fmt.Println("Upload failed:", err)
+  } else {
+    fmt.Println("Upload successful:", success)
+  }
+}
+
 }
 `}
           />

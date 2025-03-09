@@ -1,5 +1,5 @@
 {
-  "activity_key": "uniqueKeyLessThan20Chars",
+  "activity_key": "unique_alphanum_key",
   "content_type": "image/jpeg",
   "file_name": "745727-savannah-wallpaper-fr.jpg",
   "processor_id": "3933ec77-12a7-4595-9e16-8732087a8c56",

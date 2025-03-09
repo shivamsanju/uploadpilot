@@ -26,7 +26,7 @@ func (r *UploadRepo) GetAll(ctx context.Context, workspaceID string, paginationP
 
 	query := r.db.Orm.WithContext(ctx).
 		Model(&models.Upload{}).
-		Select("id", "file_name", "status", "content_type", "started_at", "content_length", "finished_at").
+		Select("id", "file_name", "status", "content_type", "started_at", "content_length", "finished_at", "metadata").
 		Where("workspace_id = ?", workspaceID)
 
 	query, totalRecords, sortApplied, err := dbutils.BuildPaginationQuery(
