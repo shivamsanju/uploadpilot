@@ -39,7 +39,7 @@ export const MenuButton: React.FC<Props> = () => {
                 opacity={0.9}
                 lineClamp={1}
               >
-                Upload Pilot
+                UploadPilot
               </Title>
             </UnstyledButton>
           ) : (

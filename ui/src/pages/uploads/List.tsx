@@ -44,7 +44,6 @@ const UploadList = ({ setTotalRecords }: any) => {
   const scrollViewportRef = useRef<HTMLDivElement>(null);
   const { width } = useViewportSize();
   const [openModal, setOpenModal] = useState(false);
-  const [modalVariant, setModalVariant] = useState<'logs' | 'metadata'>('logs');
   const [metadata, setMetadata] = useState({});
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
   const [search, setSearch] = useState<string>('');
@@ -143,7 +142,6 @@ const UploadList = ({ setTotalRecords }: any) => {
   const handleViewMetadata = useCallback((metadata: any) => {
     setOpenModal(true);
     setMetadata(metadata || {});
-    setModalVariant('metadata');
   }, []);
 
   const handleRefresh = () => {
@@ -222,12 +220,11 @@ const UploadList = ({ setTotalRecords }: any) => {
           <MultiSelect
             w={200}
             data={[
+              'In progress',
               'Finished',
               'Failed',
-              'Created',
-              'Queued',
-              'Skipped',
               'Cancelled',
+              'Timed Out',
             ]}
             value={statusFilter}
             placeholder="Filter by status"
@@ -323,13 +320,13 @@ const UploadList = ({ setTotalRecords }: any) => {
       {/* Loading overlay only while pending, not on refetch*/}
       <ContainerOverlay visible={isPending || isTriggeringProcess} />{' '}
       <MetadataModal
-        open={openModal && modalVariant === 'metadata'}
+        open={openModal}
         onClose={() => setOpenModal(false)}
         metadata={metadata || {}}
       />
-      <Box mr="md">
+      <Box>
         <UploadPilotDataTable
-          minHeight={500}
+          minHeight="65vh"
           verticalSpacing="xs"
           horizontalSpacing="lg"
           noHeader={false}
@@ -340,6 +337,7 @@ const UploadList = ({ setTotalRecords }: any) => {
           noRecordsText="No imports yet"
           selectedRecords={selectedRecords}
           onSelectedRecordsChange={setSelectedRecords}
+          onRowDoubleClick={row => handleViewMetadata(row.record?.metadata)}
           menuBar={
             <Group gap="sm" align="center" justify="space-between">
               <Group gap="sm">
@@ -363,7 +361,7 @@ const UploadList = ({ setTotalRecords }: any) => {
           }
         />
       </Box>
-      <Stack align="center" justify="center" p="md" key="selectedRecords">
+      <Stack align="center" justify="center" p="md" mb="xl">
         <Button
           display={hasNextPage ? 'block' : 'none'}
           leftSection={<IconChevronsDown size={16} />}

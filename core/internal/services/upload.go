@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"slices"
 	"time"
 
 	"maps"
@@ -69,7 +70,7 @@ func (s *UploadService) CreateUpload(ctx context.Context, tenantID, workspaceID 
 		ContentLength: upload.ContentLength,
 		Metadata:      upload.Metadata,
 		StartedAt:     time.Now(),
-		Status:        models.UploadStatusCreated,
+		Status:        models.UploasStatusInProgress,
 	}); err != nil {
 		return nil, err
 	}
@@ -104,7 +105,7 @@ func (s *UploadService) createSingleUseSignedUploadURL(bucketName, objectKey str
 }
 
 // FinishUpload finishes an upload
-func (s *UploadService) FinishUpload(ctx context.Context, tenantID, workspaceID, uploadID string) error {
+func (s *UploadService) FinishUpload(ctx context.Context, tenantID, workspaceID, uploadID string, status models.UploadStatus) error {
 	session, err := webutils.GetSessionFromCtx(ctx)
 	if err != nil {
 		return err
@@ -118,8 +119,12 @@ func (s *UploadService) FinishUpload(ctx context.Context, tenantID, workspaceID,
 	if err != nil {
 		return err
 	}
+	if !slices.Contains(models.UploadNonTerminalStates, upload.Status) {
+		return fmt.Errorf(msg.ErrUploadAlreadyIsTerminalState)
+	}
+
 	upload.FinishedAt = time.Now()
-	upload.Status = models.UploadStatusFinished
+	upload.Status = status
 
 	if err = s.processorSvc.TriggerWorkflows(ctx, workspaceID, upload); err != nil {
 		log.Error().Str("workspace_id", workspaceID).Str("upload_id", uploadID).Err(err).Msg("failed to trigger workflows")

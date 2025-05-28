@@ -1,113 +1,181 @@
 export class Uploader {
-  private apiKey: string;
+  private file: File;
   private tenantId: string;
   private workspaceId: string;
+  private apiKey: string;
   private baseUrl: string;
+  private metadata: Record<string, any>;
+  private xhr: XMLHttpRequest | null = null;
+  private uploadId: string | null = null;
+  private isUploading = false;
+  private abortedErr = 'upload_aborted';
+  private status = 'unknown';
+
+  private eventHandlers = {
+    progress: (computable: boolean, loaded: number, total: number) => {},
+    start: () => {},
+    complete: (serverFileId: string) => {},
+    error: (message: string) => {},
+    abort: () => {},
+  };
 
   constructor(
+    file: File,
     tenantId: string,
     workspaceId: string,
     apiKey: string,
+    metadata: Record<string, any> = {},
     baseUrl: string = 'http://localhost:8080',
   ) {
+    this.file = file;
     this.tenantId = tenantId;
     this.workspaceId = workspaceId;
     this.apiKey = apiKey;
     this.baseUrl = baseUrl;
+    this.metadata = metadata;
   }
 
-  async upload(
-    file: File,
-    metadata: Record<string, any> = {},
-  ): Promise<boolean> {
-    if (!file) {
-      throw new Error('No file provided for upload.');
+  addMetadata(key: string, value: any) {
+    this.metadata[key] = value;
+  }
+
+  removeMetadata(key: string) {
+    delete this.metadata[key];
+  }
+
+  async start() {
+    if (this.isUploading) return;
+    this.isUploading = true;
+    this.eventHandlers.start();
+
+    try {
+      this.status = 'generating_presigned_url';
+      const presignedData = await this.getPresignedUrl();
+
+      this.status = 'uploading';
+      this.uploadId = presignedData.uploadId;
+
+      await this.uploadToS3(presignedData.uploadUrl, presignedData.method);
+
+      this.status = 'finishing';
+      await this.completeUpload();
+      this.status = 'complete';
+      this.eventHandlers.complete(this.uploadId!);
+    } catch (error) {
+      if ((error as Error).message === this.abortedErr) return;
+      this.eventHandlers.error((error as Error).message);
+      try {
+        if (this.status === 'uploading') {
+          await this.completeUpload('Failed');
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
-
-    const uploadId = await this.getPresignedUrl(file, metadata);
-    await this.uploadToS3(file, uploadId.uploadUrl, uploadId.method);
-    return this.completeUpload(uploadId.uploadId);
   }
 
-  async uploadMultiple(
-    files: File[],
-    metadata: Record<string, any> = {},
-  ): Promise<boolean[]> {
-    if (!files.length) {
-      throw new Error('No files provided for upload.');
+  cancel() {
+    if (this.xhr) {
+      this.xhr.abort();
     }
-
-    return Promise.all(files.map(file => this.upload(file, metadata)));
+    this.eventHandlers.abort();
+    this.isUploading = false;
+    this.completeUpload('Cancelled');
   }
 
-  private async getPresignedUrl(
-    file: File,
-    metadata: Record<string, any>,
-  ): Promise<{ uploadUrl: string; method: string; uploadId: string }> {
-    const uploadUrlEndpoint = `${this.baseUrl}/tenants/${this.tenantId}/workspaces/${this.workspaceId}/uploads`;
+  private async getPresignedUrl() {
+    const url = `${this.baseUrl}/tenants/${this.tenantId}/workspaces/${this.workspaceId}/uploads`;
 
-    const response = await fetch(uploadUrlEndpoint, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Api-Key': this.apiKey,
       },
       body: JSON.stringify({
-        fileName: file.name,
-        contentType: file.type,
-        contentLength: file.size,
+        fileName: this.file.name,
+        contentType: this.file.type,
+        contentLength: this.file.size,
         uploadUrlValiditySecs: 900,
-        metadata,
+        metadata: this.metadata,
       }),
     });
 
     if (!response.ok) {
-      const resp = await response.text();
-      throw new Error('Failed to get upload URL: ' + resp);
+      const resp = await response.json();
+      throw new Error(resp.message);
     }
 
     return response.json();
   }
 
-  private async uploadToS3(
-    file: File,
-    uploadUrl: string,
-    method: string,
-  ): Promise<void> {
-    const uploadResponse = await fetch(uploadUrl, {
-      method,
-      body: file,
-      headers: {
-        'Content-Type': file.type,
-        'if-none-match': '*',
-      },
-    });
+  private async uploadToS3(uploadUrl: string, method: string) {
+    return new Promise<void>((resolve, reject) => {
+      this.xhr = new XMLHttpRequest();
+      this.xhr.open(method, uploadUrl);
 
-    if (!uploadResponse.ok) {
-      const resp = await uploadResponse.text();
-      throw new Error('Failed to upload: ' + resp);
-    }
+      this.xhr.upload.onprogress = event => {
+        this.eventHandlers.progress(
+          event.lengthComputable,
+          event.loaded,
+          event.total,
+        );
+      };
+
+      this.xhr.onload = () => {
+        if (this.xhr!.status >= 200 && this.xhr!.status < 300) {
+          resolve();
+        } else {
+          reject(new Error(`Upload failed with status ${this.xhr!.status}`));
+        }
+      };
+
+      this.xhr.onerror = () =>
+        reject(new Error('Network error during upload.'));
+      this.xhr.onabort = () => reject(new Error(this.abortedErr));
+
+      this.xhr.setRequestHeader('Content-Type', this.file.type);
+      this.xhr.setRequestHeader('If-None-Match', '*');
+      this.xhr.send(this.file);
+    });
   }
 
-  private async completeUpload(uploadId: string): Promise<boolean> {
-    if (!uploadId) {
-      throw new Error('No uploadId provided.');
-    }
+  private async completeUpload(status: string = 'Finished') {
+    if (!this.uploadId) throw new Error('No uploadId provided.');
 
-    const completeEndpoint = `${this.baseUrl}/tenants/${this.tenantId}/workspaces/${this.workspaceId}/uploads/${uploadId}/finish`;
+    const url = `${this.baseUrl}/tenants/${this.tenantId}/workspaces/${this.workspaceId}/uploads/${this.uploadId}/finish`;
 
-    const response = await fetch(completeEndpoint, {
+    const response = await fetch(url, {
       method: 'POST',
       headers: {
         'X-Api-Key': this.apiKey,
       },
+      body: JSON.stringify({
+        status: status,
+      }),
     });
 
     if (!response.ok) {
-      const err = await response.text();
-      throw new Error('Failed to complete upload: ' + err);
+      const resp = await response.json();
+      throw new Error(resp.message);
     }
+  }
 
-    return true;
+  onProgress(
+    callback: (computable: boolean, loaded: number, total: number) => void,
+  ) {
+    this.eventHandlers.progress = callback;
+  }
+
+  onComplete(callback: (serverFileId: string) => void) {
+    this.eventHandlers.complete = callback;
+  }
+
+  onError(callback: (message: string) => void) {
+    this.eventHandlers.error = callback;
+  }
+
+  onAbort(callback: () => void) {
+    this.eventHandlers.abort = callback;
   }
 }

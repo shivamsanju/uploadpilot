@@ -7,24 +7,35 @@
   --mantine-datatable-shadow-background-bottom: 0 !important;
   --mantine-datatable-shadow-background-left: 0 !important;
   --mantine-datatable-shadow-background-right: 0 !important;
-  --mantine-datatable-row-border-color: light-dark(
-    var(--mantine-color-gray-1),
-    var(--mantine-color-dark-8)
-  ) !important;
-}
-
-.mantine-datatable-header {
-  background-color: light-dark(
-    var(--mantine-color-gray-0),
-    var(--mantine-color-dark-8)
-  ) !important;
-  /* padding-right: 20px !important; */
-  /* background-color: var(--mantine-color-body) !important; */
 }
 
 .mantine-datatable-header th {
-  border: none !important;
+  font-size: var(--mantine-font-size-xs) !important;
 }
+
+.mantine-datatable-row td {
+  font-size: var(--mantine-font-size-xs) !important;
+}
+
+.mantine-datatable-table {
+  border-collapse: unset !important;
+}
+
+.mantine-datatable-row:hover {
+  background-color: light-dark(
+    var(--mantine-color-gray-2),
+    var(--mantine-color-dark-8)
+  ) !important;
+}
+
+/* 
+.mantine-datatable-header {
+  background-color: light-dark(
+    var(--mantine-color-gray-0),
+    var(--mantine-color-dark-5)
+  ) !important;
+}
+
 
 .mantine-datatable-header th:first-child {
   border-top-left-radius: 10px !important;
@@ -36,6 +47,7 @@
   border-bottom-right-radius: 10px !important;
 }
 
+
 .mantine-datatable-row td:first-child {
   border-top-left-radius: 10px !important;
   border-bottom-left-radius: 10px !important;
@@ -46,23 +58,13 @@
   border-bottom-right-radius: 10px !important;
 }
 
-.mantine-datatable-row td {
-  font-size: var(--mantine-font-size-xs) !important;
-}
-
-.mantine-datatable-table {
-  border-collapse: unset !important;
-  /* padding-right: 20px !important; */
-}
-
-.mantine-datatable-row:hover {
-  background-color: light-dark(var(--mantine-color-gray-2), #171717) !important;
-}
-
 .mantine-datatable-row[data-selected='true'] td {
-  background-color: light-dark(var(--mantine-color-gray-8), #171717) !important;
+  background-color: light-dark(
+    var(--mantine-color-gray-8),
+    var(--mantine-color-dark-8)
+  ) !important;
 }
 
 tr[data-selected] .mantine-datatable-row-selector-cell:before {
   background-color: transparent !important;
-}
+} */

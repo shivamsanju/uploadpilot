@@ -40,11 +40,11 @@ func CreateJSONHandler[Params any, Query any, Body any, Result any](
 				paramsMap[key] = routeContext.URLParams.Values[i]
 			}
 			if err := mapstructure.Decode(paramsMap, &params); err != nil {
-				HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
+				HandleHttpError(w, r, http.StatusUnprocessableEntity, fmt.Errorf("invalid params: %w", err))
 				return
 			}
 			if err := validator.ValidateStruct(params); err != nil {
-				HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
+				HandleHttpError(w, r, http.StatusUnprocessableEntity, fmt.Errorf("invalid params: %w", err))
 				return
 			}
 		}
@@ -70,7 +70,7 @@ func CreateJSONHandler[Params any, Query any, Body any, Result any](
 			}
 
 			if err := validator.ValidateStruct(query); err != nil {
-				HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
+				HandleHttpError(w, r, http.StatusUnprocessableEntity, fmt.Errorf("invalid query parameters: %w", err))
 				return
 			}
 		}
@@ -93,7 +93,7 @@ func CreateJSONHandler[Params any, Query any, Body any, Result any](
 			}
 
 			if err := validator.ValidateStruct(body); err != nil {
-				HandleHttpError(w, r, http.StatusUnprocessableEntity, err)
+				HandleHttpError(w, r, http.StatusUnprocessableEntity, fmt.Errorf("invalid request body: %w", err))
 				return
 			}
 		}

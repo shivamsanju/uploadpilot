@@ -75,7 +75,6 @@ const UserButton = ({ collapsed }: { collapsed: boolean }) => {
 
       <Menu.Dropdown>
         {/* <Menu.Item leftSection={<IconSun size={16} />} closeMenuOnClick={false}>
-          {' '}
           <ThemeSwitcher />
         </Menu.Item> */}
         <Menu.Item

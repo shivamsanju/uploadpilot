@@ -1,8 +1,13 @@
 .frameworkCard {
-  cursor: pointer;
+  cursor: pointer !important;
   transition: all 0.2s ease-in-out;
 }
 
+.frameworkCard:hover {
+  background-color: var(--mantine-color-dark-7) !important;
+}
+
 .selected {
-  border-color: var(--mantine-color-appcolor-filled) !important;
+  border-color: var(--mantine-color-dark-3) !important;
+  background-color: var(--mantine-color-dark-7) !important;
 }

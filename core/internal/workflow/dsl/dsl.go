@@ -7,6 +7,7 @@ import (
 
 	"maps"
 
+	"github.com/phuslu/log"
 	"go.temporal.io/sdk/temporal"
 	"go.temporal.io/sdk/workflow"
 )
@@ -53,6 +54,7 @@ type (
 		RetryBackoffCoefficient       *float64       `json:"retry_backoff_coefficient,omitempty" yaml:"retry_backoff_coefficient,omitempty"`
 		RetryMaxIntervalSeconds       *int64         `json:"retry_max_interval_seconds,omitempty" yaml:"retry_max_interval_seconds,omitempty"`
 		RetryInitialIntervalSeconds   *int64         `json:"retry_initial_interval_seconds,omitempty" yaml:"retry_initial_interval_seconds,omitempty"`
+		IgnoreErrors                  *bool          `json:"ignore_errors,omitempty" yaml:"ignore_errors,omitempty"`
 		OnSuccess                     *Statement     `json:"on_success,omitempty" yaml:"on_success,omitempty"`
 		OnError                       *Statement     `json:"on_error,omitempty" yaml:"on_error,omitempty"`
 	}
@@ -121,6 +123,7 @@ func (b *Statement) execute(ctx workflow.Context, bindings map[string]any) error
 }
 
 func (a *ActivityInvocation) execute(ctx workflow.Context, bindings map[string]any) error {
+	log.Debug().Interface("activity", a).Msg("invoking activity")
 	ao := workflow.ActivityOptions{}
 	if a.StartToCloseTimeoutSeconds != nil && *a.StartToCloseTimeoutSeconds != 0 {
 		ao.StartToCloseTimeout = time.Duration(*a.StartToCloseTimeoutSeconds) * time.Second
@@ -168,18 +171,25 @@ func (a *ActivityInvocation) execute(ctx workflow.Context, bindings map[string]a
 		return err
 	}
 
-	var result []byte
-	err = workflow.ExecuteActivity(ctx, "Executor", a.Uses, args).Get(ctx, &result)
-	if err != nil {
+	handleError := func(err error) error {
+		if a.OnError != nil {
+			errH := a.OnError.execute(ctx, bindings)
+			if errH != nil {
+				return errH
+			}
+		}
 		return err
 	}
 
-	var output map[string]any
-	if err := json.Unmarshal(result, &output); err != nil {
-		if a.OnError != nil {
-			return a.OnError.execute(ctx, bindings)
-		}
-		return err
+	var result []byte
+	err = workflow.ExecuteActivity(ctx, "Executor", a.Uses, args).Get(ctx, &result)
+	if err != nil && (a.IgnoreErrors == nil || !*a.IgnoreErrors) {
+		return handleError(err)
+	}
+
+	output := make(map[string]any)
+	if err := json.Unmarshal(result, &output); err != nil && (a.IgnoreErrors == nil || !*a.IgnoreErrors) {
+		return handleError(err)
 	}
 
 	saveOutput(output, bindings, a.Key)

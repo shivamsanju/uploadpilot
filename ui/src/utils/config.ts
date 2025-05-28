@@ -12,7 +12,7 @@ export const getWebsiteDomain = () => {
 };
 
 export const getAppName = () => {
-  return process.env.REACT_APP_APP_NAME || 'Upload Pilot';
+  return process.env.REACT_APP_APP_NAME || 'UploadPilot';
 };
 
 export const getUploadApiDomain = () => {

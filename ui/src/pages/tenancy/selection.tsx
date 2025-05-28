@@ -5,7 +5,6 @@ import {
   Stack,
   Text,
   TextInput,
-  UnstyledButton,
 } from '@mantine/core';
 import { IconPlus, IconSearch } from '@tabler/icons-react';
 import { useState } from 'react';
@@ -75,15 +74,14 @@ const TenantSelectionPage = () => {
         onChange={event => setSearch(event.currentTarget.value)}
       />
 
-      <Stack p={0} m={0} mt="md" gap="sm">
+      <Stack p={0} m={0} mt="md" gap="md">
         {filteredTenants.map((tenant, index) => (
-          <UnstyledButton onClick={() => selectTenant(tenant)}>
-            <TenantInfoCard
-              key={index}
-              tenantName={tenants[tenant]}
-              tenantId={tenant}
-            />
-          </UnstyledButton>
+          <TenantInfoCard
+            key={index}
+            tenantName={tenants[tenant]}
+            tenantId={tenant}
+            onChoose={selectTenant}
+          />
         ))}
         {filteredTenants.length === 0 && (
           <Text size="md" mt="md" c="dimmed">

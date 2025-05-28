@@ -1,0 +1,21 @@
+.filepond--panel-root {
+  background-color: transparent !important;
+}
+
+.filepond--wrapper {
+  border: 2px dotted var(--mantine-color-dark-3) !important;
+  border-radius: var(--mantine-radius-md) !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.filepond--drop-label {
+  cursor: pointer !important;
+}
+
+.filepond--wrapper:hover {
+  background-color: var(--mantine-color-dark-6) !important;
+}
+
+.filepond--drop-label {
+  color: var(--mantine-color-dark-3) !important;
+}

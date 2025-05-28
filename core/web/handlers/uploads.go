@@ -74,8 +74,8 @@ func (h *uploadHandler) CreateUpload(r *http.Request, params dto.WorkspaceParams
 	return res, http.StatusOK, nil
 }
 
-func (h *uploadHandler) FinishUpload(r *http.Request, params dto.UploadParams, query, body interface{}) (bool, int, error) {
-	err := h.uploadSvc.FinishUpload(r.Context(), params.TenantID, params.WorkspaceID, params.UploadID)
+func (h *uploadHandler) FinishUpload(r *http.Request, params dto.UploadParams, query interface{}, body dto.FinishUploadRequest) (bool, int, error) {
+	err := h.uploadSvc.FinishUpload(r.Context(), params.TenantID, params.WorkspaceID, params.UploadID, body.Status)
 	if err != nil {
 		return false, http.StatusBadRequest, err
 	}

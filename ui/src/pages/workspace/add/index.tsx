@@ -66,7 +66,12 @@ const CreateWorkspacePage: React.FC<Props> = () => {
         <form onSubmit={form.onSubmit(handleAdd)}>
           <Group justify="space-between" align="center" mb="lg">
             <Title order={3}>Create new workspace</Title>
-            <Button type="submit">Create</Button>
+            <Group>
+              <Button onClick={() => navigate(-1)} variant="default">
+                Cancel
+              </Button>
+              <Button type="submit">Create</Button>
+            </Group>
           </Group>
 
           <Stack gap="lg">

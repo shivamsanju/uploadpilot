@@ -7,4 +7,5 @@ const (
 	ErrUploadMissingRequiredMetadataFields  = "upload missing required metadata fields: %s"
 	ErrUploadURLValidityExceedsAllowedLimit = "requested upload url validity exceeds allowed limit. validity: %d, limit: %d"
 	ErrUploadNotFinished                    = "upload not finished"
+	ErrUploadAlreadyIsTerminalState         = "upload already is a terminal state"
 )

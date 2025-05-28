@@ -5,8 +5,38 @@
   );
 }
 
-.codetext {
+/* .codetext {
   font-size: var(--mantine-font-size-xs);
-  word-break: break-word; /* Works in most browsers */
-  word-break: break-all; /* Breaks words anywhere */
+  word-break: break-word;
+  word-break: break-all;
+} */
+
+.logScheduled {
+  border-top: 1px solid
+    light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-5));
+  margin-top: var(--mantine-spacing-md);
+  padding-top: var(--mantine-spacing-xs);
+}
+.logTimestamp {
+  font-size: var(--mantine-font-size-xs);
+  color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-dimmed));
+}
+
+.logEvent {
+  font-size: var(--mantine-font-size-xs);
+  margin-left: var(--mantine-spacing-md);
+  color: var(--mantine-color-appcolor-3);
+}
+
+.logEventScheduled {
+  font-size: var(--mantine-font-size-xs);
+  margin-left: var(--mantine-spacing-md);
+  color: var(--mantine-color-green-5);
+}
+
+.logDetails {
+  font-size: var(--mantine-font-size-xs);
+  color: light-dark(var(--mantine-color-gray-4), var(--mantine-color-dimmed));
+  font-family: 'Source Code Pro', monospace;
+  margin-left: var(--mantine-spacing-md);
 }

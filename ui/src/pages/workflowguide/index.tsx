@@ -42,7 +42,7 @@ const WorkflowBuilderGuidePage = () => {
         <IconClipboardText size={24} />
         <Title order={3}>Builder guide</Title>
       </Group>
-      <Paper px="lg" className={classes.guideMd}>
+      <Paper px="lg" withBorder className={classes.guideMd}>
         <Markdown components={components}>{workflowGuideMd}</Markdown>
       </Paper>
     </Box>

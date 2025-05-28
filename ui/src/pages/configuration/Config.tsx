@@ -4,26 +4,29 @@ import {
   NumberInput,
   SimpleGrid,
   Stack,
-  Switch,
   TagsInput,
-  Text,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { showNotification } from '@mantine/notifications';
+import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useUpdateUploaderConfigMutation } from '../../apis/uploader';
 import { ContainerOverlay } from '../../components/Overlay';
 import { WorkspaceConfig } from '../../types/uploader';
-import classes from './Form.module.css';
 
 type NewUploaderConfigProps = {
   config: WorkspaceConfig;
+  isPending: boolean;
 };
 
-const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
+const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({
+  config,
+  isPending,
+}) => {
   const { workspaceId } = useParams();
 
-  const { mutateAsync, isPending } = useUpdateUploaderConfigMutation();
+  const { mutateAsync, isPending: isUpdating } =
+    useUpdateUploaderConfigMutation();
 
   const form = useForm<WorkspaceConfig>({
     initialValues: {
@@ -58,6 +61,16 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
     form.resetDirty();
   };
 
+  useEffect(() => {
+    form.setValues({
+      ...config,
+      allowedContentTypes: config?.allowedContentTypes || [],
+      requiredMetadataFields: config?.requiredMetadataFields || [],
+      allowedOrigins: config?.allowedOrigins || [],
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config]);
+
   const handleResetButton = () => {
     form.reset();
     form.resetDirty();
@@ -68,7 +81,7 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
       onSubmit={form.onSubmit(handleEditAndSaveButton)}
       onReset={handleResetButton}
     >
-      <ContainerOverlay visible={isPending} />
+      <ContainerOverlay visible={isPending || isUpdating} />
       <SimpleGrid cols={{ base: 1, xl: 2 }} spacing="50">
         <Stack gap="xl">
           <NumberInput
@@ -80,14 +93,14 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
           />
           {/* Max file size */}
           <NumberInput
-            label="Max file size"
+            label="Max file size (in bytes)"
             placeholder="Enter maximum file size in bytes"
             {...form.getInputProps('maxFileSize')}
             min={0}
           />
           {/* Min file size */}
           <NumberInput
-            label="Min file size"
+            label="Min file size (in bytes)"
             placeholder="Enter minimum file size in bytes"
             {...form.getInputProps('minFileSize')}
             min={0}
@@ -115,85 +128,9 @@ const UploaderConfigForm: React.FC<NewUploaderConfigProps> = ({ config }) => {
           />
         </Stack>
       </SimpleGrid>
-      <SimpleGrid cols={{ sm: 1, lg: 2 }} spacing="50" mt="xl">
-        <Stack gap="xl">
-          <Group justify="space-between" className={classes.item}>
-            <div>
-              <Text fw="500">Allow pause and resume</Text>
-              <Text c="dimmed">
-                Toggle to allow pause and resume in the uploader
-              </Text>
-            </div>
-            <Switch
-              className={classes.cusomSwitch}
-              onLabel="ON"
-              offLabel="OFF"
-              checked={form.values.allowPauseAndResume}
-              onChange={e =>
-                form.setFieldValue('allowPauseAndResume', e.target.checked)
-              }
-            />
-          </Group>
 
-          <Group justify="space-between" className={classes.item}>
-            <div>
-              <Text fw="500">Enable image editing</Text>
-              <Text c="dimmed">
-                Toggle to enable image editing in the uploader ui
-              </Text>
-            </div>
-            <Switch
-              className={classes.cusomSwitch}
-              onLabel="ON"
-              offLabel="OFF"
-              checked={form.values.enableImageEditing}
-              onChange={e =>
-                form.setFieldValue('enableImageEditing', e.target.checked)
-              }
-            />
-          </Group>
-        </Stack>
-        <Stack gap="xl">
-          <Group justify="space-between" className={classes.item}>
-            <div>
-              <Text fw="500">Use compression</Text>
-              <Text c="dimmed">
-                Toggle to enable compression while uploading files
-              </Text>
-            </div>
-            <Switch
-              className={classes.cusomSwitch}
-              onLabel="ON"
-              offLabel="OFF"
-              checked={form.values.useCompression}
-              onChange={e =>
-                form.setFieldValue('useCompression', e.target.checked)
-              }
-            />
-          </Group>
-
-          <Group justify="space-between" className={classes.item}>
-            <div>
-              <Text fw="500">Use fault tolerant mode</Text>
-              <Text c="dimmed">
-                Fault tolerant mode allows to recover from browser crashes
-              </Text>
-            </div>
-            <Switch
-              className={classes.cusomSwitch}
-              onLabel="ON"
-              offLabel="OFF"
-              checked={form.values.useFaultTolerantMode}
-              onChange={e =>
-                form.setFieldValue('useFaultTolerantMode', e.target.checked)
-              }
-            />
-          </Group>
-        </Stack>
-      </SimpleGrid>
-
-      <Group gap="md" mt="50">
-        <Button variant="outline" type="reset">
+      <Group gap="md" mt="70" justify="flex-end">
+        <Button variant="default" type="reset">
           Reset
         </Button>
         <Button type="submit">Save</Button>

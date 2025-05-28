@@ -1,4 +1,4 @@
-import { Box, Group, Modal, Text, Timeline } from '@mantine/core';
+import { Box, Modal, Stack } from '@mantine/core';
 import { useGetProcessorRunLogs } from '../../apis/processors';
 import { RefreshButton } from '../../components/Buttons/RefreshButton/RefreshButton';
 import { ErrorLoadingWrapper } from '../../components/ErrorLoadingWrapper';
@@ -11,6 +11,7 @@ type LogsModalProps = {
   processorId: string;
   workflowId: string;
   runId: string;
+  finishedRun: boolean;
 };
 export const LogsModal: React.FC<LogsModalProps> = ({
   open,
@@ -19,6 +20,7 @@ export const LogsModal: React.FC<LogsModalProps> = ({
   processorId,
   workflowId,
   runId,
+  finishedRun,
 }) => {
   const { isPending, error, logs, invalidate } = useGetProcessorRunLogs(
     workspaceId,
@@ -31,29 +33,39 @@ export const LogsModal: React.FC<LogsModalProps> = ({
     <Modal opened={open} fullScreen title="Logs" onClose={onClose} size="100%">
       <ErrorLoadingWrapper isPending={isPending} error={error}>
         <Box px="md">
-          <RefreshButton onClick={invalidate} mb="md" variant="outline" />
-          <Timeline bulletSize={14}>
+          {!finishedRun && (
+            <RefreshButton onClick={invalidate} mb="md" variant="filled" />
+          )}
+          <Stack>
             {logs?.length > 0 &&
               logs.map((item: any, index: number) => (
-                <Timeline.Item
+                <Box
                   key={index}
-                  title={
-                    <Group align="center" gap="md">
-                      <Text c="dimmed">{item?.timestamp}</Text>
-                      {item?.eventType === 'ActivityTaskScheduled' ? (
-                        <Text fw="bold" c="green">
-                          {`${item?.details?.split('"')[1]}`}
-                        </Text>
-                      ) : (
-                        <Text c="blue">{item?.eventType}</Text>
-                      )}
-                    </Group>
+                  className={
+                    item?.eventType === 'ActivityTaskScheduled'
+                      ? classes.logScheduled
+                      : ''
                   }
                 >
-                  <code className={classes.codetext}>{item?.details}</code>
-                </Timeline.Item>
+                  <span className={classes.logTimestamp}>
+                    {item?.timestamp}
+                  </span>
+                  {item?.eventType === 'ActivityTaskScheduled' ? (
+                    <span className={classes.logEventScheduled}>
+                      {`${item?.details?.split('"')[1]}`.replace(' ', '\n')}
+                    </span>
+                  ) : (
+                    <span className={classes.logEvent}>
+                      {item?.eventType.replace(' ', '\n')}
+                    </span>
+                  )}
+                  <span className={classes.logDetails}>{item?.details}</span>
+                </Box>
               ))}
-          </Timeline>
+          </Stack>
+          {!finishedRun && (
+            <RefreshButton onClick={invalidate} mt="md" variant="filled" />
+          )}
         </Box>
       </ErrorLoadingWrapper>
     </Modal>

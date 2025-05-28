@@ -1,11 +1,3 @@
 .tenantInfoCard {
-  background: transparent;
   transition: all 0.2s ease-in-out;
-}
-
-.tenantInfoCard:hover {
-  background-color: light-dark(
-    var(--mantine-color-gray-1),
-    var(--mantine-color-dark-8)
-  );
 }

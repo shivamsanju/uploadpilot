@@ -92,7 +92,7 @@ function PricingCard({ plan }: { plan: PricingPlan }) {
       <Button
         fullWidth
         size="md"
-        variant={'light'}
+        variant={highlighted ? 'white' : 'light'}
         className={`${highlighted ? classes.highlightedButton : ''} ${classes.button}`}
       >
         {buttonText}

@@ -1,8 +1,4 @@
 export const workflowGuideMd = `
-The guide describes how to define the workflows using yaml
-
-----
-
 ### Workflow components
 
 #### 1. Workflow Variables
@@ -32,6 +28,7 @@ Each \`activity\` includes:
 - \`retry_backoff_coefficient\`: Backoff coefficient for retries.
 - \`retry_max_interval_seconds\`: Maximum retry interval.
 - \`retry_initial_interval_seconds\`: Initial retry interval.
+- \`ignore_errors\`: Whether to ignore errors. Retries will be skipped if set to true, and on_error will be ignored.
 - \`on_success\`: Defines an action on success.
 - \`on_error\`: Defines an action on failure.
 
@@ -78,6 +75,7 @@ root:
           retry_backoff_coefficient: 2.0
           retry_max_interval_seconds: 60
           retry_initial_interval_seconds: 5
+          ignore_errors: false
           on_success:
             activity:
               key: success-key

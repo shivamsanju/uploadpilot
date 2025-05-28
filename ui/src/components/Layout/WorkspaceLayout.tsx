@@ -2,8 +2,8 @@ import { AppShell, ScrollArea } from '@mantine/core';
 import {
   IconAdjustments,
   IconCircles,
-  IconCloudUpload,
   IconGauge,
+  IconServer2,
   IconTools,
 } from '@tabler/icons-react';
 import { useMemo } from 'react';
@@ -28,7 +28,7 @@ const WorkspaceLayout: React.FC<{ children: React.ReactNode }> = ({
       },
       {
         label: 'Uploads',
-        icon: IconCloudUpload,
+        icon: IconServer2,
         link: `/workspace/${workspaceId}/uploads`,
       },
       {
@@ -62,7 +62,7 @@ const WorkspaceLayout: React.FC<{ children: React.ReactNode }> = ({
         transitionDuration={500}
         transitionTimingFunction="ease"
       >
-        <AppShell.Navbar withBorder>
+        <AppShell.Navbar withBorder bg="#08060f">
           <NavBar items={navItems} />
         </AppShell.Navbar>
         <AppShell.Main m={0} pr={0}>

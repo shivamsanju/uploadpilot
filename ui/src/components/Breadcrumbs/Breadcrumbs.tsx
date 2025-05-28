@@ -17,7 +17,7 @@ export const BreadcrumbsComponent = () => {
     }
 
     if (breadcrumbs.length === 1) {
-      document.title = 'UploadPilot | ' + breadcrumbs[0].label;
+      document.title = 'UploadPilot';
       return;
     }
 

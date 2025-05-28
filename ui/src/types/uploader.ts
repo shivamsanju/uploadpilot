@@ -5,8 +5,4 @@ export type WorkspaceConfig = {
   allowedOrigins?: string[];
   maxUploadURLLifetimeSecs?: number;
   requiredMetadataFields?: string[];
-  allowPauseAndResume?: boolean;
-  enableImageEditing?: boolean;
-  useCompression?: boolean;
-  useFaultTolerantMode?: boolean;
 };

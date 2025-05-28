@@ -1,4 +1,12 @@
-import { Box, Button, Group, TagsInput, TextInput, Title } from '@mantine/core';
+import {
+  Box,
+  Button,
+  Group,
+  Paper,
+  TagsInput,
+  TextInput,
+  Title,
+} from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { IconSettings } from '@tabler/icons-react';
 import { useEffect } from 'react';
@@ -79,30 +87,27 @@ const ProcessorSettingsPage = () => {
         <Title order={3}>Settings</Title>
       </Group>
       <ContainerOverlay visible={isCreating || isPending} />
-      <form onSubmit={form.onSubmit(handleUpdate)}>
-        <TextInput
-          maw="800"
-          mt="xl"
-          withAsterisk
-          label="Name"
-          type="name"
-          placeholder="Enter a name"
-          {...form.getInputProps('name')}
-        />
-        <TagsInput
-          maw="800"
-          mt="xl"
-          label="Trigger"
-          placeholder="Enter comma separated file type"
-          {...form.getInputProps('triggers')}
-          min={0}
-        />
-        <Group mt={50}>
-          <Button type="submit" variant="white">
-            Update
-          </Button>
-        </Group>
-      </form>
+      <Paper withBorder p="md">
+        <form onSubmit={form.onSubmit(handleUpdate)}>
+          <TextInput
+            withAsterisk
+            label="Name"
+            type="name"
+            placeholder="Enter a name"
+            {...form.getInputProps('name')}
+          />
+          <TagsInput
+            mt="xl"
+            label="Trigger"
+            placeholder="Enter comma separated file type"
+            {...form.getInputProps('triggers')}
+            min={0}
+          />
+          <Group mt={50} justify="flex-end">
+            <Button type="submit">Update</Button>
+          </Group>
+        </form>
+      </Paper>
     </Box>
   );
 };

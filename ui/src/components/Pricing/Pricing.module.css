@@ -15,20 +15,16 @@
 .highlighted {
   background: linear-gradient(
     135deg,
-    #f1f1f1 0%,
-    var(--mantine-color-white) 100%
+    var(--mantine-color-appcolor-light) 50%,
+    var(--mantine-color-appcolor-filled) 100%
   );
-  color: var(--mantine-color-black);
+  color: var(--mantine-color-white);
 }
 
 .highlighted .planDescription,
 .highlighted .priceGroup span {
-  color: var(--mantine-color-black) !important;
-  opacity: 0.8;
-}
-.highlightedButton {
-  background-color: var(--mantine-color-black) !important;
   color: var(--mantine-color-white) !important;
+  opacity: 0.8;
 }
 
 .planHeader {

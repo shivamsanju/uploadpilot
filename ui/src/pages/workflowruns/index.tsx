@@ -18,7 +18,7 @@ const WorkflowRunsPage = () => {
   }, [setBreadcrumbs, workspaceId]);
 
   return (
-    <Box mb={50}>
+    <Box mb={50} mr="md">
       <Group mb="xl">
         <IconBolt size={24} />
         <Title order={3}>Runs</Title>

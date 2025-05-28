@@ -1,5 +1,7 @@
 package dto
 
+import "github.com/uploadpilot/core/internal/db/models"
+
 type CreateUploadRequest struct {
 	FileName              string                 `json:"fileName" validate:"required"`
 	ContentType           string                 `json:"contentType" validate:"required"`
@@ -13,4 +15,8 @@ type CreateUploadResponse struct {
 	UploadURL     string              `json:"uploadUrl" validate:"required"`
 	Method        string              `json:"method" validate:"required"`
 	SignedHeaders map[string][]string `json:"signedHeaders" validate:"required"`
+}
+
+type FinishUploadRequest struct {
+	Status models.UploadStatus `json:"status" validate:"required"`
 }

@@ -1,28 +1,39 @@
 :root {
   --mantine-color-body: light-dark(
     var(--mantine-color-gray-1),
-    #121212
+    var(--mantine-color-dark-9)
   ) !important;
+
+  --mantine-font-size-xs: calc(0.8rem * var(--mantine-scale)) !important;
+  --mantine-color-default-color: var(--mantine-color-dark-1) !important;
 }
 
 :root[data-mantine-color-scheme='dark'] * {
   --input-bg: transparent !important;
 }
+[data-mantine-color-scheme='dark'] .mantine-Card-root {
+  background-color: var(--mantine-color-dark-7) !important;
+}
 
 [data-mantine-color-scheme='dark'] .mantine-Notifications-notification {
-  background-color: #242424 !important;
+  background-color: var(--mantine-color-dark-7) !important;
 }
 
 [data-mantine-color-scheme='dark'] .mantine-CodeHighlight-root {
   border-radius: var(--mantine-radius-md) !important;
+  /* background-color: var(--mantine-color-dark-9) !important; */
 }
 
-.mantine-AppShell-navbar {
+[data-mantine-color-scheme='dark'] .mantine-AppShell-navbar {
   transition: all 0.2s ease-in-out;
-  border-color: light-dark(
-    var(--mantine-color-gray-1),
-    var(--mantine-color-dark-7)
-  ) !important;
+}
+
+[data-mantine-color-scheme='dark'] .mantine-Modal-content {
+  background-color: var(--mantine-color-dark-7) !important;
+}
+
+[data-mantine-color-scheme='dark'] .mantine-Modal-header {
+  background-color: var(--mantine-color-dark-7) !important;
 }
 
 .breadcrumb-link {

@@ -39,6 +39,7 @@ import { WorkflowStatus } from './Status';
 const ProcessorRunsList = () => {
   const [workflowId, setWorkflowId] = useState<string>('');
   const [runId, setRunId] = useState<string>('');
+  const [finishedRun, setFinishedRun] = useState<boolean>(false);
   const [opened, setOpened] = useState(false);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
 
@@ -97,15 +98,20 @@ const ProcessorRunsList = () => {
     });
   };
 
-  const handleViewLogs = useCallback((runId: string, workflowId: string) => {
-    setRunId(runId);
-    setWorkflowId(workflowId);
-    setOpened(true);
-  }, []);
+  const handleViewLogs = useCallback(
+    (runId: string, workflowId: string, finishedRun = false) => {
+      setFinishedRun(finishedRun);
+      setRunId(runId);
+      setWorkflowId(workflowId);
+      setOpened(true);
+    },
+    [],
+  );
 
   const closeLogs = useCallback(() => {
     setRunId('');
     setWorkflowId('');
+    setFinishedRun(false);
     setOpened(false);
   }, []);
 
@@ -171,7 +177,6 @@ const ProcessorRunsList = () => {
       {
         title: 'Execution Time',
         accessor: 'executionTimeMillis',
-        textAlign: 'center',
         hidden: width < 768,
         render: (item: any) =>
           formatMilliseconds(item?.executionTimeMillis || 0),
@@ -179,7 +184,6 @@ const ProcessorRunsList = () => {
       {
         accessor: 'status',
         title: 'Status',
-        textAlign: 'center',
         render: (item: any) => (
           <Group align="center" gap="0">
             <WorkflowStatus status={item?.status} />
@@ -217,7 +221,14 @@ const ProcessorRunsList = () => {
                 )}
                 <Menu.Item
                   leftSection={<IconLogs size={16} stroke={1.5} />}
-                  onClick={() => handleViewLogs(item?.runId, item?.workflowId)}
+                  onClick={() =>
+                    handleViewLogs(
+                      item?.runId,
+                      item?.workflowId,
+                      item?.record?.status !== 'Running' &&
+                        item?.record?.status !== 'Continued-As-New',
+                    )
+                  }
                 >
                   <Text>View Logs</Text>
                 </Menu.Item>
@@ -263,7 +274,7 @@ const ProcessorRunsList = () => {
         visible={isPending || isTriggeringProcess || isCancelling}
       />
       <UploadPilotDataTable
-        minHeight={500}
+        minHeight="75vh"
         columns={columns}
         records={runs}
         verticalSpacing="xs"
@@ -294,6 +305,14 @@ const ProcessorRunsList = () => {
         }
         selectedRecords={selectedRecords}
         onSelectedRecordsChange={setSelectedRecords}
+        onRowDoubleClick={item =>
+          handleViewLogs(
+            item.record?.runId as string,
+            item?.record?.workflowId as string,
+            item?.record?.status !== 'Running' &&
+              item?.record?.status !== 'Continued-As-New',
+          )
+        }
       />
       <Modal
         padding="xl"
@@ -319,6 +338,7 @@ const ProcessorRunsList = () => {
               processorId={processorId}
               workflowId={workflowId}
               runId={runId}
+              finishedRun={finishedRun}
             />
           </div>
         )}

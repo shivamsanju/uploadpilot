@@ -132,7 +132,7 @@ func (r *UploadRepo) BulkMarkTimedOut(ctx context.Context) error {
 			WHERE wc.workspace_id = uploads.workspace_id
 		), 0);
 	`
-	if err := r.db.Orm.WithContext(ctx).Exec(query, models.UploadStatusTimedOut, models.UploadStatusCreated).Error; err != nil {
+	if err := r.db.Orm.WithContext(ctx).Exec(query, models.UploadStatusTimedOut, models.UploasStatusInProgress).Error; err != nil {
 		return dbutils.DBError(ctx, r.db.Orm.Logger, err)
 	}
 

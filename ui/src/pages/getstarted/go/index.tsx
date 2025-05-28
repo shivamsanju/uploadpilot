@@ -9,32 +9,29 @@ const GoIntegrationPage = ({ style }: { style: MantineStyleProp }) => {
   const { workspaceId } = useParams();
 
   return (
-    <Stack justify="center" align="center" pt="sm" mb={50}>
-      <Timeline
-        active={3}
-        bulletSize={24}
-        lineWidth={2}
-        w={{ sm: '100vw', md: '70vw', lg: '60vw' }}
-      >
+    <Stack mb={50}>
+      <Timeline active={3} bulletSize={24} lineWidth={2}>
         <Timeline.Item
           bullet={<IconBrandNpm size={12} />}
           title="Install package"
         >
-          <Text opacity={0.7} size="sm" mb="lg">
+          <Text opacity={0.7} mb="lg">
             Install the go sdk
           </Text>
           <CodeHighlight
             m="sm"
+            language="bash"
             code={`go get github.com/uploadpilot/sdk/go-client`}
           />
         </Timeline.Item>
 
         <Timeline.Item bullet={<IconCode size={12} />} title="Code">
-          <Text opacity={0.7} size="sm" mb="lg">
+          <Text opacity={0.7} mb="lg">
             Use the go sdk
           </Text>
           <CodeHighlight
             m="sm"
+            language="go"
             code={`
 package main
 
@@ -74,14 +71,12 @@ func main() {
     fmt.Println("Upload successful:", success)
   }
 }
-
-}
 `}
           />
         </Timeline.Item>
 
         <Timeline.Item bullet={<IconConfetti size={12} />} title="Cheers">
-          <Text opacity={0.7} size="sm" mb="lg">
+          <Text opacity={0.7} mb="lg">
             You did it, Start uploading and check your uploaded files in the
             uploads section or configure from the configuration section
           </Text>

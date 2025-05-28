@@ -175,7 +175,7 @@ const WorkspaceApiKeyList = () => {
       <ContainerOverlay visible={isPending} />
       <UploadPilotDataTable
         fetching={revoking}
-        minHeight={500}
+        minHeight="75vh"
         columns={columns}
         records={apikeys}
         verticalSpacing="xs"

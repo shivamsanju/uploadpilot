@@ -45,7 +45,7 @@ export const useGetUploads = ({
     isFetchNextPageError,
   } = useInfiniteQuery({
     queryKey: ['uploads', { workspaceId, formattedSearch, filter }],
-    staleTime: 1 * 1000,
+    refetchInterval: 10000,
     queryFn: ({ pageParam = 0 }) => {
       if (!workspaceId) {
         throw new Error('workspaceId is required');

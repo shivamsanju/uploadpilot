@@ -15,7 +15,6 @@ export const UploadPilotDataTable: React.FC<TableProps> = props => {
       {props.menuBar && <Box mb="4">{props.menuBar}</Box>}
       {/* <Divider p={0} m={0} mt="2" /> */}
       <DataTable
-        backgroundColor="transparent"
         selectionCheckboxProps={{
           style: { '*': { cursor: 'pointer' } },
         }}
@@ -28,6 +27,8 @@ export const UploadPilotDataTable: React.FC<TableProps> = props => {
             />
           ) as any
         }
+        withTableBorder
+        borderRadius="md"
         {...props}
       />
     </Stack>

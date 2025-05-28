@@ -22,7 +22,7 @@ type Upload struct {
 type UploadStatus string
 
 const (
-	UploadStatusCreated             UploadStatus = "Created"
+	UploasStatusInProgress          UploadStatus = "In Progress"
 	UploadStatusSkipped             UploadStatus = "Skipped"
 	UploadStatusFinished            UploadStatus = "Finished"
 	UploadStatusFailed              UploadStatus = "Failed"
@@ -47,7 +47,7 @@ var UploadTerminalStates = []UploadStatus{
 }
 
 var UploadNonTerminalStates = []UploadStatus{
-	UploadStatusCreated,
+	UploasStatusInProgress,
 	UploadStatusProcessing,
 }
 

@@ -31,6 +31,5 @@ export const showConfirmationPopup = ({
     onCancel: () => onCancel(),
     withCloseButton: false,
     closeOnClickOutside: false,
-    confirmProps: { variant: 'white' },
   });
 };

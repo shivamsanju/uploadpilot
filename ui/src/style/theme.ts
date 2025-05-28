@@ -4,6 +4,7 @@ import {
   Badge,
   Burger,
   Button,
+  Card,
   ColorInput,
   createTheme,
   Input,
@@ -39,31 +40,31 @@ type Icolors = readonly [
   ...string[],
 ];
 
-const white: Icolors = [
-  '#ffffff',
-  '#fafafa',
-  '#e8e8e8',
-  '#d3d3d3',
-  '#bfbfbf',
-  '#b0b0b0',
-  '#a9a9a9',
-  '#989898',
-  '#8c8c8c',
-  '#7e7e7e',
+const dark: Icolors = [
+  '#E2E5E9',
+  '#B3BAC5',
+  '#6F7D8C',
+  '#3E4A5A',
+  '#1F2937',
+  '#1A222E',
+  '#151B25',
+  '#10141C',
+  '#0C0A15',
+  '#08060F',
 ];
 
-// const lightBlue: Icolors = [
-//   '#e1f8ff',
-//   '#cbedff',
-//   '#9ad7ff',
-//   '#64c1ff',
-//   '#3aaefe',
-//   '#20a2fe',
-//   '#099dff',
-//   '#0088e4',
-//   '#0079cd',
-//   '#0069b6',
-// ];
+const appcolor: Icolors = [
+  '#f2effa',
+  '#e0dcef',
+  '#bfb5e0',
+  '#9c8bd2',
+  '#7f68c6',
+  '#6c51bf',
+  '#6346bd',
+  '#5338a7',
+  '#493195',
+  '#3e2a84',
+];
 
 export const myAppTheme = createTheme({
   primaryColor: 'appcolor',
@@ -74,10 +75,11 @@ export const myAppTheme = createTheme({
   colors: {
     textColor: virtualColor({
       name: 'textColor',
-      dark: '#F3F5F7',
+      dark: '#E2E5E9',
       light: '#7a7a7b',
     }),
-    appcolor: white,
+    appcolor: appcolor,
+    dark: dark,
   },
   defaultRadius: 'md',
   components: {
@@ -136,7 +138,6 @@ export const myAppTheme = createTheme({
       defaultProps: {
         size: 'xs',
         radius: 'md',
-        variant: 'white',
       },
     }),
     Badge: Badge.extend({
@@ -175,10 +176,11 @@ export const myAppTheme = createTheme({
     Paper: Paper.extend({
       defaultProps: {
         radius: 'md',
-        style: {
-          borderColor:
-            'light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-6))',
-        },
+      },
+    }),
+    Card: Card.extend({
+      defaultProps: {
+        radius: 'md',
       },
     }),
     Loader: Loader.extend({
@@ -188,7 +190,7 @@ export const myAppTheme = createTheme({
     }),
     CodeHighlight: CodeHighlight.extend({
       defaultProps: {
-        bg: 'light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-8))',
+        bg: 'light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-7))',
         copiedLabel: 'Copied',
         copyLabel: 'Copy',
       },
@@ -207,3 +209,29 @@ export const myAppTheme = createTheme({
     }),
   },
 });
+
+// const white: Icolors = [
+//   '#ffffff',
+//   '#fafafa',
+//   '#e8e8e8',
+//   '#d3d3d3',
+//   '#bfbfbf',
+//   '#b0b0b0',
+//   '#a9a9a9',
+//   '#989898',
+//   '#8c8c8c',
+//   '#7e7e7e',
+// ];
+
+// const defaultDark: Icolors = [
+//   '#C9C9C9',
+//   '#b8b8b8',
+//   '#828282',
+//   '#696969',
+//   '#424242',
+//   '#3b3b3b',
+//   '#2e2e2e',
+//   '#242424',
+//   '#1f1f1f',
+//   '#141414',
+// ];

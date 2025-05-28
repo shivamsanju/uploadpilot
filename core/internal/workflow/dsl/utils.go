@@ -50,11 +50,10 @@ func makeInput(argMap map[string]any, bindings map[string]any, activityKey strin
 	return string(argsbytes), nil
 }
 
-func saveOutput(result map[string]any, bindings map[string]any, activityKey string) error {
+func saveOutput(result map[string]any, bindings map[string]any, activityKey string) {
 	for key, value := range result {
 		bindings[fmt.Sprintf("%s.%s", activityKey, key)] = value
 	}
-	return nil
 }
 
 func runPostProcessingActivity(ctx workflow.Context, bindings map[string]any) error {

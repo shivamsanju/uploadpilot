@@ -10,10 +10,6 @@ type WorkspaceConfig struct {
 	AllowedOrigins           dtypes.StringArray `gorm:"column:allowed_origins;type:text[]" json:"allowedOrigins"`
 	MaxUploadURLLifetimeSecs int64              `gorm:"column:max_upload_url_lifetime_secs;default:900" json:"maxUploadURLLifetimeSecs"` // default 15 minutes
 	RequiredMetadataFields   dtypes.StringArray `gorm:"not null;column:required_metadata_fields;type:text[]" json:"requiredMetadataFields"`
-	AllowPauseAndResume      bool               `gorm:"column:allow_pause_and_resume default:true" json:"allowPauseAndResume"`
-	EnableImageEditing       bool               `gorm:"column:enable_image_editing default:false" json:"enableImageEditing"`
-	UseCompression           bool               `gorm:"column:use_compression default:true" json:"useCompression"`
-	UseFaultTolerantMode     bool               `gorm:"column:use_fault_tolerant_mode default:false" json:"useFaultTolerantMode"`
 	Workspace                Workspace          `gorm:"foreignKey:workspace_id;constraint:OnDelete:CASCADE" json:"-"`
 	CreatedAtColumn
 	UpdatedAtColumn
@@ -47,8 +43,4 @@ var DefaultWorkspaceConfig = &WorkspaceConfig{
 	AllowedOrigins:           nil,
 	MaxUploadURLLifetimeSecs: 900,
 	RequiredMetadataFields:   []string{},
-	AllowPauseAndResume:      true,
-	EnableImageEditing:       false,
-	UseCompression:           true,
-	UseFaultTolerantMode:     false,
 }

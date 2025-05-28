@@ -23,7 +23,7 @@ export function AdminHeader({ burger }: Props) {
       <Box onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
         <Group gap="md" align="center">
           <Title order={4} opacity={0.7}>
-            Upload Pilot{' '}
+            UploadPilot{' '}
           </Title>
           <Badge
             variant="gradient"

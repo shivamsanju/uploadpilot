@@ -11,7 +11,7 @@ export const InitSupertokens = () => {
   SuperTokens.init({
     appInfo: {
       // learn more about this on https://supertokens.com/docs/references/app-info
-      appName: 'Upload Pilot',
+      appName: 'UploadPilot',
       apiDomain: getApiDomain(),
       websiteDomain: getWebsiteDomain(),
       apiBasePath: '/auth',

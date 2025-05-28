@@ -4,6 +4,7 @@ import {
   Text,
   Tooltip,
   useMantineColorScheme,
+  useMantineTheme,
 } from '@mantine/core';
 import Editor, { Monaco } from '@monaco-editor/react';
 import { IconAlertCircle, IconCircleCheck } from '@tabler/icons-react';
@@ -22,6 +23,7 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
   const [error, setError] = useState<string | null>('');
   const [initialLoad, setInitialLoad] = useState(true);
   const { colorScheme } = useMantineColorScheme();
+  const theme = useMantineTheme();
 
   const handleEditorDidMount = (monaco: Monaco) => {
     monaco.editor.defineTheme('myCustomThemeDark', {
@@ -29,7 +31,7 @@ export const WorkflowYamlEditor: React.FC<Props> = ({
       inherit: true,
       rules: [{ token: 'comment', fontStyle: 'italic' }],
       colors: {
-        'editor.background': '#141414',
+        'editor.background': theme.colors.dark[9],
       },
     });
     setInitialLoad(false);

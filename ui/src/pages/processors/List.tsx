@@ -1,5 +1,6 @@
 import {
   ActionIcon,
+  Avatar,
   Box,
   Button,
   Group,
@@ -33,7 +34,6 @@ import {
 } from '../../apis/processors';
 import { RefreshButton } from '../../components/Buttons/RefreshButton/RefreshButton';
 import { ErrorCard } from '../../components/ErrorCard/ErrorCard';
-import { AppLoader } from '../../components/Loader/AppLoader';
 import { ContainerOverlay } from '../../components/Overlay';
 import { showConfirmationPopup } from '../../components/Popups/ConfirmPopup';
 import { UploadPilotDataTable } from '../../components/Table/Table';
@@ -43,7 +43,6 @@ const ProcessorList = () => {
   const { workspaceId } = useParams();
   const { width } = useViewportSize();
 
-  const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
   const [search, setSearch] = useState<string>('');
 
   const { isPending, error, processors, invalidate } = useGetProcessors(
@@ -91,20 +90,6 @@ const ProcessorList = () => {
     },
     [handleRemoveProcessor],
   );
-  const handleBulkRemove = useCallback(async () => {
-    if (selectedRecords.length > 0) {
-      showConfirmationPopup({
-        message:
-          'Are you sure you want to delete these processors? this is irreversible.',
-        onOk: async () => {
-          await Promise.all(
-            selectedRecords.map(record => handleRemoveProcessor(record.id)),
-          );
-          setSelectedRecords([]);
-        },
-      });
-    }
-  }, [selectedRecords, handleRemoveProcessor]);
 
   const handleEnableDisableProcessor = useCallback(
     async (processorId: string, enabled: boolean) => {
@@ -131,61 +116,54 @@ const ProcessorList = () => {
     [workspaceId, enableDisableProcessor],
   );
 
-  const handleBulkEnableDisable = useCallback(
-    async (enabled: boolean) => {
-      if (selectedRecords.length > 0) {
-        await Promise.all(
-          selectedRecords.map(record =>
-            handleEnableDisableProcessor(record.id, enabled),
-          ),
-        );
-        setSelectedRecords([]);
-      }
-    },
-    [selectedRecords, handleEnableDisableProcessor],
-  );
-
   const columns: DataTableColumn[] = useMemo(
     () => [
       {
+        accessor: 'id',
+        title: '',
+        width: 70,
+        render: (params: any) => (
+          <Avatar radius="xs" size="md">
+            {params?.name[0]}
+          </Avatar>
+        ),
+      },
+      {
         accessor: 'name',
         title: 'Name',
-        render: (params: any) => <Text>{params?.name}</Text>,
+        render: (params: any) => <Text fw="500">{params?.name}</Text>,
       },
       {
         accessor: 'triggers',
         title: 'Triggers',
         hidden: width < 768,
         render: (item: any) => (
-          <div>
-            <Text fw={500}>
-              {item.triggers && item.triggers.length > 0 ? (
-                <>
-                  {item.triggers
-                    .slice(0, 5)
-                    .map((trigger: any, index: number) => (
-                      <Pill mr="xs" size="xs" key={index}>
-                        {trigger}
-                      </Pill>
-                    ))}
-                  {item.triggers.length > 5 && (
-                    <Pill size="xs" color="blue">
-                      +{item.triggers.length - 5}
-                    </Pill>
-                  )}
-                </>
-              ) : (
-                ''
-              )}
-            </Text>
-          </div>
+          <Group>
+            {item.triggers && item.triggers.length > 0 ? (
+              <>
+                {item.triggers
+                  .slice(0, 4)
+                  .map((trigger: any, index: number) => (
+                    <Text mr="xs" size="xs" key={index}>
+                      {trigger}
+                    </Text>
+                  ))}
+                {item.triggers.length > 4 && (
+                  <Pill size="xs" color="blue">
+                    +{item.triggers.length - 4}
+                  </Pill>
+                )}
+              </>
+            ) : (
+              ''
+            )}
+          </Group>
         ),
       },
       {
         title: 'Updated At',
         accessor: 'updatedAt',
         hidden: width < 768,
-        textAlign: 'center',
         render: (params: any) => (
           <Text>
             {params?.updatedAt && timeAgo.format(new Date(params?.updatedAt))}
@@ -195,10 +173,9 @@ const ProcessorList = () => {
       {
         accessor: 'enabled',
         title: 'Status',
-        textAlign: 'center',
         hidden: width < 768,
         render: (item: any) => (
-          <Group align="center" gap="0" justify="center">
+          <Group gap="0" align="center">
             <ThemeIcon variant="subtle" color={item.enabled ? 'green' : 'red'}>
               {!item.enabled ? (
                 <IconAlertCircle size={18} stroke={1.5} />
@@ -301,16 +278,13 @@ const ProcessorList = () => {
   if (error) {
     return <ErrorCard title="Error" message={error.message} h="70vh" />;
   }
-  if (isPending) {
-    return <AppLoader h="70vh" />;
-  }
 
   return (
     <Box mr="md">
       <ContainerOverlay visible={isPending} />
       <UploadPilotDataTable
         fetching={isDeleting || isEnabling}
-        minHeight={500}
+        minHeight="75vh"
         columns={columns}
         records={processors}
         verticalSpacing="xs"
@@ -330,27 +304,6 @@ const ProcessorList = () => {
               >
                 Add
               </Button>
-              <Button
-                variant="subtle"
-                leftSection={<IconCircleCheck size={18} />}
-                onClick={() => handleBulkEnableDisable(true)}
-              >
-                Enable
-              </Button>
-              <Button
-                variant="subtle"
-                leftSection={<IconCancel size={18} />}
-                onClick={() => handleBulkEnableDisable(false)}
-              >
-                Disable
-              </Button>
-              <Button
-                variant="subtle"
-                leftSection={<IconTrash size={18} />}
-                onClick={handleBulkRemove}
-              >
-                Delete
-              </Button>
               <RefreshButton onClick={invalidate} />
             </Group>
             <TextInput
@@ -367,8 +320,6 @@ const ProcessorList = () => {
             `/workspace/${workspaceId}/processors/${row?.record?.id}/runs`,
           );
         }}
-        selectedRecords={selectedRecords}
-        onSelectedRecordsChange={setSelectedRecords}
       />
     </Box>
   );
